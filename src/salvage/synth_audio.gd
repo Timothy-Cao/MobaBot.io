@@ -33,6 +33,9 @@ func _ready() -> void:
 	sounds.boss_down = sounds.win
 	sounds.loot = _tone(450, 1450, 0.28, 0.05)
 	sounds.cast = _tone(220, 590, 0.11, 0.1)
+	sounds.nuke_impact = _tone(75, 32, 0.55, 0.25)
+	sounds.unlock = sounds.upgrade
+	sounds.supply = sounds.loot
 	sounds.blink = _tone(700, 160, 0.12, 0.08)
 	sounds.beam = _tone(120, 45, 0.35, 0.2)
 	sounds.demo_boss = sounds.boss

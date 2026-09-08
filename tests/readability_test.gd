@@ -77,6 +77,9 @@ func _run() -> void:
 	var game := load("res://src/salvage/workshop.tscn").instantiate() as Node2D
 	root.add_child(game)
 	await process_frame
+	game.persist_settings = false
+	game.camera_locked = true
+	game.r_quickcast = false
 	var first_focus: Control = root.gui_get_focus_owner()
 	var tab := InputEventKey.new()
 	tab.keycode = KEY_TAB

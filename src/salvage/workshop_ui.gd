@@ -471,7 +471,7 @@ func show_equipment(gear, back_action: Callable) -> void:
 	_label(overlay, "%d credits" % gear.credits, Rect2(585, 44, 190, 26), 17, GOLD, true, HORIZONTAL_ALIGNMENT_RIGHT)
 	_button("Back", Rect2(809, 43, 104, 34), back_action, false)
 	var index := 0
-	for id in BotEquipment.ITEMS:
+	for id in BotEquipment.ITEM_ORDER:
 		var data: Dictionary = BotEquipment.ITEMS[id]
 		var item: Dictionary = gear.inventory[id]
 		var x := 46 + (index % 3) * 291
@@ -482,6 +482,7 @@ func show_equipment(gear, back_action: Callable) -> void:
 		card.add_theme_stylebox_override("normal", _style(PANEL, 6, GOLD if id == gear_selected else EDGE, 2 if id == gear_selected else 1))
 		_icon(card, data.icon, Rect2(10, 27, 72, 76), item.copies == 0)
 		_label(card, data.name, Rect2(91, 10, 177, 24), 16, CREAM, true)
+		_label(card, "MK II" if id in ["reactor", "shell", "rotor"] else "MK I", Rect2(10, 6, 72, 18), 10, GOLD if id in ["reactor", "shell", "rotor"] else MUTED, true, HORIZONTAL_ALIGNMENT_CENTER)
 		_label(card, "%s / %d stars / %d copies" % [data.slot, item.stars, item.copies], Rect2(91, 37, 178, 18), 10, GOLD)
 		_label(card, gear.item_text(id), Rect2(91, 61, 179, 46), 10, MUTED)
 		_label(card, "EQUIPPED" if id in gear.equipped.values() else ("Not owned" if item.copies == 0 else "Available"), Rect2(91, 111, 174, 17), 10, TEAL, true)

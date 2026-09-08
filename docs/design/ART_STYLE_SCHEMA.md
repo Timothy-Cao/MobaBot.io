@@ -1,4 +1,12 @@
-# Workshop Salvager — art style schema 1.3
+# MobaBot.io — art style schema 1.4
+
+## v0.9 additions
+
+The game is now MobaBot.io. Preserve the salvage-tech material language below. Static equipment uses three slot silhouettes: pulse core, broad robot chassis, paired thrusters. Mk I/II share the silhouette and differ through explicit labels/stats; do not pretend there are six unique paintings. New chassis/drive images are transparent PNGs with mipmaps, inspected in actual UI; rejected painted checkerboard outputs are not assets. Accepted prompts and origins: assets/upgrades/EQUIPMENT_PROVENANCE.md.
+
+Q uses a rocket silhouette, W a flame, R a descending strike over concentric rings. QWER stay larger than DF/T. The flame preview is a cone matching its damage angle/reach; the nuke preview radius matches its collision radius. Gold/cream nuke impact and short flame jets add response without full-screen flashes or camera shake. Friendly FX stay below hostile tells.
+
+Health, energy and XP form one compact HUD group. Gameplay has no permanent control footer, tool count or scrap counter. Controls belong in Settings; credits and equipment are inspectable in Tab. Equipment descriptions state actual effects, not hype.
 
 ## Style in one sentence
 

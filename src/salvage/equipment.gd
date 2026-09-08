@@ -2,6 +2,7 @@ class_name BotEquipment
 extends RefCounted
 ## Persistent local collection. Each type shares its own stars/bonus across copies.
 const PATH := "user://mobabot_equipment.json"
+const ITEM_ORDER := ["coil", "rack", "jets", "reactor", "shell", "rotor"]
 const ITEMS := {
 	"coil": {"name": "Pulse core", "slot": "Core", "icon": "pulse", "base": 0.04, "stat": "damage"},
 	"reactor": {"name": "Heavy core", "slot": "Core", "icon": "pulse", "base": 0.08, "stat": "damage"},

@@ -239,6 +239,9 @@ func _run() -> void:
 	var game := load("res://src/salvage/workshop.tscn").instantiate() as Node2D
 	root.add_child(game)
 	await process_frame
+	game.persist_settings = false
+	game.camera_locked = true
+	game.r_quickcast = false
 	# UI tests don't overwrite the user's saved keys or loadout.
 	for connection in game.ui.loadout_changed.get_connections():
 		game.ui.loadout_changed.disconnect(connection.callable)

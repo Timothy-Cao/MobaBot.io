@@ -5,6 +5,7 @@ var active := 0
 var current := ""
 var fade: Tween
 var silenced := false
+var shutting_down := false
 
 func _ready() -> void:
 	for i in range(2):
@@ -14,6 +15,7 @@ func _ready() -> void:
 		voices.append(voice)
 
 func update_context(screen: String, run, muted: bool) -> void:
+	if shutting_down: return
 	# The headless dummy audio driver does not drain MP3 playbacks at shutdown.
 	if DisplayServer.get_name() == "headless": return
 	if voices.is_empty(): return
@@ -49,8 +51,12 @@ func update_context(screen: String, run, muted: bool) -> void:
 	fade.tween_property(voices[active], "volume_db", -15.0, 0.6)
 	fade.chain().tween_callback(voices[previous].stop)
 
-func _exit_tree() -> void:
+func shutdown() -> void:
+	shutting_down = true
 	if fade != null: fade.kill()
 	for voice in voices:
 		voice.stop()
 		voice.stream = null
+
+func _exit_tree() -> void:
+	shutdown()

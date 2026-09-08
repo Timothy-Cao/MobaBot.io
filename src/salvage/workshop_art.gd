@@ -42,11 +42,12 @@ func receive(event: Dictionary) -> void:
 	if kind == "hurt" and not reduced_effects:
 		shake = 5.0
 	# Automatic collection/ultimate pulses must not continuously shake the actors.
-	if kind in ["kill", "hit", "spent", "pulse", "pickup", "equipped", "boss_down", "loot", "blink", "beam", "move", "cast", "milestone", "vacuum", "hostile_blast"]:
+	if kind in ["kill", "hit", "spent", "pulse", "pickup", "equipped", "boss_down", "loot", "blink", "beam", "move", "cast", "milestone", "vacuum", "hostile_blast", "nuke_impact"]:
 		if effects.size() < (65 if reduced_effects else 180):
 			var e := event.duplicate()
 			e.age = 0.0
 			e.life = 0.55 if kind in ["kill", "pulse", "boss_down", "loot", "move"] else 0.24
+			if kind == "nuke_impact": e.life = 0.6
 			effects.append(e)
 
 func _box(rect: Rect2, color: Color, radius: int = 5, border: Color = INK, width: int = 2) -> void:
@@ -411,18 +412,31 @@ func _moba_ground() -> void:
 			cone.append(model.player + kit.flame_direction.rotated(lerpf(-PI / 5, PI / 5, i / 16.0)) * kit.cast_range(kit.flame_slot) * kit.area_scale(kit.flame_slot))
 		draw_colored_polygon(cone, Color(GOLD, 0.20))
 		draw_polyline(cone, Color(GOLD, 0.7), 2, true)
+		for i in range(3 if reduced_effects else 7):
+			var fraction := fmod(visual_time * 1.7 + i * 0.143, 1.0)
+			var direction := kit.flame_direction.rotated(sin(i * 2.7) * PI / 6)
+			var reach := kit.cast_range(kit.flame_slot) * kit.area_scale(kit.flame_slot)
+			_line(model.player + direction * (20 + fraction * reach * 0.7), model.player + direction * (38 + fraction * reach * 0.8), Color(CREAM if i % 2 == 0 else GOLD, (1 - fraction) * 0.7), 4 * (1 - fraction) + 1)
 	if not preview_slot.is_empty():
 		var data: Dictionary = MobaKit.ABILITIES[kit.loadout[preview_slot]]
 		var radius := kit.cast_range(preview_slot)
 		var end := kit.target_point(model, preview_slot, cursor_world)
 		var color := TEAL if kit.preview_ready(model, preview_slot, cursor_world) else CORAL
 		draw_arc(model.player, radius if radius > 0 else 38, 0, TAU, 80, Color(color, 0.3), 1.5, true)
-		if data.aim == "line":
+		if kit.loadout[preview_slot] == "flame":
+			var cone := PackedVector2Array([model.player])
+			var facing := (cursor_world - model.player).normalized()
+			for i in range(17): cone.append(model.player + facing.rotated(lerpf(-PI / 5, PI / 5, i / 16.0)) * radius * kit.area_scale(preview_slot))
+			draw_colored_polygon(cone, Color(color, 0.13))
+			cone.append(model.player)
+			draw_polyline(cone, color, 2, true)
+		elif data.aim == "line":
 			var line_end := end
 			if data.glyph in ["beam", "rail"]:
 				line_end = (model.player + (cursor_world - model.player).normalized() * radius).clamp(SalvageRun.ARENA.position + Vector2.ONE * 16, SalvageRun.ARENA.end - Vector2.ONE * 16)
 			_line(model.player, line_end, Color(color, 0.20), 56 * kit.area_scale(preview_slot) if data.glyph == "beam" else 8)
 			_line(model.player, line_end, color, 2)
+			if kit.loadout[preview_slot] == "rocket": draw_arc(line_end, 62 * kit.area_scale(preview_slot), 0, TAU, 40, Color(color, 0.5), 1, true)
 		elif data.aim == "ground":
 			draw_arc(end, (135 if kit.loadout[preview_slot] == "nuke" else 90) * kit.area_scale(preview_slot) if data.glyph == "target" else 22, 0, TAU, 48, color, 2, true)
 			_line(end - Vector2(8, 0), end + Vector2(8, 0), color, 2)
@@ -439,6 +453,10 @@ func _moba_ground() -> void:
 	if kit.overdrive > 0:
 		draw_arc(model.player, kit.cast_range("r"), 0, TAU, 64, Color(GOLD, 0.35), 2, true)
 	for zone in kit.zones:
+		if zone.kind == "nuke":
+			var height: float = 160 * zone.time / zone.duration
+			_line(zone.pos - Vector2(0, height + 32), zone.pos - Vector2(0, height), Color(GOLD, 0.8), 8)
+			draw_circle(zone.pos - Vector2(0, height), 5, CREAM)
 		if zone.kind == "beam":
 			_line(zone.pos, zone.end, Color(TEAL, 0.22), zone.radius * 2)
 			_line(zone.pos, zone.end, TEAL, 2)
@@ -515,6 +533,11 @@ func _effect(effect: Dictionary) -> void:
 			for i in range(3):
 				var direction := Vector2.from_angle(i * TAU / 3 + float(effect.pos.y))
 				_line(p + direction * 4, p + direction * (8 + t * 9), Color(CREAM, 1 - t), 2)
+		"nuke_impact":
+			draw_arc(p, effect.radius * (0.5 + t * 0.5), 0, TAU, 64, Color(CREAM, (1 - t) * 0.8), 6 * (1 - t) + 1, true)
+			for i in range(4 if reduced_effects else 8):
+				var direction := Vector2.from_angle(i * TAU / 8)
+				_line(p + direction * effect.radius * t, p + direction * effect.radius * (t + 0.15), Color(GOLD, 1 - t), 3)
 		"pulse":
 			draw_arc(p, lerpf(20, effect.radius, t), 0, TAU, 64, Color(GOLD, (1 - t) * 0.9), 5 * (1 - t) + 1, true)
 			if not reduced_effects:

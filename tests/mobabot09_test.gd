@@ -186,6 +186,13 @@ func _run() -> void:
 	game._input(key(KEY_SPACE, false))
 	game._update_camera()
 	check(game.model.detached_camera, "Release Space restores free camera")
+	game.model.player = SalvageRun.ARENA.end - Vector2.ONE * 16
+	game._input(key(KEY_SPACE))
+	game._update_camera()
+	var edge_follow: Vector2 = game.camera.position
+	game._input(key(KEY_SPACE, false))
+	game._update_camera()
+	check(game.camera.position.is_equal_approx(edge_follow), "Free camera preserves HUD-safe overscan on Space release at edge")
 	game._input(key(KEY_L))
 	check(game.camera_locked, "L toggles lock")
 	game._input(key(KEY_TAB))

@@ -403,6 +403,7 @@ func step(run, delta: float) -> void:
 		if zone.time <= 0:
 			if zone.kind == "nuke":
 				area(run, zone.pos, zone.radius, 85 * zone.scale, "ultimate", 240)
+				run.emit_event("nuke_impact", zone.pos, {"radius": zone.radius})
 			elif zone.kind == "blast":
 				area(run, zone.pos, zone.radius, 16 * zone.get("scale", 1.0), "active", 150)
 			else:

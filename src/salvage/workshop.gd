@@ -119,7 +119,8 @@ func _quit_cleanly(code: int) -> void:
 		return
 	closing = true
 	sound.set_muted(true)
-	await get_tree().create_timer(0.1).timeout
+	music_player.shutdown()
+	await get_tree().create_timer(0.2).timeout
 	get_tree().quit(code)
 
 func show_home() -> void:
@@ -185,7 +186,7 @@ func _update_camera() -> void:
 		if not model.detached_camera:
 			free_center = model.follow_origin() + model.view_size / 2
 		else:
-			free_center = free_center.clamp(SalvageRun.ARENA.position + model.view_size / 2, SalvageRun.ARENA.end - model.view_size / 2)
+			free_center = free_center.clamp(SalvageRun.ARENA.position + model.view_size / 2 - Vector2(48, 96) / zoom_value, SalvageRun.ARENA.end - model.view_size / 2 + Vector2(48, 200) / zoom_value)
 		model.detached_origin = free_center - model.view_size / 2
 		camera.position = free_center
 		camera.force_update_scroll()
@@ -440,7 +441,7 @@ func _process(delta: float) -> void:
 	_record_screen_time(delta)
 	art.preview_slot = pending_cast_slot if screen == "running" else ""
 	art.cursor_world = get_global_mouse_position()
-	if capture_kind in ["aim", "motion_lowenergy"]:
+	if capture_kind in ["aim", "motion_lowenergy", "nuke_aim"]:
 		art.preview_slot = "r"
 		art.cursor_world = model.player + Vector2(380, -120)
 	run_frames += 1
@@ -676,8 +677,13 @@ func _bot_direction() -> Vector2:
 	return desired.normalized()
 
 func _fixture(kind: String) -> void:
+	camera_locked = true
+	ui.camera_locked = true
+	r_quickcast = false
+	ui.r_quickcast = false
 	# QA images use repeatable presentation, without overwriting saved preferences.
 	zoom_value = MAX_ZOOM
+	ui.zoom_value = zoom_value
 	art.set_process(true)
 	art.reduced_effects = false
 	ui.reduced = false
@@ -693,6 +699,11 @@ func _fixture(kind: String) -> void:
 	if kind == "equipment":
 		_open_gear()
 		return
+	if kind == "gear":
+		_open_build()
+		ui.build_page = "gear"
+		ui.show_build(ui.build_model, false)
+		return
 	if kind == "settings":
 		_open_settings()
 		return
@@ -707,6 +718,7 @@ func _fixture(kind: String) -> void:
 	model.pickups.clear()
 	model.time = 48
 	model.kit.elapsed = 48
+	if kind in ["aim", "flame", "nuke_aim", "nuke_impact"]: model.kit.elapsed = 120
 	model.stage_time = 48
 	model.kills = 64
 	model.total_xp = 81
@@ -851,6 +863,13 @@ func _fixture(kind: String) -> void:
 		ui.show_stage_reward(model)
 	_update_camera()
 	ui.update_hud(model)
+	if kind == "flame":
+		pending_cast_slot = "w"
+		model.kit.cast(model, "w", model.player + Vector2(180, -40))
+	if kind == "nuke_impact":
+		model.kit.cast(model, "r", model.player + Vector2(185, -100))
+		model.kit.step(model, 0.66)
+		_drain_events()
 
 func _capture() -> void:
 	await RenderingServer.frame_post_draw

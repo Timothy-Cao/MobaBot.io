@@ -1,107 +1,88 @@
-# Workshop Salvager — v0.8 demo / Stage 1, Levels 1–3
+# MobaBot.io — 0.9 demo
 
-Windows-first survivor-like in Godot 4.7.2, with mouse movement, four toggleable passive slots, three regular actives, an ultimate, movement abilities, one pet and one summon. A little robot breaks machines and turns scrap into weapons. World art, action icons, animation and sound are code-authored; seven generated item illustrations are included locally. Playing needs no API keys or paid service.
+A Windows-first, single-player survivor-like with MOBA mouse controls. Build a small salvage robot into a crowd-clearing machine. Stage 1 contains three levels and ends with the Foreman.
 
-## Start here
+## Play
 
-**Double-click `Play Workshop Salvager.cmd` in this folder.** No terminal or Godot editor needed. Keep `.tools/godot` beside the project: this is a local development launcher, not a standalone exported executable.
+Double-click **Play MobaBot.io.cmd**. Relaunch any older game window to load this version.
 
-Latest QA pass: **0.8 Demo**. Automatic pulses no longer cause persistent shake; damage recoil is small and player-only. Fixed dash lean, reduced-effects tank flashes, stale held steering after menus, blocked mobility consuming charges, aim-readiness colors, charge warnings and arena-edge player visibility. Full test/capture evidence and tomorrow's handoff: [QA_08.md](docs/design/QA_08.md). Relaunch to load changes; an already-open older window does not hot-update.
+On a fresh clone, run `scripts/setup.ps1` first; the portable Godot 4.7.2 engine is intentionally not committed. Then launch the game or run `scripts/open_editor.ps1`. The launcher works with spaces in the folder path.
 
-Play one Stage with three Levels: Loading bay has 75 seconds of mobs only; Assembly line has 90 seconds of harder mobs plus two required wardens; Reactor floor has 90 seconds of mobs followed by the Foreman. The first two clears offer an ability promotion or reactor cache. Defeating the Foreman ends the demo—there is no Level 4. Target: roughly five combat minutes, with human choice time still to be measured.
+This is a Godot development project, not a standalone exported Windows release. No accounts, API keys or online services are required to play. Repository: [Timothy-Cao/MobaBot.io](https://github.com/Timothy-Cao/MobaBot.io).
 
-Carry the whole build between levels. Rank ceilings rise from 5 to 8 to 10, putting the first transformation in Level 1 and final milestones in Level 3. HUD “Power” means XP growth, distinct from encounter Level. Wardens teach committed charges and marked ground attacks; the Foreman combines these with a projectile fan and a faster half-health phase. Gold EXPOSED recovery windows take +50% damage. Walking can evade the telegraphs; blink is optional insurance.
+## Controls
 
-New in v0.7: labelled edge pointers find required enemies; the nearest objective owns the boss bar. Wardens now have distinct plow/barrel silhouettes. Damage identifies its source and defeat explains a relevant response. Boss cues are protected from loot feedback. Tab navigates menu buttons normally; hold-Tab inspection remains in combat. Audit and comparisons: [BLINDSPOT_AUDIT_07.md](docs/design/BLINDSPOT_AUDIT_07.md).
+| Input | Action |
+| --- | --- |
+| Right-click / hold | Move to a point / steer |
+| S | Stop walking; a committed short dash still finishes |
+| Q | Impact bolt: straight skillshot; impact and end-of-range explosion |
+| W | Welding torch: two-second cone, steered with the cursor |
+| E | Safety shell |
+| R, then left-click | Target and confirm Reactor drop; right-click or Esc cancels |
+| D / F | Sprint / charged blink |
+| T | Deploy one sentry; replaces the previous one |
+| 1–4 | Passive toggles; orbit alternates close/wide radius |
+| 5 / 6 | Repair +2 hull / restore 50 energy; two of each per run |
+| L / hold Space | Toggle camera lock / temporarily follow |
+| Screen edges | Pan when the camera is unlocked |
+| Wheel | Zoom 65–100% |
+| Hold Tab | Inspect abilities, upgrades, stats and equipped gear; release to return |
+| Esc | Settings; cancels targeting first |
+| M / F2 | Mute audio / reduced effects |
 
-Coral bumpers chase, purple wedges charge, and plated tanks take more hits. Warned pressure packs include faster runners and tougher elites. Spawns begin off-screen. Ordinary/charger/tank/final-boss drops scatter 3/10/20/72 scrap dots; wardens drop 30, with extra loot from pressure elites. Difficult enemies also drop energy cells and some hull patches. Remaining earned scrap and supplies are banked when a level clears.
+No WASD movement. Settings offers camera lock and optional R quick cast. Other actives quick-cast by default; Shift + ability previews and casts on key release. Loadout edits and ability bindings apply next run. S, L, M, Space, Tab, Esc, 5 and 6 are reserved. Occupied ability bindings swap; older bindings that conflict with the new reserved keys migrate to a free letter.
 
-- Right-click: move to a point; hold to steer. S: stop walking immediately (a committed short dash still finishes). **No WASD movement.**
-- Q: Homing salvo; W: Shock ring; E: Safety shell; R: Overdrive ultimate (default Relaxed preset).
-- D: speed boost. F: charged blink. T: deploy one turret, replacing the old one.
-- 1–4: toggle the four equipped passives. The pet is automatic. Some toggles consume energy over time; others are free.
-- Quick-cast on ability press. For an indicator, hold Shift while pressing/holding an ability, then release the ability key to cast. Esc or right-click cancels the preview.
-- 1 / 2 / 3 or click: choose an upgrade. Menus also support focus navigation and Enter.
-- Esc: open settings (or cancel an aimed cast / close inspection first). Switching away also pauses a human-controlled run.
-- Hold Tab: inspect loadout, upgrades and stats; release to return without losing pending choices. Inspection pauses this solo game.
-- Mouse wheel: zoom between 65% and 100%. The original view is the closest limit; the widest view shows about 54% more world width. Settings also has a zoom slider.
-- Restart through the pause or results menu. R never restarts.
-- M: sound toggle. F2: reduced effects (no shake or hit-color flashes, fewer fragments).
-- Close the window to exit.
+Start with Q, D and F. Unlocks follow combat time: passive 1 at 10s, W at 20s, passive 2 at 32s, E at 45s, passive 3 at 58s, R at 70s, T at 95s, passive 4 at 110s. Pauses do not advance this clock. The default kit is aimed; the optional Relaxed kit and individual loadout choices retain low-mechanics alternatives. Every run repeats this short onboarding sequence.
 
-The workshop is 5360x3400 world units, with a following, zoomable camera, painted bays and floor panels. Gold minimap markers are scrap caches: approach one to release eight scrap. Paths between caches are open; floor markings are not obstacles. The map has distant boundaries and is not infinite. Each level starts in a different sector of this same arena, not a separate obstacle map.
+## The demo
 
-**Main menu > Loadout**: select Relaxed or Precision, customize individual abilities and four passive slots, cycle the equipped pet, and rebind keys. Letters and numbers are supported; occupied keys swap. S and M are reserved. R/D/F are default keys for fixed ability roles, but those keys can be rebound. Changes apply to the next run. Precision replaces the easy spells with Rail spike, Scrap mortar, Ram strike and Foundry lance; it uses a dash and attack drone. No unlock grind in this prototype.
+- Level 1 — Loading bay: 75 seconds of mobs.
+- Level 2 — Assembly line: 90 seconds of harder mobs and two required wardens.
+- Level 3 — Reactor floor: 90 seconds of mobs, then the Foreman.
 
-Build → Upgrades separates Skills, Weapons and Utility. Seven equipped cast slots and eight weapon/support tracks each have ten ranks. Damage/rate bonuses progress +20/25/30/35/40%, then continue to +65% at rank 10; ranks 5 and 10 add milestones such as larger rings, longer volleys, extra shield hits and wider beams. Click each rank for exact before/after numbers. Offers exclude unsupported mechanics and include a focused continuation when possible. This is a run-rank browser, not a permanent unlock tree.
+The build carries between levels; the demo ends after the boss. Numerical rank ceilings rise 5 → 8 → 10. Ranks 5 and 10 transform effect size or behavior. End-level promotions raise ability rarity separately from ranks. XP Power is separate from encounter Level.
 
-Magnet is separate, free utility: no passive slot, no energy drain, no combat choice spent. Start at 250 px reach and gain a free rank every three level-ups, reaching 650 px with faster pull speed. Rank 5 sweeps all scrap every 15 seconds. Legacy saves with Magnet in a passive slot migrate that slot to the defensive Recoil shell; other equipment and keys stay intact.
+The map is 5360 × 3400 world units, with three sectors, caches and distant boundaries. It is not infinite and has no obstacle/pathfinding system yet. Off-screen spawns stay centered on the player even when the camera is panned elsewhere.
 
-Energy starts at 100 and regenerates at 8/second before toggle upkeep. Q/W/E/R/T generally cost energy; D/F movement and basic automatic attacks stay free. Reactor and cell ranks improve regeneration and capacity, with milestone boosts. Emergency cell trades one hull for 55 energy (70/85 at its milestones), never your last hull point. Boss rarity promotions remain Common → Rare → Epic, separate from numerical ranks. Cooldowns recover charges one at a time, preserve progress through upgrades, and pause in menus. All run ranks and rarity reset next run.
+Magnet is separate free utility: 88 → 180 px reach, a free rank every three level-ups, and faster pull speed. There is no full-map vacuum in the main demo. Bonus drops require 48 px proximity. Ordinary kills have independent baseline chances of 1/25 for 25 credits and 1/15 for a six-second speed boost or QWE charge refill. Drop bonuses multiply those chances, with caps. Wardens/bosses also drop 75 credits. Difficult enemies retain larger scrap showers and energy/repair supplies.
 
-Default seed: 2407, fixed for repeatable decisions. No metaprogression or mid-run save yet. Preferences, keybinds, loadouts and completed run summaries persist locally in `%APPDATA%\Godot\app_userdata\Workshop Salvager`. Nothing is uploaded.
+## Equipment
 
-Completed v0.7 runs also record the last 32 hull-hit causes and time spent in combat, choices, inspection and pauses. These local diagnostics help find unclear damage and excessive menu time; they do not record keystrokes or upload analytics.
+Main menu → Equipment. Three slots: Core, Chassis, Drive; two equipment types per slot. Mk I and Mk II deliberately share each slot's art silhouette.
 
-## Develop and verify
+- Equip a replacement without consuming the old item.
+- Reroll only the bonus for 35 credits. Results can be better, worse or the same.
+- Add up to five stars with spare copies of that exact item and credits. Star N costs N duplicates and 25 × N credits. One owned copy is always retained.
+- Each star adds 20% of that item's base stat, not 20 percentage points.
+- Starter gear includes one spare of each equipped item and 150 credits, so you can try both systems immediately.
+- Each cleared level awards one random equipment copy and 50 credits in addition to collected money. Level 1–2 rewards bank when you select the clear reward; final rewards bank on victory. Collected credits also bank on defeat. Quitting/restarting mid-level abandons that level's unbanked loot.
+- Equipment is persistent; combat ranks, ability rarity and consumables reset each run. Equipment purchases apply next run.
 
-From PowerShell **in this project folder**:
+Saves use a temporary file followed by replacement; failed purchases roll back. Unreadable/corrupt equipment saves are preserved rather than overwritten. Automated runs and screenshot fixtures cannot earn persistent rewards.
 
-```powershell
-.\scripts\open_editor.ps1
-```
+Preferences and local run diagnostics retain the original folder for compatibility:
+`%APPDATA%/Godot/app_userdata/Workshop Salvager`.
+Equipment: `mobabot_equipment.json`. Preferences: `salvage_settings.cfg`. Results: `salvage_runs.jsonl`.
+No telemetry is uploaded. There is no mid-run save or cloud sync.
 
-F5 runs Workshop Salvager. Its main scene is `src/salvage/workshop.tscn`. You can also launch directly:
+## Art and audio
 
-```powershell
-.\scripts\run_game.ps1
-```
+Original code-native world graphics, ability icons and animation; nine generated inventory illustrations. New chassis and thruster art follows the existing teal enamel / steel / brass / cream style. [Art schema](docs/design/ART_STYLE_SCHEMA.md) and [equipment prompts/provenance](assets/upgrades/EQUIPMENT_PROVENANCE.md).
 
-Run the original sample test, salvage regressions, MOBA controls/ability tests, stage/resource tests, simulated runs and a dense legacy combat stress check:
+User-provided MP3s in `music/` play by context: menu, settings, equipment/results, the three levels, wardens, Foreman and overclocked Foreman. Two music voices crossfade; combat inspection and upgrade screens keep the current track. Mute affects both music and synthesized effects. Music defaults quieter than effects. Music is disabled under the headless dummy driver; normal Windows playback is enabled.
+
+## Verify and continue development
+
+Run from the project folder:
 
 ```powershell
 .\scripts\check.ps1
+.\.tools\godot\Godot_v4.7.2-stable_win64_console.exe --headless --path . --script res://tests/mobabot09_behavior_probe.gd
 ```
 
-If `.tools/godot` is missing after cloning or moving the repository, restore the portable editor with:
+The full check includes legacy simulations, MOBA mechanics, progression, boss readability, movement at multiple physics rates, v0.9 mechanics/equipment/camera tests and UI text layout. The optional behavior probe compares idle, stationary casting and moving casting with normal health. Neither is a substitute for human playtesting.
 
-```powershell
-.\scripts\setup.ps1
-```
+[Latest audit and handoff](docs/design/QA_09.md). Earlier iteration documents are historical; this README and QA_09 supersede their controls and scope. Preserve the old Neon Collector sample at `src/main/main.tscn`.
 
-To refresh GPU-rendered screen fixtures, run `scripts/capture_screens.ps1`. It opens brief game windows and writes twenty-nine captures to `output/playtest-v08`. `scripts/capture_motion_qa.ps1` adds eight targeted motion/edge/effect fixtures. These are constructed fixtures; `completed-run.png` shows an actual automated run. Earlier screenshots remain in their original versioned folders.
-
-Reproduce a rendered automated playthrough:
-
-```powershell
-& '.\.tools\godot\Godot_v4.7.2-stable_win64_console.exe' --path . -- --autoplay --quit-on-result
-```
-
-Optional arguments after `--`: `--seed=2408`, `--fixture=home` (or gameplay, upgrade, pause, result, build, stats, world, loadout, passives, keys, abilities, loot, stage_reward, settings, zoom), `--capture=C:/absolute/path.png`, `--capture-on-result`. Screenshot directories must exist; screenshots require real rendering, not `--headless`.
-
-## Code map and scope
-
-- `src/salvage/run_model.gd`: deterministic combat, spatial collision index, pressure waves, supplies and upgrades.
-- `demo_campaign.gd`: three-level demo pacing, sector transitions, wardens, final-boss state machines and test-only steering policy.
-- `progression.gd`: ten-rank curves, milestone descriptions and exact preview values.
-- `moba_kit.gd`: loadout catalog, validation, charges, targeting, spells, pets and summons.
-- `workshop.gd`: input, state transitions, settings and test hooks.
-- `workshop_art.gd`: original shapes, motion, telegraphs and impact effects.
-- `workshop_ui.gd`: menus, HUD and upgrade cards.
-- `build_view.gd`: upgrade graph, rank previews and source-linked stats.
-- `loadout_view.gd`: pre-run equipment, passive/pet selection, presets and key editor.
-- `ability_icon.gd`: consistent square code-native action icons; `ability_glyph.gd` retains the earlier symbol vocabulary.
-- `mini_map.gd`: world/camera position and remaining caches.
-- `synth_audio.gd`: synthesized cues and bounded voice pool.
-
-One open arena with three sectors/levels, 14 selectable ability definitions, six combat passive choices, two pets, fifteen ten-rank combat tracks and a five-rank free Utility track. Three ordinary enemy types, pressure variants, two warden move sets and a final boss combining their lessons. No music, metaprogression, Steam integration or packaged standalone release. No obstacle navigation, attack-move command or full MOBA animation-cancelling system yet. Summons cannot be attacked in this prototype. Matching Godot export templates are not installed; they are unnecessary for the included local launcher. Keyboard/mouse is the main mode; no controller or WASD support in this version of the salvager.
-
-## First playtest
-
-Try Relaxed first, then optionally Precision from Loadout. Send one combined reaction: movement/stop feel; first upgrade that felt different; most confusing hit; dullest stretch; best power moment; whether the final boss felt fair. Automatic runs validate operation, not your experience or final balance. Further campaign progression is frozen until this demo is playtested.
-
-## Earlier sample and research
-
-The original **Neon Collector** sample is preserved at `src/main/main.tscn`. Open it and press F6; F5 always runs the new game. Its smoke test remains in the check script.
-
-Current direction, research, north stars and scope: [MVP_NORTH_STARS.md](docs/design/MVP_NORTH_STARS.md). Priorities and playtest questions: [MVP_TASK_BOARD.md](docs/design/MVP_TASK_BOARD.md). Previous rank/utility numbers: `docs/design/ITERATION_05.md`; earlier design/references: `docs/design/ITERATION_04.md` and `docs/design/MOBA_MODE_03.md`. Shared art palette, vocabulary, prompt template and audit: `docs/design/ART_STYLE_SCHEMA.md`. Verification: `docs/design/IMPLEMENTATION_STATUS.md`. Earlier research: `output/pdf/godot-survivor-research.pdf`; original design: `docs/design/ART_FIRST_DESIGN.md`; learning notes: `docs/GODOT_WORKFLOW.md`.
+Commit coherent, verified changes; do not commit engine/cache folders, generated test captures, temp files or local player records. Public-release work still includes export packaging, audio balance/listening, music-rights confirmation, and human tuning of camera speed, rewards and combat difficulty.

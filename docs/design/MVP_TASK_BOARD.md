@@ -52,3 +52,6 @@ Stage 2 or Level 4+, new heroes, permanent talent economy, monetization, randomi
 ## Evidence discipline
 
 Automated wins prove operation, not fun. Report test seeds/loadouts, actual outcomes, and limitations. Distinguish constructed screenshots from organic runs. Do not change difficulty only to manufacture an appealing win rate. Keep user data local; no accounts or paid assets are required. Human validation remains openly pending until feedback arrives.
+# v0.9 handoff
+
+Current implemented/tested: aimed Q/W, click-confirm R, staged ability unlocks, orbit radius toggle, L/Space/free camera, compact HUD, consumables, rare bonus drops, persistent equipment, matching static art, music routing, GitHub delivery. See QA_09.md for evidence and the consolidated remaining checklist. Older board entries below are historical; no Level 4 is in scope.

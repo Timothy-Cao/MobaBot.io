@@ -125,3 +125,6 @@ One arena; auto bolt gun; two common enemy behaviors and optional late boss; col
 - Controller left-stick movement exists; complete controller-only operation is not physically tested. Keyboard/mouse is the supported first-play path.
 - Reduced effects is an option, not a comprehensive accessibility certification. Working title is not legally cleared as a commercial brand.
 - No user decisions, credentials or paid assets block the playable. Next input: one combined reaction after a run about appealing art, satisfying interactions and confusing/annoying moments.
+# Current: MobaBot.io 0.9
+
+The latest user request supersedes earlier scope exclusions for equipment and free-camera controls. See README.md and QA_09.md for the authoritative implemented behavior, test evidence and remaining human decisions. Historical entries below describe previous builds, not current defaults.
