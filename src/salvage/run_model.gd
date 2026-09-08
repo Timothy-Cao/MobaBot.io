@@ -64,6 +64,13 @@ var kit: MobaKit
 var move_target := Vector2.ZERO
 var moving := false
 var view_size := Vector2(960, 540)
+var detached_camera := false
+var detached_origin := Vector2.ZERO
+var coins := 0
+var equipment_snapshot: Array[Dictionary] = []
+var consumables := [2, 2]
+var drop_bonus := 0.0
+var loot_rng := RandomNumberGenerator.new()
 var staged := false
 var stage := 1
 var stage_time := 0.0
@@ -202,7 +209,12 @@ func passive_enabled(id: String) -> bool:
 
 func upgrade_available(id: String) -> bool:
 	if staged and id.begins_with("skill_"):
-		return id.trim_prefix("skill_") in MobaKit.SLOTS
+		return id.trim_prefix("skill_") in MobaKit.SLOTS and kit.unlocked(id.trim_prefix("skill_"))
+	if kit != null and kit.onboarding:
+		var passive: String = {"grinder": "orbit", "capacity": "orbit", "ricochet": "ricochet", "pulse": "pulse", "rapid": "bolt"}.get(id, "")
+		if not passive.is_empty():
+			var index: int = kit.loadout.passives.find(passive)
+			if index < 0 or not kit.unlocked("p%d" % (index + 1)): return false
 	if kit == null:
 		if id in ["reactor", "cell"]:
 			return false
@@ -223,6 +235,9 @@ func _init(seed_value: int = 2407, selected_mode: String = "salvage") -> void:
 		caches.append({"pos": player + offset, "opened": false})
 
 func camera_origin() -> Vector2:
+	return detached_origin if detached_camera else follow_origin()
+
+func follow_origin() -> Vector2:
 	if demo_mode:
 		# Camera overscan is visual only. Keep the player clear of HUD at all four
 		# edges, with margins expressed in screen pixels so zoom cannot erase them.
@@ -291,11 +306,15 @@ func capacity() -> int:
 	return 6 + rank_of("capacity") * 2
 
 func orbit_radius() -> float:
+	if kit != null and kit.onboarding and kit.orbit_far:
+		return 105.0 * (1 + milestone("grinder") * 0.35)
 	if staged:
 		return 49.0 * (1 + milestone("grinder") * 0.35)
 	return 49.0 + rank_of("grinder") * 7.0
 
 func magnet_radius() -> float:
+	if kit != null and kit.onboarding:
+		return 65.0 + rank_of("magnet") * 23.0
 	if staged:
 		return 150.0 + rank_of("magnet") * 100.0
 	return 83.0 + rank_of("magnet") * 27.0 + (45.0 if kit != null and kit.passive_active("magnet") else 0.0)
@@ -409,7 +428,7 @@ func _spawn_step(delta: float) -> void:
 		spawn_clock += maxf(0.24, 0.9 - time * 0.007)
 		var side := spawn_rng.randi_range(0, 3)
 		var point := Vector2.ZERO
-		var view := camera_origin()
+		var view := follow_origin()
 		var size := view_size
 		match side:
 			0: point = view + Vector2(spawn_rng.randf_range(30, size.x - 30), -35)
@@ -454,7 +473,7 @@ func spawn_enemy(point: Vector2, kind: int = 0) -> void:
 	next_id += 1
 
 func _offscreen_point(side: int = -1) -> Vector2:
-	var view := Rect2(camera_origin(), view_size).grow(70)
+	var view := Rect2(follow_origin(), view_size).grow(70)
 	var valid: Array[int] = []
 	if view.position.y > ARENA.position.y + 30: valid.append(0)
 	if view.end.x < ARENA.end.x - 30: valid.append(1)
@@ -655,7 +674,7 @@ func _projectile_step(delta: float) -> void:
 			if not target.is_empty():
 				bullet.vel = Vector2(bullet.vel).lerp((Vector2(target.pos) - Vector2(bullet.pos)).normalized() * 430, minf(1, delta * 12)).normalized() * 430
 		bullet.prev = bullet.pos
-		bullet.pos += Vector2(bullet.vel) * (minf(delta, maxf(0, bullet.life)) if bullet.kind == "rail" else delta)
+		bullet.pos += Vector2(bullet.vel) * (minf(delta, maxf(0, bullet.life)) if bullet.kind in ["rail", "rocket"] else delta)
 		bullet.life -= delta
 		if bullet.kind == "hostile":
 			var near := Geometry2D.get_closest_point_to_segment(player, bullet.prev, bullet.pos)
@@ -687,6 +706,7 @@ func _projectile_step(delta: float) -> void:
 			bullet.hits.append(enemy.id)
 			hit_enemy(enemy, bullet.damage, bullet.kind, Vector2(bullet.vel).normalized() * 72.0)
 			if bullet.pierce <= 0:
+				if bullet.kind == "rocket": bullet.pos = closest
 				bullet.life = 0.0
 				break
 			bullet.pierce -= 1
@@ -696,6 +716,8 @@ func _projectile_step(delta: float) -> void:
 					bullet.pos = enemy.pos
 					bullet.vel = (Vector2(target.pos) - Vector2(bullet.pos)).normalized() * 480.0
 				break
+		if bullet.kind == "rocket" and bullet.life <= 0:
+			MobaKit.area(self, bullet.pos, bullet.get("radius", 62), bullet.get("blast", 8), "rocket", 110)
 	projectiles = projectiles.filter(func(b: Dictionary) -> bool: return b.life > 0)
 	enemies = enemies.filter(func(e: Dictionary) -> bool: return not e.dead)
 
@@ -711,6 +733,12 @@ func hit_enemy(enemy: Dictionary, damage: float, source: String, knock: Vector2 
 	if enemy.hp <= 0:
 		enemy.dead = true
 		kills += 1
+		if kit != null and kit.onboarding:
+			if loot_rng.randf() < minf(0.20, (1.0 + drop_bonus) / 25.0):
+				_drop_supply(enemy.pos, "coins", 25)
+			if loot_rng.randf() < minf(0.25, (1.0 + drop_bonus) / 15.0):
+				_drop_supply(Vector2(enemy.pos) + Vector2(-20, 0), "speed" if loot_rng.randf() < 0.5 else "reset", 1)
+			if enemy.has("role"): _drop_supply(Vector2(enemy.pos) + Vector2(0, 24), "coins", 75)
 		if kit != null:
 			var count: int = [3, 10, 72, 20][enemy.kind] if staged else [1, 6, 48, 12][enemy.kind]
 			if enemy.has("role") and enemy.role != "foreman": count = 30
@@ -792,7 +820,7 @@ func _drop(point: Vector2, value: int) -> void:
 	next_id += 1
 
 func _pickup_step(delta: float) -> void:
-	if staged and rank_of("magnet") >= 5:
+	if staged and rank_of("magnet") >= 5 and not (kit != null and kit.onboarding):
 		vacuum_clock -= delta
 		if vacuum_clock <= 0:
 			vacuum_clock += 15
@@ -924,8 +952,16 @@ func _drop_supply(point: Vector2, kind: String, value: int) -> void:
 
 func _collect_supply(supply: Dictionary) -> void:
 	if supply.value <= 0: return
-	if supply.kind == "energy": kit.energy = minf(kit.energy_max(), kit.energy + supply.value)
-	else: health = mini(5, health + supply.value)
+	match supply.kind:
+		"energy": kit.energy = minf(kit.energy_max(), kit.energy + supply.value)
+		"repair": health = mini(5, health + supply.value)
+		"coins": coins += supply.value
+		"speed": kit.boost_speed = 6.0
+		"reset":
+			for slot in ["q", "w", "e"]:
+				kit.charges[slot] = MobaKit.ABILITIES[kit.loadout[slot]].max
+				kit.recharge[slot] = 0
+	emit_event("supply", player, {"supply": supply.kind})
 	supply.value = 0
 	emit_event("equipped", player, {"id": "repair"})
 
@@ -934,10 +970,19 @@ func _supply_step(delta: float) -> void:
 	for supply in supply_drops:
 		supply.age += delta
 		if supply.age < 0.35: continue
-		if Vector2(supply.pos).distance_to(player) < magnet_radius():
+		if Vector2(supply.pos).distance_to(player) < (48.0 if kit.onboarding else magnet_radius()):
 			supply.pos = Vector2(supply.pos).move_toward(player, delta * 900)
 		if Vector2(supply.pos).distance_to(player) < 18: _collect_supply(supply)
 	supply_drops = supply_drops.filter(func(s: Dictionary) -> bool: return s.value > 0)
+
+func use_consumable(index: int) -> bool:
+	if state != "running" or kit == null or index < 0 or index > 1 or consumables[index] <= 0: return false
+	if (index == 0 and health >= 5) or (index == 1 and kit.energy >= kit.energy_max()): return false
+	consumables[index] -= 1
+	if index == 0: health = mini(5, health + 2)
+	else: kit.energy = minf(kit.energy_max(), kit.energy + 50)
+	emit_event("equipped", player, {"id": "repair"})
+	return true
 
 func summary() -> Dictionary:
 	return {"seed": run_seed, "mode": mode, "result": state, "seconds": snappedf(time, 0.01),

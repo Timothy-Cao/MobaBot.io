@@ -92,7 +92,7 @@ func _run() -> void:
 	game.key_setting.p1 = KEY_Q
 	game.start_run()
 	game._drain_events()
-	check(game.ui.notice.text.contains("1 W E"), "Opening guidance respects rebinding and survives initial events")
+	check(game.ui.notice.text == "Loading bay" and game.model.kit.bindings.q == KEY_1, "Opening label stays clean and saved rebinding remains intact")
 	game.ui.announce("Boss warning", 2)
 	game.ui.announce("Scrap cache")
 	check(game.ui.notice.text == "Boss warning", "Routine loot cannot replace critical warning")
@@ -100,7 +100,7 @@ func _run() -> void:
 	game.ui.announce("Scrap cache")
 	check(game.ui.notice.text == "Scrap cache", "Expired warning releases notice priority")
 	game.start_run()
-	check(game.ui.notice.text.contains("Right-click"), "Restart resets previous announcement priority")
+	check(game.ui.notice.text == "Loading bay", "Restart resets previous announcement priority")
 	game.screen = "upgrade"
 	var combat_time: float = game.model.time
 	game._record_screen_time(4)

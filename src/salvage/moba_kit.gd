@@ -18,6 +18,9 @@ const PASSIVES := {
 	"thorns": {"name": "Recoil shell", "icon": "pulse", "text": "Taking hull damage releases a 6-damage ring in 100 radius. Free; damage is listed under Active."},
 }
 const ABILITIES := {
+	"rocket": {"name": "Impact bolt", "category": "active", "icon": "power", "glyph": "rail", "cd": 3.0, "max": 2, "range": 540.0, "aim": "line", "text": "Aim a straight rocket. 15 impact damage plus an 8-damage blast on contact or at maximum range."},
+	"flame": {"name": "Welding torch", "category": "active", "icon": "rapid", "glyph": "flame", "cd": 7.0, "max": 1, "range": 190.0, "aim": "line", "text": "Burn a forward cone for 2 seconds: 24 damage total. Steer with the cursor while moving."},
+	"nuke": {"name": "Reactor drop", "category": "ultimate", "icon": "pulse", "glyph": "target", "cd": 26.0, "max": 1, "range": 480.0, "aim": "ground", "text": "Mark a 135-radius area. After 0.65 seconds, strike for 85 damage. Press R, then left-click. Right-click cancels."},
 	"salvo": {"name": "Homing salvo", "category": "active", "icon": "rapid", "glyph": "salvo", "cd": 8.0, "max": 3, "range": 440.0, "aim": "auto", "text": "5 seeking bolts over 1 second. Each deals 2 + bolt damage. Needs a nearby enemy."},
 	"nova": {"name": "Shock ring", "category": "active", "icon": "pulse", "glyph": "ring", "cd": 7.0, "max": 1, "range": 155.0, "aim": "self", "text": "Deal 9 + pulse rank x 2 damage in a ring. Push enemies away."},
 	"shield": {"name": "Safety shell", "category": "active", "icon": "capacity", "glyph": "shield", "cd": 12.0, "max": 1, "range": 0.0, "aim": "self", "text": "Block the next hit within 4 seconds. No aiming."},
@@ -64,6 +67,31 @@ var ranks: Dictionary = {}
 var rank_regen := 0.0
 var rank_energy := 0.0
 var shield_hits := 1
+var onboarding := false
+var elapsed := 0.0
+var orbit_far := false
+var flame_left := 0.0
+var flame_tick := 0.25
+var flame_slot := "w"
+var flame_direction := Vector2.RIGHT
+var gear_damage := 0.0
+var gear_speed := 0.0
+var boost_speed := 0.0
+const UNLOCKS := {"q": 0.0, "d": 0.0, "f": 0.0, "p1": 10.0, "w": 20.0, "p2": 32.0, "e": 45.0, "p3": 58.0, "r": 70.0, "t": 95.0, "p4": 110.0}
+
+static func demo_preset() -> Dictionary:
+	var config := preset()
+	config.q = "rocket"
+	config.w = "flame"
+	config.r = "nuke"
+	config.pet = "drone"
+	return config
+
+func unlocked(slot: String) -> bool:
+	return not onboarding or elapsed >= float(UNLOCKS.get(slot, 0))
+
+func ability_cost(id: String) -> float:
+	return float({"rocket": 8, "flame": 18, "nuke": 35}.get(id, ENERGY_COST.get(id, 0)))
 
 static func deals_damage(id: String) -> bool:
 	return id not in ["shield", "sprint", "blink", "dash", "pylon", "sacrifice"]
@@ -111,13 +139,17 @@ func drain_rate() -> float:
 
 func passive_active(id: String) -> bool:
 	var index: int = loadout.passives.find(id)
-	if index < 0 or not toggles[index]:
+	if index < 0 or not toggles[index] or not unlocked("p%d" % (index + 1)):
 		return false
 	return id != "ricochet" or passive_active("orbit")
 
 func toggle(index: int) -> bool:
 	if index < 0 or index >= 4:
 		return false
+	if not unlocked("p%d" % (index + 1)): return false
+	if onboarding and loadout.passives[index] == "orbit":
+		orbit_far = not orbit_far
+		return true
 	if not toggles[index] and UPKEEP.has(loadout.passives[index]) and energy < 1:
 		return false
 	toggles[index] = not toggles[index]
@@ -131,7 +163,7 @@ func cooldown_at(slot: String, rank_value: int, tier_value: int = -1) -> float:
 	return float(ABILITIES[loadout[slot]].cd) * (1.0 - tier * 0.08) * (1.0 - SalvageProgression.bonus(rank_value) * 0.5)
 
 func damage_scale(slot: String) -> float:
-	return (1.0 + int(tiers.get(slot, 0)) * 0.15) * (1.0 + SalvageProgression.bonus(int(ranks.get(slot, 0))))
+	return (1.0 + gear_damage) * (1.0 + int(tiers.get(slot, 0)) * 0.15) * (1.0 + SalvageProgression.bonus(int(ranks.get(slot, 0))))
 
 func promote(slot: String) -> bool:
 	if slot not in SLOTS or tiers[slot] >= 2:
@@ -142,6 +174,7 @@ func promote(slot: String) -> bool:
 	return true
 
 static func cost_text(id: String) -> String:
+	if id in ["rocket", "flame", "nuke"]: return "%d energy" % {"rocket": 8, "flame": 18, "nuke": 35}[id]
 	return "1 hull -> 55 energy" if id == "sacrifice" else ("%d energy" % ENERGY_COST[id] if ENERGY_COST.has(id) else "Free")
 
 static func resolve_bindings(config: Dictionary) -> Dictionary:
@@ -155,6 +188,12 @@ static func resolve_bindings(config: Dictionary) -> Dictionary:
 			if result[other] == config[slot]:
 				result[other] = old
 		result[slot] = config[slot]
+	for slot in BIND_SLOTS:
+		if result[slot] in [KEY_S, KEY_M, KEY_L, KEY_5, KEY_6]:
+			for candidate in [KEY_Q, KEY_W, KEY_E, KEY_R, KEY_D, KEY_F, KEY_T, KEY_1, KEY_2, KEY_3, KEY_4, KEY_A, KEY_B, KEY_C, KEY_G, KEY_H, KEY_J]:
+				if candidate not in result.values():
+					result[slot] = candidate
+					break
 	return result
 
 static func preset(precision: bool = false) -> Dictionary:
@@ -186,7 +225,7 @@ static func valid_bindings(config: Dictionary) -> bool:
 	for slot in (BIND_SLOTS if config.has("p1") else SLOTS):
 		var key := int(config.get(slot, 0))
 		# S is a hard stop; Escape/Tab and the audio shortcuts remain system keys.
-		if not ((key >= KEY_A and key <= KEY_Z) or (key >= KEY_0 and key <= KEY_9)) or key in [KEY_S, KEY_M] or key in used:
+		if not ((key >= KEY_A and key <= KEY_Z) or (key >= KEY_0 and key <= KEY_9)) or key in [KEY_S, KEY_M, KEY_L, KEY_5, KEY_6] or key in used:
 			return false
 		used.append(key)
 	return true
@@ -205,19 +244,19 @@ func has_passive(id: String) -> bool:
 	return id in loadout.passives
 
 func speed() -> float:
-	return 205.0 * (1.0 + (0.65 if sprint > 0 else 0.0) + (0.25 if overdrive > 0 else 0.0))
+	return 205.0 * (1.0 + gear_speed + (0.4 if boost_speed > 0 else 0.0) + (0.65 if sprint > 0 else 0.0) + (0.25 if overdrive > 0 else 0.0))
 
 func target_point(run, slot: String, cursor: Vector2) -> Vector2:
 	var offset: Vector2 = cursor - run.player
 	var point: Vector2 = run.player + offset.limit_length(cast_range(slot))
-	if loadout[slot] in ["beam", "rail"]:
+	if loadout[slot] in ["beam", "rail", "rocket", "flame"]:
 		point = run.player + offset.normalized() * cast_range(slot)
 	return point.clamp(run.ARENA.position + Vector2.ONE * 16, run.ARENA.end - Vector2.ONE * 16)
 
 func preview_ready(run, slot: String, cursor: Vector2) -> bool:
-	if slot not in SLOTS or charges[slot] <= 0: return false
+	if slot not in SLOTS or charges[slot] <= 0 or not unlocked(slot): return false
 	var id: String = loadout[slot]
-	if energy < float(ENERGY_COST.get(id, 0)): return false
+	if energy < ability_cost(id): return false
 	if id == "sacrifice": return run.health > 1 and energy < energy_max()
 	if id == "salvo":
 		var target: Dictionary = run.nearest_enemy(run.player)
@@ -229,6 +268,9 @@ func preview_ready(run, slot: String, cursor: Vector2) -> bool:
 func cast(run, slot: String, cursor: Vector2) -> bool:
 	last_failure = "Not ready"
 	if run.state != "running" or not SLOTS.has(slot) or charges[slot] <= 0:
+		return false
+	if not unlocked(slot):
+		last_failure = "Unlocks at %d seconds" % UNLOCKS[slot]
 		return false
 	var id: String = loadout[slot]
 	var data: Dictionary = ABILITIES[id]
@@ -246,7 +288,7 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 			return false
 	if id in ["dash", "lunge", "blink"] and dash_left > 0:
 		return false
-	var cost := float(ENERGY_COST.get(id, 0))
+	var cost := ability_cost(id)
 	if energy < cost:
 		last_failure = "Need %d energy" % cost
 		return false
@@ -263,6 +305,19 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	run.aim = direction if direction != Vector2.ZERO else run.aim
 	run.emit_event("cast", run.player, {"ability": id, "target": point, "milestone": milestone(slot)})
 	match id:
+		"rocket":
+			var before: int = run.projectiles.size()
+			run._add_projectile(run.player, direction * 720, 15 * multiplier, "rocket", 0)
+			if run.projectiles.size() > before:
+				run.projectiles.back().life = cast_range(slot) / 720.0
+				run.projectiles.back().blast = 8 * multiplier
+				run.projectiles.back().radius = 62 * area_scale(slot)
+		"flame":
+			flame_left = 2.0
+			flame_tick = 0.25
+			flame_slot = slot
+			flame_direction = direction
+		"nuke": zones.append({"pos": point, "time": 0.65, "duration": 0.65, "radius": 135.0 * area_scale(slot), "kind": "nuke", "scale": multiplier})
 		"salvo": salvos.append({"left": 5 + milestone(slot) * 2, "clock": 0.0, "scale": multiplier, "interval": 1.0 / (5 + milestone(slot) * 2)})
 		"nova": area(run, run.player, cast_range(slot), (9 + run.rank_of("pulse") * 2) * multiplier, "active", 280)
 		"shield":
@@ -296,6 +351,22 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	return true
 
 func step(run, delta: float) -> void:
+	var previous := elapsed
+	elapsed += delta
+	if onboarding:
+		for slot in UNLOCKS:
+			if previous < UNLOCKS[slot] and elapsed >= UNLOCKS[slot]:
+				run.emit_event("unlock", run.player, {"slot": slot})
+	boost_speed = maxf(0, boost_speed - delta)
+	if flame_left > 0:
+		flame_tick -= minf(delta, flame_left)
+		while flame_tick <= 0.000001:
+			flame_tick += 0.25
+			for enemy in run.enemies:
+				var offset: Vector2 = enemy.pos - run.player
+				if not enemy.dead and enemy.warmup <= 0 and offset.length() <= cast_range(flame_slot) * area_scale(flame_slot) + enemy.radius and absf(flame_direction.angle_to(offset)) <= PI / 5:
+					run.hit_enemy(enemy, 3 * damage_scale(flame_slot), "flame")
+		flame_left = maxf(0, flame_left - delta)
 	var available := energy + energy_regen() * delta
 	var drain := drain_rate() * delta
 	if drain > available:
@@ -330,7 +401,9 @@ func step(run, delta: float) -> void:
 	for zone in zones:
 		zone.time -= delta
 		if zone.time <= 0:
-			if zone.kind == "blast":
+			if zone.kind == "nuke":
+				area(run, zone.pos, zone.radius, 85 * zone.scale, "ultimate", 240)
+			elif zone.kind == "blast":
 				area(run, zone.pos, zone.radius, 16 * zone.get("scale", 1.0), "active", 150)
 			else:
 				for enemy in run.enemies:

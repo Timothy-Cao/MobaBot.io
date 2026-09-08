@@ -30,5 +30,8 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & $godot --headless --path $projectRoot --script "res://tests/motion_qa_test.gd"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+& $godot --headless --path $projectRoot --script "res://tests/mobabot09_test.gd"
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
 & $godot --headless --path $projectRoot --script "res://tests/layout_audit.gd"
 exit $LASTEXITCODE

@@ -26,7 +26,7 @@ static func _utility(ui) -> void:
 	ui._icon(ui.overlay, "magnet", Rect2(70, 128, 180, 180))
 	ui._label(ui.overlay, "Magnet", Rect2(281, 128, 588, 39), 29, ui.CREAM, true)
 	ui._label(ui.overlay, "ALWAYS EQUIPPED / FREE", Rect2(283, 178, 583, 24), 13, ui.TEAL, true)
-	ui._label(ui.overlay, "No passive slot. No energy drain.\n\nStarts with 250 px pickup reach. Gain a free rank every\n3 level-ups, up to 650 px. Each rank pulls loot faster.\n\nAt rank 5: sweep all scrap every 15 seconds.\nCombat choices stay separate from utility rewards.", Rect2(283, 220, 594, 209), 16, ui.MUTED)
+	ui._label(ui.overlay, "No passive slot. No energy drain.\n\nStarts at 88 px. Free ranks every 3 level-ups,\nup to 180 px. Each rank pulls scrap faster.\n\nBonus drops need you within 48 px.\nNo full-map vacuum. Move to collect rewards.", Rect2(283, 220, 594, 209), 16, ui.MUTED)
 
 static func _equipment(ui) -> void:
 	var passive: bool = ui.loadout_page == "passives"
@@ -95,6 +95,7 @@ static func _equipment(ui) -> void:
 	ui._surface(ui.overlay, Rect2(298, 385, 602, 79), ui.PANEL)
 	var description: Label = ui._label(ui.overlay, info.text, Rect2(313, 395, 570, 59), 14, ui.CREAM)
 	description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	if passive and selected_id == "orbit": description.text = "Collected scrap becomes orbit blades. Press its number key to alternate close protection and a wider attack radius."
 	if passive:
 		ui._label(ui.overlay, "ONE PET", Rect2(48, 298, 220, 20), 11, ui.MUTED, true)
 		ui._button(MobaKit.PETS[ui.loadout_config.pet], Rect2(48, 325, 226, 39), func() -> void:
@@ -106,8 +107,11 @@ static func _equipment(ui) -> void:
 		var note: Label = ui._label(ui.overlay, text, Rect2(48, 373, 221, 78), 12, ui.MUTED)
 		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	else:
-		ui._button("Relaxed", Rect2(48, 422, 109, 37), func() -> void: _preset(ui, false), false)
-		ui._button("Precision", Rect2(165, 422, 109, 37), func() -> void: _preset(ui, true), false)
+		ui._button("Default kit", Rect2(48, 422, 109, 37), func() -> void:
+			ui.loadout_config = MobaKit.demo_preset()
+			ui.loadout_changed.emit(ui.loadout_config, ui.key_config)
+			draw(ui), false)
+		ui._button("Relaxed", Rect2(165, 422, 109, 37), func() -> void: _preset(ui, false), false)
 
 static func _preset(ui, precision: bool) -> void:
 	ui.loadout_config = MobaKit.preset(precision)
@@ -132,4 +136,4 @@ static func _keys(ui) -> void:
 		ui.rebind_slot = ""
 		ui.loadout_changed.emit(ui.loadout_config, ui.key_config)
 		draw(ui), false)
-	ui._label(ui.overlay, "1–4 toggle passives by default. Occupied keys swap safely.\nS, M, Tab and Esc are reserved. Ability roles stay fixed when rebound.", Rect2(248, 423, 650, 47), 12, ui.MUTED)
+	ui._label(ui.overlay, "1–4 passives / 5–6 items / L lock / Hold Space follow\nS, M, L, 5, 6, Tab, Space and Esc reserved. Occupied keys swap.", Rect2(248, 423, 650, 47), 12, ui.MUTED)

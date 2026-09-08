@@ -34,6 +34,17 @@ func _draw() -> void:
 	for i in range(3):
 		line(Vector2(7 + i * 5, 55), Vector2(7 + i * 5, 58), Color("668577"), 1)
 	match ability:
+		"rocket":
+			poly([Vector2(13, 47), Vector2(29, 19), Vector2(50, 10), Vector2(46, 33), Vector2(22, 53)], STEEL)
+			poly([Vector2(29, 19), Vector2(50, 10), Vector2(46, 33)], TEAL)
+			line(Vector2(9, 55), Vector2(21, 43), GOLD, 7)
+		"flame":
+			poly([Vector2(17, 53), Vector2(8, 34), Vector2(22, 37), Vector2(24, 10), Vector2(36, 28), Vector2(49, 14), Vector2(55, 36), Vector2(44, 54)], GOLD)
+			poly([Vector2(25, 51), Vector2(24, 35), Vector2(34, 40), Vector2(43, 29), Vector2(43, 49)], CREAM)
+		"nuke":
+			for r in [14, 25]: draw_arc(Vector2(32, 37), r, 0, TAU, 40, GOLD, 3, true)
+			line(Vector2(32, 7), Vector2(32, 35), STEEL, 9)
+			poly([Vector2(21, 29), Vector2(43, 29), Vector2(32, 45)], CREAM)
 		"salvo":
 			for p in [Vector2(22, 20), Vector2(37, 32), Vector2(47, 47)]:
 				line(p + Vector2(-15, 14), p, Color(TEAL, 0.6), 4)

@@ -23,7 +23,7 @@ var peak_enemies := 0
 var closing := false
 var camera := Camera2D.new()
 var build_return_screen := "home"
-var loadout_setting := MobaKit.preset()
+var loadout_setting := MobaKit.demo_preset()
 var key_setting := MobaKit.DEFAULT_BINDS.duplicate()
 var mouse_moving := false
 var bot_cast_clock := 0.0
@@ -35,14 +35,32 @@ var tab_held := false
 var settings_return_screen := "home"
 var screen_seconds: Dictionary = {}
 var run_wall_seconds := 0.0
+var camera_locked := true
+var recenter_held := false
+var free_center := Vector2.ZERO
+var r_quickcast := false
+var persist_settings := true
+var gear = preload("res://src/salvage/equipment.gd").new()
+var music_player = preload("res://src/salvage/music_director.gd").new()
+var gear_return := "home"
 
 func _ready() -> void:
-	get_window().title = "Workshop Salvager - 0.8 Demo"
+	get_window().title = "MobaBot.io - 0.9 Demo"
 	get_tree().auto_accept_quit = false
 	add_child(camera)
 	camera.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
 	camera.enabled = false
 	_load_settings()
+	gear.load_profile()
+	add_child(music_player)
+	ui.gear_requested.connect(_open_gear)
+	ui.camera_lock_changed.connect(func(value: bool) -> void:
+		_set_camera_lock(value))
+	ui.quickcast_changed.connect(func(value: bool) -> void:
+		r_quickcast = value
+		ui.r_quickcast = value
+		_save_settings()
+		ui.show_settings())
 	ui.start_requested.connect(start_run)
 	ui.upgrade_selected.connect(_choose)
 	ui.resume_requested.connect(_pause_toggle)
@@ -90,6 +108,7 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST and not closing:
 		_quit_cleanly(0)
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT and not auto_play:
+		recenter_held = false
 		if screen == "build" and tab_held:
 			_close_build()
 		if screen == "running":
@@ -133,6 +152,10 @@ func start_run(mode: String = "salvage") -> void:
 	model = SalvageRun.new(seed_value, mode)
 	model.enable_moba(loadout_setting, key_setting)
 	model.enable_demo()
+	model.kit.onboarding = true
+	model.loot_rng.seed = seed_value + 901
+	gear.apply_to(model)
+	free_center = model.follow_origin() + model.view_size / 2
 	mouse_moving = false
 	pending_cast_slot = ""
 	bot_cast_clock = 1.0
@@ -150,7 +173,7 @@ func start_run(mode: String = "salvage") -> void:
 	screen = "running"
 	ui.show_running()
 	ui.notice_time = 0
-	ui.announce("Right-click to move / %s %s %s to cast" % [OS.get_keycode_string(model.kit.bindings.q), OS.get_keycode_string(model.kit.bindings.w), OS.get_keycode_string(model.kit.bindings.e)])
+	ui.announce("Loading bay")
 	model.events.clear() # Initial sector event must not overwrite the control prompt.
 	ui.update_hud(model)
 
@@ -158,8 +181,30 @@ func _update_camera() -> void:
 	if camera.enabled:
 		camera.zoom = Vector2.ONE * zoom_value
 		model.view_size = Vector2(960, 540) / zoom_value
-		camera.position = model.camera_origin() + model.view_size / 2
+		model.detached_camera = not camera_locked and not recenter_held
+		if not model.detached_camera:
+			free_center = model.follow_origin() + model.view_size / 2
+		else:
+			free_center = free_center.clamp(SalvageRun.ARENA.position + model.view_size / 2, SalvageRun.ARENA.end - model.view_size / 2)
+		model.detached_origin = free_center - model.view_size / 2
+		camera.position = free_center
 		camera.force_update_scroll()
+
+func _set_camera_lock(value: bool) -> void:
+	camera_locked = value
+	ui.camera_locked = value
+	_update_camera()
+	_save_settings()
+	if screen == "settings": ui.show_settings()
+
+func _open_gear() -> void:
+	gear_return = screen
+	_clear_held_movement()
+	mouse_moving = false
+	pending_cast_slot = ""
+	screen = "equipment"
+	ui.show_equipment(gear, func() -> void:
+		show_home())
 
 func _set_zoom(value: float, persist: bool = true) -> void:
 	zoom_value = clampf(value, MIN_ZOOM, MAX_ZOOM)
@@ -204,6 +249,9 @@ func _open_build() -> void:
 		var preview := SalvageRun.new(seed_value)
 		preview.enable_moba(loadout_setting, key_setting)
 		preview.enable_demo()
+		preview.kit.onboarding = true
+		preview.kit.elapsed = 120.0
+		gear.apply_to(preview)
 		ui.show_build(preview)
 	else:
 		ui.show_build(model)
@@ -224,6 +272,19 @@ func _close_build() -> void:
 		_: ui.show_running()
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.keycode == KEY_SPACE:
+		recenter_held = event.pressed and screen == "running"
+		get_viewport().set_input_as_handled()
+		return
+	if screen == "running" and event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_L:
+			_set_camera_lock(not camera_locked)
+			get_viewport().set_input_as_handled()
+			return
+		if event.keycode in [KEY_5, KEY_6]:
+			model.use_consumable(event.keycode - KEY_5)
+			get_viewport().set_input_as_handled()
+			return
 	if event is InputEventKey and event.keycode == KEY_TAB and not event.echo:
 		if event.pressed and screen in ["running", "upgrade", "paused", "result", "stage_reward"]:
 			_open_build()
@@ -240,7 +301,7 @@ func _input(event: InputEvent) -> void:
 		pending_cast_slot = ""
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and not event.pressed:
 		mouse_moving = false
-	if event is InputEventKey and not event.pressed and screen == "running" and not pending_cast_slot.is_empty() and event.keycode == model.kit.bindings[pending_cast_slot]:
+	if event is InputEventKey and not event.pressed and screen == "running" and not pending_cast_slot.is_empty() and event.keycode == model.kit.bindings[pending_cast_slot] and not (pending_cast_slot == "r" and not r_quickcast):
 		var slot := pending_cast_slot
 		pending_cast_slot = ""
 		_cast_slot(slot)
@@ -264,7 +325,7 @@ func _input(event: InputEvent) -> void:
 				return
 			for slot in MobaKit.SLOTS:
 				if event.keycode == model.kit.bindings[slot]:
-					if event.shift_pressed:
+					if event.shift_pressed or (slot == "r" and not r_quickcast):
 						pending_cast_slot = slot
 					else:
 						pending_cast_slot = ""
@@ -284,6 +345,12 @@ func _cast_slot(slot: String) -> void:
 		mouse_moving = false
 
 func _unhandled_input(event: InputEvent) -> void:
+	if screen == "running" and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and not pending_cast_slot.is_empty():
+		var slot := pending_cast_slot
+		pending_cast_slot = ""
+		_cast_slot(slot)
+		get_viewport().set_input_as_handled()
+		return
 	if screen == "running" and event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
 		_set_zoom(zoom_value + (0.05 if event.button_index == MOUSE_BUTTON_WHEEL_UP else -0.05))
 		get_viewport().set_input_as_handled()
@@ -303,6 +370,17 @@ func _physics_process(delta: float) -> void:
 	if screen == "home":
 		model.time += delta
 	elif screen == "running":
+		if not camera_locked and not recenter_held:
+			var cursor := get_viewport().get_mouse_position()
+			if Rect2(0, 0, 960, 540).has_point(cursor):
+				var pan := Vector2(float(cursor.x > 948) - float(cursor.x < 12), float(cursor.y > 528) - float(cursor.y < 12))
+				free_center += pan.normalized() * 620.0 / zoom_value * delta
+		if model.kit.flame_left > 0:
+			var facing := (get_global_mouse_position() - model.player).normalized()
+			if auto_play:
+				var enemy := model.nearest_enemy(model.player)
+				if not enemy.is_empty(): facing = (Vector2(enemy.pos) - model.player).normalized()
+			if facing != Vector2.ZERO: model.kit.flame_direction = facing
 		var direction := Vector2.ZERO
 		if auto_play:
 			direction = _bot_direction()
@@ -358,6 +436,7 @@ func _physics_process(delta: float) -> void:
 	ui.update_hud(model)
 
 func _process(delta: float) -> void:
+	if music_player.is_inside_tree(): music_player.update_context(screen, model, mute_setting)
 	_record_screen_time(delta)
 	art.preview_slot = pending_cast_slot if screen == "running" else ""
 	art.cursor_world = get_global_mouse_position()
@@ -415,6 +494,13 @@ func _drain_events() -> void:
 			ui.announce("Warden defeated / %d of 2" % model.demo_minis_killed)
 		elif event.kind == "boss_phase":
 			ui.announce("Foreman overclocked / faster tells", 2)
+		elif event.kind == "unlock":
+			var slot: String = event.slot
+			var title: String = MobaKit.PASSIVES[model.kit.loadout.passives[int(slot.substr(1)) - 1]].name if slot.begins_with("p") else MobaKit.ABILITIES[model.kit.loadout[slot]].name
+			ui.announce("%s  [%s]" % [title, OS.get_keycode_string(model.kit.bindings[slot])], 1)
+		elif event.kind == "supply":
+			if event.supply in ["coins", "speed", "reset"]:
+				ui.announce({"coins": "Credits collected", "speed": "Overclock / 6 seconds", "reset": "Q W E refreshed"}[event.supply])
 	model.events.clear()
 
 func _choose(index: int) -> void:
@@ -424,6 +510,8 @@ func _choose(index: int) -> void:
 		_drain_events()
 
 func _choose_stage(index: int) -> void:
+	if model.state == "stage_reward" and index >= 0 and index < model.stage_rewards.size():
+		_bank_loot(model.stage)
 	if model.choose_stage_reward(index):
 		screen = "running"
 		ui.show_running()
@@ -433,7 +521,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
 	if event.keycode == KEY_ESCAPE:
-		if screen == "settings":
+		if screen == "equipment":
+			show_home()
+		elif screen == "settings":
 			_close_settings()
 		elif screen == "loadout":
 			ui.rebind_slot = ""
@@ -504,14 +594,19 @@ func _load_settings() -> void:
 		mute_setting = bool(config.get_value("audio", "muted", false))
 		reduced_setting = bool(config.get_value("visual", "reduced_effects", false))
 		zoom_value = clampf(float(config.get_value("visual", "zoom", 1.0)), MIN_ZOOM, MAX_ZOOM)
+		camera_locked = bool(config.get_value("visual", "camera_locked", true))
+		r_quickcast = bool(config.get_value("moba", "r_quickcast", false))
 		var loaded: Variant = config.get_value("moba", "loadout", {})
 		if loaded is Dictionary: loaded = MobaKit.migrate_loadout(loaded)
 		var keys: Variant = config.get_value("moba", "keys", {})
-		if loaded is Dictionary and MobaKit.valid_loadout(loaded):
+		if keys is Dictionary: keys = MobaKit.resolve_bindings(keys)
+		if loaded is Dictionary and MobaKit.valid_loadout(loaded) and int(config.get_value("moba", "version", 0)) >= 9:
 			loadout_setting = loaded
 		if keys is Dictionary and MobaKit.valid_bindings(keys):
 			key_setting = MobaKit.resolve_bindings(keys)
 	ui.zoom_value = zoom_value
+	ui.camera_locked = camera_locked
+	ui.r_quickcast = r_quickcast
 	ui.loadout_config = loadout_setting.duplicate(true)
 	ui.key_config = key_setting.duplicate()
 	sound.set_muted(mute_setting)
@@ -520,11 +615,15 @@ func _load_settings() -> void:
 	ui.reduced = reduced_setting
 
 func _save_settings() -> void:
+	if not persist_settings: return
 	var config := ConfigFile.new()
 	config.load("user://salvage_settings.cfg")
 	config.set_value("audio", "muted", mute_setting)
 	config.set_value("visual", "reduced_effects", reduced_setting)
 	config.set_value("visual", "zoom", zoom_value)
+	config.set_value("visual", "camera_locked", camera_locked)
+	config.set_value("moba", "r_quickcast", r_quickcast)
+	config.set_value("moba", "version", 9)
 	config.set_value("moba", "loadout", loadout_setting)
 	config.set_value("moba", "keys", key_setting)
 	if config.save("user://salvage_settings.cfg") != OK:
@@ -533,13 +632,15 @@ func _save_settings() -> void:
 func _save_result() -> void:
 	if saved_result:
 		return
+	_bank_loot(3 if model.state == "won" else 0)
 	var record := model.summary()
 	var measured := frame_times.slice(mini(60, frame_times.size()))
 	measured.sort()
 	if not measured.is_empty():
 		record.render_timing = {"frames": measured.size(), "median_ms": measured[measured.size() / 2],
 			"p95_ms": measured[int(measured.size() * 0.95)], "peak_enemies": peak_enemies}
-	record.build = "slice-08-demo"
+	record.build = "slice-09-mobabot"
+	record.equipment = gear.equipped.duplicate()
 	record.wall_seconds = snappedf(run_wall_seconds, 0.01)
 	record.screen_seconds = screen_seconds.duplicate()
 	record.timestamp = Time.get_datetime_string_from_system()
@@ -552,6 +653,13 @@ func _save_result() -> void:
 		file.flush()
 		saved_result = file.get_error() == OK
 	print("RUN_SUMMARY ", JSON.stringify(record))
+
+func _bank_loot(completed_level: int) -> void:
+	if auto_play or not capture_kind.is_empty(): return
+	if gear.award(model.coins + (50 if completed_level > 0 else 0), completed_level):
+		model.coins = 0
+	else:
+		ui.announce(gear.message, 2)
 
 func _bot_direction() -> Vector2:
 	if model.demo_mode: return DemoCampaign.test_direction(model)
@@ -582,6 +690,9 @@ func _fixture(kind: String) -> void:
 		kind = kind.trim_suffix("_wide")
 	if kind == "home":
 		return
+	if kind == "equipment":
+		_open_gear()
+		return
 	if kind == "settings":
 		_open_settings()
 		return
@@ -595,6 +706,7 @@ func _fixture(kind: String) -> void:
 	ui.notice_time = 0
 	model.pickups.clear()
 	model.time = 48
+	model.kit.elapsed = 48
 	model.stage_time = 48
 	model.kills = 64
 	model.total_xp = 81

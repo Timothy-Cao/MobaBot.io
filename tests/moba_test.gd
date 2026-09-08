@@ -255,8 +255,14 @@ func _run() -> void:
 	game._physics_process(0.1)
 	check(game.model.player == origin and not game.mouse_moving, "S latches stop even when RMB was held")
 	game.model.kills = 17
+	game.model.kit.elapsed = 120
 	game._input(key(KEY_R))
-	check(game.model.kills == 17 and game.model.kit.overdrive > 0, "R casts ultimate and does not restart")
+	check(game.model.kills == 17 and game.pending_cast_slot == "r" and game.model.kit.overdrive == 0, "R previews ultimate and does not restart")
+	var confirm := InputEventMouseButton.new()
+	confirm.button_index = MOUSE_BUTTON_LEFT
+	confirm.pressed = true
+	game._unhandled_input(confirm)
+	check(game.model.kit.overdrive > 0, "Left click confirms ultimate")
 	game._input(key(KEY_W))
 	game._physics_process(0.1)
 	check(game.model.player == origin, "W is an ability, never walking")

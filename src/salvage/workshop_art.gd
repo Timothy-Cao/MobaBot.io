@@ -85,11 +85,16 @@ func _draw() -> void:
 		_scrap(pickup)
 	for supply in model.supply_drops:
 		var p: Vector2 = supply.pos
-		var color := TEAL if supply.kind == "energy" else Color("ed9285")
+		var color: Color = {"energy": TEAL, "repair": Color("ed9285"), "coins": GOLD, "speed": Color("b7ddee"), "reset": Color("bfa6dd")}.get(supply.kind, TEAL)
 		draw_circle(p, 11, INK)
 		draw_circle(p, 8, color)
 		_line(p - Vector2(4, 0), p + Vector2(4, 0), CREAM, 2)
 		if supply.kind == "repair": _line(p - Vector2(0, 4), p + Vector2(0, 4), CREAM, 2)
+		if supply.kind == "coins": draw_arc(p, 7, 0, TAU, 20, GOLD, 2, true)
+		if supply.kind == "speed":
+			_line(p + Vector2(-3, -5), p + Vector2(3, 0), CREAM, 2)
+			_line(p + Vector2(3, 0), p + Vector2(-3, 5), CREAM, 2)
+		if supply.kind == "reset": draw_arc(p, 6, 0.5, TAU - 0.5, 20, CREAM, 2, true)
 		else:
 			_line(p + Vector2(2, -5), p + Vector2(-2, 0), CREAM, 2)
 			_line(p + Vector2(2, 0), p + Vector2(-2, 5), CREAM, 2)
@@ -400,6 +405,12 @@ func _moba_ground() -> void:
 	if model.kit == null:
 		return
 	var kit := model.kit
+	if kit.flame_left > 0:
+		var cone := PackedVector2Array([model.player])
+		for i in range(17):
+			cone.append(model.player + kit.flame_direction.rotated(lerpf(-PI / 5, PI / 5, i / 16.0)) * kit.cast_range(kit.flame_slot) * kit.area_scale(kit.flame_slot))
+		draw_colored_polygon(cone, Color(GOLD, 0.20))
+		draw_polyline(cone, Color(GOLD, 0.7), 2, true)
 	if not preview_slot.is_empty():
 		var data: Dictionary = MobaKit.ABILITIES[kit.loadout[preview_slot]]
 		var radius := kit.cast_range(preview_slot)
@@ -413,7 +424,7 @@ func _moba_ground() -> void:
 			_line(model.player, line_end, Color(color, 0.20), 56 * kit.area_scale(preview_slot) if data.glyph == "beam" else 8)
 			_line(model.player, line_end, color, 2)
 		elif data.aim == "ground":
-			draw_arc(end, 90 * kit.area_scale(preview_slot) if data.glyph == "target" else 22, 0, TAU, 48, color, 2, true)
+			draw_arc(end, (135 if kit.loadout[preview_slot] == "nuke" else 90) * kit.area_scale(preview_slot) if data.glyph == "target" else 22, 0, TAU, 48, color, 2, true)
 			_line(end - Vector2(8, 0), end + Vector2(8, 0), color, 2)
 			_line(end - Vector2(0, 8), end + Vector2(0, 8), color, 2)
 	if model.moving:

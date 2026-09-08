@@ -5,24 +5,42 @@ extends RefCounted
 static func draw(ui: CanvasLayer, model: SalvageRun) -> void:
 	ui._panel(Rect2(24, 24, 912, 492), Color("172932"))
 	ui._label(ui.overlay, "Build", Rect2(47, 39, 212, 42), 30, ui.CREAM, true)
-	ui._button("Upgrades", Rect2(286, 42, 142, 34), func() -> void:
+	ui._button("Upgrades", Rect2(286, 42, 116, 34), func() -> void:
 		ui.build_page = "upgrades"
 		ui.show_build(model, false), ui.build_page == "upgrades")
-	ui._button("Stats", Rect2(440, 42, 142, 34), func() -> void:
+	ui._button("Stats", Rect2(414, 42, 116, 34), func() -> void:
 		ui.build_page = "stats"
 		ui.show_build(model, false), ui.build_page == "stats")
 	if model.kit != null:
-		ui._button("Abilities", Rect2(594, 42, 142, 34), func() -> void:
+		ui._button("Abilities", Rect2(542, 42, 116, 34), func() -> void:
 			ui.build_page = "abilities"
 			ui.show_build(model, false), ui.build_page == "abilities")
+	ui._button("Gear", Rect2(670, 42, 116, 34), func() -> void:
+		ui.build_page = "gear"
+		ui.show_build(model, false), ui.build_page == "gear")
 	var close: Button = ui._button("Back", Rect2(811, 42, 102, 34), func() -> void: ui.build_closed.emit(), false)
 	if ui.build_page == "upgrades":
 		_tree(ui, model)
 	elif ui.build_page == "abilities":
 		_abilities(ui, model)
+	elif ui.build_page == "gear":
+		_gear(ui, model)
 	else:
 		_stats(ui, model)
 	close.grab_focus()
+
+static func _gear(ui, model: SalvageRun) -> void:
+	for i in range(model.equipment_snapshot.size()):
+		var item: Dictionary = model.equipment_snapshot[i]
+		var x := 46 + i * 291
+		ui._surface(ui.overlay, Rect2(x, 106, 279, 279), ui.PANEL)
+		ui._label(ui.overlay, item.slot, Rect2(x + 18, 119, 243, 22), 13, ui.TEAL, true)
+		ui._icon(ui.overlay, item.icon, Rect2(x + 72, 153, 134, 134))
+		ui._label(ui.overlay, item.name, Rect2(x + 18, 285, 243, 28), 20, ui.CREAM, true)
+		ui._label(ui.overlay, "%d stars / %s" % [item.stars, item.stats], Rect2(x + 18, 326, 243, 48), 12, ui.GOLD)
+	ui._label(ui.overlay, "%d run credits / Repair x%d / Energy x%d" % [model.coins, model.consumables[0], model.consumables[1]], Rect2(47, 407, 866, 26), 17, ui.CREAM, true)
+	ui._label(ui.overlay, "Bonus drop chance +%.0f%% / Ability damage +%.1f%% / Gear move speed +%.1f%%" % [model.drop_bonus * 100, model.kit.gear_damage * 100, model.kit.gear_speed * 100], Rect2(47, 446, 866, 23), 13, ui.MUTED)
+	ui._label(ui.overlay, "Collected credits bank at a clear or defeat. Each cleared level also awards equipment.", Rect2(47, 481, 866, 20), 12, ui.MUTED)
 
 static func _wire(ui: CanvasLayer, a: Vector2, b: Vector2, color: Color) -> void:
 	var line := Line2D.new()
@@ -172,7 +190,7 @@ static func _stats(ui: CanvasLayer, model: SalvageRun) -> void:
 	var total := 0.0
 	for value in model.damage_dealt.values():
 		total += float(value)
-	var sources := ["bolt", "orbit", "shard", "pulse", "homing", "rail", "active", "ultimate", "pet", "summon"]
+	var sources := ["bolt", "orbit", "shard", "pulse", "rocket", "flame", "active", "ultimate", "pet", "summon"] if model.kit != null and model.kit.onboarding else ["bolt", "orbit", "shard", "pulse", "homing", "rail", "active", "ultimate", "pet", "summon"]
 	for i in range(sources.size()):
 		var id: String = sources[i]
 		var x := 62 + (i % 5) * 109
@@ -203,7 +221,7 @@ static func _abilities(ui, model: SalvageRun) -> void:
 		if MobaKit.deals_damage(kit.loadout[slot]):
 			details += " / x%.2f damage" % kit.damage_scale(slot)
 		ui._label(tile, details, Rect2(70, 31, 348, 18), 11, MobaKit.RARITY_COLORS[kit.tiers[slot]])
-		ui._label(tile, "%d / %d ready%s" % [kit.charges[slot], data.max, " / next in %.1fs" % kit.recharge[slot] if kit.recharge[slot] > 0 else ""], Rect2(70, 49, 348, 18), 11, ui.GOLD)
+		ui._label(tile, ("Unlocks in %ds" % ceili(kit.UNLOCKS[slot] - kit.elapsed)) if not kit.unlocked(slot) else "%d / %d ready%s" % [kit.charges[slot], data.max, " / next in %.1fs" % kit.recharge[slot] if kit.recharge[slot] > 0 else ""], Rect2(70, 49, 348, 18), 11, ui.GOLD)
 	for i in range(4):
 		var data: Dictionary = MobaKit.PASSIVES[kit.loadout.passives[i]]
 		var x := 48 + i * 217

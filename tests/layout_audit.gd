@@ -22,7 +22,7 @@ func _run() -> void:
 	root.add_child(game)
 	await process_frame
 	game.set_physics_process(false)
-	for name in ["home", "gameplay", "upgrade", "pause", "result", "build", "stats", "loadout", "passives", "keys", "abilities", "stage_reward", "settings", "utility", "utility_tree", "weapons", "milestone", "milestone_tree", "demo_recovery", "death_recap"]:
+	for name in ["equipment", "home", "gameplay", "upgrade", "pause", "result", "build", "stats", "loadout", "passives", "keys", "abilities", "stage_reward", "settings", "utility", "utility_tree", "weapons", "milestone", "milestone_tree", "demo_recovery", "death_recap"]:
 		game.show_home()
 		game._fixture(name)
 		await process_frame

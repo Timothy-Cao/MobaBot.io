@@ -29,10 +29,11 @@ static func data(run, id: String) -> Dictionary:
 static func note(run, id: String, r: int) -> String:
 	var m := milestone(r)
 	if id == "magnet":
-		return "Rank 5: sweep all scrap every 15s."
+		return "Rank 5: 180 px reach. Bonus drops require close collection." if run.kit.onboarding else "Rank 5: sweep all scrap every 15s."
 	if id.begins_with("skill_"):
 		var slot := id.trim_prefix("skill_")
 		var ability: String = run.kit.loadout[slot]
+		if ability in ["rocket", "flame", "nuke"]: return "5 / 10: effect size +25% / +50%."
 		return {"salvo": "5 / 10: volley fires 7 / 9 bolts.", "nova": "5 / 10: ring radius +25% / +50%.", "mortar": "5 / 10: blast radius +25% / +50%.", "beam": "5 / 10: beam width +25% / +50%.", "rail": "5 / 10: +2 / +4 pierces; gold core.", "shield": "5 / 10: blocks 2 / 3 hits.", "sprint": "5 / 10: lasts 4 / 5 seconds.", "blink": "5 / 10: range +25% / +50%.", "dash": "5 / 10: range +25% / +50%.", "lunge": "5 / 10: range +25% / +50%.", "overdrive": "5 / 10: radius +25% / +50%.", "turret": "5 / 10: sentry fires 25% / 50% faster.", "pylon": "5 / 10: heal radius +50% / +100%.", "sacrifice": "5 / 10: restores 70 / 85 energy."}.get(ability, "")
 	return {"power": "5 / 10: +25% / +50% damage, +1 / +2 pierces.", "rapid": "5 / 10: +25% / +50% firing speed.", "grinder": "5 / 10: larger orbit, +1 / +2 tool hits.", "ricochet": "5 / 10: +2 / +4 extra bounces.", "pulse": "5 / 10: +25% / +50% pulse radius.", "capacity": "5 / 10: +2 / +4 extra tool slots.", "reactor": "5 / 10: +2 / +4 extra energy/sec.", "cell": "5 / 10: +20 / +40 extra capacity."}.get(id, "")
 
@@ -43,6 +44,7 @@ static func values(run, id: String, r: int) -> Array[Dictionary]:
 		var slot := id.trim_prefix("skill_")
 		var combat := MobaKit.deals_damage(run.kit.loadout[slot])
 		var effects := {
+			"rocket": ["Blast radius", 62 * (1 + m * 0.25), " px"], "flame": ["Cone reach", 190 * (1 + m * 0.25), " px"], "nuke": ["Blast radius", 135 * (1 + m * 0.25), " px"],
 			"salvo": ["Bolts / volley", 5 + m * 2, ""], "nova": ["Radius", 155 * (1 + m * 0.25), " px"],
 			"mortar": ["Blast radius", 90 * (1 + m * 0.25), " px"], "beam": ["Beam width", 56 * (1 + m * 0.25), " px"],
 			"rail": ["Targets pierced", 4 + m * 2, ""], "shield": ["Hits blocked", 1 + m, ""],
@@ -61,5 +63,5 @@ static func values(run, id: String, r: int) -> Array[Dictionary]:
 		"capacity": return [{"label": "Tool slots", "value": 6 + r + m * 2, "unit": ""}]
 		"reactor": return [{"label": "Regen / sec", "value": 8 + r + m * 2 + run.kit.regen_bonus, "unit": ""}]
 		"cell": return [{"label": "Max energy", "value": 100 + r * 10 + m * 20 + run.kit.energy_bonus, "unit": ""}]
-		"magnet": return [{"label": "Pickup radius", "value": 150 + r * 100, "unit": " px"}, {"label": "Pull speed", "value": 800 + r * 180, "unit": " px/s"}]
+		"magnet": return [{"label": "Pickup radius", "value": 65 + r * 23 if run.kit != null and run.kit.onboarding else 150 + r * 100, "unit": " px"}, {"label": "Pull speed", "value": 800 + r * 180, "unit": " px/s"}]
 	return [{"label": "Hull", "value": run.health, "unit": " / 5"}]

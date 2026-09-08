@@ -176,6 +176,7 @@ func _run() -> void:
 	game._unhandled_key_input(key(KEY_ESCAPE))
 	check(game.screen == "upgrade", "Escape restores the exact previous screen")
 	game._choose(0)
+	game.model.kit.elapsed = 120
 	game._input(key(KEY_1))
 	check(not game.model.kit.toggles[0], "Default 1 key toggles passive slot one in combat")
 	game._input(key(KEY_TAB))
