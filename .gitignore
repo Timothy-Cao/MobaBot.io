@@ -1,0 +1,21 @@
+# Godot-generated cache and local export credentials
+.godot/
+
+# Local portable editor (downloaded by setup.ps1)
+.tools/
+
+# Builds
+builds/
+exports/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+tmp/
+output/
+.env
+.env.*
+*.pem
+*.key

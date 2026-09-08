@@ -1,0 +1,518 @@
+extends Node2D
+## Code-authored world art follows docs/design/ART_STYLE_SCHEMA.md.
+
+const INK := Color("14242c")
+const CREAM := Color("fff0c7")
+const TEAL := Color("399c99")
+const GOLD := Color("efc16b")
+const CORAL := Color("ee796c")
+const FLOOR := Color("314d56")
+const PALE := Color("bdd3ce")
+
+var model: SalvageRun
+var visual_time := 0.0
+var effects: Array[Dictionary] = []
+var reduced_effects := false
+var shake := 0.0
+var shot_recoil := 0.0
+var styles: Dictionary = {}
+var frame_offset := Vector2.ZERO
+var world_mode := false
+var stencil_font := SystemFont.new()
+var preview_slot := ""
+var cursor_world := Vector2.ZERO
+
+func impact_bank() -> float:
+	return 0.0 if reduced_effects else sin(visual_time * 38) * minf(shake, 5.0) * 0.008
+
+func _process(delta: float) -> void:
+	visual_time += delta
+	shot_recoil = maxf(0, shot_recoil - delta * 6)
+	shake = maxf(0, shake - delta * 20)
+	for effect in effects:
+		effect.age += delta
+	effects = effects.filter(func(e: Dictionary) -> bool: return e.age < e.life)
+	queue_redraw()
+
+func receive(event: Dictionary) -> void:
+	var kind: String = event.kind
+	if kind == "shot":
+		shot_recoil = 1.0
+		return
+	if kind == "hurt" and not reduced_effects:
+		shake = 5.0
+	# Automatic collection/ultimate pulses must not continuously shake the actors.
+	if kind in ["kill", "hit", "spent", "pulse", "pickup", "equipped", "boss_down", "loot", "blink", "beam", "move", "cast", "milestone", "vacuum", "hostile_blast"]:
+		if effects.size() < (65 if reduced_effects else 180):
+			var e := event.duplicate()
+			e.age = 0.0
+			e.life = 0.55 if kind in ["kill", "pulse", "boss_down", "loot", "move"] else 0.24
+			effects.append(e)
+
+func _box(rect: Rect2, color: Color, radius: int = 5, border: Color = INK, width: int = 2) -> void:
+	var key := "%s_%s_%d_%d" % [color.to_html(), border.to_html(), radius, width]
+	if not styles.has(key):
+		var style := StyleBoxFlat.new()
+		style.bg_color = color
+		style.border_color = border
+		style.set_border_width_all(width)
+		style.set_corner_radius_all(radius)
+		styles[key] = style
+	draw_style_box(styles[key], rect)
+
+func _line(a: Vector2, b: Vector2, color: Color, width: float = 2) -> void:
+	draw_line(a, b, color, width, true)
+
+func _draw() -> void:
+	_floor()
+	if model == null:
+		return
+	if world_mode:
+		_draw_caches()
+		_moba_ground()
+	# Keep actors, hitboxes, ground tells and cursor geometry in the same space.
+	# Hull impact is a small player-only angular recoil, never a world displacement.
+	frame_offset = Vector2.ZERO
+	# Telegraphs are drawn clearly below actors, never hidden beneath player effects.
+	for enemy in model.enemies:
+		if enemy.dead:
+			continue
+		if enemy.warmup > 0:
+			draw_arc(enemy.pos, float(enemy.radius) + 10, 0, TAU, 32, Color(CORAL, 0.55), 2, true)
+		if enemy.phase == "windup":
+			_charge_tell(enemy.pos, Vector2(enemy.pos) + Vector2(enemy.dir) * (255 * 0.65), enemy.radius + 12)
+	for pickup in model.pickups:
+		_scrap(pickup)
+	for supply in model.supply_drops:
+		var p: Vector2 = supply.pos
+		var color := TEAL if supply.kind == "energy" else Color("ed9285")
+		draw_circle(p, 11, INK)
+		draw_circle(p, 8, color)
+		_line(p - Vector2(4, 0), p + Vector2(4, 0), CREAM, 2)
+		if supply.kind == "repair": _line(p - Vector2(0, 4), p + Vector2(0, 4), CREAM, 2)
+		else:
+			_line(p + Vector2(2, -5), p + Vector2(-2, 0), CREAM, 2)
+			_line(p + Vector2(2, 0), p + Vector2(-2, 5), CREAM, 2)
+	for enemy in model.enemies:
+		if not enemy.dead:
+			_enemy(enemy)
+	for bullet in model.projectiles:
+		var direction: Vector2 = Vector2(bullet.vel).normalized()
+		if bullet.kind == "hostile":
+			draw_circle(bullet.pos, 8, INK)
+			draw_circle(bullet.pos, 6, CORAL)
+			draw_circle(bullet.pos, 2, CREAM)
+		else:
+			var color := PALE if bullet.kind in ["rail", "pet", "summon"] else GOLD
+			if model.staged and ((bullet.kind == "rail" and model.kit.milestone("q") > 0) or (bullet.kind == "bolt" and model.milestone("power") > 0)):
+				color = GOLD
+			_line(bullet.pos - direction * (35 if bullet.kind == "rail" else 15), bullet.pos, Color(color, 0.35), 6)
+			_line(bullet.pos - direction * (21 if bullet.kind == "rail" else 6), bullet.pos, CREAM if bullet.kind == "bolt" else color, 4)
+	if model.mode == "salvage" and model.passive_enabled("orbit"):
+		draw_arc(model.player, model.orbit_radius(), 0, TAU, 64, Color(PALE, 0.12), 1, true)
+		for i in range(model.orbit.size()):
+			_tool(model.orbit_position(i) + frame_offset, model.time * 6 + i, model.rank_of("grinder") > 0, 1.0 + model.milestone("grinder") * 0.2)
+	for effect in effects:
+		_effect(effect)
+	_player()
+	if world_mode:
+		_companions()
+	# Danger projectiles receive a final outline pass for visibility in crowded FX.
+	for bullet in model.projectiles:
+		if bullet.kind == "hostile":
+			draw_arc(bullet.pos, 8, 0, TAU, 16, CREAM, 1.3, true)
+	if model.demo_mode: _demo_tells()
+	# A steady directional arc remains legible even with shake/flashes disabled.
+	if model.time - model.last_damage_time < 0.7 and model.last_damage_direction.length_squared() > 0.1:
+		var angle := model.last_damage_direction.angle()
+		draw_arc(model.player, 37, angle - 0.55, angle + 0.55, 18, INK, 6, true)
+		draw_arc(model.player, 37, angle - 0.55, angle + 0.55, 18, CORAL, 3, true)
+
+func _demo_tells() -> void:
+	for hazard in model.hazards:
+		draw_circle(hazard.pos, hazard.radius, Color(CORAL, 0.1))
+		draw_arc(hazard.pos, hazard.radius, 0, TAU, 64, CORAL, 2.5, true)
+		draw_arc(hazard.pos, hazard.radius * clampf(1 - hazard.time / hazard.duration, 0, 1), 0, TAU, 48, CREAM, 1.5, true)
+	for enemy in model.enemies:
+		if enemy.dead or not enemy.has("role"): continue
+		var p: Vector2 = enemy.pos
+		var title: String = {"rammer": "RAM WARDEN", "artillery": "ARTILLERY WARDEN", "foreman": "FOREMAN"}[enemy.role]
+		if enemy.phase == "recover":
+			draw_arc(p, enemy.radius + 9, 0, TAU, 40, GOLD, 3, true)
+			title += " / EXPOSED"
+		elif enemy.phase == "telegraph":
+			if enemy.attack == "charge":
+				_charge_tell(p, enemy.target, enemy.radius + 12)
+			elif enemy.attack == "fan":
+				for angle in [-0.7, -0.35, 0.0, 0.35, 0.7]:
+					_line(p, p + Vector2(enemy.dir).rotated(angle) * 230, Color(CORAL, 0.65), 2)
+		draw_string(stencil_font, p + Vector2(-70, -55), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, GOLD if enemy.phase == "recover" else CREAM)
+
+func _charge_tell(start: Vector2, end: Vector2, radius: float) -> void:
+	var direction := (end - start).normalized()
+	if direction == Vector2.ZERO:
+		draw_arc(start, radius, 0, TAU, 32, CORAL, 2.5, true)
+		return
+	var normal := direction.orthogonal() * radius
+	_line(start + normal, end + normal, CORAL, 2.5)
+	_line(start - normal, end - normal, CORAL, 2.5)
+	_line(start, end, Color(CORAL, 0.13), radius * 2)
+	var angle := direction.angle()
+	draw_arc(start, radius, angle + PI / 2, angle + PI * 1.5, 24, CORAL, 2.5, true)
+	draw_arc(end, radius, angle - PI / 2, angle + PI / 2, 24, CREAM, 2.5, true)
+
+func _floor() -> void:
+	if world_mode and model != null:
+		_world_floor()
+		return
+	draw_rect(Rect2(0, 0, 960, 540), INK)
+	_box(Rect2(22, 84, 916, 428), Color("263f48"), 12, Color("122d35"), 3)
+	_box(Rect2(34, 96, 892, 406), FLOOR, 8, Color("44636b"), 2)
+	for x in range(180, 924, 150):
+		_line(Vector2(x, 102), Vector2(x, 494), Color("2c4751"), 2)
+	for y in range(180, 492, 104):
+		_line(Vector2(42, y), Vector2(918, y), Color("2c4751"), 2)
+	# Restrained workshop fixtures sit on the perimeter, not in the fight.
+	for x in [50, 910]:
+		for y in [110, 488]:
+			draw_circle(Vector2(x, y), 4, Color("718883"))
+			_line(Vector2(x - 2, y), Vector2(x + 2, y), INK, 1)
+	for y in [148, 416]:
+		_box(Rect2(15, y, 13, 64), Color("9d8860"), 2, INK, 2)
+		_box(Rect2(932, y, 13, 64), Color("9d8860"), 2, INK, 2)
+		for stripe in range(4):
+			_line(Vector2(16, y + stripe * 15 + 7), Vector2(27, y + stripe * 15 + 15), INK, 4)
+			_line(Vector2(933, y + stripe * 15 + 7), Vector2(944, y + stripe * 15 + 15), INK, 4)
+	# Dashed maintenance markings imply a place without a noisy background texture.
+	for x in range(352, 610, 25):
+		_line(Vector2(x, 116), Vector2(x + 10, 116), Color("607b7c"), 2)
+		_line(Vector2(x, 482), Vector2(x + 10, 482), Color("607b7c"), 2)
+
+func _world_floor() -> void:
+	var origin := model.camera_origin()
+	var view := Rect2(origin - Vector2(100, 100), model.view_size + Vector2(200, 200))
+	draw_rect(view, Color("293e46"))
+	for x in range(int(floor(view.position.x / 640)), int(ceil(view.end.x / 640))):
+		for y in range(int(floor(view.position.y / 480)), int(ceil(view.end.y / 480))):
+			var p := Vector2(x * 640, y * 480)
+			var color := Color("304851") if posmod(x + y, 2) == 0 else Color("2d444c")
+			draw_rect(Rect2(p + Vector2(4, 4), Vector2(632, 472)), color)
+			# Flush service panels, painted bay markings and floor conduits stay walkable.
+			_box(Rect2(p + Vector2(60, 82), Vector2(92, 46)), Color("243a42"), 3, Color("3b545b"), 1)
+			for vent in range(7):
+				_line(p + Vector2(72 + vent * 11, 91), p + Vector2(72 + vent * 11, 119), Color("415960"), 3)
+			_line(p + Vector2(8, 455), p + Vector2(632, 455), Color("796c49"), 2)
+			_line(p + Vector2(8, 461), p + Vector2(632, 461), Color("796c49"), 1)
+			for stripe in range(6):
+				_line(p + Vector2(400 + stripe * 28, 35), p + Vector2(414 + stripe * 28, 35), Color("657266"), 3)
+			draw_string(stencil_font, p + Vector2(425, 128), "%02d" % (posmod(x * 3 + y, 12) + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 70, Color("3a545d"))
+	for x in range(int(floor(view.position.x / 160)), int(ceil(view.end.x / 160))):
+		_line(Vector2(x * 160, view.position.y), Vector2(x * 160, view.end.y), Color("253b44"), 1)
+	for y in range(int(floor(view.position.y / 120)), int(ceil(view.end.y / 120))):
+		_line(Vector2(view.position.x, y * 120), Vector2(view.end.x, y * 120), Color("253b44"), 1)
+	var arena := SalvageRun.ARENA
+	# Mask decorative tiles beyond the walkable floor when the edge camera overscans.
+	if view.position.x < arena.position.x: draw_rect(Rect2(view.position, Vector2(arena.position.x - view.position.x, view.size.y)), INK)
+	if view.end.x > arena.end.x: draw_rect(Rect2(Vector2(arena.end.x, view.position.y), Vector2(view.end.x - arena.end.x, view.size.y)), INK)
+	if view.position.y < arena.position.y: draw_rect(Rect2(view.position, Vector2(view.size.x, arena.position.y - view.position.y)), INK)
+	if view.end.y > arena.end.y: draw_rect(Rect2(Vector2(view.position.x, arena.end.y), Vector2(view.size.x, view.end.y - arena.end.y)), INK)
+	draw_rect(SalvageRun.ARENA.grow(8), Color("a39261"), false, 10)
+	draw_rect(SalvageRun.ARENA.grow(22), INK, false, 18)
+	if model.demo_mode:
+		var center: Vector2 = DemoCampaign.info(model).start
+		var paint := Color("657266")
+		draw_string(stencil_font, center + Vector2(-240, -160), DemoCampaign.info(model).name.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 38, Color(paint, 0.5))
+		if model.stage == 2:
+			for i in range(3):
+				_line(center + Vector2(-380, -85 + i * 100), center + Vector2(380, -85 + i * 100), Color(paint, 0.35), 5)
+		elif model.stage == 3:
+			draw_arc(center, 225, 0, TAU, 96, Color(paint, 0.4), 6, true)
+			draw_arc(center, 240, 0, TAU, 96, Color(paint, 0.25), 2, true)
+
+func _draw_caches() -> void:
+	var view := Rect2(model.camera_origin() - Vector2.ONE * 60, model.view_size + Vector2.ONE * 120)
+	for cache in model.caches:
+		var p: Vector2 = cache.pos
+		if not view.has_point(p):
+			continue
+		if not cache.opened:
+			draw_arc(p, 35 + sin(visual_time * 3) * 2, 0, TAU, 48, Color(GOLD, 0.28), 2, true)
+			draw_set_transform(p)
+			_box(Rect2(-23, -15, 46, 32), Color("b99551") if not cache.opened else Color("46595a"), 5, INK, 3)
+			_box(Rect2(-18, -20 if not cache.opened else -29, 36, 12), GOLD if not cache.opened else Color("708278"), 4, INK, 2)
+			_line(Vector2(-13, -12), Vector2(-13, 13), INK, 3)
+			_line(Vector2(13, -12), Vector2(13, 13), INK, 3)
+			_box(Rect2(-4, -5, 8, 11), CREAM if not cache.opened else INK, 2, INK, 1)
+			draw_set_transform(Vector2.ZERO)
+
+func _scrap(pickup: Dictionary) -> void:
+	var p: Vector2 = pickup.pos
+	if pickup.pull and not reduced_effects:
+		var tail := (p - model.player).normalized()
+		_line(p, p + tail * minf(18, pickup.speed * 0.025), Color(GOLD, 0.32), 3)
+	var bob := sin(visual_time * 4 + float(pickup.id)) * 1.5
+	draw_circle(p + Vector2(0, 4), 5, Color(INK, 0.6))
+	draw_set_transform(p + Vector2(0, bob), 0.3)
+	_box(Rect2(-4, -5, 8, 10), GOLD, 2, INK, 1)
+	_line(Vector2(-2, -2), Vector2(2, -2), CREAM, 1)
+	if pickup.value > 1:
+		draw_circle(Vector2(3, -4), 2, CREAM)
+	draw_set_transform(Vector2.ZERO)
+
+func _enemy(enemy: Dictionary) -> void:
+	var p: Vector2 = enemy.pos + frame_offset
+	if enemy.get("elite", false):
+		draw_arc(p, enemy.radius + 5, 0, TAU, 24, GOLD, 2, true)
+		if enemy.get("runner", false):
+			var tail: Vector2 = (p - model.player).normalized()
+			_line(p + tail * 14, p + tail * 29, CORAL, 3)
+	var kind: int = enemy.kind
+	var r: float = enemy.radius
+	var body := CORAL if kind == 0 else Color("b2809c")
+	if enemy.flash > 0 and not reduced_effects:
+		body = CREAM
+	if enemy.warmup > 0:
+		body.a = 0.4
+	draw_set_transform(p + Vector2(0, r * 0.6), 0, Vector2(1.0, 0.42))
+	draw_circle(Vector2.ZERO, r + 3, Color(INK, 0.7))
+	draw_set_transform(p + Vector2(0, sin(visual_time * 6 + enemy.id) * 1.4))
+	if kind == 0:
+		_box(Rect2(-18, -4, 36, 13), INK, 5)
+		draw_circle(Vector2.ZERO, 15, INK)
+		draw_circle(Vector2(0, -1), 12, body)
+		draw_arc(Vector2(0, -1), 9, PI * 1.1, PI * 1.8, 12, Color("ffb49a"), 2, true)
+		_box(Rect2(-8, -2, 16, 7), INK, 3, INK, 0)
+		draw_circle(Vector2(-4, 1), 2, CREAM)
+		draw_circle(Vector2(4, 1), 2, CREAM)
+		_line(Vector2(-5, 9), Vector2(5, 9), INK, 2)
+	elif kind == 1:
+		var rotation_angle: float = Vector2(enemy.dir).angle() + PI / 2 if enemy.phase != "seek" else (model.player - Vector2(enemy.pos)).angle() + PI / 2
+		draw_set_transform(p, rotation_angle)
+		var points := PackedVector2Array([Vector2(0, -21), Vector2(18, 11), Vector2(11, 18), Vector2(-11, 18), Vector2(-18, 11)])
+		draw_colored_polygon(points, body)
+		points.append(points[0])
+		draw_polyline(points, INK, 3, true)
+		_line(Vector2(-6, 3), Vector2(6, 3), CREAM, 3)
+		_box(Rect2(-8, 9, 16, 6), INK, 2)
+	elif kind == 3:
+		_box(Rect2(-27, -11, 54, 27), INK, 6)
+		_box(Rect2(-22, -23, 44, 44), Color("9a7882") if enemy.flash <= 0 or reduced_effects else CREAM, 6, INK, 3)
+		_box(Rect2(-17, -18, 34, 11), PALE, 3)
+		_box(Rect2(-14, -1, 28, 12), INK, 3)
+		_line(Vector2(-8, 4), Vector2(8, 4), CORAL, 3)
+		for x in [-18, 18]:
+			draw_circle(Vector2(x, 15), 3, GOLD)
+		_box(Rect2(-23, -32, 46, 4), INK, 2)
+		_box(Rect2(-22, -31, 44 * maxf(0, enemy.hp / enemy.max_hp), 2), CORAL, 1, CORAL, 0)
+	else:
+		_tool(p, visual_time * 0.4, true, 2.4 if enemy.get("role", "foreman") != "foreman" else 3.3, Color("c99864"))
+		# Different power sources read in silhouette, using the same workshop materials.
+		var facing: Vector2 = Vector2(enemy.get("dir", Vector2.RIGHT)) if enemy.phase in ["telegraph", "charge"] else (model.player - Vector2(enemy.pos)).normalized()
+		draw_set_transform(p)
+		if enemy.get("role", "") == "rammer":
+			draw_set_transform(p, facing.angle())
+			var plow := PackedVector2Array([Vector2(-23, -18), Vector2(9, -23), Vector2(31, 0), Vector2(9, 23), Vector2(-23, 18)])
+			draw_colored_polygon(plow, CREAM if enemy.flash > 0 and not reduced_effects else Color("c99864"))
+			plow.append(plow[0])
+			draw_polyline(plow, INK, 3, true)
+			_box(Rect2(-16, -10, 21, 20), INK, 4)
+			_line(Vector2(-7, -5), Vector2(-7, 5), CORAL, 3)
+			_line(Vector2(11, -13), Vector2(23, 0), CREAM, 3)
+			_line(Vector2(23, 0), Vector2(11, 13), CREAM, 3)
+		elif enemy.get("role", "") == "artillery":
+			_box(Rect2(-23, -14, 46, 37), body, 10, INK, 3)
+			for x in [-16, 16]:
+				_box(Rect2(x - 8, -37, 16, 32), Color("c99864"), 5, INK, 3)
+				draw_circle(Vector2(x, -29), 5, INK)
+				draw_circle(Vector2(x, -29), 2, CORAL)
+			_box(Rect2(-13, 0, 26, 12), INK, 4)
+			_line(Vector2(-6, 5), Vector2(6, 5), CORAL, 3)
+		else:
+			_box(Rect2(-25, -23, 50, 46), body, 10, INK, 3)
+			_box(Rect2(-17, -10, 34, 20), INK, 5)
+			for eye_x in [-9, 9]:
+				_box(Rect2(eye_x - 3, -4, 6, 6), CORAL, 1, CORAL, 0)
+		draw_set_transform(p)
+		_box(Rect2(-24, -37, 48, 5), INK, 2)
+		_box(Rect2(-23, -36, 46 * maxf(0, float(enemy.hp) / float(enemy.max_hp)), 3), CORAL, 1, CORAL, 0)
+	draw_set_transform(Vector2.ZERO)
+
+func _tool(point: Vector2, rotation_angle: float, saw: bool, scale_value: float = 1.0, color: Color = PALE) -> void:
+	draw_set_transform(point, rotation_angle, Vector2.ONE * scale_value)
+	if saw:
+		var points := PackedVector2Array()
+		for i in range(24):
+			points.append(Vector2.from_angle(float(i) * TAU / 24) * (11 if i % 3 == 0 else 8))
+		draw_colored_polygon(points, color)
+		points.append(points[0])
+		draw_polyline(points, INK, 1.5, true)
+	else:
+		_box(Rect2(-7, -8, 14, 16), color, 3, INK, 2)
+		_line(Vector2(-5, -4), Vector2(5, -4), CREAM, 2)
+	draw_circle(Vector2.ZERO, 4.5, TEAL)
+	draw_circle(Vector2.ZERO, 2.5, INK)
+	draw_circle(Vector2(-0.5, -0.5), 1.5, GOLD)
+	draw_set_transform(Vector2.ZERO)
+
+func _player() -> void:
+	var p := model.player + frame_offset
+	var bank := clampf(model.velocity.x / 205.0, -1, 1) * 0.10 + impact_bank()
+	var bob := sin(visual_time * 5) * 2
+	draw_set_transform(p + Vector2(0, 16), 0, Vector2(1.0, 0.35))
+	draw_circle(Vector2.ZERO, 23, Color(INK, 0.8))
+	draw_set_transform(p + Vector2(0, bob), bank)
+	# Thruster pods and small hover jets, independent of the hero's face.
+	for x in [-20, 20]:
+		_box(Rect2(x - 5, 1, 10, 19), INK, 4)
+		_box(Rect2(x - 4, 0, 8, 15), TEAL, 3)
+		_line(Vector2(x, 17), Vector2(x, 20 + absf(sin(visual_time * 17)) * 4), Color(PALE, 0.65), 4)
+	var body := CREAM
+	if model.invincible > 0 and not reduced_effects and sin(visual_time * 28) > 0:
+		body = Color("ffc3a0")
+	_box(Rect2(-20, -20, 40, 38), INK, 11, INK, 3)
+	_box(Rect2(-19, -22, 38, 35), body, 10, INK, 2)
+	_box(Rect2(-12, -12, 24, 15), INK, 5, INK, 0)
+	var look := model.aim.x * 1.8
+	var blink := fmod(visual_time, 4.3) < 0.10
+	for eye_x in [-6, 6]:
+		_box(Rect2(eye_x - 2 + look, -8, 4, 2 if blink else 7), Color("85d8c1"), 1, Color("85d8c1"), 0)
+	_box(Rect2(-7, 6, 14, 4), TEAL, 2, TEAL, 0)
+	# A little horseshoe magnet is the fixed visual identity of the salvager.
+	_line(Vector2(-10, -25), Vector2(-10, -32), CORAL, 5)
+	_line(Vector2(0, -25), Vector2(0, -32), CORAL, 5)
+	draw_arc(Vector2(-5, -25), 5, 0, PI, 12, CORAL, 5, true)
+	_line(Vector2(-10, -32), Vector2(-10, -35), CREAM, 5)
+	_line(Vector2(0, -32), Vector2(0, -35), CREAM, 5)
+	draw_set_transform(p, model.aim.angle())
+	_box(Rect2(17 - shot_recoil * 3, -4, 15, 8), Color("a7c7c4"), 2, INK, 2)
+	draw_set_transform(Vector2.ZERO)
+	if model.invincible > 0:
+		draw_arc(p, 30, 0, TAU, 48, Color(CREAM, 0.5), 1.5, true)
+	if model.pulse_damage() > 0:
+		draw_arc(p, 31, -PI / 2, -PI / 2 + TAU * maxf(0.02, float(model.pulse_charge) / 8), 40, GOLD, 2, true)
+	if model.kit != null and model.kit.shield > 0:
+		draw_arc(p, 38, 0, TAU, 48, TEAL, 3, true)
+		for i in range(4):
+			var direction := Vector2.from_angle(i * PI / 2 + visual_time * 0.4)
+			_line(p + direction * 35, p + direction * 41, PALE, 4)
+
+func _moba_ground() -> void:
+	if model.kit == null:
+		return
+	var kit := model.kit
+	if not preview_slot.is_empty():
+		var data: Dictionary = MobaKit.ABILITIES[kit.loadout[preview_slot]]
+		var radius := kit.cast_range(preview_slot)
+		var end := kit.target_point(model, preview_slot, cursor_world)
+		var color := TEAL if kit.preview_ready(model, preview_slot, cursor_world) else CORAL
+		draw_arc(model.player, radius if radius > 0 else 38, 0, TAU, 80, Color(color, 0.3), 1.5, true)
+		if data.aim == "line":
+			var line_end := end
+			if data.glyph in ["beam", "rail"]:
+				line_end = (model.player + (cursor_world - model.player).normalized() * radius).clamp(SalvageRun.ARENA.position + Vector2.ONE * 16, SalvageRun.ARENA.end - Vector2.ONE * 16)
+			_line(model.player, line_end, Color(color, 0.20), 56 * kit.area_scale(preview_slot) if data.glyph == "beam" else 8)
+			_line(model.player, line_end, color, 2)
+		elif data.aim == "ground":
+			draw_arc(end, 90 * kit.area_scale(preview_slot) if data.glyph == "target" else 22, 0, TAU, 48, color, 2, true)
+			_line(end - Vector2(8, 0), end + Vector2(8, 0), color, 2)
+			_line(end - Vector2(0, 8), end + Vector2(0, 8), color, 2)
+	if model.moving:
+		draw_arc(model.move_target, 12, 0, TAU, 24, Color(TEAL, 0.8), 2, true)
+		for i in range(4):
+			var dir := Vector2.from_angle(i * PI / 2)
+			_line(model.move_target + dir * 15, model.move_target + dir * 20, TEAL, 2)
+	if kit.sprint > 0 or kit.dash_left > 0:
+		for i in range(3):
+			var p := model.player + Vector2(0, (i - 1) * 10)
+			_line(p, p - model.velocity.normalized() * (25 + i * 12), Color(TEAL, 0.35), 4)
+	if kit.overdrive > 0:
+		draw_arc(model.player, kit.cast_range("r"), 0, TAU, 64, Color(GOLD, 0.35), 2, true)
+	for zone in kit.zones:
+		if zone.kind == "beam":
+			_line(zone.pos, zone.end, Color(TEAL, 0.22), zone.radius * 2)
+			_line(zone.pos, zone.end, TEAL, 2)
+		else:
+			draw_circle(zone.pos, zone.radius, Color(TEAL, 0.10))
+			draw_arc(zone.pos, zone.radius, 0, TAU, 48, TEAL, 2, true)
+			draw_arc(zone.pos, zone.radius * (1 - zone.time / zone.duration), 0, TAU, 48, PALE, 2, true)
+
+func _companions() -> void:
+	if model.kit == null:
+		return
+	var kit := model.kit
+	if not kit.summon.is_empty():
+		var p: Vector2 = kit.summon.pos
+		var repair: bool = kit.summon.id == "pylon"
+		if repair:
+			draw_arc(p, 100 * (1 + kit.summon.get("milestone", 0) * 0.5), 0, TAU, 48, Color(TEAL, 0.25), 1.5, true)
+		draw_set_transform(p)
+		for i in range(3):
+			var dir := Vector2.from_angle(i * TAU / 3 - PI / 2)
+			_line(dir * 10, dir * 26, INK, 8)
+			_line(dir * 10, dir * 25, PALE, 4)
+		_box(Rect2(-16, -19, 32, 32), TEAL, 5, INK, 3)
+		_box(Rect2(-12, -16, 24, 6), PALE, 2)
+		if repair:
+			_line(Vector2(-7, 1), Vector2(7, 1), CREAM, 4)
+			_line(Vector2(0, -6), Vector2(0, 8), CREAM, 4)
+		else:
+			_box(Rect2(-5, -29, 10, 24), PALE, 2, INK, 2)
+			_box(Rect2(-6, -13, 12, 6), GOLD, 2)
+		_box(Rect2(-18, 26, 36 * kit.summon.life / 18.0, 3), TEAL, 1, TEAL, 0)
+		draw_set_transform(Vector2.ZERO)
+	if kit.loadout.pet != "none":
+		var p: Vector2 = kit.pet_position + Vector2(0, sin(visual_time * 5) * 2)
+		draw_circle(p + Vector2(0, 9), 10, Color(INK, 0.45))
+		draw_set_transform(p)
+		_box(Rect2(-16, -3, 32, 8), PALE, 3)
+		_box(Rect2(-11, -11, 22, 21), TEAL, 6, INK, 2)
+		_box(Rect2(-7, -6, 14, 8), INK, 3)
+		draw_circle(Vector2(-3, -2), 2, GOLD)
+		draw_circle(Vector2(3, -2), 2, GOLD)
+		if kit.loadout.pet == "scout":
+			draw_arc(Vector2(0, 8), 6, 0, PI, 16, GOLD, 3, true)
+		else:
+			_box(Rect2(-3, 5, 6, 12), PALE, 2)
+		draw_set_transform(Vector2.ZERO)
+
+func _effect(effect: Dictionary) -> void:
+	var t: float = effect.age / effect.life
+	var p: Vector2 = effect.pos + frame_offset
+	match effect.kind:
+		"beam":
+			_line(p, effect.target, Color(TEAL, (1 - t) * 0.4), effect.get("width", 56) * (1 - t))
+			_line(p, effect.target, Color(CREAM, 1 - t), 12 * (1 - t))
+		"blink":
+			_line(p, effect.target, Color(TEAL, (1 - t) * 0.45), 8 * (1 - t))
+			draw_arc(effect.target, 12 + t * 30, 0, TAU, 32, Color(PALE, 1 - t), 3, true)
+		"move":
+			draw_arc(p, 23 * (1 - t), 0, TAU, 24, Color(TEAL, 1 - t), 2, true)
+		"cast":
+			draw_arc(p, 23 + t * 12, 0, TAU, 24, Color(GOLD if effect.get("milestone", 0) > 0 else TEAL, (1 - t) * 0.5), 2 + effect.get("milestone", 0), true)
+		"milestone", "vacuum":
+			draw_arc(p, 30 + t * (160 if effect.kind == "milestone" else 350), 0, TAU, 64, Color(GOLD, 1 - t), 4, true)
+		"loot":
+			draw_arc(p, 10 + t * 60, 0, TAU, 48, Color(GOLD, (1 - t) * 0.55), 2, true)
+			draw_string(stencil_font, p + Vector2(-22, -28 - 25 * t), "+%d" % effect.count, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(GOLD, 1 - t))
+		"kill", "boss_down":
+			var color := CORAL if effect.get("enemy_kind", 0) == 0 else Color("b2809c")
+			for i in range(3 if reduced_effects else 6):
+				var direction := Vector2.from_angle(i * TAU / 6 + float(effect.pos.x))
+				var center := p + direction * (6 + 32 * t)
+				_line(center, center + direction.rotated(1.0) * (5 * (1 - t)), Color(color, 1 - t), 4 * (1 - t))
+		"hit":
+			for i in range(3):
+				var direction := Vector2.from_angle(i * TAU / 3 + float(effect.pos.y))
+				_line(p + direction * 4, p + direction * (8 + t * 9), Color(CREAM, 1 - t), 2)
+		"pulse":
+			draw_arc(p, lerpf(20, effect.radius, t), 0, TAU, 64, Color(GOLD, (1 - t) * 0.9), 5 * (1 - t) + 1, true)
+			if not reduced_effects:
+				draw_arc(p, lerpf(12, effect.radius * 0.8, t), 0, TAU, 64, Color(PALE, (1 - t) * 0.5), 2, true)
+		"pickup":
+			draw_arc(p, 19 + t * 12, 0.2, 2.4, 20, Color(GOLD, (1 - t) * 0.5), 2, true)
+		"hostile_blast":
+			draw_arc(p, effect.radius, 0, TAU, 48, Color(CORAL, 1 - t), 5, true)
+		"spent":
+			draw_circle(p, 5 * (1 - t), Color(CREAM, 1 - t))
+		"equipped":
+			draw_arc(p, 20 + t * 55, 0, TAU, 48, Color(TEAL, 1 - t), 4, true)

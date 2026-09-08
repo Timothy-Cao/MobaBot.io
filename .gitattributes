@@ -1,0 +1,9 @@
+# Normalize text files so Godot scenes do not churn between Windows and Unix.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.webp binary
+*.wav binary
+*.ogg binary
+*.mp3 binary
