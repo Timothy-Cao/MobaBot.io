@@ -11,6 +11,7 @@ const IMPORTANT := ["hurt", "lost", "win", "demo_boss", "boss_phase", "boss_wind
 var sound_rng := RandomNumberGenerator.new()
 var pickup_chain := 0
 var pickup_gap := 0.0
+var channel_voice: AudioStreamPlayer
 
 func _ready() -> void:
 	sound_rng.seed = 934
@@ -43,6 +44,14 @@ func _ready() -> void:
 	sounds.boss_windup = _tone(400, 750, 0.22, 0)
 	sounds.stage_clear = sounds.win
 	sounds.milestone = sounds.upgrade
+	sounds.rocket = _tone(120, 650, 0.19, 0.2)
+	sounds.rocket_impact = _tone(105, 40, 0.24, 0.25)
+	sounds.lightning = _tone(1000, 160, 0.12, 0.35)
+	sounds.boss_summon = sounds.boss
+	channel_voice = AudioStreamPlayer.new()
+	channel_voice.volume_db = -18
+	channel_voice.stream = _channel_hum()
+	add_child(channel_voice)
 
 func _process(delta: float) -> void:
 	pickup_gap = maxf(0, pickup_gap - delta)
@@ -53,6 +62,7 @@ func _process(delta: float) -> void:
 
 func receive(event: Dictionary) -> void:
 	var kind: String = event.kind
+	if kind == "cast" and event.get("ability", "") == "rocket": kind = "rocket"
 	if muted or not sounds.has(kind) or cooldowns.get(kind, 0.0) > 0 or players.is_empty():
 		return
 	cooldowns[kind] = 0.065 if kind in ["pickup", "hit", "kill"] else 0.03
@@ -76,14 +86,42 @@ func receive(event: Dictionary) -> void:
 func set_muted(value: bool) -> void:
 	muted = value
 	if muted:
+		if channel_voice != null: channel_voice.stop()
 		for player in players:
 			player.stop()
 
 func _exit_tree() -> void:
+	if channel_voice != null:
+		channel_voice.stop()
+		channel_voice.stream = null
 	for player in players:
 		player.stop()
 		player.stream = null
 	sounds.clear()
+
+func set_channel(active: bool) -> void:
+	if channel_voice == null: return
+	if active and not muted:
+		if not channel_voice.playing: channel_voice.play()
+	elif channel_voice.playing: channel_voice.stop()
+
+func _channel_hum() -> AudioStreamWAV:
+	var bytes := PackedByteArray()
+	var frames := 11025 # Half a second; integer cycles make a seamless loop.
+	bytes.resize(frames * 2)
+	for i in range(frames):
+		var t := i / 22050.0
+		var value := (sin(TAU * 110 * t) + sin(TAU * 330 * t) * 0.25) * 0.18
+		var pcm := int(value * 32767)
+		bytes[i * 2] = pcm & 255
+		bytes[i * 2 + 1] = (pcm >> 8) & 255
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_16_BITS
+	stream.mix_rate = 22050
+	stream.data = bytes
+	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	stream.loop_end = frames
+	return stream
 
 func _tone(start_hz: float, end_hz: float, seconds: float, noise_mix: float) -> AudioStreamWAV:
 	var sample_rate := 22050

@@ -1,4 +1,14 @@
-# MobaBot.io — art style schema 1.4
+# MobaBot.io — art style schema 1.5
+
+## v0.10 override
+
+Current UI uses the original `ability_icon.gd` drawing family for **all** actives, passives, mastery nodes and equipment. Existing generated PNG masters remain archived with provenance, but are not rendered in this UI. Do not mix the old detailed raster illustrations back into the new medium-detail tiles. 64-unit canvas; broad steel/teal/brass material planes, one upper-left bevel, a small lower-right shadow, no texture noise. Match silhouettes, not intricate surface detail. Main-menu artwork is the actual code-native robot at a larger presentation scale.
+
+UI corners are now 0–2 px; prefer whitespace, ruled stat rows, thin connectors and individual icon frames over repeated large cards. Equipment separates fitted slots, the collection and one selected item. Skill explanations and cost rules belong in hover details. Operational save failures remain visible.
+
+Q uses a finned steel missile, broad exhaust and a separate impact cue. Automatic fire remains small. E is the descending reactor strike. R is a sustained cream-core/brass/teal cutter with damage-width outer rails and a remaining-channel ring. Milestones enlarge the actual geometry and use brass accents. Arc Coil uses a jagged cream/teal path; threat effects remain coral/plum and render above friendly effects. Ghost drive has a rotating pale-teal ring, without camera shake.
+
+Foreman is a 120-unit-wide radial machine with paired piston arms and a reactor core; its cutter rotation accelerates when overclocked. Ring and fan warnings use the same directions as the damaging projectiles. Warm-up strokes are less bulky, not invisible. Older sections below describe historical assets and still supply palette/material guidance unless overridden here.
 
 ## v0.9 additions
 

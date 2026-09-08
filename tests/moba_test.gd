@@ -319,6 +319,7 @@ func _run() -> void:
 		game._fixture(fixture)
 		await process_frame
 		check(game.ui.overlay.get_child_count() > 0 or fixture == "gameplay", "New UI fixture loads: " + fixture)
+	game.loadout_setting = MobaKit.preset()
 	game.key_setting.q = KEY_1
 	game.key_setting.p1 = KEY_Q
 	game.start_run()

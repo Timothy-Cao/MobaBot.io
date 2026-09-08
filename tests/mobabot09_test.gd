@@ -16,6 +16,7 @@ func fresh() -> SalvageRun:
 	run.pickups.clear()
 	run.enemies.clear()
 	run.kit.loadout.pet = "none"
+	run.kit.toggles = [false, false, false, false] # Isolate active damage from new Arc Coil.
 	return run
 func enemy(run: SalvageRun, offset: Vector2) -> Dictionary:
 	run.spawn_enemy(run.player + offset)
@@ -68,7 +69,7 @@ func _run() -> void:
 		check(behind.hp == 100, "Flame excludes rear hemisphere")
 		run = fresh()
 		var blast := enemy(run, Vector2(100, 0))
-		run.kit.cast(run, "r", blast.pos)
+		run.kit.cast(run, "e", blast.pos)
 		run.kit.step(run, 0.64)
 		check(blast.hp == 100, "Nuke waits for warning")
 		run.kit.step(run, 0.02)
@@ -83,6 +84,7 @@ func _run() -> void:
 	run._pickup_step(16)
 	check(not run.pickups[0].pull, "No full-map vacuum")
 	var close := run.orbit_radius()
+	run.kit.toggles[1] = true
 	run.kit.toggle(1)
 	check(run.kit.passive_active("orbit") and run.orbit_radius() > close * 2, "Orbit toggles radius without disabling")
 	run.kit.toggle(1)
@@ -154,17 +156,17 @@ func _run() -> void:
 	game.start_run()
 	game.model.kit.elapsed = 120
 	var energy: float = game.model.kit.energy
-	game._input(key(KEY_R))
-	game._input(key(KEY_R, false))
-	check(game.pending_cast_slot == "r" and game.model.kit.energy == energy, "Default R press and release only previews")
+	game._input(key(KEY_E))
+	game._input(key(KEY_E, false))
+	check(game.pending_cast_slot == "e" and game.model.kit.energy == energy, "Default E press and release only previews")
 	game._input(key(KEY_ESCAPE))
 	check(game.pending_cast_slot.is_empty() and game.screen == "running" and game.model.kit.charges.r == 1, "Esc cancels without charge")
-	game._input(key(KEY_R))
+	game._input(key(KEY_E))
 	game._input(mouse(MOUSE_BUTTON_RIGHT))
 	check(game.pending_cast_slot.is_empty() and game.model.kit.energy == energy, "Right-click cancels without energy")
-	game._input(key(KEY_R))
+	game._input(key(KEY_E))
 	game._unhandled_input(mouse(MOUSE_BUTTON_LEFT))
-	check(game.model.kit.charges.r == 0 and game.pending_cast_slot.is_empty() and game.model.kit.zones.size() == 1, "Left-click confirms once")
+	check(game.model.kit.charges.e == 0 and game.pending_cast_slot.is_empty() and game.model.kit.zones.size() == 1, "Left-click confirms once")
 	game._unhandled_input(mouse(MOUSE_BUTTON_LEFT))
 	check(game.model.kit.zones.size() == 1, "Repeated click cannot duplicate nuke")
 	game._set_camera_lock(false)

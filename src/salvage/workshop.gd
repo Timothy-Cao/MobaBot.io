@@ -45,7 +45,7 @@ var music_player = preload("res://src/salvage/music_director.gd").new()
 var gear_return := "home"
 
 func _ready() -> void:
-	get_window().title = "MobaBot.io - 0.9 Demo"
+	get_window().title = "MobaBot.io - 0.10 Demo"
 	get_tree().auto_accept_quit = false
 	add_child(camera)
 	camera.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
@@ -250,6 +250,7 @@ func _open_build() -> void:
 		var preview := SalvageRun.new(seed_value)
 		preview.enable_moba(loadout_setting, key_setting)
 		preview.enable_demo()
+		preview.mastery.read_only = true
 		preview.kit.onboarding = true
 		preview.kit.elapsed = 120.0
 		gear.apply_to(preview)
@@ -290,7 +291,7 @@ func _input(event: InputEvent) -> void:
 		if event.pressed and screen in ["running", "upgrade", "paused", "result", "stage_reward"]:
 			_open_build()
 			tab_held = true
-			ui.build_page = "abilities"
+			ui.build_page = "mastery" if model.mastery.available(model.level) > 0 else "abilities"
 			ui.show_build(model, false)
 			get_viewport().set_input_as_handled()
 			return
@@ -300,9 +301,14 @@ func _input(event: InputEvent) -> void:
 			return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed and screen == "running":
 		pending_cast_slot = ""
+		if model.kit.laser_left > 0:
+			model.kit.steer_laser(model, get_global_mouse_position())
+			mouse_moving = false
+			get_viewport().set_input_as_handled()
+			return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and not event.pressed:
 		mouse_moving = false
-	if event is InputEventKey and not event.pressed and screen == "running" and not pending_cast_slot.is_empty() and event.keycode == model.kit.bindings[pending_cast_slot] and not (pending_cast_slot == "r" and not r_quickcast):
+	if event is InputEventKey and not event.pressed and screen == "running" and not pending_cast_slot.is_empty() and event.keycode == model.kit.bindings[pending_cast_slot] and not _confirm_cast(pending_cast_slot):
 		var slot := pending_cast_slot
 		pending_cast_slot = ""
 		_cast_slot(slot)
@@ -326,7 +332,9 @@ func _input(event: InputEvent) -> void:
 				return
 			for slot in MobaKit.SLOTS:
 				if event.keycode == model.kit.bindings[slot]:
-					if event.shift_pressed or (slot == "r" and not r_quickcast):
+					if model.kit.laser_left > 0 and slot == model.kit.laser_slot:
+						model.kit.cancel_laser()
+					elif (event.shift_pressed and model.kit.loadout[slot] != "laser") or _confirm_cast(slot):
 						pending_cast_slot = slot
 					else:
 						pending_cast_slot = ""
@@ -339,10 +347,13 @@ func _input(event: InputEvent) -> void:
 					get_viewport().set_input_as_handled()
 					return
 
+func _confirm_cast(slot: String) -> bool:
+	return not r_quickcast and (model.kit.loadout[slot] == "nuke" or (slot == "r" and model.kit.loadout[slot] != "laser"))
+
 func _cast_slot(slot: String) -> void:
 	if not model.kit.cast(model, slot, get_global_mouse_position()):
 		ui.announce(model.kit.last_failure)
-	elif model.kit.loadout[slot] in ["lunge", "dash", "blink"]:
+	elif model.kit.loadout[slot] in ["lunge", "dash", "blink", "laser"]:
 		mouse_moving = false
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -357,6 +368,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if screen == "running" and event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+		if model.kit.laser_left > 0:
+			model.kit.steer_laser(model, get_global_mouse_position())
+			get_viewport().set_input_as_handled()
+			return
 		pending_cast_slot = ""
 		mouse_moving = true
 		model.command_move(get_global_mouse_position())
@@ -371,6 +386,8 @@ func _physics_process(delta: float) -> void:
 	if screen == "home":
 		model.time += delta
 	elif screen == "running":
+		if model.kit.laser_left > 0 and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+			model.kit.steer_laser(model, get_global_mouse_position())
 		if not camera_locked and not recenter_held:
 			var cursor := get_viewport().get_mouse_position()
 			if Rect2(0, 0, 960, 540).has_point(cursor):
@@ -392,7 +409,8 @@ func _physics_process(delta: float) -> void:
 				var target := model.nearest_enemy(model.player)
 				if not target.is_empty():
 					for slot in ["q", "w", "e", "r", "t"]:
-						model.kit.cast(model, slot, target.pos)
+						if model.kit.laser_left <= 0: model.kit.cast(model, slot, target.pos)
+					model.kit.steer_laser(model, target.pos)
 				if model.boss_spawned and not model.demo_mode:
 					for boss in model.enemies:
 						if boss.kind == 2 and not boss.dead:
@@ -438,11 +456,12 @@ func _physics_process(delta: float) -> void:
 
 func _process(delta: float) -> void:
 	if music_player.is_inside_tree(): music_player.update_context(screen, model, mute_setting)
+	sound.set_channel(screen == "running" and model != null and model.kit != null and model.kit.laser_left > 0)
 	_record_screen_time(delta)
 	art.preview_slot = pending_cast_slot if screen == "running" else ""
 	art.cursor_world = get_global_mouse_position()
 	if capture_kind in ["aim", "motion_lowenergy", "nuke_aim"]:
-		art.preview_slot = "r"
+		art.preview_slot = "e" if capture_kind == "nuke_aim" else "r"
 		art.cursor_world = model.player + Vector2(380, -120)
 	run_frames += 1
 	var now := Time.get_ticks_usec()
@@ -472,29 +491,29 @@ func _drain_events() -> void:
 			sound.receive({"kind": "equipped"})
 		elif event.kind == "equipped":
 			var id: String = event.id
-			ui.announce(model.upgrade_data(id).name if id != "repair" else "Supplies collected")
+			if not BotMastery.NODES.has(id): ui.announce(model.upgrade_data(id).name if id != "repair" else "Repaired")
 		elif event.kind == "milestone":
 			ui.announce("%s / Rank %d milestone" % [model.upgrade_data(event.id).name, event.rank], 1)
 		elif event.kind == "utility":
-			ui.announce("Free Magnet upgrade / Rank %d" % event.rank)
+			ui.announce("Magnet +1")
 		elif event.kind == "pressure_warning":
 			ui.announce("Reinforcements incoming" if model.demo_mode and model.stage == 1 else "Fast pack incoming", 1)
 		elif event.kind == "pressure":
-			ui.announce("Surge / keep moving")
+			ui.announce("Surge")
 		elif event.kind == "vacuum":
 			ui.announce("Magnet sweep")
 		elif event.kind == "energy_low":
-			ui.announce("Energy low / powered toggles switched off")
+			ui.announce("Passives offline")
 		elif event.kind == "stage_start":
 			ui.announce("Level %d / %s" % [model.stage, DemoCampaign.info(model).name] if model.demo_mode else "Stage %d" % model.stage)
 		elif event.kind == "demo_level":
 			ui.announce("Level %d / %s" % [model.stage, DemoCampaign.info(model).name])
 		elif event.kind == "demo_boss":
-			ui.announce({"rammer": "Warden / dodge the charge", "artillery": "Artillery / leave the marked ground", "foreman": "Foreman / punish its recovery"}[event.role], 2)
+			ui.announce(CombatReadability.NAMES[event.role], 2)
 		elif event.kind == "miniboss_down":
 			ui.announce("Warden defeated / %d of 2" % model.demo_minis_killed)
 		elif event.kind == "boss_phase":
-			ui.announce("Foreman overclocked / faster tells", 2)
+			ui.announce("OVERCLOCKED", 2)
 		elif event.kind == "unlock":
 			var slot: String = event.slot
 			var title: String = MobaKit.PASSIVES[model.kit.loadout.passives[int(slot.substr(1)) - 1]].name if slot.begins_with("p") else MobaKit.ABILITIES[model.kit.loadout[slot]].name
@@ -601,6 +620,7 @@ func _load_settings() -> void:
 		if loaded is Dictionary: loaded = MobaKit.migrate_loadout(loaded)
 		var keys: Variant = config.get_value("moba", "keys", {})
 		if keys is Dictionary: keys = MobaKit.resolve_bindings(keys)
+		if loaded is Dictionary: loaded = MobaKit.migrate_loadout(loaded)
 		if loaded is Dictionary and MobaKit.valid_loadout(loaded) and int(config.get_value("moba", "version", 0)) >= 9:
 			loadout_setting = loaded
 		if keys is Dictionary and MobaKit.valid_bindings(keys):
@@ -624,7 +644,7 @@ func _save_settings() -> void:
 	config.set_value("visual", "zoom", zoom_value)
 	config.set_value("visual", "camera_locked", camera_locked)
 	config.set_value("moba", "r_quickcast", r_quickcast)
-	config.set_value("moba", "version", 9)
+	config.set_value("moba", "version", 10)
 	config.set_value("moba", "loadout", loadout_setting)
 	config.set_value("moba", "keys", key_setting)
 	if config.save("user://salvage_settings.cfg") != OK:
@@ -640,7 +660,7 @@ func _save_result() -> void:
 	if not measured.is_empty():
 		record.render_timing = {"frames": measured.size(), "median_ms": measured[measured.size() / 2],
 			"p95_ms": measured[int(measured.size() * 0.95)], "peak_enemies": peak_enemies}
-	record.build = "slice-09-mobabot"
+	record.build = "slice-10-mobabot"
 	record.equipment = gear.equipped.duplicate()
 	record.wall_seconds = snappedf(run_wall_seconds, 0.01)
 	record.screen_seconds = screen_seconds.duplicate()
@@ -677,6 +697,11 @@ func _bot_direction() -> Vector2:
 	return desired.normalized()
 
 func _fixture(kind: String) -> void:
+	# Visual fixtures must not inherit a tester's custom loadout or bindings.
+	loadout_setting = MobaKit.demo_preset()
+	key_setting = MobaKit.DEFAULT_BINDS.duplicate()
+	ui.loadout_config = loadout_setting.duplicate(true)
+	ui.key_config = key_setting.duplicate()
 	camera_locked = true
 	ui.camera_locked = true
 	r_quickcast = false
@@ -718,7 +743,7 @@ func _fixture(kind: String) -> void:
 	model.pickups.clear()
 	model.time = 48
 	model.kit.elapsed = 48
-	if kind in ["aim", "flame", "nuke_aim", "nuke_impact"]: model.kit.elapsed = 120
+	if kind in ["aim", "flame", "nuke_aim", "nuke_impact", "laser", "laser_milestone", "mastery", "rocket"]: model.kit.elapsed = 120
 	model.stage_time = 48
 	model.kills = 64
 	model.total_xp = 81
@@ -867,9 +892,35 @@ func _fixture(kind: String) -> void:
 		pending_cast_slot = "w"
 		model.kit.cast(model, "w", model.player + Vector2(180, -40))
 	if kind == "nuke_impact":
-		model.kit.cast(model, "r", model.player + Vector2(185, -100))
+		model.kit.cast(model, "e", model.player + Vector2(185, -100))
 		model.kit.step(model, 0.66)
 		_drain_events()
+	if kind in ["mastery", "tooltip"]:
+		model.level = 13
+		for id in ["reach", "hull", "focus", "shock"]: model.mastery.buy(model, id)
+		ui.show_build(model)
+		ui.build_page = "mastery"
+		ui.show_build(model, false)
+		if kind == "tooltip":
+			var tooltip := BotTooltip.make("Static lock\nArc coil and Impact bolt briefly stun ordinary enemies. Bosses resist stuns. Requires Hot core.\n1 mastery point")
+			tooltip.position = Vector2(615, 345)
+			ui.overlay.add_child(tooltip)
+	if kind in ["laser", "laser_milestone", "rocket"]:
+		model.enemies.clear()
+		DemoCampaign.spawn_special(model, "foreman")
+		var boss: Dictionary = model.enemies.back()
+		boss.pos = model.player + Vector2(300, -70)
+		boss.warmup = 0
+		boss.phase = "telegraph"
+		boss.attack = "ring"
+		boss.dir = Vector2.LEFT
+		if kind == "laser_milestone": model.kit.ranks.r = 5
+		if kind == "rocket":
+			model.kit.cast(model, "q", boss.pos)
+			model._projectile_step(0.18)
+		else: model.kit.cast(model, "r", boss.pos)
+		_drain_events()
+		ui.update_hud(model)
 
 func _capture() -> void:
 	await RenderingServer.frame_post_draw

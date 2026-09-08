@@ -28,6 +28,16 @@ var player := Vector2(480, 300)
 var velocity := Vector2.ZERO
 var aim := Vector2.RIGHT
 var health := 5
+var mastery := BotMastery.new()
+var xp_fraction := 0.0
+var slow_left := 0.0
+
+func max_health() -> int:
+	return 5 + mastery.rank_of("hull")
+
+func apply_slow(seconds: float) -> void:
+	if invincible > 0: return
+	slow_left = maxf(slow_left, seconds * (0.5 if mastery.rank_of("resolve") > 0 else 1.0))
 var invincible := 0.0
 var kills := 0
 var total_xp := 0
@@ -167,7 +177,7 @@ func choose_stage_reward(index: int) -> bool:
 		kit.regen_bonus += 2
 	stage_history.append({"stage": stage, "reward": reward.duplicate(), "time": time})
 	stage_rewards.clear()
-	health = mini(5, health + 1)
+	health = mini(max_health(), health + 1)
 	kit.energy = kit.energy_max()
 	if stage == STAGE_COUNT:
 		state = "won"
@@ -196,6 +206,7 @@ func enable_moba(config: Dictionary = {}, keys: Dictionary = {}) -> void:
 		damage_dealt[source] = 0.0
 
 func command_move(point: Vector2) -> void:
+	if kit != null and kit.laser_left > 0: return
 	move_target = point.clamp(ARENA.position + Vector2.ONE * 16, ARENA.end - Vector2.ONE * 16)
 	moving = true
 
@@ -208,6 +219,12 @@ func passive_enabled(id: String) -> bool:
 	return kit == null or kit.passive_active(id)
 
 func upgrade_available(id: String) -> bool:
+	if id == "power" and kit != null:
+		for index in range(4):
+			if kit.loadout.passives[index] in ["bolt", "lightning"] and kit.unlocked("p%d" % (index + 1)): return true
+		for slot in MobaKit.SLOTS:
+			if kit.loadout[slot] in ["salvo", "rail"] and kit.unlocked(slot): return true
+		return false
 	if staged and id.begins_with("skill_"):
 		return id.trim_prefix("skill_") in MobaKit.SLOTS and kit.unlocked(id.trim_prefix("skill_"))
 	if kit != null and kit.onboarding:
@@ -289,7 +306,7 @@ func upgrade_values(id: String, rank_value: int = -1) -> Array[Dictionary]:
 		"rapid": return [{"label": "Shots / sec", "value": snappedf(pow(1.22, r) / 0.43, 0.01), "unit": ""}]
 		"power": return [{"label": "Bolt damage", "value": 2 + r * 1.5, "unit": ""}, {"label": "Pierces", "value": r, "unit": ""}]
 		"capacity": return [{"label": "Tool slots", "value": 6 + r * 2, "unit": ""}]
-	return [{"label": "Hull", "value": health, "unit": " / 5"}]
+	return [{"label": "Hull", "value": health, "unit": " / %d" % max_health()}]
 
 func stats() -> Dictionary:
 	return {"bolt_damage": bolt_damage(), "fire_rate": 1.0 / fire_interval(), "pierce": bolt_pierces(),
@@ -314,7 +331,7 @@ func orbit_radius() -> float:
 
 func magnet_radius() -> float:
 	if kit != null and kit.onboarding:
-		return 65.0 + rank_of("magnet") * 23.0
+		return 65.0 + rank_of("magnet") * 23.0 + mastery.rank_of("reach") * 35.0
 	if staged:
 		return 150.0 + rank_of("magnet") * 100.0
 	return 83.0 + rank_of("magnet") * 27.0 + (45.0 if kit != null and kit.passive_active("magnet") else 0.0)
@@ -342,13 +359,16 @@ func step(delta: float, input_direction: Vector2) -> void:
 	if staged:
 		stage_time += delta
 	invincible = maxf(0.0, invincible - delta)
+	slow_left = maxf(0, slow_left - delta)
 	if kit != null:
 		kit.step(self, delta)
 		if kit.dash_left > 0:
 			kit.move_dash(self, delta)
+		elif kit.laser_left > 0:
+			stop_movement()
 		elif moving:
 			var offset := move_target - player
-			velocity = offset.limit_length(kit.speed() * delta) / maxf(delta, 0.00001)
+			velocity = offset.limit_length(kit.speed() * (0.8 if slow_left > 0 else 1.0) * delta) / maxf(delta, 0.00001)
 			player += velocity * delta
 			if player.distance_to(move_target) < 0.01:
 				stop_movement()
@@ -394,6 +414,8 @@ func step(delta: float, input_direction: Vector2) -> void:
 			kit.salvos.clear()
 			kit.zones.clear()
 			kit.dash_left = 0
+			kit.cancel_laser()
+			kit.flame_left = 0
 			kit.summon.clear()
 			stop_movement()
 			if stage >= STAGE_COUNT:
@@ -542,6 +564,9 @@ func _enemy_step(delta: float) -> void:
 		enemy.warmup = maxf(0, float(enemy.warmup) - delta)
 		if enemy.warmup > 0:
 			continue
+		if enemy.get("stun", 0.0) > 0:
+			enemy.stun = maxf(0, enemy.stun - delta)
+			continue
 		if demo_mode and enemy.has("role"):
 			DemoCampaign.enemy_step(self, enemy, delta)
 			if state != "running": break
@@ -578,14 +603,17 @@ func _enemy_step(delta: float) -> void:
 			elif enemy.kind == 3: speed = 55.0 + stage * 5
 			elif enemy.kind == 2: speed = 44.0
 			elif enemy.phase == "seek": speed = 105.0
+		if demo_mode:
+			speed *= 1.2 if enemy.kind != 1 or enemy.phase == "seek" else 1.0
 		enemy.pos += (direction * speed + Vector2(enemy.knock)) * delta
 		enemy.knock = Vector2(enemy.knock).move_toward(Vector2.ZERO, delta * 500.0)
 		if Vector2(enemy.pos).distance_to(player) < float(enemy.radius) + 12.0:
-			hurt_player(enemy.pos, CombatReadability.enemy_name(enemy) + (" charge" if enemy.phase == "dash" else " contact"))
+			if demo_mode and enemy.kind == 3: apply_slow(1.2)
+			hurt_player(enemy.pos, CombatReadability.enemy_name(enemy) + (" charge" if enemy.phase == "dash" else " contact"), 2 if demo_mode and (enemy.kind in [1, 3] or enemy.get("elite", false)) else 1)
 			if state != "running":
 				break
 
-func hurt_player(source: Vector2, cause: String = "Collision") -> void:
+func hurt_player(source: Vector2, cause: String = "Collision", amount: int = 1) -> void:
 	if invincible > 0 or state != "running":
 		return
 	if kit != null and kit.shield > 0:
@@ -594,14 +622,14 @@ func hurt_player(source: Vector2, cause: String = "Collision") -> void:
 		invincible = 0.4
 		emit_event("pulse", player, {"radius": 45.0})
 		return
-	health -= 1
-	damage_taken += 1
+	health = maxi(0, health - amount)
+	damage_taken += amount
 	last_damage = cause
 	last_damage_time = time
 	last_damage_direction = (source - player).normalized()
 	damage_history.append({"seconds": snappedf(time, 0.01), "level": stage, "cause": cause, "hull_after": health})
 	if damage_history.size() > 32: damage_history.pop_front()
-	invincible = 1.35
+	invincible = 0.85 if demo_mode else 1.35
 	if kit != null and kit.passive_active("plating"):
 		invincible += 0.65
 	if health > 0 and kit != null and kit.passive_active("thorns"):
@@ -611,6 +639,7 @@ func hurt_player(source: Vector2, cause: String = "Collision") -> void:
 		if Vector2(enemy.pos).distance_to(player) < 85.0:
 			enemy.knock = (Vector2(enemy.pos) - player).normalized() * 240.0
 	if health <= 0:
+		if kit != null: kit.cancel_laser()
 		state = "lost"
 		emit_event("lost", source)
 
@@ -637,9 +666,10 @@ func _weapon_step(delta: float) -> void:
 		return
 	if kit != null and player.distance_to(target.pos) > 310:
 		return
-	aim = (Vector2(target.pos) - player).normalized()
+	var direction := (Vector2(target.pos) - player).normalized()
+	if kit == null or kit.laser_left <= 0: aim = direction
 	shot_clock = fire_interval()
-	_add_projectile(player + aim * 22.0, aim * 540.0, bolt_damage(), "bolt", bolt_pierces())
+	_add_projectile(player + direction * 22.0, direction * 540.0, bolt_damage(), "bolt", bolt_pierces())
 	emit_event("shot", player)
 
 func _add_projectile(point: Vector2, motion: Vector2, damage: float, kind: String, pierce: int) -> void:
@@ -679,14 +709,15 @@ func _projectile_step(delta: float) -> void:
 		if bullet.kind == "hostile":
 			var near := Geometry2D.get_closest_point_to_segment(player, bullet.prev, bullet.pos)
 			if near.distance_to(player) < 17:
-				hurt_player(bullet.pos, "Hostile projectile")
+				if bullet.get("slow", false): apply_slow(1.2)
+				hurt_player(bullet.pos, "Hostile projectile", int(bullet.damage))
 				bullet.life = 0.0
 			continue
 		var start: Vector2 = bullet.prev
 		var end: Vector2 = bullet.pos
 		# Largest enemy radius + projectile radius: grow both ends of the swept box.
-		var minimum := Vector2i(((start.min(end) - Vector2.ONE * 35) / COLLISION_CELL).floor())
-		var maximum := Vector2i(((start.max(end) + Vector2.ONE * 35) / COLLISION_CELL).floor())
+		var minimum := Vector2i(((start.min(end) - Vector2.ONE * 68) / COLLISION_CELL).floor())
+		var maximum := Vector2i(((start.max(end) + Vector2.ONE * 68) / COLLISION_CELL).floor())
 		var candidates: Array[Dictionary] = []
 		for x in range(minimum.x, maximum.x + 1):
 			for y in range(minimum.y, maximum.y + 1):
@@ -704,6 +735,7 @@ func _projectile_step(delta: float) -> void:
 			if closest.distance_to(enemy.pos) > float(enemy.radius) + 4.0:
 				continue
 			bullet.hits.append(enemy.id)
+			if bullet.kind == "rocket" and mastery.rank_of("shock") > 0 and not enemy.has("role"): enemy["stun"] = 0.35
 			hit_enemy(enemy, bullet.damage, bullet.kind, Vector2(bullet.vel).normalized() * 72.0)
 			if bullet.pierce <= 0:
 				if bullet.kind == "rocket": bullet.pos = closest
@@ -718,6 +750,9 @@ func _projectile_step(delta: float) -> void:
 				break
 		if bullet.kind == "rocket" and bullet.life <= 0:
 			MobaKit.area(self, bullet.pos, bullet.get("radius", 62), bullet.get("blast", 8), "rocket", 110)
+			emit_event("rocket_impact", bullet.pos, {"radius": bullet.get("radius", 62)})
+			if mastery.rank_of("aftershock") > 0:
+				MobaKit.area(self, bullet.pos, bullet.get("radius", 62) * 1.5, 12 * bullet.get("blast", 8) / 8.0, "aftershock", 160)
 	projectiles = projectiles.filter(func(b: Dictionary) -> bool: return b.life > 0)
 	enemies = enemies.filter(func(e: Dictionary) -> bool: return not e.dead)
 
@@ -761,7 +796,7 @@ func hit_enemy(enemy: Dictionary, damage: float, source: String, knock: Vector2 
 				hazards.clear()
 				for bullet in projectiles:
 					if bullet.kind == "hostile": bullet.life = 0
-			health = mini(5, health + 1)
+			health = mini(max_health(), health + 1)
 			emit_event("boss_down", enemy.pos)
 
 func orbit_position(index: int) -> Vector2:
@@ -847,7 +882,10 @@ func collect_pickup(pickup: Dictionary) -> void:
 	if value <= 0:
 		return
 	pickup.value = 0 # Claim before triggering damage/reward events.
-	total_xp += value
+	xp_fraction += value * (1.0 + mastery.rank_of("learning") * 0.1)
+	var gained := floori(xp_fraction + 0.000001)
+	total_xp += gained
+	xp_fraction = maxf(0, xp_fraction - gained)
 	collected += value
 	if mode == "salvage":
 		for i in range(mini(value, capacity() - orbit.size()) if passive_enabled("orbit") else 0):
@@ -913,7 +951,7 @@ func choose_upgrade(index: int) -> bool:
 		return false
 	var id := offers[index]
 	if id == "repair":
-		health = mini(5, health + 1)
+		health = mini(max_health(), health + 1)
 	else:
 		if rank_of(id) >= rank_limit(id): return false
 		upgrades[id] += 1
@@ -954,7 +992,7 @@ func _collect_supply(supply: Dictionary) -> void:
 	if supply.value <= 0: return
 	match supply.kind:
 		"energy": kit.energy = minf(kit.energy_max(), kit.energy + supply.value)
-		"repair": health = mini(5, health + supply.value)
+		"repair": health = mini(max_health(), health + supply.value)
 		"coins": coins += supply.value
 		"speed": kit.boost_speed = 6.0
 		"reset":
@@ -977,9 +1015,9 @@ func _supply_step(delta: float) -> void:
 
 func use_consumable(index: int) -> bool:
 	if state != "running" or kit == null or index < 0 or index > 1 or consumables[index] <= 0: return false
-	if (index == 0 and health >= 5) or (index == 1 and kit.energy >= kit.energy_max()): return false
+	if (index == 0 and health >= max_health()) or (index == 1 and kit.energy >= kit.energy_max()): return false
 	consumables[index] -= 1
-	if index == 0: health = mini(5, health + 2)
+	if index == 0: health = mini(max_health(), health + 2)
 	else: kit.energy = minf(kit.energy_max(), kit.energy + 50)
 	emit_event("equipped", player, {"id": "repair"})
 	return true

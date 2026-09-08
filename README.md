@@ -1,4 +1,4 @@
-# MobaBot.io — 0.9 demo
+# MobaBot.io — 0.10 demo
 
 A Windows-first, single-player survivor-like with MOBA mouse controls. Build a small salvage robot into a crowd-clearing machine. Stage 1 contains three levels and ends with the Foreman.
 
@@ -18,20 +18,24 @@ This is a Godot development project, not a standalone exported Windows release. 
 | S | Stop walking; a committed short dash still finishes |
 | Q | Impact bolt: straight skillshot; impact and end-of-range explosion |
 | W | Welding torch: two-second cone, steered with the cursor |
-| E | Safety shell |
-| R, then left-click | Target and confirm Reactor drop; right-click or Esc cancels |
-| D / F | Sprint / charged blink |
+| E, then left-click | Reactor drop; right-click or Esc cancels |
+| R | Channel Core cutter for up to 5s; right-click steers slowly, R again cancels |
+| D / F | Ghost drive (3s intangible) / charged blink; either can interrupt R |
 | T | Deploy one sentry; replaces the previous one |
-| 1–4 | Passive toggles; orbit alternates close/wide radius |
+| 1–4 | Passive toggles; orbit close/wide; Arc Coil chain/focused/off |
 | 5 / 6 | Repair +2 hull / restore 50 energy; two of each per run |
 | L / hold Space | Toggle camera lock / temporarily follow |
 | Screen edges | Pan when the camera is unlocked |
 | Wheel | Zoom 65–100% |
-| Hold Tab | Inspect abilities, upgrades, stats and equipped gear; release to return |
+| Hold Tab | Spend mastery points; inspect abilities, upgrades, stats and gear |
 | Esc | Settings; cancels targeting first |
 | M / F2 | Mute audio / reduced effects |
 
-No WASD movement. Settings offers camera lock and optional R quick cast. Other actives quick-cast by default; Shift + ability previews and casts on key release. Loadout edits and ability bindings apply next run. S, L, M, Space, Tab, Esc, 5 and 6 are reserved. Occupied ability bindings swap; older bindings that conflict with the new reserved keys migrate to a free letter.
+No WASD movement. Settings offers camera lock and optional area quick cast. Other actives quick-cast by default; Shift + ability previews and casts on key release. R channel starts immediately. Loadout edits and ability bindings apply next run. S, L, M, Space, Tab, Esc, 5 and 6 are reserved. Occupied ability bindings swap; older conflicting bindings migrate to a free letter. Old R-nuke saves migrate to E nuke / R laser; custom Q/W choices remain. Choose **Loadout → Default kit** to try the full new preset.
+
+Default passives are Auto bolt, Scrap orbit, Arc coil and Reactive plating. Fully enabled they consume 10 energy/sec before 8/sec base regeneration. Energy depletion switches powered passives off; use their number keys to restore them once energy is available. Reactor upgrades and equipment improve the budget. R costs 40 energy and roots you while firing; D/F remain free escapes.
+
+Mastery is run-only: start with one point, earn another every two Power levels. The HUD ◇ count shows unspent points. Tab opens the tree first when points await; no extra level-up popup. Three branches cover salvage, survival and ability effects. Main-menu mastery is a read-only preview.
 
 Start with Q, D and F. Unlocks follow combat time: passive 1 at 10s, W at 20s, passive 2 at 32s, E at 45s, passive 3 at 58s, R at 70s, T at 95s, passive 4 at 110s. Pauses do not advance this clock. The default kit is aimed; the optional Relaxed kit and individual loadout choices retain low-mechanics alternatives. Every run repeats this short onboarding sequence.
 
@@ -45,7 +49,9 @@ The build carries between levels; the demo ends after the boss. Numerical rank c
 
 The map is 5360 × 3400 world units, with three sectors, caches and distant boundaries. It is not infinite and has no obstacle/pathfinding system yet. Off-screen spawns stay centered on the player even when the camera is panned elsewhere.
 
-Magnet is separate free utility: 88 → 180 px reach, a free rank every three level-ups, and faster pull speed. There is no full-map vacuum in the main demo. Bonus drops require 48 px proximity. Ordinary kills have independent baseline chances of 1/25 for 25 credits and 1/15 for a six-second speed boost or QWE charge refill. Drop bonuses multiply those chances, with caps. Wardens/bosses also drop 75 credits. Difficult enemies retain larger scrap showers and energy/repair supplies.
+Magnet is separate free utility: 88 → 180 px reach, a free rank every three level-ups, and faster pull speed. Mastery can add 105 reach. There is no full-map vacuum. Bonus drops require 48 px proximity. Ordinary kills have independent baseline chances of 1/25 for 25 credits and 1/15 for a six-second speed boost or QWE charge refill. Drop bonuses multiply those chances, with caps. Wardens/bosses also drop 75 credits. Difficult enemies retain larger scrap showers and energy/repair supplies.
+
+Enemies now hit harder. Heavy/elite contact and boss shots/blasts cost 2 hull; boss charges cost 3. Foreman is larger, faster, summons reinforcements and overclocks at half health. Tanks and radial shots can briefly slow you by 20%. D blocks damage and slows for three seconds. Mastery can raise maximum hull from 5 to 8.
 
 ## Equipment
 
@@ -68,7 +74,7 @@ No telemetry is uploaded. There is no mid-run save or cloud sync.
 
 ## Art and audio
 
-Original code-native world graphics, ability icons and animation; nine generated inventory illustrations. New chassis and thruster art follows the existing teal enamel / steel / brass / cream style. [Art schema](docs/design/ART_STYLE_SCHEMA.md) and [equipment prompts/provenance](assets/upgrades/EQUIPMENT_PROVENANCE.md).
+Original code-native world graphics, animation and one unified icon family across abilities, passives, mastery and equipment. The nine earlier generated illustrations remain preserved but are not mixed into the current interface. [Art schema](docs/design/ART_STYLE_SCHEMA.md), [research and design decisions](docs/design/ITERATION_10.md), and [archived equipment provenance](assets/upgrades/EQUIPMENT_PROVENANCE.md).
 
 User-provided MP3s in `music/` play by context: menu, settings, equipment/results, the three levels, wardens, Foreman and overclocked Foreman. Two music voices crossfade; combat inspection and upgrade screens keep the current track. Mute affects both music and synthesized effects. Music defaults quieter than effects. Music is disabled under the headless dummy driver; normal Windows playback is enabled.
 
@@ -79,10 +85,11 @@ Run from the project folder:
 ```powershell
 .\scripts\check.ps1
 .\.tools\godot\Godot_v4.7.2-stable_win64_console.exe --headless --path . --script res://tests/mobabot09_behavior_probe.gd
+.\.tools\godot\Godot_v4.7.2-stable_win64_console.exe --headless --path . --script res://tests/mobabot10_behavior_probe.gd
 ```
 
-The full check includes legacy simulations, MOBA mechanics, progression, boss readability, movement at multiple physics rates, v0.9 mechanics/equipment/camera tests and UI text layout. The optional behavior probe compares idle, stationary casting and moving casting with normal health. Neither is a substitute for human playtesting.
+The full check includes legacy simulations, MOBA mechanics, progression, boss readability, movement at multiple physics rates, equipment/camera, UI text layout, laser/ghost/lightning and mastery effects. Behavior probes compare idle, stationary, passive-only, moving-casting and adaptive policies with normal health. They do not establish human difficulty or fun.
 
-[Latest audit and handoff](docs/design/QA_09.md). Earlier iteration documents are historical; this README and QA_09 supersede their controls and scope. Preserve the old Neon Collector sample at `src/main/main.tscn`.
+[Latest audit and handoff](docs/design/QA_10.md). Earlier iteration documents are historical; this README and QA_10 supersede their controls and scope. Preserve the old Neon Collector sample at `src/main/main.tscn`.
 
 Commit coherent, verified changes; do not commit engine/cache folders, generated test captures, temp files or local player records. Public-release work still includes export packaging, audio balance/listening, music-rights confirmation, and human tuning of camera speed, rewards and combat difficulty.

@@ -25,6 +25,7 @@ const INK := Color("14242c")
 const CREAM := Color("eceddf")
 const TEAL := Color("78cbb6")
 const GOLD := Color("efc16b")
+const CORAL := Color("ee796c")
 const PANEL := Color("21333d")
 const EDGE := Color("425863")
 const MUTED := Color("a0b3b7")
@@ -139,7 +140,7 @@ func _process(delta: float) -> void:
 func _style(color: Color, corners: int = 8, border: Color = EDGE, width: int = 1) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = color
-	style.set_corner_radius_all(corners)
+	style.set_corner_radius_all(mini(corners, 2))
 	style.set_border_width_all(width)
 	style.border_color = border
 	style.content_margin_top = 0
@@ -147,7 +148,7 @@ func _style(color: Color, corners: int = 8, border: Color = EDGE, width: int = 1
 	return style
 
 func _surface(parent: Node, rect: Rect2, color: Color = PANEL, corners: int = 8, border: Color = EDGE, width: int = 1) -> Panel:
-	var panel := Panel.new()
+	var panel: Panel = preload("res://src/salvage/tooltip_panel.gd").new()
 	panel.position = rect.position
 	panel.size = rect.size
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -188,7 +189,7 @@ func _bar(parent: Node, rect: Rect2, color: Color, maximum: float) -> ProgressBa
 	return bar
 
 func _button(text: String, rect: Rect2, action: Callable, primary: bool = true) -> Button:
-	var button := Button.new()
+	var button: Button = preload("res://src/salvage/tooltip_button.gd").new()
 	button.text = text
 	button.position = rect.position
 	button.size = rect.size
@@ -205,22 +206,12 @@ func _button(text: String, rect: Rect2, action: Callable, primary: bool = true) 
 	overlay.add_child(button)
 	return button
 
-func _icon(parent: Node, id: String, rect: Rect2, dim: bool = false) -> TextureRect:
-	var icon := TextureRect.new()
-	var asset_id: String = {"bolt": "power", "repair": "power", "reactor": "pulse", "cell": "capacity"}.get(id, id)
-	var path := ICON_PATH + asset_id + ".png"
-	if not textures.has(asset_id) and ResourceLoader.exists(path):
-		textures[asset_id] = load(path)
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	icon.texture = textures.get(asset_id)
-	icon.position = rect.position
-	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+func _icon(parent: Node, id: String, rect: Rect2, dim: bool = false) -> Control:
+	var extent := minf(rect.size.x, rect.size.y)
+	var box := Rect2(rect.position + (rect.size - Vector2.ONE * extent) * 0.5, Vector2.ONE * extent)
+	var icon := _ability_icon(parent, {"bolt": "power", "repair": "pylon", "chassis-v1": "chassis", "drive-v1": "jets"}.get(id, id), box)
 	if dim:
 		icon.modulate = Color(0.62, 0.66, 0.68, 0.7)
-	parent.add_child(icon)
-	icon.size = rect.size
 	return icon
 
 func _pips(parent: Node, point: Vector2, rank_value: int, maximum: int, next_rank: bool = false) -> void:
@@ -333,6 +324,7 @@ func _ability_hud(model: SalvageRun) -> void:
 		toggle_tiles[i].modulate = Color.WHITE if active else Color(0.45, 0.48, 0.53)
 		var state_text := "ON" if active else "OFF"
 		if kit.onboarding and kit.loadout.passives[i] == "orbit" and active: state_text = "FAR" if kit.orbit_far else "NEAR"
+		if kit.loadout.passives[i] == "lightning" and active: state_text = "FOCUS" if kit.arc_focused else "CHAIN"
 		if not kit.unlocked("p%d" % (i + 1)): state_text = "LOCK"
 		toggle_labels[i].text = "%s %s" % [OS.get_keycode_string(kit.bindings["p%d" % (i + 1)]), state_text]
 	for slot in MobaKit.SLOTS:
@@ -342,6 +334,9 @@ func _ability_hud(model: SalvageRun) -> void:
 		ability_labels[slot].text = str(ceili(kit.recharge[slot])) if kit.charges[slot] == 0 else ("LOW" if not affordable else (str(kit.charges[slot]) if data.max > 1 else ""))
 		ability_recharge[slot].value = kit.cooldown(slot) - kit.recharge[slot]
 		if not kit.unlocked(slot): ability_labels[slot].text = "%ds" % ceili(kit.UNLOCKS[slot] - kit.elapsed)
+		if kit.laser_left > 0 and slot == kit.laser_slot:
+			ability_labels[slot].text = "%.1f" % kit.laser_left
+			ability_recharge[slot].value = kit.cooldown(slot) * kit.laser_left / 5.0
 
 func clear_overlay() -> void:
 	for child in overlay.get_children():
@@ -373,9 +368,14 @@ func update_hud(model: SalvageRun) -> void:
 		energy_bar.value = model.kit.energy
 		energy_label.text = "ENERGY"
 		energy_bar.tooltip_text = "%d / %d energy" % [model.kit.energy, model.kit.energy_max()]
-	stat_label.text = "Power %d     %d kills" % [model.level, model.kills]
+	stat_label.text = "Power %d   %d kills   ◇ %d" % [model.level, model.kills, model.mastery.available(model.level)]
+	stat_label.mouse_filter = Control.MOUSE_FILTER_STOP
+	stat_label.tooltip_text = "Mastery points. Hold Tab to spend. One point every two power levels. Run only."
 	consumable_label.text = "5  +  x%d\n\n6  E  x%d" % [model.consumables[0], model.consumables[1]]
+	health_bar.max_value = model.max_health()
 	health_bar.value = model.health
+	health_bar.mouse_filter = Control.MOUSE_FILTER_STOP
+	health_bar.tooltip_text = "%d / %d hull" % [model.health, model.max_health()]
 	var previous := 0 if model.level == 1 else model.next_level - ((12 + model.level * 8) if model.staged else (8 + model.level * 4))
 	xp_bar.value = clampf(float(model.total_xp - previous) / maxf(1, model.next_level - previous), 0, 1)
 	load_label.text = "%d / %d tools" % [model.orbit.size(), model.capacity()] if model.mode == "salvage" else "Bolt gun only"
@@ -385,7 +385,7 @@ func update_hud(model: SalvageRun) -> void:
 	mini_map.queue_redraw()
 	threat_compass.model = model
 	threat_compass.queue_redraw()
-	damage_label.text = "-1 hull / " + model.last_damage
+	damage_label.text = model.last_damage
 	damage_label.visible = model.time - model.last_damage_time < 2.5
 	if objective_label == null:
 		objective_label = _label(hud, "", Rect2(250, 62, 660, 22), 12, GOLD, true, HORIZONTAL_ALIGNMENT_RIGHT)
@@ -405,8 +405,8 @@ func update_hud(model: SalvageRun) -> void:
 			boss_label.visible = true
 			boss_bar.visible = true
 			var name_text: String = {"rammer": "Ram Warden", "artillery": "Artillery Warden", "foreman": "Foreman"}[enemy.role]
-			var phase_text := "EXPOSED +50% damage" if enemy.phase == "recover" else ("OVERCLOCKED" if enemy.enraged else "")
-			boss_label.text = "%s / %d of %d HP" % [name_text, maxi(0, ceili(enemy.hp)), enemy.max_hp]
+			var phase_text := "EXPOSED" if enemy.phase == "recover" else ("OVERCLOCKED" if enemy.enraged else "")
+			boss_label.text = name_text
 			if not phase_text.is_empty(): boss_label.text += " / " + phase_text
 			boss_bar.max_value = enemy.max_hp
 			boss_bar.value = enemy.hp
@@ -424,12 +424,12 @@ func show_home() -> void:
 	_button("Upgrades", Rect2(64, 342, 292, 38), func() -> void: build_requested.emit(), false)
 	_button("Settings", Rect2(64, 386, 142, 38), func() -> void: settings_requested.emit(), false)
 	_button("Quit", Rect2(214, 386, 142, 38), func() -> void: quit_requested.emit(), false)
-	_label(overlay, "Right-click to move / S to stop", Rect2(65, 474, 310, 22), 12, MUTED)
-	_label(overlay, "0.9", Rect2(883, 501, 40, 18), 11, MUTED, false, HORIZONTAL_ALIGNMENT_RIGHT)
-	_label(overlay, "Stage 1 / Three levels / Demo", Rect2(65, 189, 386, 25), 15, GOLD)
-	_icon(overlay, "grinder", Rect2(554, 78, 150, 150))
-	_icon(overlay, "pulse", Rect2(788, 153, 114, 114))
-	_icon(overlay, "ricochet", Rect2(790, 355, 114, 114))
+	_label(overlay, "0.10", Rect2(883, 501, 40, 18), 11, MUTED, false, HORIZONTAL_ALIGNMENT_RIGHT)
+	_label(overlay, "STAGE 01", Rect2(65, 189, 386, 25), 13, GOLD)
+	for node in overlay.get_children():
+		if node is Button and node != play:
+			node.add_theme_stylebox_override("normal", _style(Color(0, 0, 0, 0), 0, Color(0, 0, 0, 0), 0))
+			node.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	play.grab_focus()
 
 func show_settings() -> void:
@@ -440,7 +440,7 @@ func show_settings() -> void:
 	_label(overlay, "Settings", Rect2(204, 33, 550, 40), 28, CREAM, true)
 	_settings(204, 85)
 	_button("Camera: " + ("Locked" if camera_locked else "Free"), Rect2(204, 142, 260, 34), func() -> void: camera_lock_changed.emit(not camera_locked), false)
-	_button("R: " + ("Quick cast" if r_quickcast else "Click to confirm"), Rect2(480, 142, 276, 34), func() -> void: quickcast_changed.emit(not r_quickcast), false)
+	_button("Area cast: " + ("Quick" if r_quickcast else "Confirm"), Rect2(480, 142, 276, 34), func() -> void: quickcast_changed.emit(not r_quickcast), false)
 	_label(overlay, "Camera zoom", Rect2(204, 187, 240, 23), 16, CREAM, true)
 	var zoom_label := _label(overlay, "%d%%" % roundi(zoom_value * 100), Rect2(650, 187, 100, 23), 15, GOLD, true, HORIZONTAL_ALIGNMENT_RIGHT)
 	var slider := HSlider.new()
@@ -454,7 +454,7 @@ func show_settings() -> void:
 		zoom_label.text = "%d%%" % roundi(value * 100)
 		zoom_changed.emit(value))
 	overlay.add_child(slider)
-	_label(overlay, "Right-click move / S stop / Wheel zoom\nL toggle lock / Hold Space follow / Screen edges pan\nHold Tab inspect / Esc settings / Shift + key aim\n5 repair (+2 hull) / 6 energy (+50) / Two each per run\nR then left-click: cast / Right-click or Esc: cancel", Rect2(204, 259, 552, 125), 13, MUTED)
+	_label(overlay, "Right-click move / S stop / Wheel zoom\nL camera lock / Hold Space follow / Edges pan\nHold Tab build / Esc settings / Shift + key aim\n5 repair (+2 hull) / 6 energy (+50)\nE + left-click: strike / Right-click or Esc: cancel\nR: channel / Right-click: steer / R again: cancel", Rect2(204, 259, 552, 146), 13, MUTED)
 	if not settings_in_run:
 		_button("Loadout & keybinds", Rect2(204, 393, 552, 36), func() -> void: loadout_requested.emit(), false)
 	else:
@@ -470,34 +470,56 @@ func show_equipment(gear, back_action: Callable) -> void:
 	_label(overlay, "Equipment", Rect2(46, 38, 300, 40), 28, CREAM, true)
 	_label(overlay, "%d credits" % gear.credits, Rect2(585, 44, 190, 26), 17, GOLD, true, HORIZONTAL_ALIGNMENT_RIGHT)
 	_button("Back", Rect2(809, 43, 104, 34), back_action, false)
-	var index := 0
-	for id in BotEquipment.ITEM_ORDER:
-		var data: Dictionary = BotEquipment.ITEMS[id]
-		var item: Dictionary = gear.inventory[id]
-		var x := 46 + (index % 3) * 291
-		var y := 98 + (index / 3) * 150
-		var card := _button("", Rect2(x, y, 279, 138), func() -> void:
+	# Fitted slots are separate from the collection; inspect one item at a time.
+	_label(overlay, "FITTED", Rect2(46, 96, 270, 22), 11, MUTED, true)
+	for i in range(3):
+		var slot: String = ["Core", "Chassis", "Drive"][i]
+		var id: String = gear.equipped[slot]
+		var y := 132 + i * 103
+		var tile := _button("", Rect2(46, y, 70, 70), func() -> void:
 			gear_selected = id
 			show_equipment(gear, back_action), false)
-		card.add_theme_stylebox_override("normal", _style(PANEL, 6, GOLD if id == gear_selected else EDGE, 2 if id == gear_selected else 1))
-		_icon(card, data.icon, Rect2(10, 27, 72, 76), item.copies == 0)
-		_label(card, data.name, Rect2(91, 10, 177, 24), 16, CREAM, true)
-		_label(card, "MK II" if id in ["reactor", "shell", "rotor"] else "MK I", Rect2(10, 6, 72, 18), 10, GOLD if id in ["reactor", "shell", "rotor"] else MUTED, true, HORIZONTAL_ALIGNMENT_CENTER)
-		_label(card, "%s / %d stars / %d copies" % [data.slot, item.stars, item.copies], Rect2(91, 37, 178, 18), 10, GOLD)
-		_label(card, gear.item_text(id), Rect2(91, 61, 179, 46), 10, MUTED)
-		_label(card, "EQUIPPED" if id in gear.equipped.values() else ("Not owned" if item.copies == 0 else "Available"), Rect2(91, 111, 174, 17), 10, TEAL, true)
-		index += 1
+		_icon(tile, BotEquipment.ITEMS[id].icon, Rect2(4, 4, 62, 62))
+		tile.tooltip_text = gear.item_text(id)
+		_label(overlay, slot, Rect2(130, y + 3, 165, 19), 11, TEAL, true)
+		_label(overlay, BotEquipment.ITEMS[id].name, Rect2(130, y + 27, 171, 25), 17, CREAM, true)
+		_label(overlay, "★".repeat(gear.inventory[id].stars), Rect2(130, y + 53, 165, 20), 13, GOLD)
+	_surface(overlay, Rect2(320, 97, 1, 390), EDGE, 0, EDGE, 0)
+	_label(overlay, "COLLECTION", Rect2(344, 96, 239, 22), 11, MUTED, true)
+	for i in range(BotEquipment.ITEM_ORDER.size()):
+		var id: String = BotEquipment.ITEM_ORDER[i]
+		var item: Dictionary = gear.inventory[id]
+		var x := 344 + (i % 3) * 83
+		var y := 134 + (i / 3) * 98
+		var tile := _button("", Rect2(x, y, 72, 78), func() -> void:
+			gear_selected = id
+			show_equipment(gear, back_action), false)
+		tile.add_theme_stylebox_override("normal", _style(PANEL, 2, GOLD if id == gear_selected else EDGE, 2 if id == gear_selected else 1))
+		_icon(tile, BotEquipment.ITEMS[id].icon, Rect2(5, 3, 62, 62), item.copies == 0)
+		_label(tile, "II" if i >= 3 else "I", Rect2(5, 3, 22, 18), 10, GOLD, true)
+		_label(tile, "x%d" % item.copies, Rect2(33, 56, 32, 18), 11, CREAM, true, HORIZONTAL_ALIGNMENT_RIGHT)
+		tile.tooltip_text = BotEquipment.ITEMS[id].name + "\n" + gear.item_text(id)
 	var chosen: Dictionary = gear.inventory[gear_selected]
+	var data: Dictionary = BotEquipment.ITEMS[gear_selected]
+	_icon(overlay, data.icon, Rect2(692, 105, 120, 120), chosen.copies == 0)
+	_label(overlay, data.name, Rect2(615, 238, 292, 32), 24, CREAM, true, HORIZONTAL_ALIGNMENT_CENTER)
+	_label(overlay, "★".repeat(chosen.stars) + "☆".repeat(5 - chosen.stars), Rect2(615, 275, 292, 24), 18, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
+	_label(overlay, gear.item_text(gear_selected), Rect2(632, 314, 259, 60), 15, CREAM)
+	_label(overlay, "Fitted" if gear_selected in gear.equipped.values() else ("Not owned" if chosen.copies == 0 else "%d spare" % maxi(0, chosen.copies - 1)), Rect2(632, 377, 259, 21), 12, TEAL)
 	for i in range(3):
 		var action: String = ["equip", "reroll", "star"][i]
-		var text_value: String = ["Equip", "Reroll / 35 credits", "Star / %d credits + %d spare" % [25 * (chosen.stars + 1), chosen.stars + 1]][i]
-		var button := _button(text_value, Rect2(46 + i * 291, 406, 279, 36), func() -> void:
+		var cost: int = 25 * (chosen.stars + 1)
+		var copies: int = chosen.stars + 1
+		var caption: String = ["Equip", "Reroll  35", "Star  %d" % cost][i]
+		var button := _button(caption, Rect2(615 + i * 99, 419, 93, 35), func() -> void:
 			gear.transact(action, gear_selected)
-			show_equipment(gear, back_action), i == 0)
-		button.add_theme_font_size_override("font_size", 13)
-		button.disabled = chosen.copies == 0 or gear.save_blocked or (action == "star" and chosen.stars >= 5)
-	_label(overlay, gear.message, Rect2(46, 453, 866, 22), 13, GOLD)
-	_label(overlay, "One item per slot. Stars improve base stats; rerolls replace only the bonus. Max 5 stars.", Rect2(46, 483, 866, 18), 11, MUTED)
+			show_equipment(gear, back_action), false)
+		button.add_theme_font_size_override("font_size", 12)
+		button.disabled = chosen.copies == 0 or gear.save_blocked or (action == "equip" and gear_selected in gear.equipped.values()) or (action == "reroll" and gear.credits < 35) or (action == "star" and (chosen.stars >= 5 or gear.credits < cost or chosen.copies <= copies))
+		button.tooltip_text = {"equip": "Fit to %s. Applies next run." % data.slot, "reroll": "35 credits. Replace the bonus stat; keep stars.", "star": "Max stars" if chosen.stars >= 5 else "%d credits + %d spare copies. +20%% base stat. Guaranteed." % [cost, copies]}[action]
+	# Only operational errors need a persistent message.
+	if gear.save_blocked or "failed" in gear.message.to_lower():
+		_label(overlay, gear.message, Rect2(46, 480, 858, 22), 12, CORAL)
 
 func _settings(x: float, y: float) -> void:
 	_button("Sound: off" if muted else "Sound: on", Rect2(x, y, 185, 34), func() -> void:
@@ -555,7 +577,7 @@ func show_upgrades(model: SalvageRun) -> void:
 		var next := model.upgrade_values(id, model.rank_of(id) + 1)
 		for row in range(values.size()):
 			_label(card, values[row].label, Rect2(18, 247 + row * 20, 144, 22), 12, MUTED)
-			var after: Variant = next[row].value if id != "repair" else mini(5, model.health + 1)
+			var after: Variant = next[row].value if id != "repair" else mini(model.max_health(), model.health + 1)
 			_label(card, "%s > %s%s" % [values[row].value, after, values[row].unit], Rect2(138, 247 + row * 20, 122, 22), 13, GOLD, true, HORIZONTAL_ALIGNMENT_RIGHT)
 	_label(overlay, "1 / 2 / 3  Select     Tab  Build", Rect2(42, 493, 874, 21), 12, MUTED, false, HORIZONTAL_ALIGNMENT_CENTER)
 	if first:

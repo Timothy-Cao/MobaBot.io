@@ -42,12 +42,12 @@ func receive(event: Dictionary) -> void:
 	if kind == "hurt" and not reduced_effects:
 		shake = 5.0
 	# Automatic collection/ultimate pulses must not continuously shake the actors.
-	if kind in ["kill", "hit", "spent", "pulse", "pickup", "equipped", "boss_down", "loot", "blink", "beam", "move", "cast", "milestone", "vacuum", "hostile_blast", "nuke_impact"]:
+	if kind in ["kill", "hit", "spent", "pulse", "pickup", "equipped", "boss_down", "loot", "blink", "beam", "move", "cast", "milestone", "vacuum", "hostile_blast", "nuke_impact", "rocket_impact", "lightning", "boss_summon"]:
 		if effects.size() < (65 if reduced_effects else 180):
 			var e := event.duplicate()
 			e.age = 0.0
 			e.life = 0.55 if kind in ["kill", "pulse", "boss_down", "loot", "move"] else 0.24
-			if kind == "nuke_impact": e.life = 0.6
+			if kind in ["nuke_impact", "rocket_impact", "boss_summon"]: e.life = 0.6
 			effects.append(e)
 
 func _box(rect: Rect2, color: Color, radius: int = 5, border: Color = INK, width: int = 2) -> void:
@@ -67,6 +67,14 @@ func _line(a: Vector2, b: Vector2, color: Color, width: float = 2) -> void:
 func _draw() -> void:
 	_floor()
 	if model == null:
+		return
+	if not world_mode and model.kit == null:
+		var center := model.player
+		draw_arc(center, 150, 0, TAU, 80, Color(PALE, 0.15), 1, true)
+		for i in range(3):
+			var angle := visual_time * 0.16 + i * TAU / 3
+			_tool(center + Vector2.from_angle(angle) * 139, angle, true, 1.9)
+		_player(3.2)
 		return
 	if world_mode:
 		_draw_caches()
@@ -108,6 +116,18 @@ func _draw() -> void:
 			draw_circle(bullet.pos, 8, INK)
 			draw_circle(bullet.pos, 6, CORAL)
 			draw_circle(bullet.pos, 2, CREAM)
+		elif bullet.kind == "rocket":
+			var m: int = bullet.get("milestone", 0)
+			_line(bullet.pos - direction * (65 + m * 18), bullet.pos, Color(TEAL, 0.3), 18 + m * 4)
+			_line(bullet.pos - direction * 45, bullet.pos, GOLD, 7 + m * 2)
+			draw_set_transform(bullet.pos, direction.angle(), Vector2.ONE * (1 + m * 0.18))
+			var hull := PackedVector2Array([Vector2(15, 0), Vector2(3, -7), Vector2(-15, -7), Vector2(-20, -13), Vector2(-19, 13), Vector2(-15, 7), Vector2(3, 7)])
+			draw_colored_polygon(hull, PALE)
+			hull.append(hull[0])
+			draw_polyline(hull, INK, 2, true)
+			_line(Vector2(-13, -3), Vector2(4, -3), CREAM, 3)
+			_line(Vector2(-11, 3), Vector2(0, 3), TEAL, 4)
+			draw_set_transform(Vector2.ZERO)
 		else:
 			var color := PALE if bullet.kind in ["rail", "pet", "summon"] else GOLD
 			if model.staged and ((bullet.kind == "rail" and model.kit.milestone("q") > 0) or (bullet.kind == "bolt" and model.milestone("power") > 0)):
@@ -150,9 +170,12 @@ func _demo_tells() -> void:
 			if enemy.attack == "charge":
 				_charge_tell(p, enemy.target, enemy.radius + 12)
 			elif enemy.attack == "fan":
-				for angle in [-0.7, -0.35, 0.0, 0.35, 0.7]:
-					_line(p, p + Vector2(enemy.dir).rotated(angle) * 230, Color(CORAL, 0.65), 2)
-		draw_string(stencil_font, p + Vector2(-70, -55), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, GOLD if enemy.phase == "recover" else CREAM)
+				for angle in [-0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9]:
+					_line(p + Vector2(enemy.dir).rotated(angle) * enemy.radius, p + Vector2(enemy.dir).rotated(angle) * 170, Color(CORAL, 0.55), 1.5)
+			elif enemy.attack == "ring":
+				var angle: float = Vector2(enemy.dir).angle()
+				draw_arc(p, enemy.radius + 30, angle + TAU / 16 * 1.5, angle + TAU - TAU / 32, 64, CORAL, 3, true)
+		draw_string(stencil_font, p + Vector2(-70, -enemy.radius - 24), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, GOLD if enemy.phase == "recover" else CREAM)
 
 func _charge_tell(start: Vector2, end: Vector2, radius: float) -> void:
 	var direction := (end - start).normalized()
@@ -311,7 +334,7 @@ func _enemy(enemy: Dictionary) -> void:
 		_box(Rect2(-23, -32, 46, 4), INK, 2)
 		_box(Rect2(-22, -31, 44 * maxf(0, enemy.hp / enemy.max_hp), 2), CORAL, 1, CORAL, 0)
 	else:
-		_tool(p, visual_time * 0.4, true, 2.4 if enemy.get("role", "foreman") != "foreman" else 3.3, Color("c99864"))
+		_tool(p, visual_time * (0.9 if enemy.get("enraged", false) else 0.4), true, enemy.radius / 11.0, Color("c99864"))
 		# Different power sources read in silhouette, using the same workshop materials.
 		var facing: Vector2 = Vector2(enemy.get("dir", Vector2.RIGHT)) if enemy.phase in ["telegraph", "charge"] else (model.player - Vector2(enemy.pos)).normalized()
 		draw_set_transform(p)
@@ -334,13 +357,22 @@ func _enemy(enemy: Dictionary) -> void:
 			_box(Rect2(-13, 0, 26, 12), INK, 4)
 			_line(Vector2(-6, 5), Vector2(6, 5), CORAL, 3)
 		else:
-			_box(Rect2(-25, -23, 50, 46), body, 10, INK, 3)
-			_box(Rect2(-17, -10, 34, 20), INK, 5)
+			# Foreman: paired piston arms, rotating outer cutter and exposed reactor.
+			for side in [-1, 1]:
+				_box(Rect2(side * 42 - 9, -24, 18, 49), PALE, 3, INK, 3)
+				_box(Rect2(side * 42 - 12, -4, 24, 25), Color("927075"), 3, INK, 3)
+			_box(Rect2(-35, -36, 70, 72), body, 6, INK, 4)
+			_box(Rect2(-29, -31, 58, 12), PALE, 2)
+			_box(Rect2(-23, -13, 46, 27), INK, 3)
+			draw_circle(Vector2(0, 26), 12, INK)
+			draw_circle(Vector2(0, 26), 8, GOLD if enemy.phase == "recover" else CORAL)
+			if not reduced_effects:
+				draw_arc(Vector2(0, 26), 14 + sin(visual_time * 8) * 2, 0, TAU, 24, Color(CORAL, 0.5), 2, true)
 			for eye_x in [-9, 9]:
 				_box(Rect2(eye_x - 3, -4, 6, 6), CORAL, 1, CORAL, 0)
 		draw_set_transform(p)
-		_box(Rect2(-24, -37, 48, 5), INK, 2)
-		_box(Rect2(-23, -36, 46 * maxf(0, float(enemy.hp) / float(enemy.max_hp)), 3), CORAL, 1, CORAL, 0)
+		_box(Rect2(-24, -r - 10, 48, 5), INK, 2)
+		_box(Rect2(-23, -r - 9, 46 * maxf(0, float(enemy.hp) / float(enemy.max_hp)), 3), CORAL, 1, CORAL, 0)
 	draw_set_transform(Vector2.ZERO)
 
 func _tool(point: Vector2, rotation_angle: float, saw: bool, scale_value: float = 1.0, color: Color = PALE) -> void:
@@ -360,13 +392,13 @@ func _tool(point: Vector2, rotation_angle: float, saw: bool, scale_value: float 
 	draw_circle(Vector2(-0.5, -0.5), 1.5, GOLD)
 	draw_set_transform(Vector2.ZERO)
 
-func _player() -> void:
+func _player(presentation_scale: float = 1.0) -> void:
 	var p := model.player + frame_offset
 	var bank := clampf(model.velocity.x / 205.0, -1, 1) * 0.10 + impact_bank()
 	var bob := sin(visual_time * 5) * 2
-	draw_set_transform(p + Vector2(0, 16), 0, Vector2(1.0, 0.35))
+	draw_set_transform(p + Vector2(0, 16) * presentation_scale, 0, Vector2(1.0, 0.35) * presentation_scale)
 	draw_circle(Vector2.ZERO, 23, Color(INK, 0.8))
-	draw_set_transform(p + Vector2(0, bob), bank)
+	draw_set_transform(p + Vector2(0, bob), bank, Vector2.ONE * presentation_scale)
 	# Thruster pods and small hover jets, independent of the hero's face.
 	for x in [-20, 20]:
 		_box(Rect2(x - 5, 1, 10, 19), INK, 4)
@@ -389,9 +421,10 @@ func _player() -> void:
 	draw_arc(Vector2(-5, -25), 5, 0, PI, 12, CORAL, 5, true)
 	_line(Vector2(-10, -32), Vector2(-10, -35), CREAM, 5)
 	_line(Vector2(0, -32), Vector2(0, -35), CREAM, 5)
-	draw_set_transform(p, model.aim.angle())
+	draw_set_transform(p, model.aim.angle(), Vector2.ONE * presentation_scale)
 	_box(Rect2(17 - shot_recoil * 3, -4, 15, 8), Color("a7c7c4"), 2, INK, 2)
 	draw_set_transform(Vector2.ZERO)
+	if presentation_scale != 1.0: return
 	if model.invincible > 0:
 		draw_arc(p, 30, 0, TAU, 48, Color(CREAM, 0.5), 1.5, true)
 	if model.pulse_damage() > 0:
@@ -406,6 +439,24 @@ func _moba_ground() -> void:
 	if model.kit == null:
 		return
 	var kit := model.kit
+	if kit.laser_left > 0:
+		var direction := Vector2.from_angle(kit.laser_angle)
+		var end := model.player + direction * kit.cast_range(kit.laser_slot)
+		var width := 46.0 * kit.area_scale(kit.laser_slot)
+		_line(model.player, end, Color(TEAL, 0.32), width)
+		_line(model.player, end, Color(GOLD, 0.65), width * 0.52)
+		_line(model.player, end, CREAM, width * 0.18)
+		for side in [-1, 1]:
+			var edge: Vector2 = direction.orthogonal() * width * 0.5 * side
+			_line(model.player + edge, end + edge, Color(TEAL if kit.milestone(kit.laser_slot) == 0 else GOLD, 0.85), 2)
+		if not reduced_effects:
+			for i in range(8):
+				var at := fmod(visual_time * 430 + i * 87, 690.0)
+				var point := model.player + direction * at
+				_line(point - direction.orthogonal() * width * 0.35, point + direction.orthogonal() * width * 0.35, Color(CREAM, 0.4), 2)
+		draw_arc(model.player, 32, -PI / 2, -PI / 2 + TAU * kit.laser_left / 5.0, 48, GOLD, 4, true)
+	if kit.sprint > 0 and model.invincible > 0:
+		draw_arc(model.player, 28, visual_time * 2, visual_time * 2 + PI * 1.5, 32, Color("9cdedb"), 3, true)
 	if kit.flame_left > 0:
 		var cone := PackedVector2Array([model.player])
 		for i in range(17):
@@ -508,6 +559,16 @@ func _effect(effect: Dictionary) -> void:
 	var t: float = effect.age / effect.life
 	var p: Vector2 = effect.pos + frame_offset
 	match effect.kind:
+		"lightning":
+			var end: Vector2 = effect.target
+			var offset := (end - p).orthogonal().normalized()
+			var points := PackedVector2Array([p])
+			for i in range(1, 6): points.append(p.lerp(end, i / 6.0) + offset * (8 if i % 2 else -8))
+			points.append(end)
+			draw_polyline(points, Color(TEAL, (1 - t) * 0.6), 8, true)
+			draw_polyline(points, Color(CREAM, 1 - t), 2.5, true)
+		"boss_summon":
+			draw_arc(p, 65 + t * 100, 0, TAU, 64, Color(CORAL, 1 - t), 4, true)
 		"beam":
 			_line(p, effect.target, Color(TEAL, (1 - t) * 0.4), effect.get("width", 56) * (1 - t))
 			_line(p, effect.target, Color(CREAM, 1 - t), 12 * (1 - t))
@@ -533,7 +594,7 @@ func _effect(effect: Dictionary) -> void:
 			for i in range(3):
 				var direction := Vector2.from_angle(i * TAU / 3 + float(effect.pos.y))
 				_line(p + direction * 4, p + direction * (8 + t * 9), Color(CREAM, 1 - t), 2)
-		"nuke_impact":
+		"nuke_impact", "rocket_impact":
 			draw_arc(p, effect.radius * (0.5 + t * 0.5), 0, TAU, 64, Color(CREAM, (1 - t) * 0.8), 6 * (1 - t) + 1, true)
 			for i in range(4 if reduced_effects else 8):
 				var direction := Vector2.from_angle(i * TAU / 8)

@@ -33,17 +33,26 @@ static func spawn_special(run, role: String) -> void:
 	run.spawn_enemy(run._offscreen_point(), 2)
 	var enemy: Dictionary = run.enemies.back()
 	enemy.role = role
-	enemy.hp = {"rammer": 140.0, "artillery": 180.0, "foreman": 900.0}[role]
+	enemy.hp = {"rammer": 230.0, "artillery": 280.0, "foreman": 1800.0}[role]
 	enemy.max_hp = enemy.hp
-	enemy.radius = 31.0 if role == "foreman" else 24.0
+	enemy.radius = 60.0 if role == "foreman" else 34.0
 	enemy.phase = "approach"
 	enemy.clock = 1.0
 	enemy.attack = ""
 	enemy.sequence = 0
 	enemy.enraged = false
+	enemy["summon_clock"] = 7.0
 	run.emit_event("demo_boss", enemy.pos, {"role": role})
 
 static func spawns(run, delta: float) -> void:
+	# Summons arrive from outside the camera; they are pressure, not contact ambushes.
+	for boss in run.enemies.duplicate():
+		if boss.get("role", "") == "foreman" and not boss.dead:
+			boss.summon_clock -= delta
+			if boss.summon_clock <= 0:
+				boss.summon_clock += 6.0 if boss.enraged else 9.0
+				run._spawn_pack(7 if boss.enraged else 4, true)
+				run.emit_event("boss_summon", boss.pos)
 	run.enemies = run.enemies.filter(func(e: Dictionary) -> bool: return e.kind == 2 or Vector2(e.pos).distance_to(run.player) < maxf(1500, run.view_size.length() + 200))
 	if ready_to_clear(run): return
 	if run.stage == 2:
@@ -90,51 +99,57 @@ static func enemy_step(run, enemy: Dictionary, delta: float) -> void:
 		run.emit_event("boss_phase", enemy.pos)
 	enemy.clock -= delta
 	if enemy.phase == "approach":
-		if Vector2(enemy.pos).distance_to(run.player) > 310:
-			enemy.pos += direction * 95 * delta
+		if Vector2(enemy.pos).distance_to(run.player) > 340:
+			enemy.pos += direction * (270 if enemy.enraged else 235) * delta
 		elif enemy.clock <= 0:
-			var pattern: Array = ["charge"] if role == "rammer" else (["shells"] if role == "artillery" else ["charge", "shells", "fan"])
+			var pattern: Array = ["charge", "fan"] if role == "rammer" else (["shells", "fan"] if role == "artillery" else ["charge", "shells", "fan", "ring"])
 			enemy.attack = pattern[enemy.sequence % pattern.size()]
 			enemy.sequence += 1
 			enemy.phase = "telegraph"
-			enemy.clock = 0.95 if enemy.enraged else 1.25
+			enemy.clock = 0.65 if enemy.enraged else 0.9
 			enemy.dir = direction
 			run.emit_event("boss_windup", enemy.pos)
-			enemy["target"] = (Vector2(enemy.pos) + direction * 420).clamp(run.ARENA.position + Vector2.ONE * 32, run.ARENA.end - Vector2.ONE * 32)
+			enemy["target"] = (Vector2(enemy.pos) + (run.player + run.velocity * 0.35 - Vector2(enemy.pos)).normalized() * 560).clamp(run.ARENA.position + Vector2.ONE * enemy.radius, run.ARENA.end - Vector2.ONE * enemy.radius)
 			if enemy.attack == "charge":
 				# Clamping a diagonal endpoint can rotate the actual travel segment.
 				enemy.dir = (Vector2(enemy.target) - Vector2(enemy.pos)).normalized()
 			if enemy.attack == "shells":
 				var center: Vector2 = run.player
 				var points: Array = [center]
-				if role == "foreman": points.append_array([center + Vector2(150, 0), center - Vector2(150, 0)])
+				if role == "foreman": points.append_array([center + run.velocity.limit_length(170), center + direction.orthogonal() * 185, center - direction.orthogonal() * 185])
 				for point in points:
-					run.hazards.append({"pos": point, "radius": 82.0, "time": enemy.clock, "duration": enemy.clock, "owner": enemy.id, "spent": false})
+					run.hazards.append({"pos": point, "radius": 92.0, "time": enemy.clock, "duration": enemy.clock, "owner": enemy.id, "spent": false})
 	elif enemy.phase == "telegraph" and enemy.clock <= 0:
 		if enemy.attack == "charge":
 			enemy.phase = "charge"
-			enemy.clock = 0.7
-			enemy["charge_velocity"] = (Vector2(enemy.target) - Vector2(enemy.pos)) / 0.7
+			enemy.clock = 0.55
+			enemy["charge_velocity"] = (Vector2(enemy.target) - Vector2(enemy.pos)) / 0.55
 		else:
 			if enemy.attack == "fan":
-				for angle in [-0.7, -0.35, 0.0, 0.35, 0.7]:
-					run._add_projectile(enemy.pos, Vector2(enemy.dir).rotated(angle) * 170, 1, "hostile", 0)
+				for angle in [-0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9]:
+					run._add_projectile(enemy.pos, Vector2(enemy.dir).rotated(angle) * 300, 2, "hostile", 0)
+			if enemy.attack == "ring":
+				for i in range(16):
+					if i in [0, 1]: continue # A visible two-projectile gap, aligned with facing.
+					var heading: Vector2 = Vector2(enemy.dir).rotated(i * TAU / 16)
+					run._add_projectile(enemy.pos + heading * enemy.radius, heading * 230, 2, "hostile", 0)
+					if not run.projectiles.is_empty(): run.projectiles.back()["slow"] = true
 			enemy.phase = "recover"
-			enemy.clock = 1.5 if enemy.enraged else 2.0
+			enemy.clock = 0.65 if enemy.enraged else 1.1
 	elif enemy.phase == "charge":
 		var before: Vector2 = enemy.pos
-		enemy.pos = (before + Vector2(enemy.charge_velocity) * minf(delta, maxf(0, enemy.clock + delta))).clamp(run.ARENA.position + Vector2.ONE * 32, run.ARENA.end - Vector2.ONE * 32)
+		enemy.pos = (before + Vector2(enemy.charge_velocity) * minf(delta, maxf(0, enemy.clock + delta))).clamp(run.ARENA.position + Vector2.ONE * enemy.radius, run.ARENA.end - Vector2.ONE * enemy.radius)
 		if Geometry2D.get_closest_point_to_segment(run.player, before, enemy.pos).distance_to(run.player) < enemy.radius + 12:
-			run.hurt_player(enemy.pos, CombatReadability.enemy_name(enemy) + " charge")
+			run.hurt_player(enemy.pos, CombatReadability.enemy_name(enemy) + " charge", 3)
 		if enemy.clock <= 0:
 			enemy.phase = "recover"
-			enemy.clock = 1.5 if enemy.enraged else 2.0
+			enemy.clock = 0.65 if enemy.enraged else 1.1
 	elif enemy.phase == "recover" and enemy.clock <= 0:
 		enemy.phase = "approach"
-		enemy.clock = 0.6
+		enemy.clock = 0.35
 	# Recovery rewards committing damage, not hiding an unavoidable contact hit.
 	if enemy.phase != "recover" and Vector2(enemy.pos).distance_to(run.player) < enemy.radius + 12:
-		run.hurt_player(enemy.pos, CombatReadability.enemy_name(enemy) + " contact")
+		run.hurt_player(enemy.pos, CombatReadability.enemy_name(enemy) + " contact", 2)
 
 static func hazards_step(run, delta: float) -> void:
 	for hazard in run.hazards:
@@ -146,7 +161,7 @@ static func hazards_step(run, delta: float) -> void:
 			hazard.spent = true
 			run.emit_event("hostile_blast", hazard.pos, {"radius": hazard.radius})
 			if Vector2(hazard.pos).distance_to(run.player) <= hazard.radius + 12:
-				run.hurt_player(hazard.pos, "Artillery blast")
+				run.hurt_player(hazard.pos, "Artillery blast", 2)
 	run.hazards = run.hazards.filter(func(h: Dictionary) -> bool: return not h.spent)
 
 static func test_direction(run) -> Vector2:

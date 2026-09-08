@@ -51,10 +51,10 @@ func _run() -> void:
 	run = fresh()
 	run.kit.energy = 40
 	run.kit.step(run, 1)
-	check(is_equal_approx(run.kit.energy, 46), "Energy regenerates net of powered passive upkeep")
+	check(is_equal_approx(run.kit.energy, 39), "Energy regenerates net of 9/s powered passive upkeep")
 	run.kit.toggle(2)
 	run.kit.step(run, 1)
-	check(is_equal_approx(run.kit.energy, 54), "Switching off an energy passive frees its upkeep")
+	check(is_equal_approx(run.kit.energy, 41), "Switching off a 3/s energy passive frees its upkeep")
 	run.kit.energy = 100
 	run.kit.step(run, 1)
 	check(run.kit.energy == 100, "Energy clamps to the maximum")
@@ -162,7 +162,7 @@ func _run() -> void:
 	var pixel := Vector2(600, 200)
 	check((game.get_canvas_transform().affine_inverse() * pixel).is_equal_approx(game.model.camera_origin() + pixel / 0.65), "Mouse casting and movement coordinates remain accurate after zoom")
 	game._input(key(KEY_TAB))
-	check(game.screen == "build" and game.tab_held and game.ui.build_page == "abilities", "Holding Tab opens loadout inspection")
+	check(game.screen == "build" and game.tab_held and game.ui.build_page == "mastery", "Holding Tab opens unspent mastery")
 	var before: float = game.model.time
 	game._physics_process(1)
 	check(game.model.time == before, "Held inspection pauses the solo game")

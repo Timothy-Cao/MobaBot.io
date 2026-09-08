@@ -6,21 +6,23 @@ const SLOTS := ["q", "w", "e", "r", "d", "f", "t"]
 const BIND_SLOTS := ["q", "w", "e", "r", "d", "f", "t", "p1", "p2", "p3", "p4"]
 const DEFAULT_BINDS := {"q": KEY_Q, "w": KEY_W, "e": KEY_E, "r": KEY_R, "d": KEY_D, "f": KEY_F, "t": KEY_T, "p1": KEY_1, "p2": KEY_2, "p3": KEY_3, "p4": KEY_4}
 const ENERGY_COST := {"salvo": 14.0, "nova": 16.0, "shield": 20.0, "rail": 12.0, "mortar": 18.0, "lunge": 12.0, "overdrive": 30.0, "beam": 30.0, "turret": 20.0, "pylon": 24.0}
-const UPKEEP := {"pulse": 2.0, "plating": 1.0}
+const UPKEEP := {"bolt": 2.0, "orbit": 2.0, "pulse": 3.0, "ricochet": 2.0, "plating": 2.0, "thorns": 1.0, "lightning": 4.0}
 const RARITIES := ["Common", "Rare", "Epic"]
 const RARITY_COLORS := [Color("a0b3b7"), Color("69b9ed"), Color("c697eb")]
 const PASSIVES := {
+	"lightning": {"name": "Arc coil", "icon": "lightning", "text": "Chain lightning every 1.8s. 7 damage, up to 4 targets. Toggle between chaining and focused double-damage strikes."},
 	"bolt": {"name": "Auto bolt", "icon": "power", "text": "Automatically fire at the nearest enemy within 310 range."},
 	"orbit": {"name": "Scrap orbit", "icon": "grinder", "text": "Collected scrap becomes orbiting tools."},
 	"pulse": {"name": "Collection pulse", "icon": "pulse", "text": "Every 8 scrap releases a damaging pulse."},
 	"ricochet": {"name": "Ricochet", "icon": "ricochet", "text": "Spent orbit tools become bouncing shards. Requires Scrap orbit."},
 	"plating": {"name": "Reactive plating", "icon": "capacity", "text": "After taking damage, gain 0.65 seconds of extra invulnerability."},
-	"thorns": {"name": "Recoil shell", "icon": "pulse", "text": "Taking hull damage releases a 6-damage ring in 100 radius. Free; damage is listed under Active."},
+	"thorns": {"name": "Recoil shell", "icon": "thorns", "text": "Taking hull damage releases a 6-damage ring in 100 radius."},
 }
 const ABILITIES := {
 	"rocket": {"name": "Impact bolt", "category": "active", "icon": "power", "glyph": "rail", "cd": 3.0, "max": 2, "range": 540.0, "aim": "line", "text": "Aim a straight rocket. 15 impact damage plus an 8-damage blast on contact or at maximum range."},
 	"flame": {"name": "Welding torch", "category": "active", "icon": "rapid", "glyph": "flame", "cd": 7.0, "max": 1, "range": 190.0, "aim": "line", "text": "Burn a forward cone for 2 seconds: 24 damage total. Steer with the cursor while moving."},
-	"nuke": {"name": "Reactor drop", "category": "ultimate", "icon": "pulse", "glyph": "target", "cd": 26.0, "max": 1, "range": 480.0, "aim": "ground", "text": "Mark a 135-radius area. After 0.65 seconds, strike for 85 damage. Press R, then left-click. Right-click cancels."},
+	"nuke": {"name": "Reactor drop", "category": "active", "icon": "pulse", "glyph": "target", "cd": 16.0, "max": 1, "range": 480.0, "aim": "ground", "text": "85 damage in a 135-radius area after 0.65s. Confirm with left click; right click cancels."},
+	"laser": {"name": "Core cutter", "category": "ultimate", "icon": "power", "glyph": "beam", "cd": 30.0, "max": 1, "range": 700.0, "aim": "line", "text": "Channel for up to 5s: 75 damage/sec. Rooted while firing. Right click to steer with inertia; R again cancels. D or F cancels into an escape."},
 	"salvo": {"name": "Homing salvo", "category": "active", "icon": "rapid", "glyph": "salvo", "cd": 8.0, "max": 3, "range": 440.0, "aim": "auto", "text": "5 seeking bolts over 1 second. Each deals 2 + bolt damage. Needs a nearby enemy."},
 	"nova": {"name": "Shock ring", "category": "active", "icon": "pulse", "glyph": "ring", "cd": 7.0, "max": 1, "range": 155.0, "aim": "self", "text": "Deal 9 + pulse rank x 2 damage in a ring. Push enemies away."},
 	"shield": {"name": "Safety shell", "category": "active", "icon": "capacity", "glyph": "shield", "cd": 12.0, "max": 1, "range": 0.0, "aim": "self", "text": "Block the next hit within 4 seconds. No aiming."},
@@ -29,7 +31,7 @@ const ABILITIES := {
 	"lunge": {"name": "Ram strike", "category": "active", "icon": "grinder", "glyph": "dash", "cd": 9.0, "max": 2, "range": 170.0, "aim": "line", "text": "Dash through enemies, dealing 12 damage once per enemy. Invulnerable during dash."},
 	"overdrive": {"name": "Overdrive", "category": "ultimate", "icon": "grinder", "glyph": "sun", "cd": 28.0, "max": 1, "range": 180.0, "aim": "self", "text": "For 5 seconds, emit 5-damage rings twice per second. +25% move speed."},
 	"beam": {"name": "Foundry lance", "category": "ultimate", "icon": "power", "glyph": "beam", "cd": 28.0, "max": 1, "range": 620.0, "aim": "line", "text": "After 0.4 seconds, fire a 56-wide beam for 55 damage. You can keep moving."},
-	"sprint": {"name": "Full throttle", "category": "speed", "icon": "rapid", "glyph": "speed", "cd": 14.0, "max": 1, "range": 0.0, "aim": "self", "text": "+65% movement speed for 3 seconds."},
+	"sprint": {"name": "Ghost drive", "category": "speed", "icon": "rapid", "glyph": "speed", "cd": 18.0, "max": 1, "range": 0.0, "aim": "self", "text": "+65% movement speed. Intangible for 3 seconds; pass through enemies and ignore damage and slows."},
 	"blink": {"name": "Phase hop", "category": "mobility", "icon": "ricochet", "glyph": "blink", "cd": 8.0, "max": 3, "range": 185.0, "aim": "ground", "text": "Blink toward the cursor, up to 185 distance. Brief protection on arrival."},
 	"dash": {"name": "Skate jets", "category": "mobility", "icon": "rapid", "glyph": "dash", "cd": 6.0, "max": 2, "range": 220.0, "aim": "line", "text": "Dash toward the cursor over 0.18 seconds. Invulnerable during travel."},
 	"turret": {"name": "Bolt sentry", "category": "summon", "icon": "power", "glyph": "turret", "cd": 10.0, "max": 1, "range": 320.0, "aim": "ground", "text": "Deploy a stationary turret for 18 seconds. Fires 3-damage bolts within 300 range. Replaces the old summon."},
@@ -77,13 +79,23 @@ var flame_direction := Vector2.RIGHT
 var gear_damage := 0.0
 var gear_speed := 0.0
 var boost_speed := 0.0
+var mastery_damage := 0.0
+var laser_left := 0.0
+var laser_angle := 0.0
+var laser_target := 0.0
+var laser_turn := 0.0
+var laser_slot := "r"
+var arc_clock := 0.0
+var arc_focused := false
 const UNLOCKS := {"q": 0.0, "d": 0.0, "f": 0.0, "p1": 10.0, "w": 20.0, "p2": 32.0, "e": 45.0, "p3": 58.0, "r": 70.0, "t": 95.0, "p4": 110.0}
 
 static func demo_preset() -> Dictionary:
 	var config := preset()
 	config.q = "rocket"
 	config.w = "flame"
-	config.r = "nuke"
+	config.e = "nuke"
+	config.r = "laser"
+	config.passives = ["bolt", "orbit", "lightning", "plating"]
 	config.pet = "drone"
 	return config
 
@@ -91,13 +103,18 @@ func unlocked(slot: String) -> bool:
 	return not onboarding or elapsed >= float(UNLOCKS.get(slot, 0))
 
 func ability_cost(id: String) -> float:
-	return float({"rocket": 8, "flame": 18, "nuke": 35}.get(id, ENERGY_COST.get(id, 0)))
+	return float({"rocket": 8, "flame": 18, "nuke": 28, "laser": 40}.get(id, ENERGY_COST.get(id, 0)))
 
 static func deals_damage(id: String) -> bool:
 	return id not in ["shield", "sprint", "blink", "dash", "pylon", "sacrifice"]
 
 static func migrate_loadout(config: Dictionary) -> Dictionary:
 	var result := config.duplicate(true)
+	if result.get("r") == "nuke":
+		result.e = "nuke"
+		result.r = "laser"
+		if result.get("passives") == ["bolt", "orbit", "pulse", "ricochet"]:
+			result.passives = ["bolt", "orbit", "lightning", "plating"]
 	if result.get("passives") is Array and "magnet" in result.passives:
 		var index: int = result.passives.find("magnet")
 		for replacement in ["thorns", "bolt", "orbit", "pulse", "plating", "ricochet"]:
@@ -147,7 +164,16 @@ func toggle(index: int) -> bool:
 	if index < 0 or index >= 4:
 		return false
 	if not unlocked("p%d" % (index + 1)): return false
+	if loadout.passives[index] == "lightning" and toggles[index]:
+		arc_focused = not arc_focused
+		if not arc_focused: toggles[index] = false
+		return true
 	if onboarding and loadout.passives[index] == "orbit":
+		if not toggles[index]:
+			if energy < 1: return false
+			toggles[index] = true
+			orbit_far = false
+			return true
 		orbit_far = not orbit_far
 		return true
 	if not toggles[index] and UPKEEP.has(loadout.passives[index]) and energy < 1:
@@ -163,7 +189,7 @@ func cooldown_at(slot: String, rank_value: int, tier_value: int = -1) -> float:
 	return float(ABILITIES[loadout[slot]].cd) * (1.0 - tier * 0.08) * (1.0 - SalvageProgression.bonus(rank_value) * 0.5)
 
 func damage_scale(slot: String) -> float:
-	return (1.0 + gear_damage) * (1.0 + int(tiers.get(slot, 0)) * 0.15) * (1.0 + SalvageProgression.bonus(int(ranks.get(slot, 0))))
+	return (1.0 + gear_damage + mastery_damage) * (1.0 + int(tiers.get(slot, 0)) * 0.15) * (1.0 + SalvageProgression.bonus(int(ranks.get(slot, 0))))
 
 func promote(slot: String) -> bool:
 	if slot not in SLOTS or tiers[slot] >= 2:
@@ -174,7 +200,7 @@ func promote(slot: String) -> bool:
 	return true
 
 static func cost_text(id: String) -> String:
-	if id in ["rocket", "flame", "nuke"]: return "%d energy" % {"rocket": 8, "flame": 18, "nuke": 35}[id]
+	if id in ["rocket", "flame", "nuke", "laser"]: return "%d energy" % {"rocket": 8, "flame": 18, "nuke": 28, "laser": 40}[id]
 	return "1 hull -> 55 energy" if id == "sacrifice" else ("%d energy" % ENERGY_COST[id] if ENERGY_COST.has(id) else "Free")
 
 static func resolve_bindings(config: Dictionary) -> Dictionary:
@@ -249,11 +275,12 @@ func speed() -> float:
 func target_point(run, slot: String, cursor: Vector2) -> Vector2:
 	var offset: Vector2 = cursor - run.player
 	var point: Vector2 = run.player + offset.limit_length(cast_range(slot))
-	if loadout[slot] in ["beam", "rail", "rocket", "flame"]:
+	if loadout[slot] in ["beam", "rail", "rocket", "flame", "laser"]:
 		point = run.player + offset.normalized() * cast_range(slot)
 	return point.clamp(run.ARENA.position + Vector2.ONE * 16, run.ARENA.end - Vector2.ONE * 16)
 
 func preview_ready(run, slot: String, cursor: Vector2) -> bool:
+	if laser_left > 0 and slot not in ["d", "f"]: return false
 	if slot not in SLOTS or charges[slot] <= 0 or not unlocked(slot): return false
 	var id: String = loadout[slot]
 	if energy < ability_cost(id): return false
@@ -267,6 +294,13 @@ func preview_ready(run, slot: String, cursor: Vector2) -> bool:
 
 func cast(run, slot: String, cursor: Vector2) -> bool:
 	last_failure = "Not ready"
+	if laser_left > 0:
+		if slot == laser_slot:
+			cancel_laser()
+			return true
+		if slot not in ["d", "f"]:
+			last_failure = "Channeling"
+			return false
 	if run.state != "running" or not SLOTS.has(slot) or charges[slot] <= 0:
 		return false
 	if not unlocked(slot):
@@ -296,6 +330,7 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 		last_failure = "Need more than 1 hull" if run.health <= 1 else "Energy is full"
 		return false
 	energy -= cost
+	if slot in ["d", "f"]: cancel_laser()
 	energy_spent += cost
 	charges[slot] -= 1
 	if recharge[slot] <= 0:
@@ -305,6 +340,14 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	run.aim = direction if direction != Vector2.ZERO else run.aim
 	run.emit_event("cast", run.player, {"ability": id, "target": point, "milestone": milestone(slot)})
 	match id:
+		"laser":
+			laser_left = 5.0
+			laser_slot = slot
+			laser_angle = direction.angle()
+			laser_target = laser_angle
+			laser_turn = 0.0
+			flame_left = 0.0
+			run.stop_movement()
 		"rocket":
 			var before: int = run.projectiles.size()
 			run._add_projectile(run.player, direction * 720, 15 * multiplier, "rocket", 0)
@@ -312,6 +355,7 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 				run.projectiles.back().life = cast_range(slot) / 720.0
 				run.projectiles.back().blast = 8 * multiplier
 				run.projectiles.back().radius = 62 * area_scale(slot)
+				run.projectiles.back().milestone = milestone(slot)
 		"flame":
 			flame_left = 2.0
 			flame_tick = 0.25
@@ -336,7 +380,11 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 			overdrive = 5.0
 			overdrive_tick = 0.0
 		"beam": zones.append({"pos": run.player, "end": point, "time": 0.4, "duration": 0.4, "radius": 28.0 * area_scale(slot), "kind": "beam", "scale": multiplier})
-		"sprint": sprint = 3.0 + milestone(slot)
+		"sprint":
+			sprint = 3.0 + milestone(slot)
+			run.invincible = maxf(run.invincible, 3.0)
+			run.slow_left = 0
+			if run.mastery.rank_of("resolve") > 0: run.health = mini(run.max_health(), run.health + 1)
 		"blink":
 			run.emit_event("blink", run.player, {"target": point})
 			run.player = point
@@ -351,6 +399,8 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	return true
 
 func step(run, delta: float) -> void:
+	_step_laser(run, delta)
+	_step_arc(run, delta)
 	var previous := elapsed
 	elapsed += delta
 	if onboarding:
@@ -428,7 +478,7 @@ func step(run, delta: float) -> void:
 			else:
 				summon.clock = 5.0
 				if run.player.distance_to(summon.pos) <= 100 * (1 + summon.get("milestone", 0) * 0.5):
-					run.health = mini(5, run.health + 1)
+					run.health = mini(run.max_health(), run.health + 1)
 					run.emit_event("equipped", run.player, {"id": "repair"})
 		if summon.life <= 0:
 			summon.clear()
@@ -441,6 +491,54 @@ func step(run, delta: float) -> void:
 		for pickup in run.pickups:
 			if Vector2(pickup.pos).distance_to(pet_position) < 105:
 				pickup.pull = true
+
+func cancel_laser() -> void:
+	laser_left = 0
+	laser_turn = 0
+
+func steer_laser(run, point: Vector2) -> void:
+	if laser_left > 0 and point.distance_squared_to(run.player) > 4:
+		laser_target = (point - run.player).angle()
+
+func _step_laser(run, delta: float) -> void:
+	if laser_left <= 0: return
+	if run.state != "running":
+		cancel_laser()
+		return
+	var dt := minf(delta, laser_left)
+	var error := wrapf(laser_target - laser_angle, -PI, PI)
+	# Bounded angular speed + acceleration: no cursor teleport or 180-degree snap.
+	var desired := clampf(error * 5.0, -1.25, 1.25)
+	laser_turn = move_toward(laser_turn, desired, 3.5 * dt)
+	laser_angle = wrapf(laser_angle + laser_turn * dt, -PI, PI)
+	var end: Vector2 = run.player + Vector2.from_angle(laser_angle) * cast_range(laser_slot)
+	var radius := 23.0 * area_scale(laser_slot)
+	run.aim = Vector2.from_angle(laser_angle)
+	for enemy in run.enemies:
+		if not enemy.dead and enemy.warmup <= 0 and Geometry2D.get_closest_point_to_segment(enemy.pos, run.player, end).distance_to(enemy.pos) <= radius + enemy.radius:
+			run.hit_enemy(enemy, 75 * damage_scale(laser_slot) * dt, "ultimate")
+	laser_left = maxf(0, laser_left - dt)
+	if laser_left <= 0: cancel_laser()
+
+func _step_arc(run, delta: float) -> void:
+	if not passive_active("lightning") or energy < 1: return
+	arc_clock -= delta
+	if arc_clock > 0: return
+	var target: Dictionary = run.nearest_enemy(run.player)
+	if target.is_empty() or Vector2(target.pos).distance_to(run.player) > 280: return
+	arc_clock = 1.8 # No stored burst after a long interval without targets.
+	var origin: Vector2 = run.player
+	var visited: Array = []
+	for i in range(1 if arc_focused else 4):
+		if target.is_empty() or Vector2(target.pos).distance_to(origin) > (280 if i == 0 else 145): break
+		visited.append(target.id)
+		run.emit_event("lightning", origin, {"target": target.pos})
+		if run.mastery.rank_of("shock") > 0 and not target.has("role"):
+			target["stun"] = 0.35
+		var power := SalvageProgression.multiplier(run.rank_of("power"))
+		run.hit_enemy(target, 7 * power * (2 if arc_focused else 1), "lightning")
+		origin = target.pos
+		target = run.nearest_enemy(origin, visited)
 
 func move_dash(run, delta: float) -> void:
 	var before: Vector2 = run.player

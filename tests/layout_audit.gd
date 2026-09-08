@@ -25,7 +25,7 @@ func _run() -> void:
 	game.camera_locked = true
 	game.r_quickcast = false
 	game.set_physics_process(false)
-	for name in ["equipment", "gear", "home", "gameplay", "upgrade", "pause", "result", "build", "stats", "loadout", "passives", "keys", "abilities", "stage_reward", "settings", "utility", "utility_tree", "weapons", "milestone", "milestone_tree", "demo_recovery", "death_recap"]:
+	for name in ["mastery", "laser", "laser_milestone", "rocket", "equipment", "gear", "home", "gameplay", "upgrade", "pause", "result", "build", "stats", "loadout", "passives", "keys", "abilities", "stage_reward", "settings", "utility", "utility_tree", "weapons", "milestone", "milestone_tree", "demo_recovery", "death_recap"]:
 		game.show_home()
 		game._fixture(name)
 		await process_frame

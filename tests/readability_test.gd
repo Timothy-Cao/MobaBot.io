@@ -28,7 +28,7 @@ func _run() -> void:
 	boss.dir = Vector2.RIGHT
 	DemoCampaign.enemy_step(run, boss, 0.02)
 	check(run.projectiles.size() == run.MAX_PROJECTILES, "Threat reservation never exceeds pool cap")
-	check(run.projectiles.filter(func(b: Dictionary) -> bool: return b.kind == "hostile").size() == 5, "Full friendly pool cannot erase promised five-shot boss fan")
+	check(run.projectiles.filter(func(b: Dictionary) -> bool: return b.kind == "hostile").size() == 7, "Full friendly pool cannot erase promised seven-shot boss fan")
 	run.projectiles.clear()
 	for i in range(run.MAX_PROJECTILES): run._add_projectile(run.player, Vector2.RIGHT, 1, "hostile", 0)
 	run._add_projectile(run.player, Vector2.RIGHT, 1, "hostile", 0)

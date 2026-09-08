@@ -13,9 +13,16 @@ func line(a: Vector2, b: Vector2, color: Color, width: float = 2) -> void:
 
 func poly(points: Array, color: Color) -> void:
 	var shape := PackedVector2Array(points)
+	var shadow := shape.duplicate()
+	for i in range(shadow.size()): shadow[i] += Vector2(2, 3)
+	draw_colored_polygon(shadow, Color(INK, 0.75))
 	draw_colored_polygon(shape, color)
 	shape.append(shape[0])
 	draw_polyline(shape, INK, 2, true)
+	# A shared upper-left bevel adds form without painted texture noise.
+	for i in range(shape.size() - 1):
+		if shape[i + 1].x > shape[i].x and shape[i + 1].y <= shape[i].y:
+			line(shape[i] + Vector2(1, 1), shape[i + 1] + Vector2(-1, 1), color.lightened(0.25), 1)
 
 func bolt(p: Vector2, scale_value: float = 1.0) -> void:
 	var points: Array = []
@@ -34,6 +41,56 @@ func _draw() -> void:
 	for i in range(3):
 		line(Vector2(7 + i * 5, 55), Vector2(7 + i * 5, 58), Color("668577"), 1)
 	match ability:
+		"lightning":
+			for p in [Vector2(12, 47), Vector2(49, 15)]:
+				draw_circle(p, 10, INK)
+				draw_circle(p, 7, TEAL)
+				draw_arc(p, 7, PI, TAU, 16, STEEL, 3, true)
+			poly([Vector2(34, 9), Vector2(17, 34), Vector2(29, 34), Vector2(24, 56), Vector2(47, 27), Vector2(35, 27)], GOLD)
+			line(Vector2(29, 29), Vector2(36, 19), CREAM, 3)
+		"power", "pulse", "reactor":
+			for i in range(8):
+				var d := Vector2.from_angle(i * TAU / 8)
+				line(Vector2(32, 32) + d * 15, Vector2(32, 32) + d * 26, STEEL, 7)
+			draw_circle(Vector2(32, 32), 21, INK)
+			draw_circle(Vector2(32, 32), 18, TEAL)
+			draw_arc(Vector2(32, 32), 16, PI, TAU * 0.9, 24, LIGHT, 3, true)
+			draw_circle(Vector2(32, 32), 11, INK)
+			draw_circle(Vector2(32, 32), 7, GOLD)
+			if ability == "power": bolt(Vector2(34, 29), 0.8)
+			if ability == "reactor": line(Vector2(28, 32), Vector2(36, 32), CREAM, 3)
+		"grinder", "ricochet":
+			var points: Array = []
+			for i in range(24): points.append(Vector2(32, 32) + Vector2.from_angle(i * TAU / 24) * (26 if i % 3 == 0 else 21))
+			poly(points, STEEL)
+			draw_circle(Vector2(32, 32), 15, INK)
+			draw_circle(Vector2(32, 32), 12, TEAL)
+			draw_arc(Vector2(32, 32), 11, PI, TAU, 20, LIGHT, 2, true)
+			draw_circle(Vector2(32, 32), 5, GOLD)
+			if ability == "ricochet":
+				line(Vector2(11, 51), Vector2(44, 18), GOLD, 4)
+				line(Vector2(44, 18), Vector2(53, 40), GOLD, 4)
+		"magnet":
+			poly([Vector2(9, 12), Vector2(23, 12), Vector2(23, 38), Vector2(29, 44), Vector2(35, 44), Vector2(41, 38), Vector2(41, 12), Vector2(55, 12), Vector2(55, 41), Vector2(43, 55), Vector2(21, 55), Vector2(9, 41)], TEAL)
+			draw_rect(Rect2(10, 12, 12, 10), STEEL)
+			draw_rect(Rect2(42, 12, 12, 10), GOLD)
+			line(Vector2(15, 27), Vector2(15, 39), LIGHT, 3)
+		"chassis", "capacity":
+			poly([Vector2(8, 16), Vector2(22, 9), Vector2(42, 9), Vector2(56, 16), Vector2(51, 47), Vector2(40, 55), Vector2(24, 55), Vector2(13, 47)], STEEL)
+			poly([Vector2(20, 19), Vector2(44, 19), Vector2(44, 45), Vector2(20, 45)], TEAL)
+			draw_rect(Rect2(24, 25, 16, 12), INK)
+			for x in [27, 36]: draw_circle(Vector2(x, 30), 2, CREAM)
+			line(Vector2(24, 41), Vector2(40, 41), GOLD, 3)
+		"jets", "rapid":
+			for x in [12, 36]:
+				poly([Vector2(x, 16), Vector2(x + 7, 9), Vector2(x + 17, 16), Vector2(x + 15, 42), Vector2(x + 2, 42)], STEEL)
+				draw_rect(Rect2(x + 3, 20, 10, 14), TEAL)
+				poly([Vector2(x + 3, 43), Vector2(x + 14, 43), Vector2(x + 8, 58)], GOLD)
+				line(Vector2(x + 7, 45), Vector2(x + 8, 52), CREAM, 3)
+		"cell":
+			poly([Vector2(20, 8), Vector2(44, 8), Vector2(49, 18), Vector2(49, 53), Vector2(15, 53), Vector2(15, 18)], STEEL)
+			draw_rect(Rect2(21, 19, 22, 28), TEAL)
+			for y in [23, 31, 39]: draw_rect(Rect2(25, y, 14, 4), GOLD)
 		"rocket":
 			poly([Vector2(13, 47), Vector2(29, 19), Vector2(50, 10), Vector2(46, 33), Vector2(22, 53)], STEEL)
 			poly([Vector2(29, 19), Vector2(50, 10), Vector2(46, 33)], TEAL)
@@ -56,11 +113,14 @@ func _draw() -> void:
 			for r in [25, 18, 11]:
 				draw_arc(Vector2(32, 32), r, 0.15, TAU - 0.1, 48, GOLD if r == 18 else TEAL, 4, true)
 			draw_circle(Vector2(32, 32), 6, CREAM)
-		"shield":
+		"shield", "thorns":
 			poly([Vector2(12, 13), Vector2(32, 7), Vector2(53, 13), Vector2(48, 39), Vector2(32, 56), Vector2(17, 39)], STEEL)
 			poly([Vector2(20, 18), Vector2(32, 14), Vector2(45, 18), Vector2(41, 36), Vector2(32, 47), Vector2(23, 36)], TEAL)
 			line(Vector2(32, 18), Vector2(32, 39), CREAM, 3)
 			line(Vector2(25, 28), Vector2(39, 28), CREAM, 3)
+			if ability == "thorns":
+				for side in [-1, 1]:
+					poly([Vector2(32 + side * 15, 22), Vector2(32 + side * 29, 15), Vector2(32 + side * 18, 35)], GOLD)
 		"mortar":
 			draw_arc(Vector2(29, 39), 18, 0, TAU, 32, TEAL, 4, true)
 			for i in range(4):
@@ -81,11 +141,13 @@ func _draw() -> void:
 			draw_circle(Vector2(32, 32), 14, INK)
 			draw_circle(Vector2(32, 32), 10, TEAL)
 			poly([Vector2(34, 18), Vector2(26, 32), Vector2(33, 32), Vector2(30, 46), Vector2(40, 29), Vector2(33, 29)], CREAM)
-		"beam":
+		"beam", "laser":
 			line(Vector2(10, 54), Vector2(53, 11), TEAL, 22)
 			line(Vector2(10, 54), Vector2(53, 11), GOLD, 11)
 			line(Vector2(10, 54), Vector2(53, 11), CREAM, 4)
 			line(Vector2(29, 7), Vector2(58, 36), STEEL, 3)
+			poly([Vector2(8, 45), Vector2(19, 35), Vector2(30, 46), Vector2(19, 57)], STEEL)
+			draw_circle(Vector2(19, 46), 5, TEAL)
 		"sprint", "dash":
 			for i in range(2):
 				var x := i * 20

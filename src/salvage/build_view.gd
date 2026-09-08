@@ -1,25 +1,30 @@
 extends RefCounted
-## Read-only build inspection. Rank nodes describe real sequential levels,
-## not additional purchases or mutually exclusive prerequisites.
+## Mastery purchases plus ability-rank, stat and equipment inspection.
+## Ability rank previews are not additional purchases.
 
 static func draw(ui: CanvasLayer, model: SalvageRun) -> void:
 	ui._panel(Rect2(24, 24, 912, 492), Color("172932"))
 	ui._label(ui.overlay, "Build", Rect2(47, 39, 212, 42), 30, ui.CREAM, true)
-	ui._button("Upgrades", Rect2(286, 42, 116, 34), func() -> void:
+	ui._button("Mastery", Rect2(253, 42, 104, 34), func() -> void:
+		ui.build_page = "mastery"
+		ui.show_build(model, false), ui.build_page == "mastery")
+	ui._button("Upgrades", Rect2(363, 42, 104, 34), func() -> void:
 		ui.build_page = "upgrades"
 		ui.show_build(model, false), ui.build_page == "upgrades")
-	ui._button("Stats", Rect2(414, 42, 116, 34), func() -> void:
+	ui._button("Stats", Rect2(473, 42, 104, 34), func() -> void:
 		ui.build_page = "stats"
 		ui.show_build(model, false), ui.build_page == "stats")
 	if model.kit != null:
-		ui._button("Abilities", Rect2(542, 42, 116, 34), func() -> void:
+		ui._button("Abilities", Rect2(583, 42, 104, 34), func() -> void:
 			ui.build_page = "abilities"
 			ui.show_build(model, false), ui.build_page == "abilities")
-	ui._button("Gear", Rect2(670, 42, 116, 34), func() -> void:
+	ui._button("Gear", Rect2(693, 42, 104, 34), func() -> void:
 		ui.build_page = "gear"
 		ui.show_build(model, false), ui.build_page == "gear")
 	var close: Button = ui._button("Back", Rect2(811, 42, 102, 34), func() -> void: ui.build_closed.emit(), false)
-	if ui.build_page == "upgrades":
+	if ui.build_page == "mastery":
+		_mastery(ui, model)
+	elif ui.build_page == "upgrades":
 		_tree(ui, model)
 	elif ui.build_page == "abilities":
 		_abilities(ui, model)
@@ -28,6 +33,31 @@ static func draw(ui: CanvasLayer, model: SalvageRun) -> void:
 	else:
 		_stats(ui, model)
 	close.grab_focus()
+
+static func _mastery(ui, model: SalvageRun) -> void:
+	ui._label(ui.overlay, "Preview" if model.mastery.read_only else "◇ %d" % model.mastery.available(model.level), Rect2(49, 98, 130, 35), 25, ui.GOLD, true)
+	var note = ui._label(ui.overlay, "Mastery", Rect2(158, 108, 225, 22), 15, ui.CREAM)
+	note.mouse_filter = Control.MOUSE_FILTER_STOP
+	note.tooltip_text = "Run-only passives. Start with 1 point, then gain 1 every two power levels. Spend in Tab; no popup. One parent point unlocks the next node."
+	for branch in range(3):
+		var x := 93 + branch * 284
+		ui._label(ui.overlay, ["SALVAGE", "SURVIVAL", "OVERLOAD"][branch], Rect2(x, 142, 238, 22), 12, ui.TEAL, true)
+	for id in BotMastery.NODES:
+		var data: Dictionary = BotMastery.NODES[id]
+		var x: int = 93 + data.branch * 284
+		var y: int = 178 + data.row * 104
+		var rank_value := model.mastery.rank_of(id)
+		var available := model.mastery.can_buy(id, model.level) and model.state in ["running", "upgrade", "stage_reward"]
+		if not data.parent.is_empty():
+			_wire(ui, Vector2(x + 28, y - 46), Vector2(x + 28, y), ui.TEAL if model.mastery.rank_of(data.parent) > 0 else ui.EDGE)
+		var node: Button = ui._button("", Rect2(x, y, 58, 58), func() -> void:
+			if model.mastery.buy(model, id): ui.show_build(model, false), false)
+		node.set_meta("mastery_id", id)
+		node.add_theme_stylebox_override("normal", ui._style(ui.PANEL, 2, ui.GOLD if available else (ui.TEAL if rank_value > 0 else ui.EDGE), 2))
+		ui._icon(node, data.icon, Rect2(5, 5, 48, 48), not available and rank_value == 0)
+		node.tooltip_text = data.text + ("\nRequires " + BotMastery.NODES[data.parent].name if not data.parent.is_empty() and model.mastery.rank_of(data.parent) == 0 else "") + ("\nMax rank" if rank_value == data.max else "\n1 mastery point")
+		ui._label(ui.overlay, data.name, Rect2(x + 72, y + 5, 169, 24), 17, ui.CREAM, true)
+		ui._label(ui.overlay, "%d / %d" % [rank_value, data.max], Rect2(x + 72, y + 34, 132, 23), 15, ui.GOLD if available else ui.MUTED)
 
 static func _gear(ui, model: SalvageRun) -> void:
 	for i in range(model.equipment_snapshot.size()):
@@ -40,7 +70,6 @@ static func _gear(ui, model: SalvageRun) -> void:
 		ui._label(ui.overlay, "%d stars / %s" % [item.stars, item.stats], Rect2(x + 18, 326, 243, 48), 12, ui.GOLD)
 	ui._label(ui.overlay, "%d run credits / Repair x%d / Energy x%d" % [model.coins, model.consumables[0], model.consumables[1]], Rect2(47, 407, 866, 26), 17, ui.CREAM, true)
 	ui._label(ui.overlay, "Bonus drop chance +%.0f%% / Ability damage +%.1f%% / Gear move speed +%.1f%%" % [model.drop_bonus * 100, model.kit.gear_damage * 100, model.kit.gear_speed * 100], Rect2(47, 446, 866, 23), 13, ui.MUTED)
-	ui._label(ui.overlay, "Collected credits bank at a clear or defeat. Each cleared level also awards equipment.", Rect2(47, 481, 866, 20), 12, ui.MUTED)
 
 static func _wire(ui: CanvasLayer, a: Vector2, b: Vector2, color: Color) -> void:
 	var line := Line2D.new()
@@ -119,7 +148,9 @@ static func _rank_tree(ui, model: SalvageRun) -> void:
 		for r in range(int(model.upgrade_data(id).max)):
 			ui._surface(tile, Rect2(242 + r * 12, 17, 8, 5), ui.GOLD if r < model.rank_of(id) and (r + 1) % 5 == 0 else (ui.TEAL if r < model.rank_of(id) else ui.EDGE), 1)
 	if ui.track_group == "utility":
-		ui._label(ui.overlay, "Always equipped. No passive slot. No energy cost.\n\nMagnet starts at rank 1.\nGain another free rank every 3 level-ups.\n\n250 -> 350 -> 450 -> 550 -> 650 px pickup radius.\nPull speed also improves each rank.\n\nRank 5 adds a whole-map scrap sweep every 15s.\nCollection can feed Orbit and Pulse: indirect power.", Rect2(55, 210, 405, 247), 14, ui.MUTED)
+		var utility = ui._label(ui.overlay, "Magnet", Rect2(55, 210, 405, 32), 24, ui.CREAM, true)
+		utility.mouse_filter = Control.MOUSE_FILTER_STOP
+		utility.tooltip_text = "Always equipped. Free ranks every 3 power levels. Mastery adds pickup reach. Bonus drops require close collection."
 	var id: String = ui.selected_item
 	var data: Dictionary = model.upgrade_data(id)
 	var r: int = clampi(ui.selected_rank, 1, data.max)
@@ -139,7 +170,6 @@ static func _rank_tree(ui, model: SalvageRun) -> void:
 	ui._label(ui.overlay, "MILESTONES" if id != "magnet" else "FREE UTILITY", Rect2(509, 402, 380, 19), 11, ui.GOLD, true)
 	var note = ui._label(ui.overlay, model.upgrade_note(id, r), Rect2(509, 427, 380, 45), 13, ui.CREAM)
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	ui._label(ui.overlay, "Level 1: ranks 1–5 / Level 2: up to 8 / Level 3: up to 10. Stars are milestones." if model.demo_mode else "Preview ranks by clicking a number. Stars mark milestone upgrades.", Rect2(49, 491, 860, 18), 11, ui.MUTED)
 
 static func _detail(ui: CanvasLayer, model: SalvageRun) -> void:
 	var id: String = ui.selected_item
@@ -169,41 +199,47 @@ static func _stat_row(ui: CanvasLayer, x: float, y: float, title: String, base: 
 
 static func _stats(ui: CanvasLayer, model: SalvageRun) -> void:
 	var s := model.stats()
-	for i in range(3):
-		var x := 46 + i * 293
-		ui._surface(ui.overlay, Rect2(x, 105, 279, 218), ui.PANEL)
-		ui._icon(ui.overlay, ["power", "grinder", "magnet"][i], Rect2(x + 14, 114, 34, 34))
-		ui._label(ui.overlay, ["Bolt gun", "Orbit tools", "Movement & collection"][i], Rect2(x + 59, 116, 210, 28), 16, ui.CREAM, true)
-		ui._label(ui.overlay, "BASE       NOW", Rect2(x + 138, 153, 127, 18), 10, ui.MUTED, true, HORIZONTAL_ALIGNMENT_RIGHT)
-	_stat_row(ui, 61, 178, "Damage", "2", str(s.bolt_damage), "Heavy bolts; also scales Salvo / Rail")
-	_stat_row(ui, 61, 222, "Shots / sec", "2.33", "%.2f" % s.fire_rate if model.passive_enabled("bolt") else "Off", "Fire rate ranks + milestone boosts" if model.staged else "Auto bolt: 1.22x per Fire rate rank")
-	_stat_row(ui, 61, 266, "Pierces", "0", str(s.pierce), "Heavy bolts")
-	var disabled := model.mode == "baseline" or not model.passive_enabled("orbit")
-	_stat_row(ui, 354, 178, "Damage", "4", "—" if disabled else str(s.orbit_damage), "Grinder")
-	_stat_row(ui, 354, 222, "Hits / tool", "1", "—" if disabled else str(s.orbit_hits), "Grinder")
-	_stat_row(ui, 354, 266, "Slots", "6", "—" if disabled else str(s.capacity), "Tool rack")
-	_stat_row(ui, 647, 178, "Move speed", "205", "%.0f px/s" % s.move_speed, "Sprint +65%; Overdrive +25% (additive)")
-	_stat_row(ui, 647, 222, "Pickup radius", "250" if model.staged else "83", "%d px" % s.magnet_radius, "Free Utility: Magnet" if model.staged else "Magnet")
-	_stat_row(ui, 647, 266, "Hull", "5", "%d / 5" % model.health, "Foreman kill restores 1 hull")
-	ui._surface(ui.overlay, Rect2(46, 337, 572, 149), ui.PANEL)
-	ui._label(ui.overlay, "Damage dealt this run", Rect2(62, 350, 510, 24), 16, ui.CREAM, true)
-	var total := 0.0
-	for value in model.damage_dealt.values():
-		total += float(value)
-	var sources := ["bolt", "orbit", "shard", "pulse", "rocket", "flame", "active", "ultimate", "pet", "summon"] if model.kit != null and model.kit.onboarding else ["bolt", "orbit", "shard", "pulse", "homing", "rail", "active", "ultimate", "pet", "summon"]
-	for i in range(sources.size()):
+	var groups := [
+		{"title": "COMBAT", "x": 49, "rows": [
+			["Bolt damage", "%.2f" % s.bolt_damage, "Heavy bolts. Automatic weapon only."],
+			["Fire rate", "%.2f /s" % s.fire_rate, "Automatic fire rate."],
+			["Orbit damage", "%.2f" % s.orbit_damage, "Per tool hit; only while Scrap orbit is enabled."],
+			["Ability power", "+%.0f%%" % ((model.kit.gear_damage + model.kit.mastery_damage) * 100), "Equipment + mastery. Each ability also has its own rank and rarity multiplier."]]},
+		{"title": "SURVIVAL", "x": 342, "rows": [
+			["Hull", "%d / %d" % [model.health, model.max_health()], "Reinforced mastery increases maximum hull."],
+			["Move speed", "%.0f" % (s.move_speed * (0.8 if model.slow_left > 0 else 1.0)), "Current movement speed, including boosts and slows."],
+			["Energy", "%d / %d" % [model.kit.energy, model.kit.energy_max()], "Stored / capacity."],
+			["Net energy", "%+.1f /s" % (model.kit.energy_regen() - model.kit.drain_rate()), "Regeneration %.1f / upkeep %.1f per second." % [model.kit.energy_regen(), model.kit.drain_rate()]]]},
+		{"title": "SALVAGE", "x": 635, "rows": [
+			["Pickup reach", "%.0f" % s.magnet_radius, "Magnet + Long reach mastery. Bonus drops still require proximity."],
+			["Bonus XP", "+%d%%" % (model.mastery.rank_of("learning") * 10), "Fast learner mastery. Scrap XP only."],
+			["Bonus drops", "+%.0f%%" % (model.drop_bonus * 100), "Relative increase to money/boost drop odds, not percentage points."],
+			["Credits", str(model.coins), "Banked at a clear or defeat."]]}
+	]
+	for group in groups:
+		ui._label(ui.overlay, group.title, Rect2(group.x, 106, 263, 24), 12, ui.TEAL, true)
+		for i in range(group.rows.size()):
+			var row: Array = group.rows[i]
+			var y := 148 + i * 47
+			var surface = ui._surface(ui.overlay, Rect2(group.x, y, 264, 42), Color(0, 0, 0, 0), 0, Color(0, 0, 0, 0), 0)
+			surface.mouse_filter = Control.MOUSE_FILTER_STOP
+			surface.tooltip_text = row[2]
+			ui._label(surface, row[0], Rect2(0, 4, 147, 23), 14, ui.MUTED)
+			ui._label(surface, row[1], Rect2(148, 4, 112, 23), 17, ui.CREAM, true, HORIZONTAL_ALIGNMENT_RIGHT)
+			ui._surface(surface, Rect2(0, 36, 260, 1), ui.EDGE, 0, ui.EDGE, 0)
+	ui._label(ui.overlay, "DAMAGE DEALT", Rect2(49, 357, 812, 24), 12, ui.TEAL, true)
+	var sources := model.damage_dealt.keys()
+	sources.sort_custom(func(a, b) -> bool: return model.damage_dealt[a] > model.damage_dealt[b])
+	var largest := 1.0
+	for value in model.damage_dealt.values(): largest = maxf(largest, value)
+	for i in range(mini(8, sources.size())):
 		var id: String = sources[i]
-		var x := 62 + (i % 5) * 109
-		var y := 382 + (i / 5) * 48
-		ui._label(ui.overlay, "%.0f" % model.damage_dealt.get(id, 0), Rect2(x, y, 98, 23), 18, ui.GOLD, true)
-		ui._label(ui.overlay, id.capitalize(), Rect2(x, y + 23, 98, 16), 10, ui.MUTED)
-		var bar: ProgressBar = ui._bar(ui.overlay, Rect2(x, y + 40, 96, 3), ui.TEAL, maxf(1, total))
-		bar.value = model.damage_dealt.get(id, 0)
-	ui._surface(ui.overlay, Rect2(632, 337, 279, 149), ui.PANEL)
-	ui._label(ui.overlay, "Energy", Rect2(648, 350, 247, 23), 16, ui.CREAM, true)
-	if model.kit != null:
-		ui._label(ui.overlay, "%d / %d stored\n+%.1f regen / sec\n-%.1f toggle upkeep / sec\n%.0f spent / %d hull paid" % [model.kit.energy, model.kit.energy_max(), model.kit.energy_regen(), model.kit.drain_rate(), model.kit.energy_spent, model.kit.health_spent], Rect2(648, 380, 247, 96), 13, ui.CREAM)
-	ui._label(ui.overlay, "Stats reflect this run. Upgrades reset when you start a new run.", Rect2(48, 491, 860, 18), 10, ui.MUTED)
+		var x := 49 + (i % 4) * 219
+		var y := 394 + (i / 4) * 54
+		ui._label(ui.overlay, id.capitalize(), Rect2(x, y, 119, 20), 13, ui.MUTED)
+		ui._label(ui.overlay, "%.0f" % model.damage_dealt[id], Rect2(x + 121, y, 81, 20), 15, ui.GOLD, true, HORIZONTAL_ALIGNMENT_RIGHT)
+		var bar = ui._bar(ui.overlay, Rect2(x, y + 28, 200, 3), ui.TEAL, largest)
+		bar.value = model.damage_dealt[id]
 
 static func _abilities(ui, model: SalvageRun) -> void:
 	var kit := model.kit
@@ -227,4 +263,3 @@ static func _abilities(ui, model: SalvageRun) -> void:
 		var x := 48 + i * 217
 		ui._icon(ui.overlay, data.icon, Rect2(x, 426, 40, 40))
 		ui._label(ui.overlay, "[%s] %s\n%s / %s energy/sec" % [OS.get_keycode_string(kit.bindings["p%d" % (i + 1)]), data.name, "ON" if kit.passive_active(kit.loadout.passives[i]) else "OFF", MobaKit.UPKEEP.get(kit.loadout.passives[i], 0)], Rect2(x + 46, 430, 171, 42), 11, ui.TEAL, true)
-	ui._label(ui.overlay, "Energy: %d / %d (+%.1f/s net) / Pet: %s / Release Tab to close a held inspection." % [kit.energy, kit.energy_max(), kit.energy_regen() - kit.drain_rate(), MobaKit.PETS[kit.loadout.pet]], Rect2(48, 485, 857, 22), 12, ui.MUTED)

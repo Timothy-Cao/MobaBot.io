@@ -19,14 +19,17 @@ static func draw(ui) -> void:
 		_utility(ui)
 	else:
 		_equipment(ui)
-	ui._label(ui.overlay, ui.loadout_message, Rect2(48, 481, 860, 23), 12, ui.GOLD)
+	if ui.loadout_message.begins_with("Replace") or ui.loadout_message.begins_with("Reserved"):
+		ui._label(ui.overlay, ui.loadout_message, Rect2(48, 481, 860, 23), 12, ui.GOLD)
 
 static func _utility(ui) -> void:
 	ui._surface(ui.overlay, Rect2(48, 105, 864, 349), ui.PANEL)
 	ui._icon(ui.overlay, "magnet", Rect2(70, 128, 180, 180))
 	ui._label(ui.overlay, "Magnet", Rect2(281, 128, 588, 39), 29, ui.CREAM, true)
 	ui._label(ui.overlay, "ALWAYS EQUIPPED / FREE", Rect2(283, 178, 583, 24), 13, ui.TEAL, true)
-	ui._label(ui.overlay, "No passive slot. No energy drain.\n\nStarts at 88 px. Free ranks every 3 level-ups,\nup to 180 px. Each rank pulls scrap faster.\n\nBonus drops need you within 48 px.\nNo full-map vacuum. Move to collect rewards.", Rect2(283, 220, 594, 209), 16, ui.MUTED)
+	var info = ui._label(ui.overlay, "88 → 180 reach", Rect2(283, 220, 594, 42), 24, ui.CREAM)
+	info.mouse_filter = Control.MOUSE_FILTER_STOP
+	info.tooltip_text = "Free rank every 3 power levels. Mastery can add another 105 reach. Bonus drops require 48 range. No passive slot or energy cost."
 
 static func _equipment(ui) -> void:
 	var passive: bool = ui.loadout_page == "passives"
@@ -84,6 +87,7 @@ static func _equipment(ui) -> void:
 			draw(ui), false)
 		if id == selected_id:
 			tile.add_theme_stylebox_override("normal", ui._style(Color("29434c"), 6, ui.TEAL, 2))
+		tile.tooltip_text = data.text
 		if passive:
 			ui._icon(tile, data.icon, Rect2(9, 10, 51, 51))
 		else:
@@ -91,11 +95,6 @@ static func _equipment(ui) -> void:
 		ui._label(tile, data.name, Rect2(67, 9, 121, 33), 12, ui.CREAM, true)
 		ui._label(tile, "Toggle" if passive else "%ss / %d charge%s" % [data.cd, data.max, "s" if data.max > 1 else ""], Rect2(67, 37, 121, 18), 10, ui.MUTED)
 		ui._label(tile, ("%s energy/s" % MobaKit.UPKEEP[id] if MobaKit.UPKEEP.has(id) else "Free") if passive else MobaKit.cost_text(id), Rect2(9, 64, 174, 18), 10, ui.TEAL)
-	var info: Dictionary = MobaKit.PASSIVES[selected_id] if passive else MobaKit.ABILITIES[selected_id]
-	ui._surface(ui.overlay, Rect2(298, 385, 602, 79), ui.PANEL)
-	var description: Label = ui._label(ui.overlay, info.text, Rect2(313, 395, 570, 59), 14, ui.CREAM)
-	description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	if passive and selected_id == "orbit": description.text = "Collected scrap becomes orbit blades. Press its number key to alternate close protection and a wider attack radius."
 	if passive:
 		ui._label(ui.overlay, "ONE PET", Rect2(48, 298, 220, 20), 11, ui.MUTED, true)
 		ui._button(MobaKit.PETS[ui.loadout_config.pet], Rect2(48, 325, 226, 39), func() -> void:
@@ -103,9 +102,6 @@ static func _equipment(ui) -> void:
 			ui.loadout_config.pet = pets[(pets.find(ui.loadout_config.pet) + 1) % pets.size()]
 			ui.loadout_changed.emit(ui.loadout_config, ui.key_config)
 			draw(ui), false)
-		var text := "Scout attracts scrap within 105 range. Drone fires at nearby enemies. No pet controls needed."
-		var note: Label = ui._label(ui.overlay, text, Rect2(48, 373, 221, 78), 12, ui.MUTED)
-		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	else:
 		ui._button("Default kit", Rect2(48, 422, 109, 37), func() -> void:
 			ui.loadout_config = MobaKit.demo_preset()

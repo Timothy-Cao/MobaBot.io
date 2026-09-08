@@ -84,7 +84,7 @@ func _run() -> void:
 	run = fresh()
 	var boss := boss_at(run, "rammer", run.player - Vector2(220, 0))
 	DemoCampaign.enemy_step(run, boss, 0.01)
-	check(boss.phase == "telegraph" and boss.clock >= 1, "Charge has a visible reaction window")
+	check(boss.phase == "telegraph" and boss.clock >= 0.85, "Charge retains a 0.9 second reaction window")
 	var locked: Vector2 = boss.target
 	run.player += Vector2(0, 120)
 	DemoCampaign.enemy_step(run, boss, 1.26)
@@ -104,22 +104,22 @@ func _run() -> void:
 	check(run.health == 5 and run.hazards.is_empty(), "Marked blast is avoidable with walking, no blink required")
 	run.hazards.append({"pos": run.player, "radius": 82, "time": 0.01, "duration": 1.25, "owner": boss.id, "spent": false})
 	DemoCampaign.hazards_step(run, 0.02)
-	check(run.health == 4, "Standing in a completed tell actually deals damage")
+	check(run.health == 3, "Standing in a completed tell deals two hull damage")
 	run.invincible = 0
 	DemoCampaign.hazards_step(run, 1)
-	check(run.health == 4, "Blast cannot hit repeatedly after resolving")
+	check(run.health == 3, "Blast cannot hit repeatedly after resolving")
 	run.hazards.append({"pos": run.player, "radius": 82, "time": 1, "duration": 1, "owner": boss.id, "spent": false})
 	boss.dead = true
 	DemoCampaign.hazards_step(run, 2)
-	check(run.health == 4 and run.hazards.is_empty(), "Killing a caster cancels its pending ground attack")
+	check(run.health == 3 and run.hazards.is_empty(), "Killing a caster cancels its pending ground attack")
 	run = fresh()
 	boss = boss_at(run, "foreman", run.player - Vector2(220, 0))
 	boss.hp = boss.max_hp / 2
 	boss.sequence = 2
 	DemoCampaign.enemy_step(run, boss, 0.01)
-	check(boss.enraged and boss.attack == "fan" and boss.clock >= 0.9, "Final boss phase two accelerates tells without deleting them")
+	check(boss.enraged and boss.attack == "fan" and boss.clock >= 0.6, "Final boss phase two retains a 0.65 second tell")
 	DemoCampaign.enemy_step(run, boss, 1)
-	check(run.projectiles.size() == 5 and boss.phase == "recover", "Final boss fan is real dodgeable projectiles followed by recovery")
+	check(run.projectiles.size() == 7 and boss.phase == "recover", "Final boss fan is seven dodgeable projectiles followed by recovery")
 	var scene := load("res://src/salvage/workshop.tscn").instantiate() as Node2D
 	root.add_child(scene)
 	await process_frame
