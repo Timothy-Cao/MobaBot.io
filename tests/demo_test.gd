@@ -125,7 +125,7 @@ func _run() -> void:
 	await process_frame
 	scene.start_run()
 	scene.ui.update_hud(scene.model)
-	check(scene.model.demo_mode and scene.ui.stage_label.text.contains("STAGE 1"), "Main game launches the demo, not old three-boss mode")
+	check(scene.model.demo_mode and scene.model.stage == 1 and scene.ui.mission_rail.stage == 1 and scene.ui.stage_label.text.contains("LOADING BAY"), "Main game launches the demo and its first sector rail, not old three-boss mode")
 	scene.queue_free()
 	await process_frame
 	for precision in [false, true]:

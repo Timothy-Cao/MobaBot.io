@@ -1,6 +1,6 @@
 # MobaBot.io development
 
-Read README.md and docs/design/QA_10.md for the current controls, scope and handoff. Older iteration documents are historical.
+Read README.md and docs/design/QA_11.md for the current controls, scope and handoff. Older iteration documents are historical.
 
 - Keep the demo focused on Stage 1, Levels 1–3. No expanded campaign or multiplayer without user direction.
 - Preserve the player's equipment/settings files and user-provided music. Never award permanent loot from automated tests or fixtures.

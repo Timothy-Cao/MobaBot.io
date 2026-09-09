@@ -35,11 +35,12 @@ func bolt(p: Vector2, scale_value: float = 1.0) -> void:
 func _draw() -> void:
 	draw_set_transform(Vector2.ZERO, 0, size / 64.0)
 	draw_rect(Rect2(0, 0, 64, 64), INK)
-	poly([Vector2(3, 3), Vector2(60, 3), Vector2(60, 38), Vector2(38, 60), Vector2(3, 60)], Color("244a53"))
-	poly([Vector2(3, 42), Vector2(42, 3), Vector2(60, 3), Vector2(3, 60)], Color("2f6466"))
-	line(Vector2(5, 5), Vector2(57, 5), Color("57817e"), 1)
-	for i in range(3):
-		line(Vector2(7 + i * 5, 55), Vector2(7 + i * 5, 58), Color("668577"), 1)
+	draw_rect(Rect2(3, 3, 58, 58), Color("223c46"))
+	draw_colored_polygon(PackedVector2Array([Vector2(3, 3), Vector2(61, 3), Vector2(61, 15), Vector2(3, 44)]), Color("294b54"))
+	line(Vector2(5, 5), Vector2(59, 5), Color("557976"), 1)
+	line(Vector2(5, 5), Vector2(5, 59), Color("557976"), 1)
+	line(Vector2(59, 5), Vector2(59, 59), Color("10232c"), 2)
+	line(Vector2(5, 59), Vector2(59, 59), Color("10232c"), 2)
 	match ability:
 		"lightning":
 			for p in [Vector2(12, 47), Vector2(49, 15)]:

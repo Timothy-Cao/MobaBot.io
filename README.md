@@ -1,6 +1,8 @@
-# MobaBot.io — 0.10 demo
+# MobaBot.io — 0.11 Foundry demo
 
 A Windows-first, single-player survivor-like with MOBA mouse controls. Build a small salvage robot into a crowd-clearing machine. Stage 1 contains three levels and ends with the Foreman.
+
+0.11 replaces the title-screen collage with an original foundry scene; adds assembly-style equipment comparison, a focused mastery inspector, cleaner rank/reward cards and a smaller combat dock. Combat balance is unchanged from 0.10. See [presentation research](docs/design/PRESENTATION_RESEARCH_11.md) and [change log / QA](docs/design/QA_11.md).
 
 ## Play
 
@@ -23,7 +25,7 @@ This is a Godot development project, not a standalone exported Windows release. 
 | D / F | Ghost drive (3s intangible) / charged blink; either can interrupt R |
 | T | Deploy one sentry; replaces the previous one |
 | 1–4 | Passive toggles; orbit close/wide; Arc Coil chain/focused/off |
-| 5 / 6 | Repair +2 hull / restore 50 energy; two of each per run |
+| 5 / 6, or their HUD buttons | Repair +2 hull / restore 50 energy; two of each per run |
 | L / hold Space | Toggle camera lock / temporarily follow |
 | Screen edges | Pan when the camera is unlocked |
 | Wheel | Zoom 65–100% |
@@ -90,6 +92,6 @@ Run from the project folder:
 
 The full check includes legacy simulations, MOBA mechanics, progression, boss readability, movement at multiple physics rates, equipment/camera, UI text layout, laser/ghost/lightning and mastery effects. Behavior probes compare idle, stationary, passive-only, moving-casting and adaptive policies with normal health. They do not establish human difficulty or fun.
 
-[Latest audit and handoff](docs/design/QA_10.md). Earlier iteration documents are historical; this README and QA_10 supersede their controls and scope. Preserve the old Neon Collector sample at `src/main/main.tscn`.
+[Latest audit and handoff](docs/design/QA_11.md). Earlier iteration documents are historical; this README and QA_11 supersede their controls and scope. Preserve the old Neon Collector sample at `src/main/main.tscn`.
 
 Commit coherent, verified changes; do not commit engine/cache folders, generated test captures, temp files or local player records. Public-release work still includes export packaging, audio balance/listening, music-rights confirmation, and human tuning of camera speed, rewards and combat difficulty.

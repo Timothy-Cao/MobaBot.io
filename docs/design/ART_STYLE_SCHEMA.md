@@ -1,4 +1,8 @@
-# MobaBot.io — art style schema 1.5
+# MobaBot.io — art style schema 1.6
+
+## v0.11 override
+
+The title screen now uses one original generated foundry illustration with native text and controls, replacing v0.10's enlarged code-native robot vignette. All interactive icons remain the shared code-native family, with quieter inset backgrounds. Major panels and cards are square; native small buttons retain subtle rounding. Equipment uses an assembly schematic, grouped collection and signed stat comparison. Mastery uses three compact routes and one stable hover/focus inspector. Gameplay has a smaller grouped dock and three-sector mission rail. See the updated format rules below and `PRESENTATION_RESEARCH_11.md` for rationale. Music skips any Dummy audio driver, including a rendered session without an output device.
 
 ## v0.10 override
 
@@ -66,9 +70,11 @@ Inventory/upgrade illustrations: isolated transparent PNG, one centred object, a
 
 World actors: code-native shapes for now, with 2–3 material blocks and 1–2 strong highlights. Animation is transform-based: hover, bank, recoil, squash, short flashes. Generated animation is not a runtime dependency. Match material language rather than forcing painterly detail into 30 px enemies.
 
-UI: flat slate cards, 6–8 px corner radius at 960x540 logical canvas, restrained 1 px border, 2 px selected outline. Cream names, muted metadata, teal ready state, gold key information. Short labels; descriptions explain effects, not marketing. No slogans such as “unleash your potential”.
+UI (0.11): graphite/slate planes, square major panels and cards, fine separator rules, restrained 1 px borders and 2 px selected outlines. Small existing buttons may retain a 6 px corner radius at the 960x540 logical canvas. Tabs use an underline, not nested filled rectangles. Cream names, muted metadata, teal ready state, gold key information. Short labels; descriptions explain effects, not marketing. Details belong in hover/focus or one stable inspector. No slogans such as “unleash your potential”.
 
-Action icons (slice 04): dedicated square drawings replace the old equipment-plus-circular-badge presentation. Use a 64-unit canvas, slate/teal diagonal bevel background, broad steel/cream silhouette and limited brass highlights. Reuse the identical icon across HUD, loadout, inspection and rarity rewards. Distinct motifs: salvo bolts, concentric shock rings, shield, rail needle, mortar crosshair, ram housing, gear-lightning ultimate, broad beam, speed chevrons, paired blink portals, sentry and repair cell. The health-to-energy cell has a coral drop. Rarity is an external border and written label, never a recoloured functional symbol. No raster variants or bespoke animation sheets required for these icons. Original source: `src/salvage/ability_icon.gd`.
+Action icons (0.11): dedicated square drawings use a 64-unit canvas, quiet slate inset with a restrained corner bevel, broad steel/cream silhouette and limited brass highlights. No repeating diagonal background stripes. Reuse the identical icon across HUD, loadout, equipment, inspection and rarity rewards. Distinct motifs: salvo bolts, concentric shock rings, shield, rail needle, mortar crosshair, ram housing, broad beam, speed chevrons, paired blink portals, sentry and repair cell. The health-to-energy cell has a coral drop. Rarity is an external border and written label, never a recoloured functional symbol. No raster variants or bespoke animation sheets required for these icons. Original source: `src/salvage/ability_icon.gd`.
+
+Title illustration (0.11): one full-bleed foundry launch bay, not a collection of oversized isolated icons. Keep left third dark and quiet for native typography/navigation; place the cream-face, teal-shell, coral-magnet hero in warm reactor light on the right. Broad cel-shaded planes, architectural depth and few wear marks. Graphite shadows separate the robot from warm brass machinery. No baked lettering, invented UI, copied characters, photoreal chrome or neon fog. The illustration stays static; no gratuitous parallax/shaking. Small native UI hover states provide feedback. `assets/menu/PROVENANCE.md` records the exact generation prompt and inspection. Image is intentionally opaque, 1672×941; use aspect-preserving cover and mipmapped filtering. Display scale was checked in actual Godot captures.
 
 ## FX and audio rules
 

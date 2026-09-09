@@ -189,7 +189,11 @@ func cooldown_at(slot: String, rank_value: int, tier_value: int = -1) -> float:
 	return float(ABILITIES[loadout[slot]].cd) * (1.0 - tier * 0.08) * (1.0 - SalvageProgression.bonus(rank_value) * 0.5)
 
 func damage_scale(slot: String) -> float:
-	return (1.0 + gear_damage + mastery_damage) * (1.0 + int(tiers.get(slot, 0)) * 0.15) * (1.0 + SalvageProgression.bonus(int(ranks.get(slot, 0))))
+	return damage_scale_at(slot, int(ranks.get(slot, 0)))
+
+func damage_scale_at(slot: String, rank_value: int, tier_value: int = -1) -> float:
+	var tier: int = int(tiers.get(slot, 0)) if tier_value < 0 else tier_value
+	return (1.0 + gear_damage + mastery_damage) * (1.0 + tier * 0.15) * (1.0 + SalvageProgression.bonus(rank_value))
 
 func promote(slot: String) -> bool:
 	if slot not in SLOTS or tiers[slot] >= 2:

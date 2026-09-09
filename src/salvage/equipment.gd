@@ -118,6 +118,22 @@ func award(amount: int, level_number: int, persist: bool = true) -> bool:
 func primary(id: String) -> float:
 	return float(ITEMS[id].base) * (1.0 + int(inventory[id].stars) * 0.20)
 
+func stats_for(id: String) -> Dictionary:
+	var values := {"damage": 0.0, "energy": 0.0, "speed": 0.0, "regen": 0.0, "drop": 0.0}
+	values[ITEMS[id].stat] = primary(id)
+	var item: Dictionary = inventory[id]
+	values[item.bonus] += item.roll * {"regen": 0.2, "damage": 0.01, "drop": 0.05}[item.bonus]
+	return values
+
+func compare_to_fitted(id: String) -> Dictionary:
+	var current := stats_for(equipped[ITEMS[id].slot])
+	var candidate := stats_for(id)
+	var differences := {}
+	for stat in current:
+		var delta: float = candidate[stat] - current[stat]
+		if not is_zero_approx(delta): differences[stat] = delta
+	return differences
+
 func item_text(id: String) -> String:
 	var data: Dictionary = ITEMS[id]
 	var base := "+%d energy" % primary(id) if data.stat == "energy" else "+%.1f%% %s" % [primary(id) * 100, "ability damage" if data.stat == "damage" else "move speed"]

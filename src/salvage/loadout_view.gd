@@ -8,7 +8,7 @@ static func draw(ui) -> void:
 	ui._label(ui.overlay, "Loadout", Rect2(46, 38, 210, 45), 30, ui.CREAM, true)
 	for i in range(4):
 		var page: String = ["abilities", "passives", "utility", "keys"][i]
-		ui._button(page.capitalize(), Rect2(300 + i * 123, 43, 115, 34), func() -> void:
+		ui._tab(page.capitalize(), Rect2(300 + i * 123, 43, 115, 34), func() -> void:
 			ui.loadout_page = page
 			ui.rebind_slot = ""
 			draw(ui), ui.loadout_page == page)

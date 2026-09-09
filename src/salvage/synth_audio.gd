@@ -48,6 +48,8 @@ func _ready() -> void:
 	sounds.rocket_impact = _tone(105, 40, 0.24, 0.25)
 	sounds.lightning = _tone(1000, 160, 0.12, 0.35)
 	sounds.boss_summon = sounds.boss
+	sounds.ui_focus = _tone(740, 820, 0.025, 0.0)
+	sounds.ui_confirm = _tone(480, 620, 0.065, 0.0)
 	channel_voice = AudioStreamPlayer.new()
 	channel_voice.volume_db = -18
 	channel_voice.stream = _channel_hum()
@@ -80,7 +82,7 @@ func receive(event: Dictionary) -> void:
 		player.pitch_scale = pow(2.0, mini(pickup_chain, 12) / 24.0)
 		pickup_chain += 1
 		pickup_gap = 0.5
-	player.volume_db = -22 if kind in ["shot", "hit"] else -14
+	player.volume_db = -26 if kind.begins_with("ui_") else (-22 if kind in ["shot", "hit"] else -14)
 	player.play()
 
 func set_muted(value: bool) -> void:

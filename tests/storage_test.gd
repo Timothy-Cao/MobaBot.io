@@ -25,7 +25,7 @@ func _run() -> void:
 				var record: Variant = JSON.parse_string(line)
 				if record is Dictionary:
 					last = record
-	valid = valid and last.get("result", "") in ["won", "lost"] and last.get("build", "") in ["slice-01", "slice-02", "slice-03", "slice-04", "slice-05", "slice-06-demo", "slice-07-demo", "slice-08-demo", "slice-09-mobabot", "slice-10-mobabot"]
+	valid = valid and last.get("result", "") in ["won", "lost"] and last.get("build", "") in ["slice-01", "slice-02", "slice-03", "slice-04", "slice-05", "slice-06-demo", "slice-07-demo", "slice-08-demo", "slice-09-mobabot", "slice-10-mobabot", "slice-11-mobabot"]
 	valid = valid and config.get_value("visual", "camera_locked", null) == game.camera_locked
 	valid = valid and config.get_value("moba", "r_quickcast", null) == game.r_quickcast
 	print("STORAGE TEST: ", "PASS" if valid else "FAIL", " preferences and completed run readback; directory=", OS.get_user_data_dir())

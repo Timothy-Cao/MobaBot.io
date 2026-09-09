@@ -17,7 +17,7 @@ func _ready() -> void:
 func update_context(screen: String, run, muted: bool) -> void:
 	if shutting_down: return
 	# The headless dummy audio driver does not drain MP3 playbacks at shutdown.
-	if DisplayServer.get_name() == "headless": return
+	if DisplayServer.get_name() == "headless" or AudioServer.get_driver_name() == "Dummy": return
 	if voices.is_empty(): return
 	if muted != silenced:
 		silenced = muted

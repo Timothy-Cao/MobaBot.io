@@ -5,20 +5,20 @@ extends RefCounted
 static func draw(ui: CanvasLayer, model: SalvageRun) -> void:
 	ui._panel(Rect2(24, 24, 912, 492), Color("172932"))
 	ui._label(ui.overlay, "Build", Rect2(47, 39, 212, 42), 30, ui.CREAM, true)
-	ui._button("Mastery", Rect2(253, 42, 104, 34), func() -> void:
+	ui._tab("Mastery", Rect2(253, 42, 104, 34), func() -> void:
 		ui.build_page = "mastery"
 		ui.show_build(model, false), ui.build_page == "mastery")
-	ui._button("Upgrades", Rect2(363, 42, 104, 34), func() -> void:
+	ui._tab("Upgrades", Rect2(363, 42, 104, 34), func() -> void:
 		ui.build_page = "upgrades"
 		ui.show_build(model, false), ui.build_page == "upgrades")
-	ui._button("Stats", Rect2(473, 42, 104, 34), func() -> void:
+	ui._tab("Stats", Rect2(473, 42, 104, 34), func() -> void:
 		ui.build_page = "stats"
 		ui.show_build(model, false), ui.build_page == "stats")
 	if model.kit != null:
-		ui._button("Abilities", Rect2(583, 42, 104, 34), func() -> void:
+		ui._tab("Abilities", Rect2(583, 42, 104, 34), func() -> void:
 			ui.build_page = "abilities"
 			ui.show_build(model, false), ui.build_page == "abilities")
-	ui._button("Gear", Rect2(693, 42, 104, 34), func() -> void:
+	ui._tab("Gear", Rect2(693, 42, 104, 34), func() -> void:
 		ui.build_page = "gear"
 		ui.show_build(model, false), ui.build_page == "gear")
 	var close: Button = ui._button("Back", Rect2(811, 42, 102, 34), func() -> void: ui.build_closed.emit(), false)
@@ -35,29 +35,7 @@ static func draw(ui: CanvasLayer, model: SalvageRun) -> void:
 	close.grab_focus()
 
 static func _mastery(ui, model: SalvageRun) -> void:
-	ui._label(ui.overlay, "Preview" if model.mastery.read_only else "◇ %d" % model.mastery.available(model.level), Rect2(49, 98, 130, 35), 25, ui.GOLD, true)
-	var note = ui._label(ui.overlay, "Mastery", Rect2(158, 108, 225, 22), 15, ui.CREAM)
-	note.mouse_filter = Control.MOUSE_FILTER_STOP
-	note.tooltip_text = "Run-only passives. Start with 1 point, then gain 1 every two power levels. Spend in Tab; no popup. One parent point unlocks the next node."
-	for branch in range(3):
-		var x := 93 + branch * 284
-		ui._label(ui.overlay, ["SALVAGE", "SURVIVAL", "OVERLOAD"][branch], Rect2(x, 142, 238, 22), 12, ui.TEAL, true)
-	for id in BotMastery.NODES:
-		var data: Dictionary = BotMastery.NODES[id]
-		var x: int = 93 + data.branch * 284
-		var y: int = 178 + data.row * 104
-		var rank_value := model.mastery.rank_of(id)
-		var available := model.mastery.can_buy(id, model.level) and model.state in ["running", "upgrade", "stage_reward"]
-		if not data.parent.is_empty():
-			_wire(ui, Vector2(x + 28, y - 46), Vector2(x + 28, y), ui.TEAL if model.mastery.rank_of(data.parent) > 0 else ui.EDGE)
-		var node: Button = ui._button("", Rect2(x, y, 58, 58), func() -> void:
-			if model.mastery.buy(model, id): ui.show_build(model, false), false)
-		node.set_meta("mastery_id", id)
-		node.add_theme_stylebox_override("normal", ui._style(ui.PANEL, 2, ui.GOLD if available else (ui.TEAL if rank_value > 0 else ui.EDGE), 2))
-		ui._icon(node, data.icon, Rect2(5, 5, 48, 48), not available and rank_value == 0)
-		node.tooltip_text = data.text + ("\nRequires " + BotMastery.NODES[data.parent].name if not data.parent.is_empty() and model.mastery.rank_of(data.parent) == 0 else "") + ("\nMax rank" if rank_value == data.max else "\n1 mastery point")
-		ui._label(ui.overlay, data.name, Rect2(x + 72, y + 5, 169, 24), 17, ui.CREAM, true)
-		ui._label(ui.overlay, "%d / %d" % [rank_value, data.max], Rect2(x + 72, y + 34, 132, 23), 15, ui.GOLD if available else ui.MUTED)
+	preload("res://src/salvage/mastery_view.gd").draw(ui, model)
 
 static func _gear(ui, model: SalvageRun) -> void:
 	for i in range(model.equipment_snapshot.size()):
@@ -127,7 +105,7 @@ static func _tree(ui: CanvasLayer, model: SalvageRun) -> void:
 static func _rank_tree(ui, model: SalvageRun) -> void:
 	for i in range(3):
 		var group: String = ["skills", "weapons", "utility"][i]
-		ui._button(group.capitalize(), Rect2(47 + i * 143, 102, 134, 31), func() -> void:
+		ui._tab(group.capitalize(), Rect2(47 + i * 143, 102, 134, 31), func() -> void:
 			ui.track_group = group
 			ui.selected_item = "skill_q" if group == "skills" else ("power" if group == "weapons" else "magnet")
 			ui.selected_rank = mini(int(model.upgrade_data(ui.selected_item).max), model.rank_of(ui.selected_item) + 1)

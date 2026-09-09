@@ -1019,7 +1019,7 @@ func use_consumable(index: int) -> bool:
 	consumables[index] -= 1
 	if index == 0: health = mini(max_health(), health + 2)
 	else: kit.energy = minf(kit.energy_max(), kit.energy + 50)
-	emit_event("equipped", player, {"id": "repair"})
+	emit_event("equipped", player, {"id": "repair" if index == 0 else "cell"})
 	return true
 
 func summary() -> Dictionary:

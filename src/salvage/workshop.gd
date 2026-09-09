@@ -45,7 +45,7 @@ var music_player = preload("res://src/salvage/music_director.gd").new()
 var gear_return := "home"
 
 func _ready() -> void:
-	get_window().title = "MobaBot.io - 0.10 Demo"
+	get_window().title = "MobaBot.io - 0.11 Foundry Demo"
 	get_tree().auto_accept_quit = false
 	add_child(camera)
 	camera.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
@@ -54,6 +54,9 @@ func _ready() -> void:
 	gear.load_profile()
 	add_child(music_player)
 	ui.gear_requested.connect(_open_gear)
+	ui.ui_interaction.connect(func(kind: String) -> void: sound.receive({"kind": kind}))
+	ui.consumable_requested.connect(func(index: int) -> void:
+		if screen == "running" and model.use_consumable(index): _drain_events())
 	ui.camera_lock_changed.connect(func(value: bool) -> void:
 		_set_camera_lock(value))
 	ui.quickcast_changed.connect(func(value: bool) -> void:
@@ -124,6 +127,7 @@ func _quit_cleanly(code: int) -> void:
 	get_tree().quit(code)
 
 func show_home() -> void:
+	art.visible = false
 	tab_held = false
 	mouse_moving = false
 	pending_cast_slot = ""
@@ -148,6 +152,7 @@ func show_home() -> void:
 	ui.show_home()
 
 func start_run(mode: String = "salvage") -> void:
+	art.visible = true
 	tab_held = false
 	selected_mode = mode
 	model = SalvageRun.new(seed_value, mode)
@@ -644,7 +649,7 @@ func _save_settings() -> void:
 	config.set_value("visual", "zoom", zoom_value)
 	config.set_value("visual", "camera_locked", camera_locked)
 	config.set_value("moba", "r_quickcast", r_quickcast)
-	config.set_value("moba", "version", 10)
+	config.set_value("moba", "version", 11)
 	config.set_value("moba", "loadout", loadout_setting)
 	config.set_value("moba", "keys", key_setting)
 	if config.save("user://salvage_settings.cfg") != OK:
@@ -660,7 +665,7 @@ func _save_result() -> void:
 	if not measured.is_empty():
 		record.render_timing = {"frames": measured.size(), "median_ms": measured[measured.size() / 2],
 			"p95_ms": measured[int(measured.size() * 0.95)], "peak_enemies": peak_enemies}
-	record.build = "slice-10-mobabot"
+	record.build = "slice-11-mobabot"
 	record.equipment = gear.equipped.duplicate()
 	record.wall_seconds = snappedf(run_wall_seconds, 0.01)
 	record.screen_seconds = screen_seconds.duplicate()
@@ -697,6 +702,7 @@ func _bot_direction() -> Vector2:
 	return desired.normalized()
 
 func _fixture(kind: String) -> void:
+	ui.persist_equipment = false
 	# Visual fixtures must not inherit a tester's custom loadout or bindings.
 	loadout_setting = MobaKit.demo_preset()
 	key_setting = MobaKit.DEFAULT_BINDS.duplicate()
@@ -721,7 +727,15 @@ func _fixture(kind: String) -> void:
 		kind = kind.trim_suffix("_wide")
 	if kind == "home":
 		return
-	if kind == "equipment":
+	if kind in ["equipment", "equipment_compare", "equipment_max"]:
+		if kind != "equipment":
+			gear = BotEquipment.new()
+			gear.credits = 1250
+			gear.inventory.reactor.copies = 6
+			gear.inventory.reactor.stars = 5 if kind == "equipment_max" else 2
+			gear.inventory.reactor.bonus = "drop"
+			gear.inventory.reactor.roll = 5
+			ui.gear_selected = "reactor"
 		_open_gear()
 		return
 	if kind == "gear":
@@ -771,9 +785,15 @@ func _fixture(kind: String) -> void:
 		model.enable_moba(MobaKit.preset(true))
 	for i in range(24):
 		model._drop(Vector2(210 + i * 20, 360 + sin(i * 0.7) * 28), 1)
-	if kind == "upgrade":
+	if kind in ["upgrade", "upgrade_milestone"]:
 		model.state = "upgrade"
 		model.offers.assign(["grinder", "ricochet", "pulse"])
+		if kind == "upgrade_milestone":
+			model.upgrades.skill_q = 4
+			model.upgrades.skill_r = 4
+			model.kit.ranks.q = 4
+			model.kit.ranks.r = 4
+			model.offers.assign(["skill_q", "skill_r", "reactor"])
 		ui.show_upgrades(model)
 	elif kind == "result":
 		model.state = "won"

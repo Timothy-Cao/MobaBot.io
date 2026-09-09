@@ -20,13 +20,15 @@ signal settings_closed
 signal camera_lock_changed(value: bool)
 signal quickcast_changed(value: bool)
 signal gear_requested
+signal ui_interaction(kind: String)
+signal consumable_requested(index: int)
 
 const INK := Color("14242c")
 const CREAM := Color("eceddf")
 const TEAL := Color("78cbb6")
 const GOLD := Color("efc16b")
 const CORAL := Color("ee796c")
-const PANEL := Color("21333d")
+const PANEL := Color("172a33")
 const EDGE := Color("425863")
 const MUTED := Color("a0b3b7")
 const ICON_PATH := "res://assets/upgrades/"
@@ -85,9 +87,16 @@ var settings_open := false
 var camera_locked := true
 var r_quickcast := false
 var gear_selected := "coil"
+var persist_equipment := true
+var mastery_focus := "reach"
+var heading_font := SystemFont.new()
+var mission_rail: Control
+var consumable_counts: Array[Label] = []
 var consumable_label: Label
 
 func _ready() -> void:
+	heading_font.font_names = PackedStringArray(["Bahnschrift", "Arial"])
+	heading_font.font_weight = 700
 	font.font_names = PackedStringArray(["Segoe UI", "Arial"])
 	bold_font.font_names = font.font_names
 	bold_font.font_weight = 700
@@ -99,13 +108,18 @@ func _ready() -> void:
 	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(hud)
 	_surface(hud, Rect2(0, 0, 960, 72), Color("14242cef"), 0, INK, 0)
-	time_label = _label(hud, "01:30", Rect2(414, 10, 132, 39), 29, CREAM, true, HORIZONTAL_ALIGNMENT_CENTER)
+	time_label = _label(hud, "01:30", Rect2(414, 6, 132, 35), 26, CREAM, true, HORIZONTAL_ALIGNMENT_CENTER)
 	stat_label = _label(hud, "", Rect2(640, 16, 293, 24), 14, CREAM, true, HORIZONTAL_ALIGNMENT_RIGHT)
 	_label(hud, "HULL", Rect2(24, 8, 55, 14), 9, MUTED, true)
 	health_bar = _bar(hud, Rect2(85, 12, 225, 8), TEAL, 5)
 	energy_bar = _bar(hud, Rect2(85, 30, 225, 6), Color("6abbeb"), 100)
 	energy_label = _label(hud, "ENERGY", Rect2(24, 25, 60, 14), 9, Color("8bccef"), true)
-	stage_label = _label(hud, "", Rect2(408, 41, 145, 15), 9, MUTED, true, HORIZONTAL_ALIGNMENT_CENTER)
+	stage_label = _label(hud, "", Rect2(400, 40, 160, 16), 9, MUTED, true, HORIZONTAL_ALIGNMENT_CENTER)
+	mission_rail = preload("res://src/salvage/mission_rail.gd").new()
+	mission_rail.position = Vector2(428, 58)
+	mission_rail.size = Vector2(104, 10)
+	mission_rail.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_child(mission_rail)
 	xp_bar = _bar(hud, Rect2(85, 46, 225, 4), GOLD, 1)
 	_label(hud, "XP", Rect2(24, 41, 55, 14), 9, GOLD, true)
 	load_label = _label(hud, "", Rect2(24, 34, 340, 18), 11, MUTED)
@@ -114,6 +128,7 @@ func _ready() -> void:
 	load_label.visible = false
 	consumable_label = _label(hud, "", Rect2(887, 442, 60, 62), 11, CREAM, true)
 	consumable_label.z_index = 2
+	consumable_label.visible = false
 	ability_bar = Control.new()
 	ability_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(ability_bar)
@@ -123,12 +138,12 @@ func _ready() -> void:
 	mini_map.size = Vector2(131, 94)
 	mini_map.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(mini_map)
-	_label(hud, "Caches / threats", Rect2(24, 376, 146, 18), 11, GOLD)
 	threat_compass = load("res://src/salvage/threat_compass.gd").new()
 	threat_compass.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(threat_compass)
 	damage_label = _label(hud, "", Rect2(24, 73, 430, 20), 12, Color("ee796c"), true)
 	overlay = Control.new()
+	overlay.z_index = 20 # Modal dimmers must cover every HUD label and item counter.
 	root.add_child(overlay)
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -162,7 +177,7 @@ func _label(parent: Node, text: String, rect: Rect2, size_value: int, color: Col
 	label.text = text
 	label.position = rect.position
 	label.size = rect.size
-	label.add_theme_font_override("font", bold_font if bold else font)
+	label.add_theme_font_override("font", heading_font if bold and size_value >= 22 else (bold_font if bold else font))
 	label.add_theme_font_size_override("font_size", size_value)
 	label.add_theme_color_override("font_color", color)
 	label.horizontal_alignment = align
@@ -173,7 +188,13 @@ func _label(parent: Node, text: String, rect: Rect2, size_value: int, color: Col
 	return label
 
 func _panel(rect: Rect2, color: Color = PANEL) -> Panel:
-	return _surface(overlay, rect, color)
+	var panel := _surface(overlay, rect, color, 0)
+	_surface(panel, Rect2(0, 0, 38, 3), GOLD, 0, GOLD, 0)
+	_surface(panel, Rect2(rect.size - Vector2(38, 3), Vector2(38, 3)), TEAL, 0, TEAL, 0)
+	return panel
+
+func _rule(point: Vector2, width: float) -> void:
+	_surface(overlay, Rect2(point, Vector2(width, 1)), EDGE, 0, EDGE, 0)
 
 func _bar(parent: Node, rect: Rect2, color: Color, maximum: float) -> ProgressBar:
 	var bar := ProgressBar.new()
@@ -202,6 +223,8 @@ func _button(text: String, rect: Rect2, action: Callable, primary: bool = true) 
 	button.add_theme_stylebox_override("hover", _style(Color("ffda8d") if primary else Color("2a4650"), 6, TEAL, 2))
 	button.add_theme_stylebox_override("pressed", _style(TEAL if primary else Color("36545c"), 6))
 	button.add_theme_stylebox_override("focus", _style(Color(0, 0, 0, 0), 6, TEAL, 2))
+	button.mouse_entered.connect(func() -> void: ui_interaction.emit("ui_focus"))
+	button.pressed.connect(func() -> void: ui_interaction.emit("ui_confirm"))
 	button.pressed.connect(action)
 	overlay.add_child(button)
 	return button
@@ -213,6 +236,14 @@ func _icon(parent: Node, id: String, rect: Rect2, dim: bool = false) -> Control:
 	if dim:
 		icon.modulate = Color(0.62, 0.66, 0.68, 0.7)
 	return icon
+
+func _tab(text: String, rect: Rect2, action: Callable, selected: bool = false) -> Button:
+	var button := _button(text, rect, action, false)
+	var normal := _style(Color.TRANSPARENT, 0, GOLD if selected else EDGE, 0)
+	normal.border_width_bottom = 3 if selected else 1
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_color_override("font_color", GOLD if selected else MUTED)
+	return button
 
 func _pips(parent: Node, point: Vector2, rank_value: int, maximum: int, next_rank: bool = false) -> void:
 	for i in range(maximum):
@@ -284,23 +315,25 @@ func _ability_hud(model: SalvageRun) -> void:
 		ability_recharge.clear()
 		toggle_tiles.clear()
 		toggle_labels.clear()
-		_surface(ability_bar, Rect2(174, 421, 758, 87), Color("14242cf2"), 8)
-		_label(ability_bar, "TOGGLES", Rect2(185, 429, 137, 17), 9, MUTED, true)
+		consumable_counts.clear()
+		_surface(ability_bar, Rect2(174, 434, 758, 80), Color("14242cf2"), 0)
+		_label(ability_bar, "PASSIVES", Rect2(185, 439, 137, 17), 9, MUTED, true)
 		for i in range(4):
 			var id: String = kit.loadout.passives[i]
 			var data: Dictionary = MobaKit.PASSIVES[id]
-			var tile := _surface(ability_bar, Rect2(186 + i * 37, 451, 33, 41), PANEL, 4)
+			var tile := _surface(ability_bar, Rect2(185 + i * 39, 462, 35, 43), PANEL, 0)
 			tile.mouse_filter = Control.MOUSE_FILTER_STOP
 			tile.tooltip_text = "[%s] %s\n%s\n%s" % [OS.get_keycode_string(kit.bindings["p%d" % (i + 1)]), data.name, data.text, "%s energy / sec" % MobaKit.UPKEEP[id] if MobaKit.UPKEEP.has(id) else "Free while enabled"]
 			_icon(tile, data.icon, Rect2(1, 0, 31, 31))
 			toggle_tiles.append(tile)
-			toggle_labels.append(_label(tile, "", Rect2(0, 29, 33, 14), 8, TEAL, true, HORIZONTAL_ALIGNMENT_CENTER))
+			toggle_labels.append(_label(tile, "", Rect2(0, 30, 35, 14), 9, TEAL, true, HORIZONTAL_ALIGNMENT_CENTER))
 		for i in range(MobaKit.SLOTS.size()):
 			var slot: String = MobaKit.SLOTS[i]
 			var data: Dictionary = MobaKit.ABILITIES[kit.loadout[slot]]
 			var x: int = [344, 419, 494, 575, 671, 731, 812][i]
-			_label(ability_bar, ["ACTIVE", "ACTIVE", "ACTIVE", "ULTIMATE", "SPEED", "BLINK/DASH", "SUMMON"][i], Rect2(x - 1, 426, 77, 17), 8, GOLD if slot == "r" else MUTED, true, HORIZONTAL_ALIGNMENT_CENTER)
-			var tile := _surface(ability_bar, Rect2(x + 8, 445, 59, 54), PANEL, 5, MobaKit.RARITY_COLORS[kit.tiers[slot]])
+			if i in [0, 3, 4, 6]:
+				_label(ability_bar, {0: "ACTIVES", 3: "ULTIMATE", 4: "ESCAPES", 6: "SUMMON"}[i], Rect2(x - 1, 439, 217 if i == 0 else (125 if i == 4 else 77), 17), 9, GOLD if slot == "r" else MUTED, true, HORIZONTAL_ALIGNMENT_CENTER)
+			var tile := _surface(ability_bar, Rect2(x + 8, 457, 59, 54), PANEL, 0, MobaKit.RARITY_COLORS[kit.tiers[slot]])
 			if i >= 4: tile.scale = Vector2.ONE * 0.78
 			tile.mouse_filter = Control.MOUSE_FILTER_STOP
 			tile.tooltip_text = "%s [%s] / %s\n%s\n%.1fs per charge / max %d / %s" % [data.name, OS.get_keycode_string(kit.bindings[slot]), MobaKit.RARITIES[kit.tiers[slot]], data.text, kit.cooldown(slot), data.max, MobaKit.cost_text(kit.loadout[slot])]
@@ -319,6 +352,15 @@ func _ability_hud(model: SalvageRun) -> void:
 			_label(tile, OS.get_keycode_string(kit.bindings[slot]), Rect2(3, 1, 25, 20), 13, CREAM, true)
 			ability_labels[slot] = _label(tile, "", Rect2(7, 22, 45, 25), 17, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
 			ability_recharge[slot] = _bar(tile, Rect2(3, 49, 53, 3), TEAL, kit.cooldown(slot))
+		for i in range(2):
+			var item := _button("", Rect2(876, 457 + i * 27, 50, 24), func() -> void: consumable_requested.emit(i), false)
+			item.reparent(ability_bar, false)
+			item.set_meta("consumable_index", i)
+			item.tooltip_text = "5 · Repair 2 hull" if i == 0 else "6 · Restore 50 energy"
+			_label(item, str(5 + i), Rect2(2, 3, 12, 17), 10, CREAM, true)
+			_icon(item, "pylon" if i == 0 else "cell", Rect2(13, 1, 21, 21))
+			consumable_counts.append(_label(item, "", Rect2(35, 3, 14, 17), 10, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER))
+	for i in range(consumable_counts.size()): consumable_counts[i].text = str(model.consumables[i])
 	for i in range(4):
 		var active := kit.passive_active(kit.loadout.passives[i])
 		toggle_tiles[i].modulate = Color.WHITE if active else Color(0.45, 0.48, 0.53)
@@ -327,6 +369,7 @@ func _ability_hud(model: SalvageRun) -> void:
 		if kit.loadout.passives[i] == "lightning" and active: state_text = "FOCUS" if kit.arc_focused else "CHAIN"
 		if not kit.unlocked("p%d" % (i + 1)): state_text = "LOCK"
 		toggle_labels[i].text = "%s %s" % [OS.get_keycode_string(kit.bindings["p%d" % (i + 1)]), state_text]
+		toggle_labels[i].add_theme_font_size_override("font_size", 8 if toggle_labels[i].text.length() > 6 else 9)
 	for slot in MobaKit.SLOTS:
 		var data: Dictionary = MobaKit.ABILITIES[kit.loadout[slot]]
 		var affordable: bool = kit.energy >= kit.ability_cost(kit.loadout[slot])
@@ -359,8 +402,12 @@ func update_hud(model: SalvageRun) -> void:
 		time_label.text = "BOSS"
 	stage_label.text = "STAGE %d / %d" % [model.stage, SalvageRun.STAGE_COUNT] if model.staged else ""
 	if model.demo_mode:
-		stage_label.text = "STAGE 1 / LEVEL %d OF 3" % model.stage
+		stage_label.text = "%02d  %s" % [model.stage, DemoCampaign.info(model).name.to_upper()]
 		if model.stage == 2 and remaining == 0: time_label.text = "HUNT"
+	mission_rail.visible = model.demo_mode
+	mission_rail.stage = model.stage
+	mission_rail.progress = clampf(model.stage_time / maxf(1, model.encounter_seconds()), 0, 1)
+	mission_rail.queue_redraw()
 	energy_bar.visible = model.kit != null
 	energy_label.visible = model.kit != null
 	if model.kit != null:
@@ -393,7 +440,7 @@ func update_hud(model: SalvageRun) -> void:
 	if model.demo_mode:
 		var goal: String = DemoCampaign.info(model).goal
 		if model.stage == 2: goal += " / %d of 2" % model.demo_minis_killed
-		objective_label.text = "%s / %s" % [DemoCampaign.info(model).name, goal]
+		objective_label.text = "%d / 2 wardens" % model.demo_minis_killed if model.stage == 2 else ""
 	if boss_label == null:
 		boss_label = _label(hud, "", Rect2(302, 375, 505, 21), 12, CREAM, true, HORIZONTAL_ALIGNMENT_CENTER)
 		boss_bar = _bar(hud, Rect2(312, 400, 485, 5), Color("ee796c"), 1)
@@ -415,22 +462,7 @@ func show_home() -> void:
 	settings_open = false
 	clear_overlay()
 	hud.visible = false
-	_surface(overlay, Rect2(0, 0, 500, 540), Color("14242cf4"), 0, INK, 0)
-	_label(overlay, "MOBA", Rect2(62, 80, 390, 27), 18, TEAL, true)
-	_label(overlay, "BOT.io", Rect2(58, 108, 440, 70), 55, CREAM, true)
-	var play := _button("Play", Rect2(64, 237, 292, 48), func() -> void: start_requested.emit("salvage"))
-	_button("Loadout", Rect2(64, 298, 142, 38), func() -> void: loadout_requested.emit(), false)
-	_button("Equipment", Rect2(214, 298, 142, 38), func() -> void: gear_requested.emit(), false)
-	_button("Upgrades", Rect2(64, 342, 292, 38), func() -> void: build_requested.emit(), false)
-	_button("Settings", Rect2(64, 386, 142, 38), func() -> void: settings_requested.emit(), false)
-	_button("Quit", Rect2(214, 386, 142, 38), func() -> void: quit_requested.emit(), false)
-	_label(overlay, "0.10", Rect2(883, 501, 40, 18), 11, MUTED, false, HORIZONTAL_ALIGNMENT_RIGHT)
-	_label(overlay, "STAGE 01", Rect2(65, 189, 386, 25), 13, GOLD)
-	for node in overlay.get_children():
-		if node is Button and node != play:
-			node.add_theme_stylebox_override("normal", _style(Color(0, 0, 0, 0), 0, Color(0, 0, 0, 0), 0))
-			node.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	play.grab_focus()
+	preload("res://src/salvage/menu_view.gd").draw(self)
 
 func show_settings() -> void:
 	settings_open = true
@@ -466,60 +498,7 @@ func show_equipment(gear, back_action: Callable) -> void:
 	clear_overlay()
 	hud.visible = false
 	_dim()
-	_panel(Rect2(24, 24, 912, 492))
-	_label(overlay, "Equipment", Rect2(46, 38, 300, 40), 28, CREAM, true)
-	_label(overlay, "%d credits" % gear.credits, Rect2(585, 44, 190, 26), 17, GOLD, true, HORIZONTAL_ALIGNMENT_RIGHT)
-	_button("Back", Rect2(809, 43, 104, 34), back_action, false)
-	# Fitted slots are separate from the collection; inspect one item at a time.
-	_label(overlay, "FITTED", Rect2(46, 96, 270, 22), 11, MUTED, true)
-	for i in range(3):
-		var slot: String = ["Core", "Chassis", "Drive"][i]
-		var id: String = gear.equipped[slot]
-		var y := 132 + i * 103
-		var tile := _button("", Rect2(46, y, 70, 70), func() -> void:
-			gear_selected = id
-			show_equipment(gear, back_action), false)
-		_icon(tile, BotEquipment.ITEMS[id].icon, Rect2(4, 4, 62, 62))
-		tile.tooltip_text = gear.item_text(id)
-		_label(overlay, slot, Rect2(130, y + 3, 165, 19), 11, TEAL, true)
-		_label(overlay, BotEquipment.ITEMS[id].name, Rect2(130, y + 27, 171, 25), 17, CREAM, true)
-		_label(overlay, "★".repeat(gear.inventory[id].stars), Rect2(130, y + 53, 165, 20), 13, GOLD)
-	_surface(overlay, Rect2(320, 97, 1, 390), EDGE, 0, EDGE, 0)
-	_label(overlay, "COLLECTION", Rect2(344, 96, 239, 22), 11, MUTED, true)
-	for i in range(BotEquipment.ITEM_ORDER.size()):
-		var id: String = BotEquipment.ITEM_ORDER[i]
-		var item: Dictionary = gear.inventory[id]
-		var x := 344 + (i % 3) * 83
-		var y := 134 + (i / 3) * 98
-		var tile := _button("", Rect2(x, y, 72, 78), func() -> void:
-			gear_selected = id
-			show_equipment(gear, back_action), false)
-		tile.add_theme_stylebox_override("normal", _style(PANEL, 2, GOLD if id == gear_selected else EDGE, 2 if id == gear_selected else 1))
-		_icon(tile, BotEquipment.ITEMS[id].icon, Rect2(5, 3, 62, 62), item.copies == 0)
-		_label(tile, "II" if i >= 3 else "I", Rect2(5, 3, 22, 18), 10, GOLD, true)
-		_label(tile, "x%d" % item.copies, Rect2(33, 56, 32, 18), 11, CREAM, true, HORIZONTAL_ALIGNMENT_RIGHT)
-		tile.tooltip_text = BotEquipment.ITEMS[id].name + "\n" + gear.item_text(id)
-	var chosen: Dictionary = gear.inventory[gear_selected]
-	var data: Dictionary = BotEquipment.ITEMS[gear_selected]
-	_icon(overlay, data.icon, Rect2(692, 105, 120, 120), chosen.copies == 0)
-	_label(overlay, data.name, Rect2(615, 238, 292, 32), 24, CREAM, true, HORIZONTAL_ALIGNMENT_CENTER)
-	_label(overlay, "★".repeat(chosen.stars) + "☆".repeat(5 - chosen.stars), Rect2(615, 275, 292, 24), 18, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
-	_label(overlay, gear.item_text(gear_selected), Rect2(632, 314, 259, 60), 15, CREAM)
-	_label(overlay, "Fitted" if gear_selected in gear.equipped.values() else ("Not owned" if chosen.copies == 0 else "%d spare" % maxi(0, chosen.copies - 1)), Rect2(632, 377, 259, 21), 12, TEAL)
-	for i in range(3):
-		var action: String = ["equip", "reroll", "star"][i]
-		var cost: int = 25 * (chosen.stars + 1)
-		var copies: int = chosen.stars + 1
-		var caption: String = ["Equip", "Reroll  35", "Star  %d" % cost][i]
-		var button := _button(caption, Rect2(615 + i * 99, 419, 93, 35), func() -> void:
-			gear.transact(action, gear_selected)
-			show_equipment(gear, back_action), false)
-		button.add_theme_font_size_override("font_size", 12)
-		button.disabled = chosen.copies == 0 or gear.save_blocked or (action == "equip" and gear_selected in gear.equipped.values()) or (action == "reroll" and gear.credits < 35) or (action == "star" and (chosen.stars >= 5 or gear.credits < cost or chosen.copies <= copies))
-		button.tooltip_text = {"equip": "Fit to %s. Applies next run." % data.slot, "reroll": "35 credits. Replace the bonus stat; keep stars.", "star": "Max stars" if chosen.stars >= 5 else "%d credits + %d spare copies. +20%% base stat. Guaranteed." % [cost, copies]}[action]
-	# Only operational errors need a persistent message.
-	if gear.save_blocked or "failed" in gear.message.to_lower():
-		_label(overlay, gear.message, Rect2(46, 480, 858, 22), 12, CORAL)
+	preload("res://src/salvage/gear_view.gd").draw(self, gear, back_action)
 
 func _settings(x: float, y: float) -> void:
 	_button("Sound: off" if muted else "Sound: on", Rect2(x, y, 185, 34), func() -> void:
@@ -544,44 +523,7 @@ func show_upgrades(model: SalvageRun) -> void:
 	hud.visible = true
 	notice_time = 0
 	_dim()
-	_label(overlay, "Power up" if model.demo_mode else "Level up", Rect2(42, 81, 520, 43), 31, CREAM, true)
-	_label(overlay, "Choose an upgrade", Rect2(44, 126, 520, 22), 13, MUTED)
-	var build_button := _button("Build  [Tab]", Rect2(765, 94, 151, 36), func() -> void: build_requested.emit(), false)
-	build_button.set_meta("utility", true)
-	var first: Button
-	for i in range(model.offers.size()):
-		var id: String = model.offers[i]
-		var data: Dictionary = model.upgrade_data(id)
-		var x := 42 + i * 298
-		var card := _button("", Rect2(x, 170, 278, 314), func() -> void: upgrade_selected.emit(i), false)
-		card.set_meta("upgrade_card", true)
-		if i == 0:
-			first = card
-		_label(card, data.tag, Rect2(17, 14, 218, 20), 10, TEAL, true)
-		_label(card, str(i + 1), Rect2(237, 12, 23, 24), 14, MUTED, true, HORIZONTAL_ALIGNMENT_RIGHT)
-		var item_art := _upgrade_icon(card, model, id, Rect2(84, 37, 110, 104))
-		item_art.pivot_offset = item_art.size / 2
-		card.mouse_entered.connect(func() -> void:
-			if not reduced:
-				item_art.create_tween().tween_property(item_art, "scale", Vector2.ONE * 1.06, 0.12))
-		card.mouse_exited.connect(func() -> void:
-			item_art.create_tween().tween_property(item_art, "scale", Vector2.ONE, 0.12))
-		_label(card, data.name, Rect2(17, 167, 244, 28), 21, CREAM, true)
-		_pips(card, Vector2(18, 201), model.rank_of(id), int(data.max), true)
-		var milestone_next := model.staged and (model.rank_of(id) + 1) % 5 == 0
-		_label(card, model.upgrade_note(id, model.rank_of(id) + 1) if milestone_next else ("Rank %d -> %d / %d" % [model.rank_of(id), model.rank_of(id) + 1, data.max] if model.staged and id != "repair" else data.description), Rect2(18, 214, 246, 28), 10, GOLD if milestone_next else MUTED)
-		if milestone_next:
-			card.add_theme_stylebox_override("normal", _style(PANEL, 8, GOLD, 2))
-			_label(card, "MILESTONE", Rect2(18, 143, 242, 20), 12, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
-		var values := model.upgrade_values(id)
-		var next := model.upgrade_values(id, model.rank_of(id) + 1)
-		for row in range(values.size()):
-			_label(card, values[row].label, Rect2(18, 247 + row * 20, 144, 22), 12, MUTED)
-			var after: Variant = next[row].value if id != "repair" else mini(model.max_health(), model.health + 1)
-			_label(card, "%s > %s%s" % [values[row].value, after, values[row].unit], Rect2(138, 247 + row * 20, 122, 22), 13, GOLD, true, HORIZONTAL_ALIGNMENT_RIGHT)
-	_label(overlay, "1 / 2 / 3  Select     Tab  Build", Rect2(42, 493, 874, 21), 12, MUTED, false, HORIZONTAL_ALIGNMENT_CENTER)
-	if first:
-		first.grab_focus()
+	preload("res://src/salvage/upgrade_view.gd").draw(self, model)
 
 func show_pause() -> void:
 	clear_overlay()
@@ -624,33 +566,40 @@ func show_result(model: SalvageRun, saved: bool = false) -> void:
 	var again := _button("Play again", Rect2(228, 353, 244, 44), func() -> void: restart_requested.emit())
 	_button("Main menu", Rect2(488, 353, 244, 44), func() -> void: menu_requested.emit(), false)
 	_button("View build", Rect2(388, 413, 184, 33), func() -> void: build_requested.emit(), false)
-	_label(overlay, "Saved locally" if saved else "Not saved", Rect2(610, 445, 126, 18), 10, MUTED, false, HORIZONTAL_ALIGNMENT_RIGHT)
+	if not saved: _label(overlay, "Run not saved", Rect2(610, 445, 126, 18), 10, MUTED, false, HORIZONTAL_ALIGNMENT_RIGHT)
 	again.grab_focus()
 
 func show_stage_reward(model: SalvageRun) -> void:
 	clear_overlay()
 	_dim()
 	_label(overlay, "%s %d cleared" % ["Level" if model.demo_mode else "Stage", model.stage], Rect2(43, 65, 650, 45), 32, CREAM, true)
-	_label(overlay, ("Next: %s / +1 hull / full energy" % DemoCampaign.LEVELS[mini(2, model.stage)].name) if model.demo_mode else "Cache secured / +1 hull / energy refilled after your choice", Rect2(45, 116, 850, 25), 14, GOLD)
+	_label(overlay, ("NEXT  /  %s" % DemoCampaign.LEVELS[mini(2, model.stage)].name.to_upper()) if model.demo_mode else "CACHE SECURED", Rect2(45, 116, 560, 25), 14, GOLD, true)
+	var recovery := _label(overlay, "+1 hull  ·  Full energy", Rect2(624, 116, 290, 25), 14, TEAL, true, HORIZONTAL_ALIGNMENT_RIGHT)
+	recovery.mouse_filter = Control.MOUSE_FILTER_STOP
+	recovery.tooltip_text = "Restored after selecting a reward. Hull cannot exceed its maximum."
 	for i in range(model.stage_rewards.size()):
 		var reward: Dictionary = model.stage_rewards[i]
 		var tier: int = reward.tier
 		var color: Color = MobaKit.RARITY_COLORS[tier]
 		var card := _button("", Rect2(42 + i * 298, 169, 278, 315), func() -> void: stage_reward_selected.emit(i), false)
-		card.add_theme_stylebox_override("normal", _style(PANEL, 8, color, 2))
+		card.set_meta("stage_reward_card", i)
+		card.add_theme_stylebox_override("normal", _style(PANEL, 0, color, 2))
+		_surface(card, Rect2(1, 1, 276, 3), color, 0, color, 0)
+		if i == 0: card.grab_focus()
 		_label(card, MobaKit.RARITIES[tier].to_upper(), Rect2(18, 13, 216, 22), 12, color, true)
 		_label(card, str(i + 1), Rect2(240, 13, 21, 22), 12, MUTED, true)
 		var title := "Reactor cache"
-		var description := "+20 maximum energy\n+2 energy regeneration / sec\nFor the rest of this run."
+		var description := "+20 max energy\n+2 energy / sec"
 		if reward.kind == "ability":
 			var id: String = model.kit.loadout[reward.slot]
 			title = MobaKit.ABILITIES[id].name
 			_ability_icon(card, id, Rect2(82, 49, 114, 114))
-			description = "%s -> %s\nDamage x%.2f -> x%.2f\nRecharge %.1fs -> %.1fs" % [MobaKit.RARITIES[tier - 1], MobaKit.RARITIES[tier], model.kit.damage_scale(reward.slot), (1 + tier * 0.15) * (1 + SalvageProgression.bonus(model.kit.ranks[reward.slot])), model.kit.cooldown(reward.slot), model.kit.cooldown_at(reward.slot, model.kit.ranks[reward.slot], tier)]
+			description = "Damage  ×%.2f → ×%.2f\nRecharge  %.1fs → %.1fs" % [model.kit.damage_scale(reward.slot), model.kit.damage_scale_at(reward.slot, model.kit.ranks[reward.slot], tier), model.kit.cooldown(reward.slot), model.kit.cooldown_at(reward.slot, model.kit.ranks[reward.slot], tier)]
 			if id in ["shield", "sprint", "blink", "dash", "pylon", "sacrifice"]:
-				description = "%s -> %s\nRecharge %.1fs -> %.1fs\nCosts and utility stay unchanged." % [MobaKit.RARITIES[tier - 1], MobaKit.RARITIES[tier], model.kit.cooldown(reward.slot), model.kit.cooldown_at(reward.slot, model.kit.ranks[reward.slot], tier)]
+				description = "Recharge  %.1fs → %.1fs" % [model.kit.cooldown(reward.slot), model.kit.cooldown_at(reward.slot, model.kit.ranks[reward.slot], tier)]
 		else:
 			_icon(card, "reactor", Rect2(78, 45, 122, 122))
 		_label(card, title, Rect2(18, 186, 244, 28), 21, CREAM, true)
 		var text := _label(card, description, Rect2(18, 230, 244, 70), 13, MUTED)
 		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		card.tooltip_text = title + "\n" + description + "\nFor the rest of this run. Costs and utility are unchanged."
