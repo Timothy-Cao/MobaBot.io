@@ -1,6 +1,6 @@
 # Ability direction and owner feedback · 9 September 2026
 
-Status: **owner notes for future research, design and playtesting; not implemented behavior.** These notes were made from the text descriptions while away from the playtesting computer. Abilities 1–8 have initial feedback; abilities 9–49 remain unreviewed. Preserve the distinction between description-based expectations and hands-on experience.
+Status: **owner notes for future research, design and playtesting; not implemented behavior.** These notes were made from the text descriptions while away from the playtesting computer. Abilities 1–11 have initial feedback; abilities 12–49 remain unreviewed. Preserve the distinction between description-based expectations and hands-on experience.
 
 `QA_17.md` and the root README continue to describe the current build until a later implementation is verified.
 
@@ -42,6 +42,18 @@ This is design direction, not permission to remove current binding behavior befo
 - If the player learns another Q-family ability while already carrying a Q, place the new ability in inventory instead of forcing a replacement.
 - Let players choose a loadout from their learned ability inventory so they can tailor a build for a stage or boss where they are stuck.
 - Work out when and where loadouts can change, how current ranks/rarities are preserved, and how this interacts with run-only progression before implementation.
+
+## Proposed focused roster
+
+Keep every existing ability in the project for now; do not delete the wider catalog. Stash abilities outside the focused set so the best candidates can be refined and tested before other options are reintroduced gradually.
+
+- Use the abilities reviewed in this document as the initial active-design set, subject to their individual keep, replace or consolidate notes.
+- For movement, initially retain only the two current defaults: Ghost drive and Phase hop.
+- Initially surface one default summon. The owner did not name which summon; do not select it without a later decision.
+- The owner's home AI should review the powered toggles and select the four strongest designs. That selection is still pending; do not infer the four here.
+- Use focused Practice tests to judge feel and purpose after the retained abilities have been refined.
+
+"Stash" means preserve the implementation and data while removing an ability from the initial player-facing test/selection pool. Exact availability, migration and unlock behavior still need design before implementation.
 
 ## Initial ability feedback
 
@@ -111,6 +123,39 @@ The owner also suggested possibly moving it into the passive-like family, which 
 - Rank 5: wider cone.
 - Rank 10: affect bosses and add a stun.
 
+### 9. Guard sweep / proposed hammer swing
+
+**Verdict:** replace the current Guard sweep concept with a large hammer swing, and consider making the hammer the player's default basic attack instead of the regular commanded shot.
+
+- A visible hammer appears and sweeps through an approximately 90-degree arc in the chosen direction.
+- The hammer head is the meaningful sweet spot: it deals extra damage, pushes enemies and briefly stuns them.
+- The longer handle deals little damage and does not push enemies.
+- The difference between the head and handle should reward deliberate player positioning.
+- Treat this as a melee basic attack. Left-click swings in the cursor direction.
+- Briefly pause movement while committing to the swing.
+- Initial cadence target: one swing every 2 seconds.
+- The hammer should be large enough, and its damage high enough, for each slower hit to feel meaningful.
+
+This proposal changes the current basic-attack and mouse-input contract. Before implementation, resolve how left-click swinging coexists with aimed casts, UI interaction, attack move and the independent powered Auto gun. "Auto attack" here means the player's repeatable basic attack, not an attack that fires without input.
+
+### 10. Rim cutter
+
+**Verdict:** its separate purpose is unclear. Consolidate its useful role into Repulsor rather than presenting it as another overlapping close-range sweep.
+
+Keep the existing ability implementation stashed for now rather than deleting it. The owner did not specify whether its outer-rim damage or healing should survive the consolidation; do not assume either mechanic carries over.
+
+### 11. Piston thrust
+
+**Verdict:** liked if it functions as a committed body-check ability, comparable in broad intent to Gragas E.
+
+- Always stun enemies hit by the thrust.
+- While executing it, contact with non-boss enemy bodies should not damage the player.
+- Enemy abilities and projectiles can still damage the player during the action.
+- Contact after the ability finishes can damage the player normally.
+- When the thrust hits an enemy, grant a short invulnerability window to prevent immediate body-contact damage.
+
+The invulnerability duration, boss interaction, collision rules and distinction between body damage and ability damage require explicit design and tests. The external reference describes the desired body-check feel; do not copy unrelated mechanics or assets.
+
 ## Pending review
 
-Abilities 9–49 have no new owner verdict in this note. Do not infer approval, rejection or requested changes for them. Continue the numbered review from ability 9 when the owner returns.
+Abilities 12–49 have no new owner verdict in this note. Do not infer approval, rejection or requested changes for them. Continue the numbered review from ability 12 when the owner returns.

@@ -11,7 +11,7 @@ The current playable version is **0.17 Field Test**. `QA_17.md` supersedes earli
 
 ## Active owner direction
 
-- [Ability direction and owner feedback](design/ABILITY_FEEDBACK_17.md) — description-based notes for abilities 1–8, a functional-taxonomy research request, proposed fixed slot identities and a learned-ability loadout direction. These are future design inputs, not current implemented behavior.
+- [Ability direction and owner feedback](design/ABILITY_FEEDBACK_17.md) — description-based notes for abilities 1–11, a functional-taxonomy research request, proposed fixed slot identities, a focused test roster and a learned-ability loadout direction. These are future design inputs, not current implemented behavior.
 
 ## Current supporting specifications
 
