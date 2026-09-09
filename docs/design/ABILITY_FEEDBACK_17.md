@@ -77,15 +77,70 @@ Details to resolve before implementation:
 
 This is future design direction, not current behavior. The current modal timing, discovery, camp arrangement and save rules remain governed by `QA_17.md` until this flow has a full state model, migration plan and verification coverage.
 
+## Default movement refinement: D and F
+
+Keep Ghost drive and Phase hop as the two default movement tools, but give them very different control promises.
+
+### D — Ghost drive
+
+The owner likes the current D direction. Preserve it as the movement-speed tool that the player holds to use. Its important uses include escaping a dangerous situation, quickly crossing open ground and collecting scattered orbs during a safe collection window.
+
+- The hold state should be immediately legible and should end responsively when D is released.
+- Preserve the successful current feel rather than adding another attack, collision payoff or complicated combo.
+- Keep D distinct from F: D improves movement over time, while F is an instantaneous discontinuous relocation.
+- Confirm the final duration, cooldown, early-release behavior and relationship between the held speed state and current intangibility before implementation; this note does not supply new balance numbers.
+
+### F — Phase hop as a full blink
+
+Refine F so it feels like League of Legends' Flash in responsiveness and terrain interaction. This is a mechanical reference, not permission to copy presentation, assets or unrelated rules.
+
+**Cast-origin buffering:**
+
+- The player may begin an eligible ability cast and then press F within a target window of less than 0.1 seconds.
+- F resolves immediately while the ability's windup continues.
+- If the pending ability has not released yet, its projectile, sweep, zone or other effect originates from the player's post-blink position.
+- The numerical cast time is not necessarily shortened. The player is allowed to begin the windup before blinking, which reduces the time spent waiting at the destination and creates fast Flash–ability combinations.
+- The original ability spends its cost and cooldown exactly once. Flash must not cancel, duplicate or retroactively move an effect that already released.
+
+The exact input-window boundary, eligible ability list and aim rule need an explicit contract. In particular, define whether a cast preserves its original world target, preserves its direction, or re-aims from the new origin for each targeting family. Channels, self-casts, movement abilities and the proposed hammer may need different eligibility rules.
+
+**Thick-terrain traversal:**
+
+- F is a true blink, not a dash. The player does not travel through or collide with intermediate space.
+- If the requested endpoint is valid walkable space, land there normally, up to the base blink range.
+- If the requested endpoint lies inside blocking terrain, compare how far the endpoint penetrates through that terrain along the blink direction.
+- When the endpoint is beyond the terrain's halfway point, place the player at the closest valid position immediately outside the far side. This may make the final displacement longer than the nominal blink range.
+- When the endpoint has not passed the halfway point, place the player at the closest valid position on the near side rather than carrying them through.
+- “Valid position” must include the player's full body clearance, arena bounds and non-overlap with other blocking terrain, not merely a free point for the player's center.
+
+Concrete owner example: if the player begins at the near edge of a wall whose thickness along the blink ray is 1.9 times F's normal range, a maximum-range blink ends just past the midpoint. The player should therefore land immediately outside the far edge of that wall, even though the corrected destination is farther than the normal range.
+
+The terrain rule should operate on the connected obstruction crossed by the blink, not become an unlimited search through several adjacent walls. Define a safe failure or near-side fallback when there is no legal far-side landing. This is especially important if the thicker terrain and corridor direction in [`ENVIRONMENT_FEEDBACK_17.md`](ENVIRONMENT_FEEDBACK_17.md) is implemented.
+
+### Required prototype checks
+
+- Ability input followed by F inside the buffer window releases from the post-blink origin.
+- F outside the window does not relocate an already-released effect.
+- The ability and F each spend their cost/charge once, including rapid repeated input.
+- A clear endpoint uses normal range; a near-half endpoint stays on the near side; a past-half endpoint exits the far side.
+- Test the owner's 1.9-times-wall example with player-body clearance.
+- Corners, diagonal walls, concave shapes, touching obstacles, arena borders and an unavailable far-side destination resolve consistently.
+- No transient movement along the blink path triggers body contact, pickups, hazards or on-move collision effects unless a later design explicitly opts them in.
+- Visual and audio feedback communicates departure and arrival without drawing a false travel path.
+
+This section records desired behavior only. Current Phase hop range, charge count, cooldown and protection values are not approved or replaced by this note.
+
 ## Proposed focused roster
 
 Keep every existing ability in the project for now; do not delete the wider catalog. Stash abilities outside the focused set so the best candidates can be refined and tested before other options are reintroduced gradually.
 
 - Use the abilities reviewed in this document as the initial active-design set, subject to their individual keep, replace or consolidate notes.
 - For movement, initially retain only the two current defaults: Ghost drive and Phase hop.
-- Initially surface one default summon. The owner did not name which summon; do not select it without a later decision.
-- The owner's home AI should review the powered toggles and select the four strongest designs. That selection is still pending; do not infer the four here.
+- Initially surface one default summon. The owner did not name one; the later research document recommends Pulse anchor as an assistant proposal pending owner review and playtesting.
+- The later research document recommends Coolant trail, Arc coil, Auto gun and Life converter as the four strongest initial powered toggles. This is an assistant recommendation, not a recorded owner verdict.
 - Use focused Practice tests to judge feel and purpose after the retained abilities have been refined.
+
+See [`ABILITY_TAXONOMY_RESEARCH_17.md`](ABILITY_TAXONOMY_RESEARCH_17.md) for the reasoning behind those recommendations and the audit of abilities 12–49.
 
 "Stash" means preserve the implementation and data while removing an ability from the initial player-facing test/selection pool. Exact availability, migration and unlock behavior still need design before implementation.
 
