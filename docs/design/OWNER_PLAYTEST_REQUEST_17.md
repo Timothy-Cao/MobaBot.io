@@ -153,7 +153,7 @@ Implement only after the baseline kit is isolated and testable. The exact owner 
 - Return blade: W alternative; larger, farther, slower, piercing, with player movement affecting return.
 - Gravity well: low damage and primarily grouping; larger/longer milestones; later explicit boss movement denial.
 - Core strike: default W; rank 5 stores three charges, rank 10 stores four with more reach and larger center.
-- Crosswire: E/module idea but now overlaps paired robots; reconcile rather than duplicate.
+- Crosswire: preserve as an older E/module idea, but do not duplicate the relay-pair geometry now reserved for Marshal.
 - Repulsor: E alternative focused on shove; rank 5 wider, rank 10 boss interaction/stun.
 - Guard sweep: replace conceptually with the hammer, preserving old implementation for regression until transition is proven.
 - Rim cutter: stash/consolidate useful purpose into Repulsor; do not delete.
@@ -168,6 +168,12 @@ Create greybox alternatives before environment art:
 3. A large circular structure or enclosure with four wide entrances and combat space inside/outside.
 
 Terrain must look and collide as substantial volume, retain clear starts and ability space, route ordinary enemies without snagging, support bosses, and remain below threats/pickups in visual hierarchy. Preserve the current layout as a regression reference.
+
+## Future robot perspective and animation bookmark
+
+Revisit whether the player robot and related bodies should use a **true top-down presentation** rather than the current perspective. Explore camera perspective and character animation together: changing the view affects silhouette, readable facing, weapon attachment points, shadows, collision honesty and the directional poses or frames required.
+
+The owner wants to revisit this on the home computer, where the Astra model may be useful for animation-oriented exploration. Treat that as a candidate production tool, not evidence that it can already produce a coherent shippable animation set. Before replacing assets, compare a very small representative motion test—idle/move, basic attack, one aimed cast, body slam and one damage/death reaction—at actual combat size, normal zoom and Reduced effects. Preserve current assets and provenance until the owner selects a perspective after seeing the motion tests.
 
 ## Owner research request: Robot AI mode
 
