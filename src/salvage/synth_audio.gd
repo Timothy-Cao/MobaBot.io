@@ -21,6 +21,8 @@ func _ready() -> void:
 		add_child(player)
 		players.append(player)
 	sounds.shot = _tone(380, 110, 0.065, 0.15)
+	sounds.auto_shot = _tone(510,190,0.035,0.13)
+	sounds.heavy_shot = _tone(180,55,0.14,0.3)
 	sounds.hit = _tone(180, 80, 0.055, 0.35)
 	sounds.kill = _tone(260, 65, 0.14, 0.45)
 	sounds.pickup = _tone(760, 1200, 0.075, 0.0)
@@ -84,6 +86,8 @@ func receive(event: Dictionary) -> void:
 		pickup_chain += 1
 		pickup_gap = 0.5
 	player.volume_db = -26 if kind.begins_with("ui_") else (-22 if kind in ["shot", "hit"] else -14)
+	if kind=="auto_shot": player.volume_db=-27
+	elif kind=="heavy_shot": player.volume_db=-18
 	player.play()
 
 func set_muted(value: bool) -> void:

@@ -172,7 +172,7 @@ func milestone(slot: String) -> int:
 	return SalvageProgression.milestone(effective_rank(slot))
 
 func area_scale(slot: String) -> float:
-	return 1.0 + milestone(slot) * 0.25
+	return (1.0 + milestone(slot) * 0.25) * (1.15 if loadout.get("rules17",false) and loadout.get(slot,"") in ["flame","reap","sweep","thrust","repulsor","tractor"] else 1.0)
 
 func cast_range(slot: String) -> float:
 	var id: String = loadout[slot]
@@ -254,7 +254,7 @@ func damage_scale(slot: String) -> float:
 
 func damage_scale_at(slot: String, rank_value: int, tier_value: int = -1) -> float:
 	var tier: int = int(tiers.get(slot, 0)) if tier_value < 0 else tier_value
-	return (1.0 + gear_damage + mastery_damage) * (1.0 + tier * 0.15) * (1.0 + SalvageProgression.bonus(mini(10,rank_value+(rank_bonus if unlocked(slot) else 0))))
+	return (1.6 if loadout.get("rules17",false) and loadout.get(slot,"") in ["flame","reap","sweep","thrust","repulsor","tractor"] else 1.0) * (1.0 + gear_damage + mastery_damage) * (1.0 + tier * 0.15) * (1.0 + SalvageProgression.bonus(mini(10,rank_value+(rank_bonus if unlocked(slot) else 0))))
 
 func promote(slot: String) -> bool:
 	if slot not in active_slots() or tiers[slot] >= 2:

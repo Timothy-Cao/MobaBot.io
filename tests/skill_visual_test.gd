@@ -24,6 +24,7 @@ func fixture(id: String, rank_value: int) -> SalvageRun:
 	run.enable_moba(MobaKit.demo_preset()); run.enable_demo()
 	run.attacks.enabled=true; run.kit.onboarding=true; run.kit.starting_gun=true
 	BotExpedition.new().start(run,"ranged",0)
+	if "--revised" in OS.get_cmdline_user_args(): run.exp.enable_revision(run)
 	run.player=Vector2(310,300); run.kit.pet_position=run.player
 	run.kit.extra.clear_combat(); run.kit.toggles=[false,false,false,false]
 	run.kit.discovered.assign(MobaKit.BIND_SLOTS)
@@ -81,6 +82,8 @@ func review() -> void:
 					var state: int=snapshot(run)
 					art.queue_redraw(); await process_frame
 					if rendered: await RenderingServer.frame_post_draw
+					if rendered and "--stills" in OS.get_cmdline_user_args() and id in ["flame","sweep","reap","thrust"] and frame==5 and rank_value in [0,5]:
+						root.get_texture().get_image().save_png("res://output/skill17-%s-%d-%s.png"%[id,rank_value,"reduced" if reduced else "normal"])
 					check(state==snapshot(run),"Rendering is simulation-independent")
 					check(art.effects.size()<=(65 if reduced else 180),"Visual event pool stays bounded")
 					if showcase and rendered:

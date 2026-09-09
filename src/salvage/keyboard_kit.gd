@@ -40,6 +40,7 @@ static func allowed(id: String, key: int) -> bool:
 static func can_place(kit, id: String, key: int) -> bool:
 	if not allowed(id,key): return false
 	var old:=slot_at(kit,key)
+	if kit.loadout.get("rules17",false) and old!="": return false
 	if old!="" and id_at(kit,old)=="orbit" and id!="orbit" and learned(kit,"ricochet")!="": return false
 	if id=="ricochet" and learned(kit,"orbit")=="": return false
 	return true
@@ -102,6 +103,7 @@ static func valid_system(keys: Dictionary) -> bool:
 	return true
 
 static func valid_config(config: Dictionary) -> bool:
+	if not SkillLibrary.valid(config): return false
 	if not config.get("passives") is Array or config.passives.size()!=9: return false
 	for id in config.passives:
 		if not id is String or (id!="" and not MobaKit.PASSIVES.has(id)): return false

@@ -9,12 +9,13 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 	run.kit.onboarding=true; run.kit.starting_gun=true; run.attacks.enabled=true
 	BotExpedition.new().start(run,class_id,difficulty)
 	BotKeyboard.enable(run)
+	if "--revised" in OS.get_cmdline_user_args(): run.exp.enable_revision(run)
 	ForgeEquipment.new().apply_to(run)
 	run.health=run.max_health()
 	var peak:=0
 	var max_us:=0
 	var samples: Array[int]=[]
-	for frame in range(120000):
+	for frame in range(240000 if "--revised" in OS.get_cmdline_user_args() else 120000):
 		if run.state in ["won","lost"]: break
 		if run.state=="upgrade":
 			var index:=0
@@ -30,11 +31,12 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 			if policy!="idle":
 				var direction: Vector2=DemoCampaign.test_direction(run)
 				if direction==Vector2.ZERO: direction=Vector2.RIGHT
-				run.command_move(run.player+direction*110)
+				if policy!="basics" or run.attacks.windup<0: run.command_move(run.player+direction*110)
 				for chest in run.exp.loot_chests:
-					if run.player.distance_to(chest.pos)<230: run.command_move(chest.pos)
+					if run.player.distance_to(chest.pos)<230 and run.attacks.windup<0: run.command_move(chest.pos)
 				var enemy:=run.nearest_enemy(run.player)
 				if not enemy.is_empty():
+					if policy=="basics" and run.attacks.cooldown<=0 and run.player.distance_to(enemy.pos)<=run.attacks.attack_range(run): run.attacks.attack(run,enemy)
 					run.kit.extra.cursor=enemy.pos
 					if frame%20==0:
 						for slot in run.kit.active_slots():
@@ -62,6 +64,6 @@ func _run() -> void:
 		print("EXPEDITION_SOAK ",JSON.stringify(result))
 		quit(0 if result.state=="won" else 1)
 	else:
-		for id in BotExpedition.CLASSES:
-			for policy in ["idle","active"]: print("EXPEDITION_PROBE ",JSON.stringify(simulate(id,policy)))
+		for id in (["ranged"] if "--revised" in OS.get_cmdline_user_args() else BotExpedition.CLASSES.keys()):
+			for policy in (["idle","active","basics"] if "--revised" in OS.get_cmdline_user_args() else ["idle","active"]): print("EXPEDITION_PROBE ",JSON.stringify(simulate(id,policy)))
 		quit()

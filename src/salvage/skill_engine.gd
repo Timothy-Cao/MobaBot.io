@@ -147,7 +147,8 @@ func cast(run, slot: String, id: String, point: Vector2, direction: Vector2, sca
 			var side := direction.orthogonal() * 95 * size_scale
 			if side == Vector2.ZERO: side = Vector2.UP * 95
 			walls.append({"uid": serial, "a": point - side, "b": point + side, "life": 5.0 * size_scale, "duration":5.0*size_scale})
-			if walls.size() > 4: walls.pop_front()
+			var temporary: Array=walls.filter(func(w): return w.uid>=0)
+			if temporary.size() > 4: walls.erase(temporary[0])
 		"roller":
 			roll_left = 4; roll_speed = 205; roll_angle = direction.angle()
 			roll_power = scale_value; roll_size = size_scale
@@ -252,6 +253,8 @@ func vault_wall(run, point: Vector2) -> Dictionary:
 	return {}
 
 func route(point: Vector2, target: Vector2, radius: float) -> Vector2:
+	if walls.any(func(w):return w.get("terrain",false)):
+		return terrain_route(point,target,radius)
 	for wall in walls:
 		if Geometry2D.segment_intersects_segment(point, target, wall.a, wall.b) == null: continue
 		var along: Vector2 = (wall.b - wall.a).normalized() * (radius + 18)
@@ -259,6 +262,34 @@ func route(point: Vector2, target: Vector2, radius: float) -> Vector2:
 		var b: Vector2 = wall.b + along
 		return a if point.distance_to(a) + a.distance_to(target) <= point.distance_to(b) + b.distance_to(target) else b
 	return target
+
+func path_blocked(point: Vector2, target: Vector2, wall: Dictionary, clearance: float) -> bool:
+	if not Rect2(point,target-point).abs().grow(clearance).intersects(Rect2(wall.a,wall.b-wall.a).abs().grow(1)): return false
+	if Geometry2D.segment_intersects_segment(point,target,wall.a,wall.b)!=null: return true
+	for endpoint in [wall.a,wall.b]:
+		if Geometry2D.get_closest_point_to_segment(endpoint,point,target).distance_to(endpoint)<clearance: return true
+	for endpoint in [point,target]:
+		if Geometry2D.get_closest_point_to_segment(endpoint,wall.a,wall.b).distance_to(endpoint)<clearance: return true
+	return false
+
+func terrain_route(point: Vector2, target: Vector2, radius: float) -> Vector2:
+	var nearest: Dictionary={}; var distance:=INF
+	for wall in walls:
+		if not path_blocked(point,target,wall,radius+7): continue
+		var d: float=Geometry2D.get_closest_point_to_segment(point,wall.a,wall.b).distance_squared_to(point)
+		if d<distance: distance=d; nearest=wall
+	if nearest.is_empty(): return target
+	var along: Vector2=(nearest.b-nearest.a).normalized()
+	var normal:=along.orthogonal()
+	var best:=point; var cost:=INF
+	for end in [nearest.a-along*(radius+22),nearest.b+along*(radius+22)]:
+		for offset in [-1,0,1]:
+			var waypoint: Vector2=end+normal*offset*(radius+22)
+			if point.distance_to(waypoint)<4: continue
+			if path_blocked(point,waypoint,nearest,radius+6): continue
+			var score: float=point.distance_to(waypoint)+waypoint.distance_to(target)+(radius*4+100 if path_blocked(waypoint,target,nearest,radius+7) else 0)
+			if score<cost: best=waypoint; cost=score
+	return best
 
 func solid_point(before: Vector2, after: Vector2, radius: float) -> Vector2:
 	for wall in walls:

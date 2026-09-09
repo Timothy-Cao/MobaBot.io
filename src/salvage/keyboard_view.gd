@@ -8,7 +8,7 @@ static func name_of(id: String) -> String:
 static func description(kit, slot: String) -> String:
 	var id:=BotKeyboard.id_at(kit,slot)
 	if slot.begins_with("p"): return name_of(id)+"\n"+MobaKit.PASSIVES[id].text+("\n+1 equipment rank: +20% primary effect, or +1 shared weapon-track rank (cap 10)." if kit.rank_bonus>0 else "")
-	var detail: String=MobaKit.ABILITIES[id].text
+	var detail: String=SkillLibrary.description(id,kit.loadout.get("rules17",false))
 	if id=="laser": detail=detail.replace("R again",OS.get_keycode_string(kit.bindings[slot])+" again")
 	return "%s · Rank %d%s\n%s\n%.1fs recharge · %s"%[name_of(id),kit.ranks[slot]," +1 gear" if kit.rank_bonus>0 else "",detail,kit.cooldown(slot),MobaKit.cost_text(id)]
 
@@ -16,10 +16,11 @@ static func draw(game) -> void:
 	var ui=game.ui; var kit: MobaKit=game.model.kit
 	ExpeditionView.frame(ui,"Place skill" if game.pending_discovery>=0 else "Skills",game.close_keyboard)
 	var incoming: String="" if game.pending_discovery<0 else game.model.exp.chest_choices[game.pending_discovery].id
+	if game.library_choice!="": incoming=game.library_choice
 	for key in BotKeyboard.GENERAL+BotKeyboard.MOVEMENT:
 		var at: Vector2=Vector2(63,133)+POS[key]
 		var slot:=BotKeyboard.slot_at(kit,key)
-		var available:=incoming=="" or BotKeyboard.can_place(kit,incoming,key)
+		var available:=incoming=="" or (BotKeyboard.allowed(incoming,key) if game.library_choice!="" else BotKeyboard.can_place(kit,incoming,key))
 		var button: Button=ui._button("",Rect2(at,Vector2(64,64)),func() -> void:
 			game.keyboard_key(key),false)
 		button.name="Key_"+OS.get_keycode_string(key)
@@ -46,9 +47,9 @@ static func draw(game) -> void:
 		ui._ability_icon(ui.overlay,incoming,Rect2(670,139,110,110))
 		ui._label(ui.overlay,name_of(incoming),Rect2(622,268,288,54),23,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER).autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		var previous:=BotKeyboard.slot_at(kit,game.keyboard_target)
-		var text_value: String="" if game.keyboard_target==0 else ("Empty slot" if previous=="" else "Replace "+name_of(BotKeyboard.id_at(kit,previous)))
+		var text_value: String="" if game.keyboard_target==0 else ("Empty slot" if previous=="" else "Store "+name_of(BotKeyboard.id_at(kit,previous)))
 		ui._label(ui.overlay,text_value,Rect2(622,340,288,50),14,ui.MUTED,false,HORIZONTAL_ALIGNMENT_CENTER).autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		var place: Button=ui._button("Place" if previous=="" else "Replace",Rect2(660,415,210,43),game.place_discovery)
+		var place: Button=ui._button("Fit" if game.library_choice!="" else "Place",Rect2(660,415,210,43),game.place_discovery)
 		place.disabled=game.keyboard_target==0
 	else:
 		ui._label(ui.overlay,"Select two keys to swap",Rect2(622,170,284,60),20,ui.CREAM,true).autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -57,6 +58,14 @@ static func draw(game) -> void:
 			if slot!="":
 				ui._ability_icon(ui.overlay,BotKeyboard.id_at(kit,slot),Rect2(670,248,110,110))
 				ui._label(ui.overlay,name_of(BotKeyboard.id_at(kit,slot)),Rect2(622,377,284,50),19,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER).autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	if not kit.loadout.get("library",{}).is_empty() and game.pending_discovery<0:
+		var stored:=OptionButton.new(); stored.position=Vector2(63,445); stored.size=Vector2(480,37)
+		stored.add_item("Stored skills · %d"%kit.loadout.library.size())
+		var ids: Array=kit.loadout.library.keys()
+		for id in ids: stored.add_item(name_of(id)+" · "+str(kit.loadout.library[id].rank))
+		stored.item_selected.connect(func(i: int) -> void:
+			if i>0: game.library_choice=ids[i-1]; game.keyboard_target=0; draw(game))
+		ui.overlay.add_child(stored)
 
 static func hud(ui, run) -> void:
 	var kit: MobaKit=run.kit
@@ -95,7 +104,7 @@ static func hud(ui, run) -> void:
 			if slot.begins_with("p"):
 				var id:=BotKeyboard.id_at(kit,slot)
 				shade=not kit.passive_active(id); progress=0 if shade else 1
-				text_value="OFF" if shade else ""
+				text_value="OFF" if shade else ({"bolt":"SNP" if kit.gun_sniper else "MG","orbit":"FAR" if kit.orbit_far else "NEAR","lightning":"LONG" if kit.arc_focused else "FAST","poison":"ON"}.get(id,"ON"))
 			else:
 				shade=kit.charges[slot]==0 or kit.energy<kit.ability_cost(kit.loadout[slot])
 				text_value=str(ceili(kit.recharge[slot])) if kit.charges[slot]==0 else (str(kit.charges[slot]) if MobaKit.ABILITIES[kit.loadout[slot]].max>1 else "")
@@ -106,7 +115,9 @@ static func hud(ui, run) -> void:
 	for i in range(2): ui.consumable_counts[i].text=str(run.consumables[i])
 
 static func overview(ui, run) -> void:
-	ui._button("Arrange skills",Rect2(49,110,340,35),func() -> void: ui.keyboard_requested.emit(),false)
+	var arrange: Button=ui._button("Arrange skills",Rect2(49,110,340,35),func() -> void: ui.keyboard_requested.emit(),false)
+	arrange.disabled=run.exp.revised and run.state!="camp" and not run.exp.practice
+	arrange.tooltip_text="Available between rounds" if arrange.disabled else "Swap bindings or fit stored skills. Learned tools keep their ranks."
 	for i in range((BotKeyboard.GENERAL+BotKeyboard.MOVEMENT).size()):
 		var key: int=(BotKeyboard.GENERAL+BotKeyboard.MOVEMENT)[i]
 		var slot:=BotKeyboard.slot_at(run.kit,key)

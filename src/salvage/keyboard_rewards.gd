@@ -13,7 +13,7 @@ static func make_chest(run) -> void:
 		if id!="ricochet" or BotKeyboard.learned(run.kit,"orbit")!="": pool.append(id)
 	for i in range(3):
 		var id: String=BotSkillCatalog.draw_discovery(pool,run.offer_rng)
-		if i==0 and exp.chests_opened==0: id=BotExpedition.CLASSES[exp.class_id].w
+		if i==0 and exp.chests_opened==0: id="returner" if exp.revised else BotExpedition.CLASSES[exp.class_id].w
 		pool.erase(id)
 		var rarity:=2 if run.offer_rng.randf()<0.08 else (1 if run.offer_rng.randf()<0.25 else 0)
 		exp.chest_choices.append({"slot":BotKeyboard.learned(run.kit,id),"id":id,"tier":rarity})
@@ -23,7 +23,21 @@ static func choose(run, index: int, key: int=0) -> bool:
 	if run.state!="chest" or exp.pending_chests<=0 or index<0 or index>=exp.chest_choices.size(): return false
 	var choice: Dictionary=exp.chest_choices[index]
 	var slot:=BotKeyboard.learned(run.kit,choice.id)
-	if slot=="":
+	if exp.revised and slot=="" and (SkillLibrary.stored(run.kit,choice.id) or not SkillLibrary.has_space(run.kit,choice.id)):
+		if SkillLibrary.stored(run.kit,choice.id):
+			var saved: Dictionary=run.kit.loadout.library[choice.id]
+			if MobaKit.PASSIVES.has(choice.id):
+				var upgrade:=passive_upgrade(choice.id)
+				for i in range(2):
+					if run.upgrades.has(upgrade) and run.rank_of(upgrade)<run.rank_limit(upgrade): run.upgrades[upgrade]+=1
+					else: exp.field_credits+=20
+				run._sync_resource_ranks()
+			else:
+				exp.field_credits+=maxi(0,int(saved.rank)+2-10)*20
+				saved.rank=mini(10,int(saved.rank)+2)
+			saved.tier=maxi(int(saved.tier),int(choice.tier))
+		else: SkillLibrary.remember(run.kit,choice.id,0,int(choice.tier))
+	elif slot=="":
 		if key==0:
 			# Deterministic non-UI probes choose an empty legal position first.
 			for candidate in BotKeyboard.GENERAL+BotKeyboard.MOVEMENT:
@@ -64,10 +78,10 @@ static func chest(game) -> void:
 		card.add_theme_stylebox_override("normal",ui._style(ui.PANEL,2,MobaKit.RARITY_COLORS[choice.tier],2))
 		ui._ability_icon(card,choice.id,Rect2(73,32,102,102))
 		ui._label(card,KeyboardView.name_of(choice.id),Rect2(13,158,222,52),21,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER).autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		var known:=BotKeyboard.learned(game.model.kit,choice.id)!=""
+		var known:=BotKeyboard.learned(game.model.kit,choice.id)!="" or SkillLibrary.stored(game.model.kit,choice.id)
 		var reward: String="+2 ranks" if MobaKit.ABILITIES.has(choice.id) or game.model.upgrades.has(passive_upgrade(choice.id)) else "40 credits"
-		ui._label(card,reward if known else "Choose key",Rect2(13,230,222,24),15,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
+		ui._label(card,reward if known else ("Learn · fit at camp" if game.model.exp.revised and not SkillLibrary.has_space(game.model.kit,choice.id) else "Choose key"),Rect2(13,230,222,24),15,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
 		var data: Dictionary=MobaKit.PASSIVES.get(choice.id,MobaKit.ABILITIES.get(choice.id,{}))
-		card.tooltip_text=data.text+"\n"+MobaKit.RARITIES[choice.tier]
+		card.tooltip_text=SkillLibrary.description(choice.id,game.model.exp.revised)+"\n"+MobaKit.RARITIES[choice.tier]
 		if i==0: card.grab_focus()
 	RewardMotion.reveal(ui,cards)

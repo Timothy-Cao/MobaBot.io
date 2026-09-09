@@ -1,10 +1,10 @@
-# MobaBot.io — 0.16 Keyboard & Forge
+# MobaBot.io — 0.17 Field Test
 
 A Windows-first, single-player survivor-like with MOBA mouse controls. Build a salvage robot through an eight-stage expedition: independent automatic fire, commanded attacks, aimed skills and deployed machines.
 
-Three classes, 22 rounds, 34 active choices, 15 powered passives, a 48-node run mastery tree, eight equipment slots × five tiers, shops, Ascensions 0–5 and cleared-round checkpoints. The old three-round scene remains a regression fixture.
+One shared skill pool, 22 rounds, 34 active choices, 15 powered passives, a 48-node run mastery tree, eight equipment slots × five tiers, shops, Ascensions 0–5 and cleared-round checkpoints. Practice mode supports isolated loadout and enemy testing. The old three-round scene remains a regression fixture.
 
-[Current changes and audit](docs/design/QA_16.md) · [Damage and design notes](docs/design/BALANCE_16.md) · [Quality bar](docs/design/QUALITY_BAR.md) · [Art schema](docs/design/ART_STYLE_SCHEMA.md)
+[Current changes and audit](docs/design/QA_17.md) · [Visual ability review](docs/review/abilities.html) · [Prior damage study](docs/design/BALANCE_16.md) · [Quality bar](docs/design/QUALITY_BAR.md) · [Art schema](docs/design/ART_STYLE_SCHEMA.md)
 
 ## Play
 
@@ -25,7 +25,7 @@ This is a Godot development project, not an exported Windows release. Playing ne
 | 1–4 / Q W E R T | Nine flexible active/toggle positions |
 | D / F | Two movement skills; may swap with each other |
 | 5 / 6 | Repair 40 hull / restore 50 energy |
-| Hold Tab | Build: Overview / Mastery |
+| Tab | Toggle Build; toggle configuration in Practice |
 | Esc | Settings / back; cancels targeting first |
 | L / hold Space | Toggle camera lock / temporarily recenter |
 | Screen edge | Pan with unlocked camera |
@@ -34,25 +34,23 @@ This is a Godot development project, not an exported Windows release. Playing ne
 
 No WASD. A, Space, Tab and Esc can be rebound in Settings, outside the skill keys and fixed S/L/M/5/6/F2 controls. Settings has six options: sound, reduced effects, camera lock, area quick cast, fullscreen and icon skin.
 
-New skills open a keyboard placement screen. Choose an empty position or explicitly replace an equipped skill. In **Tab → Overview → Arrange skills**, select two positions to swap. This moves the skill with its rank, rarity, recharge and ongoing cast state; it does not refill charges. D/F remain a separate movement pair. There is no Y or main-menu Loadout.
+New skills fit empty keys. If there is no space, the tool is learned and stored. At camp, **Tab → Overview → Arrange skills** swaps keys or fits stored tools. Displaced tools retain their ranks in storage; learned skills cannot be lost for that run. Combat-time binding swaps are disabled. D/F remain a separate movement pair. There is no Y or main-menu Loadout.
 
 Shift + skill previews and casts on release. Reactor drop and ground ultimates use click confirmation unless Area quick cast is enabled. The laser starts immediately; press its assigned key again to cancel. Right-click steers the laser with inertia; it cancels aimed targeting and Siege battery.
 
 Automatic gun and commanded attacks have independent clocks. The gun key cycles machine gun → sniper → off; S never toggles it. Powered passives can turn off when energy runs out. Short committed dashes finish before stopping.
 
-## Classes and skills
+## Skills and Practice
 
-Every class starts with the automatic gun on 1, Impact bolt on Q, Ghost drive on D and charged Phase hop on F. Other positions are empty until discoveries.
+Start with the automatic gun on 1, Impact bolt on Q, Ghost drive on D and charged Phase hop on F. Other positions are empty until discoveries.
 
-- **Gunner:** long-range basics and a short speed burst after commanded fire.
-- **Brawler:** short-range heavy basics; more speed, resistance and regeneration.
-- **Engineer:** two major summons and stronger, longer-lasting constructs.
+Classes are removed from the main game. The first chest offers Return blade alongside randomized options. Orbit cannot be stored while its dependent Ricochet is equipped.
 
-The first chest includes a class-themed option; later discovery is flexible. Replacing a skill resets that skill's own ranks, not the other positions. Orbit cannot be removed while its dependent Ricochet is equipped.
+**Practice** is on the main menu. Choose a skill, key and rank 0/5/10; click Fit. Choose an enemy and count (1–100); Spawn resumes combat. Tab returns to configuration. God mode, infinite energy and instant recharge are separate options. Target dummies, ordinary hordes, all three new ranged threats, both wardens and the boss are available. Practice neither spends equipment nor overwrites the real checkpoint.
 
 The roster includes returning blades, two-anchor stuns, center/rim damage tests, displacement, healing commitments, barriers, kill-refund lunges, return dashes, vaults, rolling crashes, artillery and six summon behaviors. Powered passives include machine gun/sniper, orbit, lightning, poison, basic-attack procs, momentum, energy conversion and shoulder drones.
 
-Major summons start at one, or two for Engineer, and reach four through mastery. The tier-5 gun companion and shoulder drones do not consume this capacity.
+Major summons start at one and reach four through mastery. The tier-5 gun companion and shoulder drones do not consume this capacity.
 
 ## Run progression
 
@@ -76,9 +74,11 @@ Magnet is free utility, not a skill slot. Automatic ranks improve pickup reach a
 | 7 | Loot, neutral, boss | Shop |
 | 8 | Boss, final boss | Finish |
 
-Neutral rounds last 50s, loot rounds 40s, and boss rounds have a 35s lead-in followed by the fight. Choices pause combat. Clearing gathers remaining rewards, repairs 20% hull and refills energy. Finish pending chests before advancing. Reward animation does not lock the controls.
+Every round has 180 seconds of survival, then a miniboss for neutral/loot rounds or a boss for boss rounds. The timer changes to ELITE/BOSS. Defeating it starts 12 seconds of safe collection, with a LOOT countdown; remaining rewards are collected at camp. Choices pause combat, but do not interrupt this collection period. Clearing repairs 20% hull and refills energy. Finish pending chests before advancing. The full 22-round route has a 66-minute minimum survival budget, excluding bosses and menus; checkpoints make it resumable.
 
-Eight boss configurations share one industrial body with different pattern sequences. Three existing world sectors use restrained blue-slate, warm foundry and violet-slate floor families. This is not eight new maps. Barriers use local end-of-wall detours, not general navigation meshes. Ascensions add pressure; winning unlocks the next up to A5.
+XP requirements rise smoothly from +25% through level 5, to +50% at 20 and +75% at 35 (hard cap). This means more XP per level, not a 75% reduction in XP gain.
+
+Eight boss configurations share one industrial body with different pattern sequences. Three existing world sectors use restrained blue-slate, warm foundry and violet-slate floor families. This is not eight new maps. Scattered rail obstacles preserve wide lanes; clearance-aware endpoint routing handles detours. Sparse Arc lancers, Burst batteries and Bomb carriers add aimed pressure. Ascensions add pressure; winning unlocks the next up to A5.
 
 ## Equipment and saves
 

@@ -1,5 +1,11 @@
 # MobaBot.io — art style schema 2.0
 
+## v0.17 motion override
+
+The title illustration is now two generated layers from our own v1 artwork: stationary empty foundry plus transparent robot, with small native hover and jet motion. Reduced effects freezes both variations. Exact prompts, source IDs and hashes are in `assets/menu/LAYERS_PROVENANCE.md`; originals remain. This supersedes the static-title rule below only. Do not claim a rigged or generated animation set.
+
+Heavy commanded attacks use slow brass-core slugs, a 0.2-second barrel charge, six-unit recoil and directional hit sparks. Autonomous shots stay small and pale with quieter audio. Close-range effects expand only with actual geometry; Guard sweep moves a steel blade across its true cone. Casts briefly open the barrel assembly without changing player collision/position. Arc lancer, Burst battery and Bomb carrier share hostile shell materials but use one long barrel, paired barrels and three mortar tubes respectively. Laser/bomb warnings remain above friendly spectacle and unchanged by Reduced effects. Existing Painted/Base icons are retained.
+
 ## v0.16 Painted / Base skin override
 
 The owner's new request explicitly introduces generated bitmap icons. **Painted** is the experimental default; **Base** preserves the native icon drawings and is selectable in Settings. This supersedes the older no-bitmap instructions below, not the combat-motion or readability rules. World actors and skill animations remain native; this is not a replacement character-animation pack.

@@ -22,6 +22,7 @@ var stencil_font := SystemFont.new()
 var preview_slot := ""
 var preview_attack := false
 var cursor_world := Vector2.ZERO
+var cast_pose := 0.0
 
 func impact_bank() -> float:
 	return 0.0 if reduced_effects else sin(visual_time * 38) * minf(shake, 5.0) * 0.008
@@ -29,6 +30,7 @@ func impact_bank() -> float:
 func _process(delta: float) -> void:
 	visual_time += delta
 	shot_recoil = maxf(0, shot_recoil - delta * 6)
+	cast_pose = maxf(0, cast_pose-delta*3.5)
 	shake = maxf(0, shake - delta * 20)
 	for effect in effects:
 		effect.age += delta
@@ -37,9 +39,11 @@ func _process(delta: float) -> void:
 
 func receive(event: Dictionary) -> void:
 	var kind: String = event.kind
-	if kind == "shot":
+	if kind in ["shot","heavy_shot"]:
 		shot_recoil = 1.0
 		return
+	if kind == "auto_shot": return
+	if kind == "cast": cast_pose = 1.0
 	if kind == "hurt" and not reduced_effects:
 		shake = 5.0
 	# Automatic collection/ultimate pulses must not continuously shake the actors.
@@ -149,7 +153,11 @@ func _draw() -> void:
 			_line(Vector2(-11, 3), Vector2(0, 3), TEAL, 4)
 			draw_set_transform(Vector2.ZERO)
 		elif bullet.get("basic_attack", false):
-			_line(bullet.pos - direction * (30 if bullet.get("sniper", false) else 10), bullet.pos, PALE, 2)
+			if bullet.kind=="basic" and model.exp!=null and model.exp.revised:
+				_line(bullet.pos-direction*35,bullet.pos,Color(GOLD,0.35),8)
+				_line(bullet.pos-direction*17,bullet.pos,GOLD,6)
+				_line(bullet.pos-direction*11,bullet.pos,CREAM,2)
+			else: _line(bullet.pos - direction * (30 if bullet.get("sniper", false) else 7), bullet.pos, PALE, 2)
 		else:
 			var color := PALE if bullet.kind in ["rail", "pet", "summon"] else GOLD
 			if model.staged and ((bullet.kind == "rail" and model.kit.milestone("q") > 0) or (bullet.kind == "bolt" and model.milestone("power") > 0)):
@@ -171,6 +179,8 @@ func _draw() -> void:
 		if bullet.kind == "hostile":
 			draw_arc(bullet.pos, 8, 0, TAU, 16, CREAM, 1.3, true)
 	if model.demo_mode: _demo_tells()
+	for enemy in model.enemies:
+		if not enemy.dead and enemy.has("gunner_kind"): RangedThreats.tell(self,enemy)
 	# A steady directional arc remains legible even with shake/flashes disabled.
 	if model.time - model.last_damage_time < 0.7 and model.last_damage_direction.length_squared() > 0.1:
 		var angle := model.last_damage_direction.angle()
@@ -314,6 +324,8 @@ func _scrap(pickup: Dictionary) -> void:
 	draw_set_transform(Vector2.ZERO)
 
 func _enemy(enemy: Dictionary) -> void:
+	if enemy.has("gunner_kind"):
+		RangedThreats.draw(self,enemy); return
 	var p: Vector2 = enemy.pos + frame_offset
 	if enemy.get("elite", false):
 		draw_arc(p, enemy.radius + 5, 0, TAU, 24, GOLD, 2, true)
@@ -447,7 +459,11 @@ func _player(presentation_scale: float = 1.0) -> void:
 	_line(Vector2(-10, -32), Vector2(-10, -35), CREAM, 5)
 	_line(Vector2(0, -32), Vector2(0, -35), CREAM, 5)
 	draw_set_transform(p, model.aim.angle(), Vector2.ONE * presentation_scale)
-	_box(Rect2(17 - shot_recoil * 3, -4, 15, 8), Color("a7c7c4"), 2, INK, 2)
+	var charge: float=clampf(model.attacks.windup/0.2,0,1) if model.attacks.windup>=0 else 0.0
+	_box(Rect2(17 - shot_recoil * 6 - charge*3, -4-cast_pose*2, 15+cast_pose*7, 8+cast_pose*4), Color("a7c7c4"), 2, INK, 2)
+	if charge>0 or cast_pose>0:
+		_line(Vector2(26,-6-cast_pose*3),Vector2(32+cast_pose*5,-6-cast_pose*3),GOLD,2)
+		_line(Vector2(26,6+cast_pose*3),Vector2(32+cast_pose*5,6+cast_pose*3),PALE,2)
 	draw_set_transform(Vector2.ZERO)
 	if presentation_scale != 1.0: return
 	if model.invincible > 0:
@@ -595,6 +611,12 @@ func _companions() -> void:
 		draw_set_transform(Vector2.ZERO)
 
 func _effect(effect: Dictionary) -> void:
+	if effect.kind=="hit" and effect.get("heavy",false):
+		var fade: float=1-effect.age/effect.life
+		for i in range(4):
+			var direction:=Vector2.from_angle(PI/4+i*PI/2)
+			_line(effect.pos+direction*5,effect.pos+direction*(7+18*(1-fade)),Color(GOLD,fade),3)
+		return
 	if preload("res://src/salvage/skill_vfx.gd").draw(self,effect): return
 	var t: float = effect.age / effect.life
 	var p: Vector2 = effect.pos + frame_offset

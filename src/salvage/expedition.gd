@@ -41,6 +41,27 @@ var bastion_clock := 0.0
 var energy_meter := 0.0
 var previous_energy_spent := 0.0
 var chest_return := "running"
+var revised := false
+var practice := false
+var god_mode := true
+var free_energy := true
+var fast_cooldowns := false
+var threat_wave := 0
+
+func enable_revision(run) -> void:
+	revised = true
+	class_id = "shared"
+	if not run.kit.loadout.get("rules17", false):
+		run.next_level = run.total_xp + ceili(maxi(1, run.next_level-run.total_xp) * xp_factor(run.level))
+	run.kit.loadout["rules17"] = true
+	if not run.kit.loadout.has("library"): run.kit.loadout["library"] = {}
+	sync_stats(run)
+	RunTerrain.build(run)
+
+static func xp_factor(level: int) -> float:
+	if level <= 5: return 1.25
+	var t := clampf(float(level-5)/15.0,0,1) if level <= 20 else clampf(float(level-20)/15.0,0,1)
+	return (1.25 if level <= 20 else 1.5) + 0.25 * t*t*(3-2*t)
 
 static func class_loadout(id: String) -> Dictionary:
 	var config: Dictionary = MobaKit.demo_preset()
@@ -103,9 +124,15 @@ func enemy_speed() -> float:
 	return 1 + (0.08 if ascension >= 1 else 0) + (0.07 if ascension >= 4 else 0)
 
 func round_seconds() -> float:
+	if revised: return 180.0
 	return 35.0 if ROUTE[route_index][1] in ["boss", "final"] else (40.0 if ROUTE[route_index][1] == "loot" else 50.0)
 
 func label() -> String:
+	if revised:
+		var round_number:=1
+		for i in range(route_index):
+			if ROUTE[i][0]==ROUTE[route_index][0]: round_number+=1
+		return "%d.%d · %s"%[ROUTE[route_index][0],round_number,STAGES[ROUTE[route_index][0]-1]]
 	return "%d · %s" % [ROUTE[route_index][0], STAGES[ROUTE[route_index][0] - 1]]
 
 static func difficulty_text(value: int) -> String:
@@ -122,6 +149,7 @@ func enter(run) -> void:
 	run.stage_time = 0; run.boss_spawned = false; run.boss_defeated = false
 	run.stage_clear_wait = -1; run.spawn_clock = 0.8; run.demo_minis_killed = 0
 	encounter_spawned = false; last_wave = -1; clear_clock = -1
+	threat_wave = 0
 	run.kit.extra.clear_combat()
 	run.enemies.clear(); run.projectiles.clear(); run.hazards.clear(); run.pickups.clear(); run.supply_drops.clear(); run.orbit.clear()
 	run.kit.salvos.clear(); run.kit.zones.clear(); run.kit.poison_trail.clear(); run.kit.summon.clear(); run.kit.cancel_laser(); run.kit.flame_left = 0; run.kit.dash_left = 0
@@ -133,12 +161,19 @@ func enter(run) -> void:
 		var point: Vector2 = run.player + Vector2.from_angle(i * TAU / 3 + 0.4) * 430
 		run.kit.extra.walls.append({"uid": -i - 1, "a": point + Vector2(-90, 0), "b": point + Vector2(90, 0), "life": 9999.0})
 	run.state = "running"
+	if revised: RunTerrain.build(run)
 	run.emit_event("demo_level", run.player)
 
 func spawns(run, delta: float) -> void:
+	if practice or clear_clock >= 0: return
 	var kind: String = ROUTE[route_index][1]
 	var stage_number: int = ROUTE[route_index][0]
 	if run.stage_time >= round_seconds():
+		if revised and kind not in ["boss", "final"] and not encounter_spawned:
+			encounter_spawned = true
+			DemoCampaign.spawn_special(run, "rammer" if route_index % 2 == 0 else "artillery")
+			var mini: Dictionary = run.enemies.back()
+			mini.hp = (100 + stage_number*30) * (1.2 if ascension >= 2 else 1); mini.max_hp = mini.hp
 		if kind in ["boss", "final"] and not encounter_spawned:
 			encounter_spawned = true; run.boss_spawned = true
 			DemoCampaign.spawn_special(run, "foreman")
@@ -149,6 +184,11 @@ func spawns(run, delta: float) -> void:
 			boss.max_hp = boss.hp
 			boss["patterns"] = [["charge","fan"],["shells","charge"],["ring","shells"],["fan","charge","fan"],["ring","fan"],["shells","ring","charge"],["charge","shells","fan"],["ring","shells","charge","fan"]][stage_number - 1]
 		return
+	if revised:
+		var threat_index := int(run.stage_time / 26)
+		if threat_index > threat_wave:
+			threat_wave = threat_index
+			RangedThreats.spawn(run, ["lancer", "volley", "bomber"][(threat_index+route_index-1)%3])
 	run.spawn_clock -= delta
 	if run.spawn_clock <= 0:
 		run.spawn_clock = maxf(0.45, 1.5 - stage_number * 0.11)
@@ -164,7 +204,7 @@ func spawns(run, delta: float) -> void:
 		if wave > 0:
 			run._spawn_pack(7 + stage_number + (3 if ascension >= 2 else 0), true)
 			run.emit_event("surge", run.player)
-	if not encounter_spawned and kind == "neutral" and (route_index > 0 or run.stage_time >= 28):
+	if not revised and not encounter_spawned and kind == "neutral" and (route_index > 0 or run.stage_time >= 28):
 		if run.stage_time >= 28:
 			encounter_spawned = true
 			DemoCampaign.spawn_special(run, "rammer" if route_index % 2 == 0 else "artillery")
@@ -172,6 +212,7 @@ func spawns(run, delta: float) -> void:
 			mini_boss.hp = (65 + stage_number * 25) * (1.2 if ascension >= 2 else 1); mini_boss.max_hp = mini_boss.hp
 
 func enemy_killed(run, enemy: Dictionary) -> void:
+	if practice: return
 	if enemy.has("role") or (enemy.get("elite", false) and run.loot_rng.randf() < 0.2):
 		loot_chests.append({"pos": enemy.pos, "life": 30.0})
 		if loot_chests.size() > 8: pending_chests += 1; loot_chests.pop_front()
@@ -181,6 +222,14 @@ func level_up(run) -> void:
 
 func finish_step(run, delta: float) -> void:
 	if run.state != "running": return
+	if practice:
+		if god_mode: run.health = run.max_health()
+		if free_energy: run.kit.energy = run.kit.energy_max()
+		if fast_cooldowns:
+			for slot in run.kit.ranks:
+				run.kit.charges[slot] = MobaKit.ABILITIES[run.kit.loadout[slot]].max
+				run.kit.recharge[slot] = 0.0
+		return
 	courier_clock = maxf(0, courier_clock - delta)
 	dynamo_clock = maxf(0, dynamo_clock - delta)
 	bastion_clock = maxf(0, bastion_clock - delta)
@@ -200,7 +249,10 @@ func finish_step(run, delta: float) -> void:
 	var kind: String = ROUTE[route_index][1]
 	var ready: bool = run.boss_defeated if kind in ["boss", "final"] else run.stage_time >= round_seconds() and run.enemies.filter(func(e: Dictionary) -> bool: return e.has("role") and not e.dead).is_empty()
 	if ready:
-		if clear_clock < 0: clear_clock = 1.4
+		if clear_clock < 0:
+			clear_clock = 12.0 if revised else 1.4
+			if revised:
+				run.enemies.clear(); run.projectiles.clear(); run.hazards.clear()
 		clear_clock -= delta
 		if clear_clock <= 0:
 			cleared += 1
@@ -219,6 +271,7 @@ func finish_step(run, delta: float) -> void:
 			run.kit.energy = run.kit.energy_max()
 			run.state = "camp"
 			return
+		if revised: return # Collection is uninterrupted; choices wait for camp.
 	if run.total_xp >= run.next_level:
 		run._make_offers(); run.state = "upgrade"; run.emit_event("upgrade", run.player)
 	elif pending_chests > 0:

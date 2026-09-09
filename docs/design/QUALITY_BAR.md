@@ -33,6 +33,14 @@ Release gates: no known save-loss bug; no repeatable stuck movement; no misleadi
 
 ## 0.16 owner feedback and follow-up · 9 September 2026
 
+### 0.17 follow-up · 9 September 2026
+
+Owner feedback: Q and the channeled laser feel good; other actives lack impact and passive states are unclear. Rounds feel short, levels too frequent, collection ends too abruptly. Owner requests no classes, lasting skill ownership and an isolated Practice tool. This is direct evidence of remaining pacing/identity gaps, not a reason to raise scores.
+
+Implemented: longer phases, slower XP, collection grace, heavier commanded attacks, six close-range buffs, native cast/recoil changes, explicit passive states, three ranged threats, wider-spread cover, skill storage, Practice, toggle Tab and layered menu animation. Verified separately in QA_17. **Retain the numeric baseline below.** Most important unproven questions are whether three-minute rounds sustain interest and whether attack commitment earns its risk. A full-route artificial-health soak takes 74 simulated minutes, excluding menus. That is a warning to evaluate run length, not a retention success. The 49-skill review sheet gives the owner a way to prune weak skills.
+
+### Retained 0.16 note
+
 Owner feedback: the current enemy difficulty feels good; Stage 1's boss was reached. The requested changes prioritize flexible in-run skill placement, simpler forging, richer optional icons, smaller interruptions and immediate resource visibility. Treat this as positive evidence for the early challenge, not approval of all classes or the full expedition.
 
 Implemented in this pass: keyboard placement/swapping, five-tier three-copy forging, 89 Painted icons with Base retained, compact power-up choices, reward reveals and above-player bars. Verified separately: checkpoint/transaction fixtures, key/rank/cooldown preservation, actual-size icon sheets, rendered menus and artificial combat probes. The 0.16 experience has not yet been reviewed by the owner. Keep the numeric baseline below unchanged until that feedback; more assets and assertions do not warrant higher fun scores.

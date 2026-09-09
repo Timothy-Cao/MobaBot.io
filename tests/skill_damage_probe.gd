@@ -3,8 +3,8 @@ extends SceneTree
 const BUDGET := {"rocket":23.0,"flame":26.0,"nuke":85.0,"laser":375.0,"returner":44.0,"gravity":36.0,"strike":64.0,"crosswire":30.0,"repulsor":20.0,"sweep":26.0,"reap":36.0,"thrust":25.0,"tractor":18.0,"echo_dash":24.0,"hop":24.0,"pursuit":32.0,"landing":120.0,"artillery":195.0}
 func _initialize() -> void:
 	for id in BUDGET:
-		var row: Dictionary={"id":id,"ceiling_per_cast":BUDGET[id],"recharge":MobaKit.ABILITIES[id].cd,"energy":MobaKit.new().ability_cost(id)}
-		row.ceiling_dps=snappedf(BUDGET[id]/MobaKit.ABILITIES[id].cd,0.01)
+		var row: Dictionary={"id":id,"ceiling_per_cast":ceiling(id),"recharge":MobaKit.ABILITIES[id].cd,"energy":MobaKit.new().ability_cost(id)}
+		row.ceiling_dps=snappedf(ceiling(id)/MobaKit.ABILITIES[id].cd,0.01)
 		row.stationary=measure(id,"stationary",0)
 		for policy in ["snapshot","track"]:
 			var total:=0.0; var low:=INF; var high:=0.0
@@ -18,6 +18,7 @@ func measure(id: String, policy: String, trial: int) -> Dictionary:
 	var run:=SalvageRun.new(401)
 	run.enable_moba(MobaKit.demo_preset()); run.enable_demo()
 	BotExpedition.new().start(run,"ranged",0); BotKeyboard.enable(run)
+	if "--revised" in OS.get_cmdline_user_args(): run.exp.enable_revision(run)
 	var slot: String="f" if MobaKit.ABILITIES[id].category=="mobility" else "q"
 	run.exp.install(run,slot,id); run.kit.energy=1000
 	run.kit.toggles.fill(false); run.kit.extra.walls.clear()
@@ -49,4 +50,7 @@ func measure(id: String, policy: String, trial: int) -> Dictionary:
 		run._projectile_step(1.0/60)
 		run.events.clear()
 	var damage: float=10000-enemy.hp
-	return {"damage":snappedf(damage,0.01),"fraction":snappedf(damage/BUDGET[id],0.001)}
+	return {"damage":snappedf(damage,0.01),"fraction":snappedf(damage/ceiling(id),0.001)}
+
+func ceiling(id: String) -> float:
+	return BUDGET[id]*(1.6 if "--revised" in OS.get_cmdline_user_args() and id in ["flame","sweep","reap","thrust","tractor","repulsor"] else 1.0)

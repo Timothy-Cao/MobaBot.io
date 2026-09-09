@@ -10,6 +10,12 @@ var ascension_choice := 0
 var gear_slot := "helmet"
 var gear_item := "courier_helmet"
 var banked_camp := -1
+var library_choice := ""
+var practice_skill := "rocket"
+var practice_enemy := "bumper"
+var practice_count := 10
+var practice_key := KEY_Q
+var practice_rank := 0
 
 func _ready() -> void:
 	collection.load_profile()
@@ -27,6 +33,7 @@ func select_class(id: String) -> void:
 	ui.loadout_config = BotExpedition.class_loadout(id).duplicate(true)
 
 func persistent_run() -> bool:
+	if model!=null and model.exp!=null and model.exp.practice: return false
 	return not auto_play and capture_kind.is_empty() and persist_settings
 
 func start_run(mode: String="salvage") -> void:
@@ -41,12 +48,14 @@ func launch_expedition(resume: bool=false) -> void:
 	super.start_run("salvage")
 	if resume:
 		if not collection.resume_into(model): show_home(); return
+		model.exp.enable_revision(model)
 		banked_camp=model.exp.route_index
 		screen="camp"; ExpeditionView.camp(self)
 	else:
 		var expedition:=BotExpedition.new()
 		expedition.start(model,class_choice,ascension_choice)
 		BotKeyboard.enable(model)
+		expedition.enable_revision(model)
 		collection.apply_to(model)
 		model.health=model.max_health(); model.kit.energy=model.kit.energy_max()
 		banked_camp=-1
@@ -87,7 +96,8 @@ func open_discovery() -> void:
 
 func choose_discovery(index: int) -> void:
 	if index<0 or index>=model.exp.chest_choices.size(): return
-	if model.kit.flexible() and BotKeyboard.learned(model.kit,model.exp.chest_choices[index].id)=="":
+	var incoming: String=model.exp.chest_choices[index].id
+	if model.kit.flexible() and BotKeyboard.learned(model.kit,incoming)=="" and not SkillLibrary.stored(model.kit,incoming) and SkillLibrary.has_space(model.kit,incoming):
 		pending_discovery=index; keyboard_target=0; screen="keyboard"; KeyboardView.draw(self); return
 	if not model.exp.choose_chest(model,index): return
 	finish_discovery()
@@ -168,6 +178,20 @@ func _input(event: InputEvent) -> void:
 			elif event.keycode==ui.system_keys.settings: close_keyboard()
 		get_viewport().set_input_as_handled(); return
 	event=system_event(event)
+	if event is InputEventKey and event.keycode==KEY_TAB:
+		if event.pressed and not event.echo:
+			if screen=="practice": close_practice()
+			elif screen=="build": _close_build()
+			elif screen in ["running","camp","paused","upgrade","result"]:
+				if model.exp!=null and model.exp.practice: open_practice()
+				else: _open_build()
+			tab_held=false
+		get_viewport().set_input_as_handled(); return
+	if screen=="practice":
+		if event is InputEventKey:
+			if event.pressed and event.keycode==KEY_ESCAPE: close_practice()
+			get_viewport().set_input_as_handled()
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if screen=="chest" and event.keycode in [KEY_1,KEY_2,KEY_3]:
 			choose_discovery(event.keycode-KEY_1); get_viewport().set_input_as_handled(); return
@@ -181,6 +205,9 @@ func _input(event: InputEvent) -> void:
 
 
 func open_keyboard() -> void:
+	if model.exp!=null and model.exp.revised and model.state!="camp" and not model.exp.practice:
+		ui.announce("Arrange at camp",1.5); return
+	library_choice=""
 	pending_discovery=-1; keyboard_target=0; keyboard_return=screen
 	tab_held=false; _clear_held_movement(); screen="keyboard"
 	KeyboardView.draw(self)
@@ -192,14 +219,21 @@ func close_keyboard() -> void:
 		screen="build"; ui.show_build(model,false)
 
 func keyboard_key(key: int) -> void:
+	if library_choice!="":
+		if BotKeyboard.allowed(library_choice,key): keyboard_target=key
+		KeyboardView.draw(self); return
 	if pending_discovery>=0:
 		if BotKeyboard.can_place(model.kit,model.exp.chest_choices[pending_discovery].id,key): keyboard_target=key
 	elif keyboard_target==0: keyboard_target=key
 	else:
-		BotKeyboard.swap(model.kit,keyboard_target,key); keyboard_target=0
+		if not model.exp.revised or model.state=="camp" or model.exp.practice: BotKeyboard.swap(model.kit,keyboard_target,key)
+		keyboard_target=0
 	KeyboardView.draw(self)
 
 func place_discovery() -> void:
+	if library_choice!="":
+		if SkillLibrary.equip(model,library_choice,keyboard_target): library_choice=""; keyboard_target=0; KeyboardView.draw(self)
+		return
 	if keyboard_target==0 or not KeyboardRewards.choose(model,pending_discovery,keyboard_target): return
 	pending_discovery=-1; keyboard_target=0; finish_discovery()
 
@@ -251,3 +285,58 @@ func confirm_leave() -> void:
 	dialog.confirmed.connect(func() -> void: show_home(); dialog.queue_free())
 	dialog.canceled.connect(dialog.queue_free)
 	add_child(dialog); dialog.popup_centered(Vector2i(440,140))
+
+func launch_practice() -> void:
+	seed_value=17017
+	super.start_run("salvage")
+	var expedition:=BotExpedition.new()
+	expedition.start(model,"ranged",0)
+	BotKeyboard.enable(model); expedition.enable_revision(model)
+	expedition.practice=true
+	model.health=model.max_health(); model.kit.energy=model.kit.energy_max()
+	model.events.clear(); ui.notice_time=0
+	free_center=model.player; _update_camera()
+	open_practice()
+
+func open_practice() -> void:
+	_clear_held_movement(); pending_cast_slot=""; pending_attack=false
+	screen="practice"; PracticeView.draw(self)
+
+func close_practice() -> void:
+	screen="running"; model.state="running"; ui.show_running()
+
+func practice_fit() -> void:
+	var existing:=BotKeyboard.learned(model.kit,practice_skill)
+	if not BotKeyboard.allowed(practice_skill,practice_key): return
+	if existing!="": BotKeyboard.swap(model.kit,int(model.kit.bindings[existing]),practice_key)
+	else:
+		SkillLibrary.remember(model.kit,practice_skill,practice_rank)
+		if not SkillLibrary.equip(model,practice_skill,practice_key): return
+	var slot:=BotKeyboard.learned(model.kit,practice_skill)
+	if not slot.begins_with("p"):
+		model.kit.ranks[slot]=practice_rank; model.upgrades["skill_"+slot]=practice_rank
+	else:
+		var upgrade:=KeyboardRewards.passive_upgrade(practice_skill)
+		if model.upgrades.has(upgrade): model.upgrades[upgrade]=mini(practice_rank,model.rank_limit(upgrade))
+	model._sync_resource_ranks()
+	PracticeView.draw(self)
+
+func practice_spawn() -> void:
+	for i in range(practice_count):
+		if model.enemies.size()>=model.MAX_ENEMIES: break
+		var point: Vector2=model.player+Vector2.from_angle(i*2.39996)*minf(620,230+sqrt(i)*26)
+		point=point.clamp(model.ARENA.position+Vector2.ONE*40,model.ARENA.end-Vector2.ONE*40)
+		point=model.kit.extra.solid_point(point,point,25)
+		if RangedThreats.NAMES.has(practice_enemy): RangedThreats.spawn(model,practice_enemy,point,true)
+		elif practice_enemy in ["rammer","artillery","foreman"]:
+			DemoCampaign.spawn_special(model,practice_enemy); model.enemies.back().pos=point
+		else: model.spawn_enemy(point,{"bumper":0,"charger":1,"tank":3,"dummy":3}.get(practice_enemy,0))
+		if practice_enemy=="dummy":
+			model.enemies.back()["dummy"]=true; model.enemies.back().hp=1000000.0; model.enemies.back().max_hp=1000000.0
+	close_practice()
+
+func practice_clear() -> void:
+	model.enemies.clear(); model.projectiles.clear(); model.hazards.clear(); model.pickups.clear(); model.supply_drops.clear()
+	model.kit.extra.fields.clear(); model.kit.extra.summons.clear(); model.kit.extra.blades.clear()
+	model.health=model.max_health(); model.kit.energy=model.kit.energy_max()
+	PracticeView.draw(self)

@@ -5,11 +5,17 @@ static func draw(c, e: Dictionary) -> bool:
 	var fade:=1-t
 	var p: Vector2=e.pos
 	if e.kind=="skill_cut":
+		fade=1-pow(t,3) # Hold a readable cutting edge, then clear promptly.
 		if e.style=="reap":
 			var radius: float=e.radius
 			c.draw_arc(p,radius,0,TAU,64,Color(c.PALE,fade*0.45),1.5,true)
 			c.draw_arc(p,e.inner,0,TAU,48,Color(c.TEAL,fade*0.35),1,true)
 			var angle: float=Vector2(e.direction).angle()+t*TAU
+			var edge:=PackedVector2Array()
+			for i in range(9): edge.append(p+Vector2.from_angle(angle-0.65+i*0.085)*(radius-2))
+			for i in range(8,-1,-1): edge.append(p+Vector2.from_angle(angle-0.65+i*0.085)*(radius-13))
+			c.draw_colored_polygon(edge,Color(c.PALE,fade))
+			c.draw_arc(p,radius-2,angle-0.65,angle+0.03,20,Color(c.CREAM,fade),2,true)
 			for i in range(1 if c.reduced_effects else 3):
 				var a: float=angle-i*0.17
 				c.draw_arc(p,radius-3-i*4,a-1.8,a,32,Color(c.GOLD if i==0 else c.PALE,fade*(1-i*0.25)),4 if i==0 else 2,true)
@@ -20,6 +26,9 @@ static func draw(c, e: Dictionary) -> bool:
 			var extension:=minf(1,t/0.2)
 			var tip:=p.lerp(end,extension)
 			c.draw_line(p,tip,Color(c.PALE,fade),5,true)
+			var head:=PackedVector2Array([tip,tip-d*25+side*0.7,tip-d*18,tip-d*25-side*0.7])
+			c.draw_colored_polygon(head,Color(c.PALE,fade))
+			c.draw_line(p+d*24,p+d*65,Color(c.TEAL,fade),9,true)
 			c.draw_polyline(PackedVector2Array([tip-d*24+side,tip,tip-d*24-side]),Color(c.GOLD if e.get("empowered",false) else c.CREAM,fade),3,true)
 			if e.get("empowered",false):
 				for sign_value in [-1,1]: c.draw_line(p+side*sign_value,tip+side*sign_value,Color(c.TEAL,fade*0.6),2,true)

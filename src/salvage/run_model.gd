@@ -583,12 +583,18 @@ func _enemy_step(delta: float) -> void:
 	for enemy in enemies:
 		if enemy.dead:
 			continue
+		if enemy.get("dummy",false):
+			enemy.warmup=0; enemy.flash=maxf(0,enemy.flash-delta); enemy.knock=Vector2.ZERO
+			continue
 		enemy.flash = maxf(0, float(enemy.flash) - delta)
 		enemy.warmup = maxf(0, float(enemy.warmup) - delta)
 		if enemy.warmup > 0:
 			continue
 		if enemy.get("stun", 0.0) > 0:
 			enemy.stun = maxf(0, enemy.stun - delta)
+			continue
+		if enemy.has("gunner_kind"):
+			RangedThreats.step(self, enemy, delta)
 			continue
 		if demo_mode and enemy.has("role"):
 			DemoCampaign.enemy_step(self, enemy, delta)
@@ -642,6 +648,7 @@ func _enemy_step(delta: float) -> void:
 				break
 
 func hurt_player(source: Vector2, cause: String = "Collision", amount: int = 1) -> void:
+	if exp != null and exp.practice and exp.god_mode: return
 	if invincible > 0 or state != "running":
 		return
 	if kit != null and kit.shield > 0:
@@ -804,7 +811,7 @@ func hit_enemy(enemy: Dictionary, damage: float, source: String, knock: Vector2 
 	enemy.hp -= damage
 	enemy.flash = 0.085
 	enemy.knock = knock
-	emit_event("hit", enemy.pos)
+	emit_event("hit", enemy.pos, {"heavy":source in ["basic","sweep","reap","thrust"] and exp!=null and exp.revised})
 	if enemy.hp <= 0:
 		enemy.dead = true
 		if exp != null: exp.enemy_killed(self, enemy)
@@ -1011,7 +1018,7 @@ func choose_upgrade(index: int) -> bool:
 	level += 1
 	if exp != null: exp.level_up(self)
 	if staged and (level - 1) % 3 == 0: grant_utility()
-	next_level += (12 + level * 8) if staged else (8 + level * 4)
+	next_level += ceili((12 + level * 8) * BotExpedition.xp_factor(level)) if exp != null and exp.revised else ((12 + level * 8) if staged else (8 + level * 4))
 	offers.clear()
 	state = "running"
 	invincible = maxf(invincible, 0.65)

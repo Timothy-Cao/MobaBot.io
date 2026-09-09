@@ -1,6 +1,7 @@
 extends RefCounted
 ## Full-bleed key art; every word and control is rendered by Godot.
-const BACKDROP = preload("res://assets/menu/foundry-bay-v1.png")
+const BACKDROP = preload("res://assets/menu/foundry-empty-v2.png")
+const HOVER = preload("res://src/salvage/menu_hover.gd")
 
 static func draw(ui: CanvasLayer) -> void:
 	var art := TextureRect.new()
@@ -12,6 +13,10 @@ static func draw(ui: CanvasLayer) -> void:
 	art.size = Vector2(960, 540)
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.overlay.add_child(art)
+	var robot:=Control.new(); robot.set_script(HOVER)
+	robot.name="HoverBot"; robot.position=Vector2(565,183); robot.size=Vector2(286,310)
+	robot.mouse_filter=Control.MOUSE_FILTER_IGNORE; robot.reduced=ui.reduced
+	ui.overlay.add_child(robot)
 	# Native gradient protects text without a visible seam or a boxed illustration.
 	var gradient := Gradient.new()
 	gradient.offsets = PackedFloat32Array([0, 0.33, 0.57, 1])
@@ -31,9 +36,10 @@ static func draw(ui: CanvasLayer) -> void:
 	var play := _nav(ui, "Play", Rect2(54, 229, 267, 44), func() -> void: ui.start_requested.emit("salvage"), true)
 	if not ui.expedition_ui: _nav(ui, "Loadout", Rect2(54, 281, 267, 36), func() -> void: ui.loadout_requested.emit())
 	_nav(ui, "Equipment", Rect2(54, 281 if ui.expedition_ui else 322, 267, 36), func() -> void: ui.gear_requested.emit())
-	_nav(ui, "Settings", Rect2(54, 336 if ui.expedition_ui else 377, 122, 30), func() -> void: ui.settings_requested.emit())
-	_nav(ui, "Quit", Rect2(188, 336 if ui.expedition_ui else 377, 132, 30), func() -> void: ui.quit_requested.emit())
-	ui._label(ui.overlay, "0.16" if ui.expedition_ui else "0.13", Rect2(55, 492, 249, 20), 11, ui.MUTED, true)
+	if ui.expedition_ui: _nav(ui,"Practice",Rect2(54,326,267,36),func(): ui.host.launch_practice())
+	_nav(ui, "Settings", Rect2(54, 383 if ui.expedition_ui else 377, 122, 30), func() -> void: ui.settings_requested.emit())
+	_nav(ui, "Quit", Rect2(188, 383 if ui.expedition_ui else 377, 132, 30), func() -> void: ui.quit_requested.emit())
+	ui._label(ui.overlay, "0.17" if ui.expedition_ui else "0.13", Rect2(55, 492, 249, 20), 11, ui.MUTED, true)
 	play.grab_focus()
 
 static func _nav(ui, text: String, rect: Rect2, action: Callable, primary: bool = false) -> Button:
@@ -52,5 +58,5 @@ static func _nav(ui, text: String, rect: Rect2, action: Callable, primary: bool 
 	var press: StyleBoxFlat = hover.duplicate()
 	press.bg_color = ui.TEAL if primary else Color("335459")
 	button.add_theme_stylebox_override("pressed", press)
-	button.tooltip_text = {"Play": "Start Stage 1.", "Loadout": "Abilities, passives and key bindings.", "Equipment": "Equip and forge." if ui.expedition_ui else "Fit, reroll and star equipment.", "Mastery": "Preview the run-only mastery tree.", "Settings": "Audio, effects, camera and controls.", "Quit": "Close MobaBot.io."}[text]
+	button.tooltip_text = {"Play": "Start Stage 1.", "Practice":"Test skills and spawn enemies. No saved progression.", "Loadout": "Abilities, passives and key bindings.", "Equipment": "Equip and forge." if ui.expedition_ui else "Fit, reroll and star equipment.", "Mastery": "Preview the run-only mastery tree.", "Settings": "Audio, effects, camera and controls.", "Quit": "Close MobaBot.io."}[text]
 	return button

@@ -431,6 +431,10 @@ func update_hud(model: SalvageRun) -> void:
 	if model.exp != null:
 		stage_label.text = model.exp.label().to_upper()
 		time_label.text = "BOSS" if model.boss_spawned else ("CLEAR" if remaining == 0 else "%02d:%02d" % [remaining / 60, remaining % 60])
+		if model.exp.revised:
+			if model.exp.practice: time_label.text="PRACTICE"
+			elif model.exp.clear_clock>=0: time_label.text="LOOT %02d"%ceili(model.exp.clear_clock)
+			elif remaining==0 and not model.boss_spawned: time_label.text="ELITE"
 		mission_rail.visible = false
 	energy_bar.visible = model.kit != null
 	energy_label.visible = model.kit != null

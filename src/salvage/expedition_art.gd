@@ -76,6 +76,9 @@ static func field(c, f: Dictionary, time: float) -> void:
 		points.append(p); c.draw_polyline(points,Color(c.PALE,fade),1.5,true)
 		if style=="sweep":
 			c.draw_arc(p,radius*0.94,d.angle()-PI*0.34,d.angle()+PI*0.34,32,Color(c.GOLD,fade),5,true)
+			var cutter:=d.rotated(lerpf(-PI*0.34,PI*0.34,1-pow(1-progress,3)))
+			c.draw_line(p+cutter*radius*0.3,p+cutter*radius*0.95,Color(c.PALE,fade),9,true)
+			c.draw_line(p+cutter*radius*0.6,p+cutter*radius*0.95,Color(c.CREAM,fade),3,true)
 		else:
 			for i in range(3 if c.reduced_effects else 5):
 				var direction:=d.rotated((i-1 if c.reduced_effects else i-2)*0.28)

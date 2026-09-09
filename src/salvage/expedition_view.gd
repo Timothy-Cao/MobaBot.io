@@ -10,16 +10,10 @@ static func frame(ui, title: String, back: Callable) -> void:
 static func prepare(game) -> void:
 	var ui = game.ui
 	frame(ui,"Expedition",game.show_home)
-	for i in range(3):
-		var id: String = BotExpedition.CLASSES.keys()[i]
-		var data: Dictionary = BotExpedition.CLASSES[id]
-		var card: Button = ui._button("",Rect2(48+i*290,111,274,219),func() -> void:
-			game.select_class(id); prepare(game),false)
-		card.add_theme_stylebox_override("normal",ui._style(ui.PANEL,0,ui.GOLD if id==game.class_choice else ui.EDGE,2))
-		ui._ability_icon(card,{"ranged":"returner","melee":"reap","summoner":"mirror_sentry"}[id],Rect2(99,20,76,76))
-		ui._label(card,data.name,Rect2(18,111,238,28),23,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
-		var body: Label = ui._label(card,data.text,Rect2(20,153,234,52),13,ui.MUTED)
-		body.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	ui._ability_icon(ui.overlay,"bolt",Rect2(110,153,105,105))
+	ui._ability_icon(ui.overlay,"rocket",Rect2(236,153,105,105))
+	ui._label(ui.overlay,"One bot. Your build.",Rect2(404,169,454,40),29,ui.CREAM,true)
+	ui._label(ui.overlay,"3 minutes. Survive, then defeat the guardian.",Rect2(404,218,454,40),16,ui.MUTED).autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	ui._label(ui.overlay,"Ascension",Rect2(48,355,170,28),17,ui.MUTED)
 	for i in range(6):
 		var button: Button = ui._button(str(i),Rect2(205+i*47,350,40,38),func() -> void:
@@ -31,7 +25,7 @@ static func prepare(game) -> void:
 	start.grab_focus()
 	if not game.collection.checkpoint.is_empty():
 		ui._button("Continue run",Rect2(424,439,234,44),func() -> void: game.launch_expedition(true),false)
-	ui._label(ui.overlay,"8 stages · Equipment persists",Rect2(48,445,354,25),13,ui.MUTED)
+	ui._label(ui.overlay,"8 stages · Save between rounds",Rect2(48,445,354,25),13,ui.MUTED)
 	if not game.collection.message.is_empty(): ui._label(ui.overlay,game.collection.message,Rect2(48,491,856,21),12,ui.CORAL)
 
 static func chest(game) -> void:
