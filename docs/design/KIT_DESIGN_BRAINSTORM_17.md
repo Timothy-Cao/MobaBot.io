@@ -1,10 +1,12 @@
 # Static-kit design brainstorm
 
-Status: **owner direction plus assistant proposals for later review; no implementation is authorized merely because an idea appears here.** The first/default kit is locked as a design target. The other three kits are deliberately concrete enough to discuss and prototype, but their names, rules, numbers and slot assignments remain suggestions.
+Status: **owner direction plus assistant proposals for later review; no implementation is authorized merely because an idea appears here.** Vanguard is locked as the default kit and Marshal is the current summon design. The combo concept is parked. Racer is the assistant's proposed third-class direction and remains unapproved.
 
 Date: 9 September 2026.
 
 **Later owner focus:** park the Circuit Weaver/combo proposal without deleting it. It is not ready for approval or implementation. Focus current kit design on the summon character, now named **Marshal** and refined in [`RELAY_MARSHAL_DESIGN_17.md`](RELAY_MARSHAL_DESIGN_17.md). That focused document supersedes the initial Relay Architect sketch below.
+
+**Latest owner focus:** approve **Vanguard** as the default name, move paired zap geometry exclusively to Marshal, and replace Vanguard slot 4 with a short cooldown/energy power totem. Explore only one additional class for now. The assistant recommends simplifying the earlier speedster into **Racer**, prioritizing movement feel over a dense identity system.
 
 ## Provenance
 
@@ -20,9 +22,9 @@ Date: 9 September 2026.
 
 Everything below the locked default-kit record is an assistant-authored synthesis. It translates the owner concepts into consistent input roles and testable interaction grammars. Treat it as a proposal to critique, not as owner approval.
 
-## Kit 1 — Default kit (locked; Vanguard proposed)
+## Kit 1 — Vanguard (locked)
 
-Identity: readable all-rounder. Its tools mostly work alone, cover the major combat jobs and teach the common control language before later kits ask for tighter setup.
+Identity: readable mid-range all-rounder. The player-controlled robot does the primary work through strong abilities that mostly stand on their own. Its summon and totems support that work rather than becoming a second network class.
 
 | Input/system | Locked tool | Job |
 | --- | --- | --- |
@@ -37,7 +39,7 @@ Identity: readable all-rounder. Its tools mostly work alone, cover the major com
 | 1 | Two-mode orbiting tools | Close/fast versus far/slow positioning |
 | 2 | Aggressive summon | Local damage and limited aggro relief |
 | 3 | Healing totem | Leave-and-return sustain economy |
-| 4 | Paired zap robots | Active line placement |
+| 4 | Cooldown/energy totem | Five-second burst window with doubled cooldown recovery and unlimited energy; approximately 15-second cooldown |
 
 “Locked” means the composition should not be reopened during the next concept pass. Exact tuning, visuals, rank milestones and unresolved edge cases still require implementation and owner playtesting. The current 0.17 shared-pool build remains authoritative until that work is requested.
 
@@ -45,10 +47,10 @@ Identity: readable all-rounder. Its tools mostly work alone, cover the major com
 
 Each kit needs one short sentence that predicts how it wins:
 
-- The default kit wins by choosing the right self-contained tool. **Vanguard** is the assistant's proposed simple name, pending owner approval.
+- Vanguard wins by choosing the right self-contained tool and timing a brief power window.
 - Marshal wins by creating useful firing origins and preserving its network.
-- Circuit Weaver wins by making different geometries touch at the right time.
-- Redline Runner wins by banking value, spending it during a speed window and surviving recovery.
+- Parked Circuit Weaver concept would win by making different geometries touch at the right time.
+- Racer wins by routing through danger during a speed window and remaining capable during recovery.
 
 Every fixed input should reinforce that sentence. A mechanically strong ability that does not reinforce the kit belongs elsewhere.
 
@@ -104,7 +106,7 @@ The owner's BTD6-style shared vision idea needs translation because the current 
 - Thirty seconds may create maintenance rather than strategy. Test visible lifetime rings and staggered expiry before adding duration upgrades.
 - Shared acquisition should not let projectiles ignore walls or weapon range.
 
-## Kit 3 proposal — Circuit Weaver
+## Parked concept — Circuit Weaver
 
 ### Core promise
 
@@ -152,7 +154,45 @@ This delivers the owner's “any two abilities matter together” feeling withou
 - R should accelerate decisions, not automatically solve every prepared field. Cap simultaneous reactions and preserve the need to place them.
 - The module row may be too busy. Prototype Q/W/E/R first, then add one module at a time only if it strengthens the grammar.
 
-## Kit 4 proposal — Redline Runner
+## Current third-class recommendation — Racer
+
+Status: **assistant proposal for owner discussion, not locked.** This is the one additional class worth exploring before expanding the roster again.
+
+### Gameplay element to explore
+
+**Movement tempo:** the player alternates a short, controllable Overdrive window with an equally important normal-speed window. The fun comes from choosing a route through danger, making close passes and correcting the route—not from maintaining a complicated resource or memorizing interactions.
+
+This complements the other classes cleanly without forcing novelty for its own sake:
+
+| Class | Primary source of agency |
+| --- | --- |
+| Vanguard | Aim and time strong self-contained abilities from mid range |
+| Marshal | Place bodies and coordinate attacks across several origins |
+| Racer | Shape a continuous movement route and choose when to accelerate |
+
+### Minimum fun-first kit core
+
+| System | First prototype idea | Requirement |
+| --- | --- | --- |
+| Normal state | Reliable ranged basic and Q, precise steering, ordinary energy recovery | Must feel like real combat rather than waiting for D |
+| D — Overdrive | Roughly five or six seconds fast, followed by similar downtime | High speed cannot be permanently refreshed |
+| Passive side blades | Damage enemies passed close on either side during Overdrive | Per-target re-hit timer; near-pass, not body collision |
+| Q — Wheel shot | Simple forward/returning projectile usable in both states | Fast state changes its path or reach, not whether Q is usable |
+| E — Handbrake | Small peel at normal speed; sharper turn and side sweep while fast | Immediate, controllable route correction is more important than damage |
+| R — Ghost lap | Record a short path, then send a damaging afterimage along it | Add only after base steering is fun; it lets the speed route keep paying off during recovery |
+
+Do not specify all four modules yet. First test movement, camera comfort, near-pass geometry, Q while steering and the normal/fast transition. If simply driving a good line is not enjoyable, additional passives will not rescue the class.
+
+### Why Racer is the best third experiment
+
+- It tests a different kind of execution: continuous steering rather than more buttons or more setup objects.
+- It can create immediate physical satisfaction through acceleration, banking, near-pass sparks, Doppler-like audio and a sharp handbrake response.
+- It naturally distinguishes wave play (long routes through crowds) from boss play (careful passes and recovery shots).
+- Its primary risk is easy to identify early: excessive speed may make mouse movement, terrain and enemy tells feel worse. A tiny prototype can answer that before a full kit is designed.
+
+## Earlier detailed speedster sketch — Redline Runner (superseded)
+
+The table below is retained as brainstorm history. Racer intentionally starts with a smaller fun-first slice and does not inherit every resource, module or ability here unless testing earns it.
 
 ### Core promise
 
@@ -204,8 +244,8 @@ Do not build all three at once.
 
 1. Keep the locked default kit as the control condition.
 2. Prototype Marshal with one relay, command fire, Q mirroring, repositioning and body transfer. Add the other relays only after the basic loop is readable.
-3. Prototype Circuit Weaver with only Q, W, E and the three pair reactions. Add R after players can intentionally create each pair.
-4. Prototype Redline Runner with D, side blades, Q and W in an empty arena. Add trail and Ghost lap after steering and camera behavior feel safe.
+3. Leave Circuit Weaver parked.
+4. Prototype Racer with D, side blades, Q and Handbrake in an empty arena. Add Ghost lap and any modules only after steering and camera behavior feel good.
 
 For each slice, compare beginner value, expert ceiling, damage taken, energy pressure, invalid actions and whether the player can explain the kit's win sentence. Automated probes can verify caps and geometry; only human play can decide whether maintaining relays, constructing intersections or alternating speed states is enjoyable.
 
@@ -214,6 +254,6 @@ For each slice, compare beginner value, expert ceiling, damage taken, energy pre
 - Should all kits share the permanent autonomous gun, or may a kit replace it with a different permanent passive weapon?
 - For Marshal, should 1–3 remain distinct relays with slot 4 as a network command?
 - Should mirrored casts copy the player's aim direction or converge on the marked target?
-- Should Circuit Weaver reward exactly the three pair reactions above, or should R change which reaction is produced?
-- During Redline Overdrive, should active abilities remain usable in transformed versions, or should the speed state emphasize steering and modules only?
-- Are the tentative kit names useful, or should naming wait until the mechanics survive a playtest?
+- Is **Racer** the right third direction, or should the third class explore a different gameplay element?
+- During Racer Overdrive, should all active abilities remain usable, or should only Q/E transform while steering takes priority?
+- Does Racer need a formal momentum resource, or is a fixed D window more immediately fun?

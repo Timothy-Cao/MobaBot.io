@@ -11,7 +11,7 @@ The owner chose **Marshal** for this summon kit.
 - **Marshal** says the character commands a coordinated force rather than merely building unattended turrets.
 - It is short enough for a class card and leaves the relay language available for the individual machines and passive.
 
-For the locked default all-rounder, the assistant recommends **Vanguard**: simple, readable and appropriate for the kit that teaches the baseline combat language. Vanguard is a proposal pending owner approval, not a locked name.
+The owner approved **Vanguard** as the locked default all-rounder's name.
 
 ## Provenance boundary
 
@@ -31,7 +31,7 @@ For the locked default all-rounder, the assistant recommends **Vanguard**: simpl
 
 ### Assistant proposal
 
-Vanguard, individual ability names, relay projectile roles, Battle Order, D/F behavior, non-recursive effect rules and implementation guardrails below are assistant proposals unless explicitly listed as owner direction above.
+Individual ability names, relay projectile roles, Battle Order, D/F behavior, non-recursive effect rules and implementation guardrails below are assistant proposals unless explicitly listed as owner direction above.
 
 ## One-sentence identity
 
@@ -225,7 +225,6 @@ Only then add a second relay, EMP and the first E line. The third relay, Battle 
 
 ## Open decisions for owner review
 
-- Approve **Vanguard** as the default kit's name, or keep searching?
 - Does Relay Network regeneration stack per relay, apply only once or require standing within X?
 - Should Q missiles also explode on the first enemy/terrain collision, or only at maximum distance?
 - Is Arc Relay's third projectile better as chaining damage, a slow or another support effect?

@@ -21,9 +21,11 @@ The default kit, progression, controls, modules, ability refinements, terrain di
 
 The section titled **Assistant research findings: Swarm** is analytical output, not an owner statement. The implementation sequence and playtest exercises are also assistant-authored scaffolding for carrying out the owner's requests safely.
 
-## Locked default kit for testing
+## Vanguard — locked default kit for testing
 
-The owner locked this first kit on 9 September 2026. For the next focused design pass, treat it as one static all-rounder kit: do not offer cross-kit ability swapping or discovery replacements. Ranks and milestones may improve its fixed tools, but its composition stays stable. Revisit ability swapping only after several complete static kits have distinct, testable identities.
+The owner locked this first kit on 9 September 2026 and later approved the simple name **Vanguard**. For the next focused design pass, treat it as one static all-rounder kit: do not offer cross-kit ability swapping or discovery replacements. Ranks and milestones may improve its fixed tools, but its composition stays stable. Revisit ability swapping only after several complete static kits have distinct, testable identities.
+
+Vanguard's play identity is intentionally straightforward: remain mostly at mid range and let the player-controlled robot do the primary work through individually strong abilities. Its summon and totems provide support, space or temporary power windows; they must not turn Vanguard into a second Marshal or make remote bodies the main damage source.
 
 | Input/system | Locked tool | Core test question |
 | --- | --- | --- |
@@ -38,7 +40,7 @@ The owner locked this first kit on 9 September 2026. For the next focused design
 | 1 | Close/fast versus far/slow orbiting tools | Do the two modes change positioning? |
 | 2 | Targetable aggressive summon with weak gun, local pulse and short aggro draw | Does it create useful temporary space without tanking the whole encounter? |
 | 3 | Stored-healing totem with energy/damage overflow | Is leave-and-return timing understandable and bounded? |
-| 4 | Paired zap robots placed within four seconds | Does active line placement create useful terrain play? |
+| 4 | Short-lived cooldown/energy totem | Does a five-second burst window create exciting ability sequences without becoming mandatory or self-looping? |
 
 This lock is a design direction for a future implementation pass, not a statement about the current build. Preserve the existing shared pool and older abilities for regression until a static-kit migration is designed and verified.
 
@@ -46,7 +48,9 @@ This lock is a design direction for a future implementation pass, not a statemen
 
 The owner next requested three highly synergistic static-kit directions: a summon network whose machines mirror casts and can trade places with the player, a geometry-heavy combo kit whose abilities transform one another, and a speedster with powerful but deliberately intermittent speed windows. The organized assistant proposals, interaction grammar, risks and prototype order are in [`KIT_DESIGN_BRAINSTORM_17.md`](KIT_DESIGN_BRAINSTORM_17.md). They are brainstorm material, not approved ability specifications; only the first/default kit above is locked.
 
-Later owner direction parks the combo kit for now and names the summon-network character **Marshal**. Each relay detects autonomously within X and may fire as far as roughly 3X when the target is inside another relay's X circle or the player's attack range. Player basics command a substantial extra relay attack on a separate clock; Q launches maximum-range exploding missiles from all bodies; W creates a medium EMP at every relay; E pulses damage along every relay pair; and Overclock massively increases fire rate/missiles while turning body transfers into relay-sacrifice explosions with a 10-second redeploy wait. Slots 1–3 deploy distinct-projectile robot bodies and use press → left-click to reposition or a second key press to transfer control. Full wording, unresolved cases and source-backed design reasoning are in [`RELAY_MARSHAL_DESIGN_17.md`](RELAY_MARSHAL_DESIGN_17.md). The assistant proposes **Vanguard** as the default kit's simple name; owner confirmation is pending.
+Later owner direction parks the combo kit for now and names the summon-network character **Marshal**. Each relay detects autonomously within X and may fire as far as roughly 3X when the target is inside another relay's X circle or the player's attack range. Player basics command a substantial extra relay attack on a separate clock; Q launches maximum-range exploding missiles from all bodies; W creates a medium EMP at every relay; E pulses damage along every relay pair; and Overclock massively increases fire rate/missiles while turning body transfers into relay-sacrifice explosions with a 10-second redeploy wait. Slots 1–3 deploy distinct-projectile robot bodies and use press → left-click to reposition or a second key press to transfer control. Full wording, unresolved cases and source-backed design reasoning are in [`RELAY_MARSHAL_DESIGN_17.md`](RELAY_MARSHAL_DESIGN_17.md).
+
+For the third and final current class concept, the assistant recommends returning to the owner's speedster idea under the simple working name **Racer**. Its fun-first gameplay axis is alternating a short controllable Overdrive with a capable ranged recovery state, using near-pass damage and route-shaped effects rather than a large combo dictionary. This remains a brainstorm proposal in [`KIT_DESIGN_BRAINSTORM_17.md`](KIT_DESIGN_BRAINSTORM_17.md), not a locked kit.
 
 ## Requested progression flow
 
@@ -123,19 +127,21 @@ Define touch damage as a separate source type with a repeat-hit grace policy. Pr
 - Apply value in order: missing hull → missing energy → small damaging shock wave.
 - Cap every conversion and block recursive generation.
 
-### 4 — paired zap robots
+### 4 — cooldown/energy totem
 
-- Place a first robot, then its partner within four seconds.
-- Damage enemies between the pair.
-- Show pairing time, valid placement and active line clearly.
+- Replace the paired zap robots; relay-pair damage now belongs exclusively to Marshal.
+- Deploy a short-lived power totem, initially suggested at approximately five seconds of uptime and a 15-second cooldown.
+- While the benefit applies, double cooldown recovery so affected abilities recharge in roughly half their normal time and give the player unlimited energy.
+- The totem must not accelerate its own cooldown or recursively extend its own uptime.
+- Decide whether the benefit requires standing inside a visible aura, when the 15-second cooldown starts, whether R/D/F are affected, and how stored charges recover before tuning uptime.
 
 ### Non-aggro deployment rule
 
 - Slot 3 and slot 4 deployables are not targetable or killable.
 - They expire after a finite lifetime.
-- Natural expiry starts a 10-second redeploy wait.
+- Natural expiry normally starts a 10-second redeploy wait; the slot-4 power totem's newer approximately 15-second cooldown proposal supersedes that generic timing for its own ability.
 - Manual redeployment before expiry replaces/moves the construct and resets its lifetime, encouraging active repositioning.
-- Specify whether stored healing survives a move and whether the pair moves together.
+- Specify whether stored healing survives a move and whether repositioning the power totem refreshes its duration.
 
 ## Requested ability directions
 

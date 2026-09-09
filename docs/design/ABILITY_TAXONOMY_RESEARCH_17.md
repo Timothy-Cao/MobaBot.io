@@ -4,7 +4,7 @@ Status: **design research and recommendations for future prototyping; not implem
 
 The current implementation remains defined by [`QA_17.md`](QA_17.md), the [root README](../../README.md) and the [ability catalog](../review/abilities.html). The owner's exact notes remain preserved in [`ABILITY_FEEDBACK_17.md`](ABILITY_FEEDBACK_17.md).
 
-**Subsequent owner direction:** the later proposal in `ABILITY_FEEDBACK_17.md` supersedes this document's initial default 1–4 recommendation. The current owner-proposed defaults are orbiting tools on 1, an aggressive aggro-drawing summon on 2, a stored-healing totem on 3 and paired zap robots on 4. Keep the analysis below as research history and as input to later alternatives; do not mistake its Pulse-anchor/four-toggle recommendation for the latest owner decision.
+**Subsequent owner direction:** later notes supersede this document's initial default 1–4 recommendation. The locked Vanguard defaults are orbiting tools on 1, an aggressive aggro-drawing summon on 2, a stored-healing totem on 3 and a short-lived cooldown/energy totem on 4. Paired zap geometry moved exclusively to Marshal. Keep the analysis below as research history and as input to later alternatives; do not mistake its Pulse-anchor/four-toggle recommendation for the latest owner decision.
 
 The same subsequent notes reclassify the player's default autonomous machine gun as a permanent, upgradable but currently unequippable passive rather than a learned powered toggle. They also make the body-slam version of Piston thrust the leading default E proposal. The original catalog audit below remains useful historical analysis, but these later owner constraints win when preparing implementation.
 

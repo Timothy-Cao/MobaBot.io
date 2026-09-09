@@ -6,6 +6,8 @@ Status: **owner notes for future research, design and playtesting; not implement
 
 **Later owner direction:** the first/default kit is now locked and kits should remain static for the next design pass. Body slam/Piston thrust is therefore the default E for that locked composition. Cross-kit ability swapping, stored alternatives and replacement choices are deferred rather than deleted. See [`KIT_DESIGN_BRAINSTORM_17.md`](KIT_DESIGN_BRAINSTORM_17.md) and the consolidated [`OWNER_PLAYTEST_REQUEST_17.md`](OWNER_PLAYTEST_REQUEST_17.md).
 
+**Latest owner direction:** the locked default kit is named **Vanguard**. Its slot 4 paired zap robots are removed and reserved for Marshal's relay-pair interaction. Vanguard slot 4 becomes a short-lived cooldown/energy totem: approximately five seconds of doubled cooldown recovery and unlimited energy on an approximately 15-second cooldown, with exact aura and cooldown timing still unresolved.
+
 ## Research request: classify abilities by function
 
 Research how ability roles are normally classified across several game mediums, choose a practical taxonomy for MobaBot.io, and research what gives each type a satisfying purpose and feel. Do not settle the taxonomy from intuition alone.
@@ -204,7 +206,7 @@ The best non-overlapping E alternatives remain:
 | Gravity well | Grouping and setup for other abilities | Strong combo tool, but slower to explain and overlaps the default summons' area control |
 | Bulkhead | Defensive terrain and route control | Distinctive, but highly dependent on pathfinding and the unfinished terrain redesign |
 | Self repair | Create safety, then channel recovery | Good risk/reward, but starts the player with sustain rather than an active combat interaction |
-| Crosswire | Pre-plan a control line | Interesting setup, but overlaps the proposed paired robots on slot 4 |
+| Crosswire | Pre-plan a control line | Interesting setup, but relay-pair geometry now belongs to Marshal rather than Vanguard |
 
 Recommendation: prototype body slam as the default E first, with Repulsor as the simplest comparison option. Treat this as an assistant recommendation awaiting owner confirmation and a human Practice test.
 
@@ -217,7 +219,7 @@ The latest owner direction replaces the earlier idea of an initial module pool b
 | 1 | Orbiting tools | Player-centered positional offense with two orbit modes |
 | 2 | Aggressive summon | Sustained damage, local AoE and limited aggro diversion |
 | 3 | Healing totem | Stored recovery with overflow conversion |
-| 4 | Paired zap robots | Two-point line damage and active redeployment |
+| 4 | Cooldown/energy totem | Short burst window with doubled cooldown recovery and unlimited energy |
 
 These are design notes, not final names, numbers or implemented assignments.
 
@@ -252,26 +254,27 @@ The conversion order should remain explicit: missing hull first, then missing en
 
 This is a rework direction for the Repair anchor concept, replacing a simple continuous healing aura with a leave-and-return rhythm.
 
-### 4 — paired zap robots
+### 4 — cooldown/energy totem
 
-- Deploy the first robot, then place its partner within four seconds.
-- Once paired, they zap enemies in the space or line between them.
-- Their main decision is the angle, separation and timing of the two placements.
-- Clearly show the first robot's four-second pairing window, the valid second-placement area and the damaging connection.
-- Define what happens if the second robot is not placed in time without spending an invisible or unusable deployment.
+- Remove the paired zap robots from Vanguard. Marshal exclusively owns relay-pair and triangle shock geometry.
+- Deploy a temporary power totem. Initial owner targets are approximately five seconds of uptime and a 15-second cooldown.
+- While active for the player, cooldowns recover at double speed and energy is effectively unlimited.
+- The totem must not accelerate its own cooldown. Otherwise its benefit could recursively approach permanent uptime.
+- Make the five-second window unmistakable through a visible aura, countdown and audio start/end cues.
+- Decide whether the player must remain within the aura, whether the cooldown begins on placement or expiry, whether R/D/F are affected, and how charges recover before implementation.
 
-This resembles Crosswire's current two-endpoint structure but changes the fantasy to a persistent robot pair. Decide later whether it replaces Crosswire, becomes its module version or shares only the underlying placement code.
+The ability is intended to create a brief high-output sequence for Vanguard's strong standalone actives. It should feel like permission to unload the kit, not a passive maintenance buff.
 
 ### Targeting, expiry and active redeployment
 
 - The aggressive slot-2 summon is the aggro-drawing, targetable and killable exception.
-- Deployables that do not draw aggro should not be targetable or killable. Under the current mapping, this clearly applies to the slot-3 healing totem and slot-4 robot pair; orbiting tools remain attached to the player rather than becoming enemy targets.
+- Deployables that do not draw aggro should not be targetable or killable. Under the current mapping, this clearly applies to the slot-3 healing totem and slot-4 cooldown/energy totem; orbiting tools remain attached to the player rather than becoming enemy targets.
 - Non-aggro deployables expire after a finite lifetime.
-- If one expires naturally, the player waits 10 additional seconds before deploying it again.
+- If one expires naturally, the generic earlier rule was a 10-second redeploy wait. The newer slot-4 power-totem proposal instead uses its own approximately 15-second cooldown; its cooldown start remains unresolved.
 - If the player redeploys it before expiration, move or replace it and reset its lifetime timer. This lets active management maintain the effect and encourages repositioning.
 - A redeploy must be visibly different from placing an additional copy. Old collision/effects should end cleanly, and summon-capacity accounting must not leak an extra entity.
 
-Still unresolved: lifetimes, placement range, energy costs, the aggressive summon's death cooldown, whether redeployment itself has a short input cooldown, what happens to stored healing on a moved totem, and whether both slot-4 robots move together or are placed again as a new pair.
+Still unresolved: lifetimes, placement range, energy costs, the aggressive summon's death cooldown, whether redeployment itself has a short input cooldown, what happens to stored healing on a moved totem, and whether moving the slot-4 power totem refreshes or preserves its five-second window.
 
 ## Proposed focused roster
 
@@ -279,7 +282,7 @@ Keep every existing ability in the project for now; do not delete the wider cata
 
 - Use the abilities reviewed in this document as the initial active-design set, subject to their individual keep, replace or consolidate notes.
 - For movement, initially retain only the two current defaults: Ghost drive and Phase hop.
-- Use the latest owner-proposed default 1–4 mapping above: orbiting tools, aggressive summon, healing totem and paired zap robots.
+- Use the latest owner-locked Vanguard 1–4 mapping above: orbiting tools, aggressive summon, healing totem and cooldown/energy totem.
 - Preserve the earlier research recommendation—Pulse anchor plus Coolant trail, Arc coil, Auto gun and Life converter—as historical design analysis, not the current default-loadout direction. Its principles may still help refine or offer later alternatives.
 - Use focused Practice tests to judge feel and purpose after the retained abilities have been refined.
 
