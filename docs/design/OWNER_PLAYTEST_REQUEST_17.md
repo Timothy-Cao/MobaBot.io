@@ -10,6 +10,7 @@ This document consolidates the owner's 9 September 2026 directions. It is a work
 - [`SWARM_DESIGN_RESEARCH_17.md`](SWARM_DESIGN_RESEARCH_17.md)
 - [`KIT_DESIGN_BRAINSTORM_17.md`](KIT_DESIGN_BRAINSTORM_17.md)
 - [`RELAY_MARSHAL_DESIGN_17.md`](RELAY_MARSHAL_DESIGN_17.md)
+- [`PRACTICE_SANDBOX_RESEARCH_17.md`](PRACTICE_SANDBOX_RESEARCH_17.md)
 - [`QUALITY_BAR.md`](QUALITY_BAR.md)
 - [`QA_17.md`](QA_17.md)
 
@@ -17,7 +18,7 @@ If summaries conflict, the latest dated owner statement in the detailed feedback
 
 ## Provenance boundary
 
-The default kit, progression, controls, modules, ability refinements, terrain direction and Robot AI concept below originate from owner feedback. Implementation cautions and unresolved questions organize that direction without claiming owner approval for the answers.
+The default kit, progression, controls, modules, ability refinements, terrain direction, Practice cleanup and Robot AI concept below originate from owner feedback. Implementation cautions and unresolved questions organize that direction without claiming owner approval for the answers.
 
 The section titled **Assistant research findings: Swarm** is analytical output, not an owner statement. The implementation sequence and playtest exercises are also assistant-authored scaffolding for carrying out the owner's requests safely.
 
@@ -169,6 +170,14 @@ Create greybox alternatives before environment art:
 
 Terrain must look and collide as substantial volume, retain clear starts and ability space, route ordinary enemies without snagging, support bosses, and remain below threats/pickups in visual hierarchy. Preserve the current layout as a regression reference.
 
+## Owner research request: Practice sandbox cleanup
+
+The owner wants Practice cleaned up into a faster combat laboratory. Preserve its strict progression/checkpoint isolation, but research a live left-side interface for selecting complete loadouts, changing focused player stats, choosing enemies and placing them with the mouse. Use one simple smallish test arena with a few substantial large and medium rocks rather than another campaign map.
+
+The source comparison, proposed four-section dock, mouse-placement grammar, greybox ingredients, honest modified-test labels, metrics and phased acceptance plan are in [`PRACTICE_SANDBOX_RESEARCH_17.md`](PRACTICE_SANDBOX_RESEARCH_17.md). The leading recommendation is a collapsible live dock with Build, Player, Enemies and Session sections; Point/Line/Ring/Cluster placement; a few named test scenarios; and a collapsed per-source measurement strip. Do not expose every internal variable on the main surface, implement a campaign editor or let Practice write rewards/loadouts back to the real profile.
+
+This is research and future implementation direction only. `QA_17.md` remains the current Practice behavior until the redesign is implemented and verified.
+
 ## Future robot perspective and animation bookmark
 
 Revisit whether the player robot and related bodies should use a **true top-down presentation** rather than the current perspective. Explore camera perspective and character animation together: changing the view affects silhouette, readable facing, weapon attachment points, shadows, collision honesty and the directional poses or frames required.
@@ -250,6 +259,7 @@ The research explicitly advises against importing Swarm's champion classes, exac
 
 | Pass | Scope | Do not combine yet |
 | --- | --- | --- |
+| 0 | Practice left dock, mouse placement and simple test greybox as specified in the separate research note | Campaign terrain, balance or save-format changes |
 | 1 | Permanent gun, hammer, Q/W and body-slam E in isolated Practice | Terrain overhaul, new progression, all four modules |
 | 2 | Ghost drive restriction/effects and Phase hop blink rules/effects | XP increase |
 | 3 | Each 1–4 module alone, then combined with explicit caps | Stashed skill reintroduction |
@@ -272,6 +282,10 @@ Use the same short encounter with permanent gun only, then gun + hammer/Q/W/E/R.
 - Is body slam chosen for engage/peel rather than ordinary travel?
 - Does Q remain useful after W/E/R are available?
 - Can the player explain what hit them?
+
+### Practice usability setup
+
+Before the combat sessions, ask the owner to load the Vanguard rank-5 preset, place ten weak enemies by a large rock, replace them with an armored dummy, reset measurement and return every modifier to Normal without instructions. Record completion time, mistaken clicks, placement precision and any hidden/clipped control. Confirm on exit that equipment, collection and checkpoint are unchanged.
 
 ### Session B — D/F
 
