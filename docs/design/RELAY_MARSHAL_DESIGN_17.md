@@ -1,36 +1,41 @@
-# Relay Marshal — focused static-kit proposal
+# Marshal — focused static-kit proposal
 
-Status: **assistant research and design proposal for owner review; not an approved specification and not implemented.** The owner supplied the core fantasy and range constraints. Exact names, numbers, upgrade milestones and the proposed three-relay structure remain open.
+Status: **organized owner direction plus assistant research for later implementation; not implemented.** The owner has chosen the class name and revised its core abilities. Exact values, D/F, rank milestones and unresolved edge cases remain open.
 
 Date: 9 September 2026.
 
-## Working name
+## Names
 
-**Relay Marshal** is the recommended class name.
+The owner chose **Marshal** for this summon kit.
 
-- **Relay** names the spatial network and the way attacks are repeated from remote origins.
 - **Marshal** says the character commands a coordinated force rather than merely building unattended turrets.
-- It is short enough for a class card and distinct from the locked all-rounder, Default Salvager.
+- It is short enough for a class card and leaves the relay language available for the individual machines and passive.
 
-Earlier notes called the concept Relay Architect. That remains a useful description, but Relay Marshal better emphasizes active command and synchronized fire. Alternatives such as Signal Warden or Meshwright can be revisited only if the owner dislikes this name.
+For the locked default all-rounder, the assistant recommends **Vanguard**: simple, readable and appropriate for the kit that teaches the baseline combat language. Vanguard is a proposal pending owner approval, not a locked name.
 
 ## Provenance boundary
 
 ### Owner direction
 
 - Focus on this summon character and park the combo-kit design for now.
-- Turrets have real range and must never shoot beyond it.
-- Linked turrets share target awareness: a target seen within the network can be used by other reasonably nearby towers, subject to their own range.
-- One likely ability fires a missile from both the character and every summon toward the mouse.
-- Preserve the earlier fantasy: summons mirror abilities, their summon input can switch places with them, they expire after roughly 30 seconds, and summon interactions or self-detonation may be central.
+- Each relay normally detects enemies in a medium circle of radius **X**. It may detect and attack as far as roughly **3X** when that enemy is inside another relay's normal detection circle or the player's attack range.
+- Relays provide small health and energy regeneration.
+- Each player basic attack commands every relay that can legally reach the target within 3X to make an additional attack on a separate timer from its autonomous weapon.
+- Q fires a missile from the character and every relay toward the mouse. Its range is roughly 3X and it explodes at maximum distance.
+- W becomes a simple medium-radius EMP centered on every relay.
+- E becomes a timed high-damage shock along every pair of active non-player relays. It requires two or three relays and uses one line with two or a triangle with three.
+- R is Overclock: relays gain massively increased attack speed and extra missiles. Switching bodies during Overclock detonates the body left behind for major damage and puts that relay on a 10-second redeploy cooldown.
+- Use three relay slots. If a relay is already placed, press its key once to enter a ranged reposition preview and left-click to place it again; press its key twice to switch bodies instead.
+- Relay bodies should visibly resemble Marshal's robot chassis, with different tools attached, so switching reads as transferring software/control between compatible bodies.
+- The three relays fire distinct projectile families, including explosive wave-clear and single-target armor-piercing fire.
 
 ### Assistant proposal
 
-The complete loadout, three-relay limit, range model, focus/coverage command, effect caps and names below are proposed solutions, not owner decisions.
+Vanguard, individual ability names, relay projectile roles, Battle Order, D/F behavior, non-recursive effect rules and implementation guardrails below are assistant proposals unless explicitly listed as owner direction above.
 
 ## One-sentence identity
 
-**Place a connected squad, command attacks from every useful angle, then trade places with the squad to preserve or cash out the network.**
+**Place a squad, make every personal attack become a coordinated attack, then reposition or transfer control between robot bodies to keep the formation useful.**
 
 That sentence is the filter for the entire kit. A generic gun buff, unrelated dash or passive stat bonus does not belong unless it changes network placement, synchronized fire, survival or command decisions.
 
@@ -46,127 +51,143 @@ Use three deployable summon slots and one network-command slot as the first prop
 
 This is a complexity and readability recommendation, not a permanent cap. Prototype one relay first, then two, then three; only test a fourth if players still want another placement decision after the full kit is readable.
 
-## Range and network contract
+## Range and shared-target contract
 
-Do not use “vision” as a loose synonym for unlimited range. The kit needs three visible, separately enforced distances.
+The owner's simplified rule uses two primary distances.
 
 | Range | Meaning | Rule |
 | --- | --- | --- |
-| Link range | Whether two nodes can relay commands and target data | A summon joins the player's network if it connects to the player or to another already connected relay within this large radius |
-| Sensor range | Whether a node can discover an enemy for the network | Any connected node can publish a target detected inside its sensor radius |
-| Hard firing range | How far a shot from one origin may travel | Every player or turret shot checks distance from its own origin and expires or lands at its own maximum range; shared data never extends it |
+| **X — local range** | Normal detection and autonomous targeting | A relay independently sees and attacks enemies inside this medium circle |
+| **3X — relayed range** | Network-assisted detection and maximum weapon reach | If an enemy is inside another active relay's X circle or the player's attack range, each other relay may attack it only while it is within roughly 3X of that firing relay |
 
-In the initial prototype, sensor range should be slightly shorter than hard firing range. Shared data therefore lets a connected relay use the outer portion of its legal weapon reach without pretending that its own sensors found the target. Links may chain, but keep the network within a broad player-centered command radius or at most two relay hops so three clever placements cannot stretch damage across the entire arena.
+Example: an enemy beside Relay A is published to the squad. Relay B is 2.5X from that enemy, so B may fire. Relay C is 3.2X away, so C may not. Shared information extends acquisition, but 3X remains a hard local range measured from each firing body; walls and projectile collision still apply.
 
-Practical example: Relay A detects an enemy. Relay B may immediately acquire that enemy from shared data only if B is connected and the enemy is also within B's hard firing range. B does not fire across the map. An isolated relay keeps its own local behavior but neither publishes targets nor mirrors player casts.
+The same 3X distance is the initial range target for Q missiles. A brief shared-target memory can prevent edge flicker, but it must not preserve a target after it leaves every valid detection and firing condition.
 
-The network should remember a published target for only a brief grace window. This prevents tiny sensor-edge movements from making every turret chatter between firing and idle, while still dropping genuinely unavailable targets quickly.
+Whether health/energy regeneration stacks per active relay, applies globally or requires the player to stand inside X remains open. The conservative first test is a small non-stacking aura within X, followed by a stacking test only if maintaining multiple zones feels unrewarding.
 
 ## Proposed full kit
 
 | Input/system | Working name | Function | Network interaction |
 | --- | --- | --- | --- |
-| Permanent passive | **Mesh Command** | Maintains links, shared target acquisition and one priority mark | Shows connected/isolated state; shared knowledge never bypasses local hard firing range or line of fire |
-| Basic attack | **Command Rivet** | Reliable medium-range aimed shot with modest personal damage | A hit briefly marks that enemy; linked relays in Focus order prioritize it if each can legally fire |
-| Q | **Synchronized Salvo** | Low-cooldown bread-and-butter missile fired toward the mouse | The Marshal and every connected relay launch one missile from their own locations toward the cursor; each missile has its own capped path and cannot recursively mirror |
-| W | **Siege Designator** | Long-range, higher-commitment target or ground designation | After a short readable lock, every eligible origin fires a heavier converging shot at the designated point; origins without local range show unavailable rather than cheating range |
-| E | **Pinning Grid** | Utility/CC window that energizes current network links | Links become visible tripwires for a short time, slowing ordinary enemies that cross; crossing two distinct links produces one brief stun with a per-target lockout |
-| R | **Zero-Hour Protocol** | High-impact network cash-out | Relays become temporarily protected and overclocked; during the window their summon inputs still permit swaps, then all active relays self-detonate in a clearly ordered sequence |
-| D | **Uplink Rush** | Short hold-to-move escape/reposition tool | Base speed increase works anywhere; moving along or toward a connected link is faster, rewarding routes through the network without trapping a relay-less player |
-| F | **Emergency Hop** | Small dependable cursor blink | Leaves a very short-lived non-targetable signal echo at the origin that can contribute one reduced Q missile, then disappears; it is not a fourth maintained summon |
-| 1 | **Needle Relay** | Deployable anti-boss/priority turret; 30-second lifetime | Fast precise local fire; press 1 again to swap with it while valid |
-| 2 | **Pulse Relay** | Deployable wave-control turret; 30-second lifetime | Slower radial pulse plus modest local fire; press 2 again to swap with it |
-| 3 | **Aegis Relay** | Deployable defensive/anchor turret; 30-second lifetime | Lower damage, local aggro relief and a small protective zone; press 3 again to swap with it |
-| 4 | **Battle Order** | Toggles **Focus** and **Coverage** with a short lockout | Focus prioritizes the Command Rivet mark; Coverage assigns different legal nearby targets and avoids wasteful overkill |
+| Permanent passive | **Relay Network** | Local X detection, shared 3X acquisition and small health/energy regeneration | Another relay or the player can publish a target, but each firing relay still checks its own 3X limit |
+| Basic attack | **Command Fire** | Reliable personal attack | Every relay with the target inside its 3X range performs one substantial bonus shot on a command-fire clock separate from its normal attack timer |
+| Q | **Synchronized Missile** | Bread-and-butter cursor-directed missile with roughly 3X range | Marshal and all active relays fire from their own positions; each missile explodes at its maximum travel distance |
+| W | **EMP Pulse** | Simple medium-radius control/damage blast | Every active relay emits the EMP around itself; the player is not an origin |
+| E | **Triangulation Shock** | Timed high-damage relay-to-relay pulse | Two relays fire one beam; three pulse all three triangle edges; the player never forms an edge |
+| R | **Overclock** | High-impact attack-speed and missile window | Relays fire massively faster with extra missiles; switching detonates the abandoned relay body and puts that relay slot on a 10-second cooldown |
+| D | **Uplink Rush** | Provisional movement-speed escape/reposition tool | Works without a relay; a small benefit near relays may be tested later but is not owner-approved |
+| F | **Emergency Hop** | Provisional dependable short blink | No extra summon or mirrored attack in the simplified version |
+| 1 | **Needle Relay** | Thirty-second anti-boss turret | Fires armor-piercing single-target rounds; key opens reposition preview, second key press switches bodies |
+| 2 | **Blast Relay** | Thirty-second wave-clear turret | Fires slower explosive projectiles; key opens reposition preview, second key press switches bodies |
+| 3 | **Arc Relay** | Thirty-second control/generalist turret | Fires lower-damage chaining or slowing shots; key opens reposition preview, second key press switches bodies |
+| 4 | **Battle Order** | Provisional toggle between **Focus** and **Coverage** | Focus follows the latest Command Fire target; Coverage assigns different legal nearby targets and avoids wasteful overkill |
 
 ## Core ability details
 
-### Q — Synchronized Salvo
+### Basic — Command Fire
+
+The player's basic attack is the simplest and most important Marshal/summon interaction.
+
+- The player's body performs its own attack.
+- Every active relay whose distance to that target is at most 3X immediately performs one additional command shot.
+- This additional shot has its own cooldown clock. It does not consume, reset or wait for the relay's autonomous attack timer.
+- A full three-relay command should deal substantial focused damage and feel recognizably stronger than leaving the turrets unattended.
+- Relay type still matters: Needle contributes an armor-piercing shot, Blast an explosive shot and Arc a chaining/control shot, subject to balance caps.
+- If a target leaves one relay's 3X range before release, that relay does not cheat the shot. Define windup cancellation consistently before implementation.
+
+This is the Azir-like command layer requested by the owner: placement determines which bodies can answer, while each player basic creates a coordinated attack moment.
+
+### Q — Synchronized Missile
 
 This should be the kit's signature sound-and-motion action, not merely several copies of Impact bolt.
 
-- One input creates a near-simultaneous firing chorus from the player and each connected relay.
+- One input creates a near-simultaneous firing chorus from the player and every active relay.
 - Every missile aims toward the current mouse world position from its own origin. The paths therefore fan, cross or converge naturally according to placement.
-- If the cursor is beyond an origin's hard range, that missile travels in the cursor direction and ends at its maximum distance. It does not teleport to the cursor.
+- Each missile travels roughly 3X. It explodes when it reaches that maximum distance, including when the mouse is farther away; it does not teleport to the cursor.
+- Whether an earlier enemy/terrain collision also detonates it or only stops it remains an implementation question for the first feel test.
 - Relays may contribute reduced damage, but added origins must remain meaningfully valuable. Use a shared same-target budget or diminishing echo damage only if boss stacking overwhelms other play.
 - Give each origin a very short launch cadence offset and one combined low-frequency report. Perfectly simultaneous identical sounds tend to become loud noise rather than a satisfying volley.
 - Show a small ready pip over each eligible relay. The player should know before casting whether one, two or three echoes will participate.
 
 The reward is geometric: a tight formation produces reliable concentrated fire; a wide formation sweeps more lanes and may approach a boss from safer angles.
 
-### W — Siege Designator
+### W — EMP Pulse
 
-Q rewards frequent repositioning; W pays off a network that already surrounds or reaches a high-value point.
+Keep W simple: every active non-player relay emits one medium-radius EMP at the same time.
 
-- The player designates an enemy or ground point at longer range and sees which relays can legally contribute.
-- After a short lock-on tell, all eligible nodes launch heavy converging rounds.
-- Multiple angles should improve reliability and modestly improve damage, but do not multiply crowd control per missile.
-- A relay outside local firing range stays silent and displays a muted range cue. This makes bad placement legible instead of feeling bugged.
-- Against crowds, the impact may have a small local blast. Against one boss, converging hits provide the kit's anti-boss payoff.
+- Each relay shows a short charge ring, then releases a circular electromagnetic blast around its own body.
+- The player does not emit an EMP. With no relay placed, W is unavailable and clearly says why.
+- Overlapping EMPs should not multiply hard crowd control without a cap. Their damage may overlap if testing shows that clustering relays deserves the lost map coverage.
+- Decide whether the EMP interrupts enemy windups, disables projectiles/machines or simply damages/slows only after the base pulse is readable.
 
-### E — Pinning Grid
+### E — Triangulation Shock
 
-The summons need a reason to form something other than a pile beside the player.
+E rewards the timing and geometry of two or three non-player relays.
 
-- Temporarily energize links between connected nodes and the player.
-- An ordinary enemy crossing one link is slowed and takes low damage.
-- Crossing a second distinct link during the same activation causes one brief stun, then that target becomes immune to another grid stun for the rest of the cast.
-- Heavy enemies and bosses resist displacement; a boss may receive only the slow unless later testing approves a clearly reduced stun.
-- The link effect must use the same geometry as the network display. Decorative curves cannot imply a hit area that the simulation does not use.
+- Two active relays create one telegraphed high-damage laser/shock pulse between them.
+- Three active relays pulse all three pairwise edges, forming one triangle.
+- The player is never a corner and no continuous passive damage exists between pulses.
+- Use a clear anticipation beat so enemies entering the lines at the correct moment are rewarded; do not leave an ambiguous always-on lightning decoration.
+- Each enemy is hit at most once per edge per activation. Define whether a target at the triangle corner may take two edges before tuning damage.
 
-This gives triangle placement a concrete wave-control purpose without making passive link lines constant free damage.
+This gives repositioning a concrete payoff: the player chooses when and where the network becomes a weapon, while enemies can move between safe and dangerous spaces before the pulse.
 
-### R — Zero-Hour Protocol
+### R — Overclock
 
-The ultimate converts maintained territory into a deliberate climax.
+Overclock makes the autonomous network briefly overwhelming and turns body switching into a sacrificial attack.
 
-- Start a short overclock window. Active relays become visually armed, briefly protected from ordinary chip damage and fire/mirror more aggressively.
-- The player may use 1–3 recasts during this window to swap and reposition the eventual blast locations.
-- At the end, the player emits a smaller safety pulse and active relays detonate in their displayed order. The sequence is fast enough to feel connected but slow enough to read and steer between swaps.
-- Detonation consumes the relays and never grants duplicate expiry rewards. It should be substantially stronger than letting them time out naturally.
-- Casting with no relays still gives the player's small pulse, but it is intentionally a poor use. The ultimate's full value requires prior network setup.
+- During the window, every active relay gains massively increased autonomous attack speed and adds extra missiles to its attacks.
+- Relays remain available for normal reposition previews and body switching.
+- When the player switches into a relay body, the previously controlled body becomes the abandoned relay body and immediately explodes for major area damage.
+- That exploded relay is removed and its slot enters a 10-second cooldown before it can be deployed again.
+- Switching several times can therefore create several positioned explosions, but progressively consumes the firing network. Staying put preserves the overclocked guns.
+- With no active relay, R should not generate free machines. It may be unavailable or grant only a weak personal effect; decide after the basic Overclock loop is tested.
 
-The dramatic arc is setup → arm → frantic reposition/swap → cascade. That is more distinctive than a generic screen-wide explosion.
+The decision is deliberately sharp: retain the huge attack-speed network or sacrifice individual bodies as bombs. The visuals should show the player's control signal leaving one compatible robot shell and entering another, not an unexplained teleport between unrelated objects.
 
 ## Summon and swap contract
 
-- Each summon input has three unambiguous states: **deploy**, **swap ready**, or **unavailable**.
-- First press places that relay at the confirmed valid point.
-- Pressing the same slot while its relay exists swaps positions; it never silently redeploys or heals the summon.
-- Hold or an explicit placement modifier may preview a redeploy only at a safe time if later testing proves repositioning is necessary. Do not overload a quick recast with both swap and replacement.
-- Swap preserves both actors' remaining health, relay lifetime, cooldowns and current network membership after positions are recalculated.
+- If a relay is not active, pressing 1, 2 or 3 opens its placement preview and left-click deploys it within the displayed range.
+- If it is already active, the first key press immediately opens a reposition preview. Left-click confirms its new valid location.
+- Pressing the same key a second time while that preview is open performs the software/body switch instead. This avoids delaying every single press while the game waits to distinguish a double-tap.
+- Right-click or Esc cancels the preview without spending the action.
+- In a normal switch, player control and the Marshal tool set move into the relay-shaped body while the old controlled shell assumes that relay's role. During Overclock, the old shell explodes instead and the relay enters its 10-second cooldown.
+- All four bodies should share the same core robot chassis and scale. Needle, Blast and Arc use unmistakable weapon attachments, silhouettes and projectile languages so their roles remain readable.
 - Destination validation rejects walls, enemy bodies and invalid arena space. Failure spends neither swap nor energy and gives immediate feedback.
-- A relay that naturally reaches 30 seconds gives a short shutdown tell, performs only a small expiry burst and enters redeploy cooldown.
-- Relay deaths and expiry must be distinguishable from ultimate detonation in sound, silhouette and reward logic.
+- Normal repositioning should not silently heal a relay. Whether it refreshes the 30-second lifetime remains open and must be displayed explicitly either way.
+- Relay health, the player's health and cooldown ownership during a software transfer require an explicit rule before code. Avoid a swap that becomes a hidden full heal.
+- A relay that naturally reaches 30 seconds gives a clear shutdown tell. Natural expiry does not inherit Overclock's massive explosion unless the owner later requests it.
+- Relay death, expiry, repositioning and Overclock sacrifice must be distinguishable in sound, silhouette and reward logic.
 
 ## Intended skill curve
 
 | Player stage | Useful behavior | What mastery adds |
 | --- | --- | --- |
-| First minutes | Place one relay nearby, leave Coverage on, press Q toward enemies | Understand that the extra missile comes from a real origin with real range |
-| Comfortable | Maintain two relays, use a marked target, swap away from danger | Preserve uptime and choose Focus versus Coverage |
-| Skilled | Build triangles, energize crossing links, surround bosses for W | Plan geometry, expiry timing and legal firing angles |
-| Expert | Swap several times during Zero-Hour and choose the cascade pattern | Trade network safety for a precisely placed ultimate cash-out |
+| First minutes | Place one relay nearby, basic attack and press Q | Understand autonomous fire versus the separate commanded shot and missile |
+| Comfortable | Maintain two relays, reposition one and time EMP coverage | Use the X/3X rule and choose Focus versus Coverage if slot 4 survives testing |
+| Skilled | Build a triangle and pulse E through a wave or boss | Plan distinct projectile roles, expiry timing and legal command-fire ranges |
+| Expert | Overclock, decide which guns to preserve and which bodies to sacrifice | Chain deliberate control transfers into positioned explosions without losing every safe body |
 
-The floor is “my machines help when I press Q.” The ceiling is network geometry, target policy and positional sacrifice. Individual turret selection or RTS-style box commands are intentionally absent.
+The floor is “my machines answer my attacks.” The ceiling is range coverage, projectile composition, timed geometry, rapid repositioning and positional sacrifice. Individual turret selection or RTS-style box commands are intentionally absent.
 
 ## What should make it satisfying
 
-1. **The network visibly wakes up.** A command travels along links before relays rotate and fire; response must still be mechanically immediate.
-2. **The volley has rhythm.** The player shot leads, relay launches answer in a tight sequence, and convergence gets one clear impact accent.
-3. **Placement changes the result.** Wide and tight formations produce observably different lanes, link traps and safe swaps.
+1. **Every basic gets an answer.** The player fires, then every in-range relay responds on its independent command clock.
+2. **The missile volley has rhythm.** The player launch leads, relay launches answer in a tight sequence and the maximum-range explosions share one clear impact accent.
+3. **Placement changes the result.** Wide and tight formations change X coverage, 3X command reach, EMP zones, triangle pulses and safe body transfers.
 4. **Summons feel dependable.** They acquire the expected target, respect walls/range, do not jitter and communicate why they are idle.
-5. **There is an authored climax.** Zero-Hour sacrifices accumulated board state for a large, player-shaped payoff.
+5. **There is an authored climax.** Overclock makes the network roar, then lets the player trade individual guns for massive body explosions.
 6. **Failure is recoverable.** A destroyed network reduces power but leaves the player a basic, Q, D and F while rebuilding.
 
 ## Balance and clarity guardrails
 
 - Summon count, mirrored projectiles, target memory, chain/link checks and effects all need strict caps.
 - Mirror calls use a non-recursive damage primitive. They do not spend player energy again or trigger another mirror/proc generation.
-- Autonomous turret DPS should be supportive. A low-input player gets value, but active marking, placement, Q/W aim, swaps and R timing create the ceiling.
+- Autonomous turret DPS should be supportive. A low-input player gets value, but commanded basics, placement, Q aim, EMP coverage, triangle timing, transfers and Overclock decisions create the ceiling.
 - Same-target scaling and AoE scaling need separate measurement. A fix for boss burst must not make the network irrelevant against waves.
-- Shared target data never bypasses wall collision, hard range or projectile travel.
-- Connected, isolated, expiring, swap-ready, armed and unable-to-fire states must remain legible at normal zoom and Reduced effects.
+- Shared target data never bypasses wall collision, the 3X hard range or projectile travel.
+- Local-X, relayed-3X, expiring, reposition-preview, switch-ready, overclocked and unable-to-fire states must remain legible at normal zoom and Reduced effects.
 - Thirty-second lifetimes should be tested for maintenance fatigue. Do not add upgrades that merely hide an unfun replacement chore.
 - Practice and automated fixtures must never award permanent loot or touch the real checkpoint.
 
@@ -175,10 +196,10 @@ The floor is “my machines help when I press Q.” The ceiling is network geome
 These references inform principles, not names, art, code or copied balance values.
 
 - Riot's official Zed page demonstrates a compact relationship between a temporary remote origin, mirrored attacks and a recast position swap. It also limits same-cast resource reward, a useful reminder that multiple origins need explicit once-per-cast or non-recursive accounting. MobaBot adapts the grammar to destructible machines and PvE spatial coverage rather than copying shurikens or assassination mechanics. [Zed champion page](https://nexus.leagueoflegends.com/en-us/champion/zed/)
-- Riot's Azir retrospective says automatic minions were not sufficiently interactive for the intended commander fantasy, while direct commands made the soldiers central; it also candidly describes the resulting complexity, balance and bug burden. Relay Marshal therefore uses one shared command language and no per-unit selection, while treating multi-origin behavior as a high-risk system requiring staged prototypes. [Origins: Azir](https://nexus.leagueoflegends.com/en-us/2017/06/origins-azir/)
-- Riot's Naafiri development article identifies the less-visible requirements that make companions feel helpful: correct pathing and positioning, rapid command response, appropriate range and correct target choice, all under performance constraints. Relay Marshal makes those states deterministic and visible; stationary relays reduce formation complexity but do not remove targeting and range obligations. [Champion Insights: Naafiri](https://www.leagueoflegends.com/en-au/news/dev/champion-insights-naafiri/)
-- Riot's current Heimerdinger material ties movement to proximity to deployed turrets, while recent patch notes describe how turret range, vision duration and follow-up targeting can create poor feel when their boundaries disagree. This supports separate visible sensor/fire ranges, brief target memory and Uplink Rush near the network. [Heimerdinger champion page](https://www.leagueoflegends.com/en-au/champions/heimerdinger/) and [Patch 26.11 notes](https://www.leagueoflegends.com/en-us/news/game-updates/league-of-legends-patch-26-11-notes/)
-- Blizzard's Torbjörn page presents a small, legible loop of deployment, direct maintenance and a temporary turret overclock. The transferable lesson is that a construct kit benefits when the player has an active relationship with the machine; Relay Marshal uses command fire, swapping and a sacrificial overclock rather than copying repair-hammer or molten-area mechanics. [Torbjörn hero page](https://overwatch.blizzard.com/en-us/heroes/torbjorn/)
+- Riot's Azir retrospective says automatic minions were not sufficiently interactive for the intended commander fantasy, while direct commands made the soldiers central; it also candidly describes the resulting complexity, balance and bug burden. Marshal therefore uses one shared command language and no per-unit selection, while treating multi-origin behavior as a high-risk system requiring staged prototypes. [Origins: Azir](https://nexus.leagueoflegends.com/en-us/2017/06/origins-azir/)
+- Riot's Naafiri development article identifies the less-visible requirements that make companions feel helpful: correct pathing and positioning, rapid command response, appropriate range and correct target choice, all under performance constraints. Marshal makes those states deterministic and visible; stationary relays reduce formation complexity but do not remove targeting and range obligations. [Champion Insights: Naafiri](https://www.leagueoflegends.com/en-au/news/dev/champion-insights-naafiri/)
+- Riot's current Heimerdinger material ties movement to proximity to deployed turrets, while recent patch notes describe how turret range, vision duration and follow-up targeting can create poor feel when their boundaries disagree. This supports visible X/3X range states and brief target memory. [Heimerdinger champion page](https://www.leagueoflegends.com/en-au/champions/heimerdinger/) and [Patch 26.11 notes](https://www.leagueoflegends.com/en-us/news/game-updates/league-of-legends-patch-26-11-notes/)
+- Blizzard's Torbjörn page presents a small, legible loop of deployment, direct maintenance and a temporary turret overclock. The transferable lesson is that a construct kit benefits when the player has an active relationship with the machine; Marshal uses command fire, repositioning, transfers and sacrificial Overclock explosions rather than copying repair-hammer or molten-area mechanics. [Torbjörn hero page](https://overwatch.blizzard.com/en-us/heroes/torbjorn/)
 
 The owner's BTD6 comparison is the design prompt for shared local information. This document does not claim an independently verified current BTD6 rule or import its tower, targeting or upgrade values.
 
@@ -186,27 +207,30 @@ The owner's BTD6 comparison is the design prompt for shared local information. T
 
 Do not implement the table all at once. The minimum useful experiment is:
 
-1. One stationary Needle Relay with visible link and hard firing ranges.
-2. Shared target acquisition with a short memory window and strict local firing check.
-3. Q firing from player and relay toward the mouse, including cursor-beyond-range behavior.
-4. Press 1 again to swap, with invalid-destination feedback and no lifetime refresh.
-5. Thirty-second expiry with a clear warning.
+1. One stationary Needle Relay with visible X and 3X range states.
+2. Shared target acquisition through the player's attack range, with a short memory window and strict 3X firing check.
+3. A player basic causing the Needle Relay's separate armor-piercing command shot without resetting autonomous fire.
+4. Q firing from player and relay toward the mouse and exploding at roughly 3X.
+5. First key press plus left-click repositioning versus a second key press that transfers control, with clear invalid-destination feedback.
+6. Thirty-second expiry with a clear warning.
 
-Test isolated and connected states, targets at every range boundary, walls, detached camera, normal/reduced effects, expiry during a cast, swap during a telegraph and fixed-seed projectile counts. After mechanical verification, ask the owner only:
+Test local-X versus shared-3X states, targets at every range boundary, walls, detached camera, normal/reduced effects, expiry during a cast, transfer during a telegraph and fixed-seed projectile counts. After mechanical verification, ask the owner only:
 
-- Did one Q feel like a coordinated volley rather than duplicated clutter?
+- Did Command Fire and Q feel like two distinct coordinated attacks rather than duplicated clutter?
 - Could you predict when the relay would fire?
 - Did placing and swapping the relay create a decision worth making?
 - Did 30 seconds feel like useful territory, a maintenance chore or too permanent?
 
-Only then add a second relay, Focus/Coverage order and crossfire. E, W and R should wait until the basic network is fun.
+Only then add a second relay, EMP and the first E line. The third relay, Battle Order and Overclock should wait until the basic network is fun.
 
 ## Open decisions for owner review
 
-- Keep **Relay Marshal** as the class name?
-- Are Needle/Pulse/Aegis the right three summon roles, or should every relay be mechanically identical so only position matters?
-- Should Q missiles simply fly through the mouse direction, or explode at the mouse point when that point is locally in range?
-- Should summons be destructible, merely timed, or vary by type? The proposal assumes destructible plus timed.
-- Should natural expiry cause any damage, or should only the R sacrifice detonate?
-- Does Focus/Coverage deserve slot 4, or would a fourth summon be more fun despite the added complexity?
-- Should a relay outside the player's connected component continue firing autonomously, or fully power down until reconnected? The proposal keeps weak local behavior so one placement error is not total loss.
+- Approve **Vanguard** as the default kit's name, or keep searching?
+- Does Relay Network regeneration stack per relay, apply only once or require standing within X?
+- Should Q missiles also explode on the first enemy/terrain collision, or only at maximum distance?
+- Is Arc Relay's third projectile better as chaining damage, a slow or another support effect?
+- Are summons destructible as well as timed? The current owner note confirms the lifetime but does not settle health.
+- Does normal repositioning preserve or refresh the 30-second lifetime?
+- During a normal software transfer, which health value and cooldowns follow the player's control software versus the physical chassis?
+- Does Focus/Coverage still deserve slot 4 after Command Fire gives the player direct focus control?
+- What happens when Overclock ends without any switch: relays simply return to normal, or fire one final missile volley?
