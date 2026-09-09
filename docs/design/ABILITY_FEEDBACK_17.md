@@ -88,6 +88,8 @@ The owner likes the current D direction. Preserve it as the movement-speed tool 
 - The hold state should be immediately legible and should end responsively when D is released.
 - Preserve the successful current feel rather than adding another attack, collision payoff or complicated combo.
 - Keep D distinct from F: D improves movement over time, while F is an instantaneous discontinuous relocation.
+- Give the active speed state a visible afterimage effect. It should communicate direction and continued movement without implying a damaging trail or a second body.
+- Give D its own movement-speed sound treatment, with a clear start, sustained state and/or end as appropriate to the final hold implementation.
 - Confirm the final duration, cooldown, early-release behavior and relationship between the held speed state and current intangibility before implementation; this note does not supply new balance numbers.
 
 ### F — Phase hop as a full blink
@@ -113,6 +115,8 @@ The exact input-window boundary, eligible ability list and aim rule need an expl
 - When the endpoint has not passed the halfway point, place the player at the closest valid position on the near side rather than carrying them through.
 - “Valid position” must include the player's full body clearance, arena bounds and non-overlap with other blocking terrain, not merely a free point for the player's center.
 
+Give F a teleport smoke-poof or similarly abrupt departure/arrival effect so it reads as a blink rather than very fast travel. F also needs its own distinctive teleport sound. The effect must not draw a continuous trail between endpoints because no path is traversed.
+
 Concrete owner example: if the player begins at the near edge of a wall whose thickness along the blink ray is 1.9 times F's normal range, a maximum-range blink ends just past the midpoint. The player should therefore land immediately outside the far edge of that wall, even though the corrected destination is farther than the normal range.
 
 The terrain rule should operate on the connected obstruction crossed by the blink, not become an unlimited search through several adjacent walls. Define a safe failure or near-side fallback when there is no legal far-side landing. This is especially important if the thicker terrain and corridor direction in [`ENVIRONMENT_FEEDBACK_17.md`](ENVIRONMENT_FEEDBACK_17.md) is implemented.
@@ -127,8 +131,74 @@ The terrain rule should operate on the connected obstruction crossed by the blin
 - Corners, diagonal walls, concave shapes, touching obstacles, arena borders and an unavailable far-side destination resolve consistently.
 - No transient movement along the blink path triggers body contact, pickups, hazards or on-move collision effects unless a later design explicitly opts them in.
 - Visual and audio feedback communicates departure and arrival without drawing a false travel path.
+- Inspect the D afterimage and F poof at actual combat scale in normal and reduced-effects modes. Reduced effects may simplify secondary particles but must retain movement state and blink endpoints.
 
 This section records desired behavior only. Current Phase hop range, charge count, cooldown and protection values are not approved or replaced by this note.
+
+## Current owner proposal for default 1–4 modules
+
+The latest owner direction replaces the earlier idea of an initial module pool built around one summon plus four assistant-selected powered toggles. The current proposed default mapping is:
+
+| Key | Default concept | Primary purpose |
+| --- | --- | --- |
+| 1 | Orbiting tools | Player-centered positional offense with two orbit modes |
+| 2 | Aggressive summon | Sustained damage, local AoE and limited aggro diversion |
+| 3 | Healing totem | Stored recovery with overflow conversion |
+| 4 | Paired zap robots | Two-point line damage and active redeployment |
+
+These are design notes, not final names, numbers or implemented assignments.
+
+### 1 — orbiting tools
+
+- Start with tools orbiting close to the player at high speed.
+- Toggling changes them to a wider, slower orbit.
+- The close/fast and far/slow states should create a positional choice rather than being cosmetic variants.
+- This concept should build from Scrap orbit, but its contact damage, target rules, energy cost and toggle cadence still need design.
+- Show the active radius and mode through the orbit itself; avoid a persistent large range overlay during ordinary play.
+
+### 2 — aggressive summon
+
+- Deploy a robot or construct that attacks nearby enemies with a weak machine gun.
+- It also pulses for low local area damage.
+- Enemies may target and destroy it.
+- Give it enough durability to survive briefly and make placement meaningful rather than disappearing immediately.
+- It draws enemy aggression within a smaller range than the player's normal aggro range. The intent is useful local distraction, not a full-arena taunt.
+- Its gun, pulse, health state and aggro draw need separate readable feedback.
+
+This combines parts of Line sentry and Pulse anchor into a new default concept. Whether it replaces those entries, packages them, or leaves them stashed is an implementation decision for a later pass.
+
+### 3 — healing totem
+
+- Deploy a non-aggressive healing structure.
+- It stores healing energy while the player is away, up to a cap. “Away” is the current interpretation of the owner's wording because the stored value resolves when the player returns; confirm this before implementation.
+- When the player returns to its activation area, spend the stored value to restore missing hull.
+- Convert healing beyond full hull into energy.
+- If that conversion would exceed maximum energy, convert the remaining overflow into a small damaging shock wave.
+
+The conversion order should remain explicit: missing hull first, then missing energy, then a small shock wave. Caps and conversion rates are unresolved. Prevent feedback loops in which the shock wave, pickups or another totem recursively generate more stored healing.
+
+This is a rework direction for the Repair anchor concept, replacing a simple continuous healing aura with a leave-and-return rhythm.
+
+### 4 — paired zap robots
+
+- Deploy the first robot, then place its partner within four seconds.
+- Once paired, they zap enemies in the space or line between them.
+- Their main decision is the angle, separation and timing of the two placements.
+- Clearly show the first robot's four-second pairing window, the valid second-placement area and the damaging connection.
+- Define what happens if the second robot is not placed in time without spending an invisible or unusable deployment.
+
+This resembles Crosswire's current two-endpoint structure but changes the fantasy to a persistent robot pair. Decide later whether it replaces Crosswire, becomes its module version or shares only the underlying placement code.
+
+### Targeting, expiry and active redeployment
+
+- The aggressive slot-2 summon is the aggro-drawing, targetable and killable exception.
+- Deployables that do not draw aggro should not be targetable or killable. Under the current mapping, this clearly applies to the slot-3 healing totem and slot-4 robot pair; orbiting tools remain attached to the player rather than becoming enemy targets.
+- Non-aggro deployables expire after a finite lifetime.
+- If one expires naturally, the player waits 10 additional seconds before deploying it again.
+- If the player redeploys it before expiration, move or replace it and reset its lifetime timer. This lets active management maintain the effect and encourages repositioning.
+- A redeploy must be visibly different from placing an additional copy. Old collision/effects should end cleanly, and summon-capacity accounting must not leak an extra entity.
+
+Still unresolved: lifetimes, placement range, energy costs, the aggressive summon's death cooldown, whether redeployment itself has a short input cooldown, what happens to stored healing on a moved totem, and whether both slot-4 robots move together or are placed again as a new pair.
 
 ## Proposed focused roster
 
@@ -136,8 +206,8 @@ Keep every existing ability in the project for now; do not delete the wider cata
 
 - Use the abilities reviewed in this document as the initial active-design set, subject to their individual keep, replace or consolidate notes.
 - For movement, initially retain only the two current defaults: Ghost drive and Phase hop.
-- Initially surface one default summon. The owner did not name one; the later research document recommends Pulse anchor as an assistant proposal pending owner review and playtesting.
-- The later research document recommends Coolant trail, Arc coil, Auto gun and Life converter as the four strongest initial powered toggles. This is an assistant recommendation, not a recorded owner verdict.
+- Use the latest owner-proposed default 1–4 mapping above: orbiting tools, aggressive summon, healing totem and paired zap robots.
+- Preserve the earlier research recommendation—Pulse anchor plus Coolant trail, Arc coil, Auto gun and Life converter—as historical design analysis, not the current default-loadout direction. Its principles may still help refine or offer later alternatives.
 - Use focused Practice tests to judge feel and purpose after the retained abilities have been refined.
 
 See [`ABILITY_TAXONOMY_RESEARCH_17.md`](ABILITY_TAXONOMY_RESEARCH_17.md) for the reasoning behind those recommendations and the audit of abilities 12–49.
