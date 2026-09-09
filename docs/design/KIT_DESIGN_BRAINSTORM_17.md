@@ -1,12 +1,12 @@
 # Static-kit design brainstorm
 
-Status: **owner direction plus assistant proposals for later review; no implementation is authorized merely because an idea appears here.** Vanguard is locked as the default kit and Marshal is the current summon design. The combo concept is parked. Racer is the assistant's proposed third-class direction and remains unapproved.
+Status: **owner direction plus assistant proposals for later review; no implementation is authorized merely because an idea appears here.** Vanguard is locked as the default kit and Marshal is the current summon design. The combo concept is parked. The owner approves deeper Racer exploration, but its final kit remains experimental and unlocked.
 
 Date: 9 September 2026.
 
 **Later owner focus:** park the Circuit Weaver/combo proposal without deleting it. It is not ready for approval or implementation. Focus current kit design on the summon character, now named **Marshal** and refined in [`RELAY_MARSHAL_DESIGN_17.md`](RELAY_MARSHAL_DESIGN_17.md). That focused document supersedes the initial Relay Architect sketch below.
 
-**Latest owner focus:** approve **Vanguard** as the default name, move paired zap geometry exclusively to Marshal, and replace Vanguard slot 4 with a short cooldown/energy power totem. Explore only one additional class for now. The assistant recommends simplifying the earlier speedster into **Racer**, prioritizing movement feel over a dense identity system.
+**Latest owner focus:** approve **Vanguard** as the default name, move paired zap geometry exclusively to Marshal, and replace Vanguard slot 4 with a short cooldown/energy power totem. Explore only one additional class for now. The owner accepts deeper experimental work on **Racer**, with movement feel proven before a dense identity system. [`RACER_EXPERIMENT_17.md`](RACER_EXPERIMENT_17.md) supersedes this document's smaller sketch where details differ.
 
 ## Provenance
 
@@ -156,7 +156,7 @@ This delivers the owner's “any two abilities matter together” feeling withou
 
 ## Current third-class recommendation — Racer
 
-Status: **assistant proposal for owner discussion, not locked.** This is the one additional class worth exploring before expanding the roster again.
+Status: **owner-approved experimental direction, not a locked final kit.** This is the one additional class worth exploring before expanding the roster again. Use the deeper staged brief in [`RACER_EXPERIMENT_17.md`](RACER_EXPERIMENT_17.md).
 
 ### Gameplay element to explore
 

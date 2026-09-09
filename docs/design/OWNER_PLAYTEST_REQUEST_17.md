@@ -11,6 +11,9 @@ This document consolidates the owner's 9 September 2026 directions. It is a work
 - [`KIT_DESIGN_BRAINSTORM_17.md`](KIT_DESIGN_BRAINSTORM_17.md)
 - [`RELAY_MARSHAL_DESIGN_17.md`](RELAY_MARSHAL_DESIGN_17.md)
 - [`PRACTICE_SANDBOX_RESEARCH_17.md`](PRACTICE_SANDBOX_RESEARCH_17.md)
+- [`RACER_EXPERIMENT_17.md`](RACER_EXPERIMENT_17.md)
+- [`ROBOT_AI_MODE_17.md`](ROBOT_AI_MODE_17.md)
+- [`TERMINOLOGY_PRESENTATION_17.md`](TERMINOLOGY_PRESENTATION_17.md)
 - [`QUALITY_BAR.md`](QUALITY_BAR.md)
 - [`QA_17.md`](QA_17.md)
 
@@ -51,7 +54,11 @@ The owner next requested three highly synergistic static-kit directions: a summo
 
 Later owner direction parks the combo kit for now and names the summon-network character **Marshal**. Each relay detects autonomously within X and may fire as far as roughly 3X when the target is inside another relay's X circle or the player's attack range. Player basics command a substantial extra relay attack on a separate clock; Q launches maximum-range exploding missiles from all bodies; W creates a medium EMP at every relay; E pulses damage along every relay pair; and Overclock massively increases fire rate/missiles while turning body transfers into relay-sacrifice explosions with a 10-second redeploy wait. Slots 1–3 deploy distinct-projectile robot bodies and use press → left-click to reposition or a second key press to transfer control. Full wording, unresolved cases and source-backed design reasoning are in [`RELAY_MARSHAL_DESIGN_17.md`](RELAY_MARSHAL_DESIGN_17.md).
 
-For the third and final current class concept, the assistant recommends returning to the owner's speedster idea under the simple working name **Racer**. Its fun-first gameplay axis is alternating a short controllable Overdrive with a capable ranged recovery state, using near-pass damage and route-shaped effects rather than a large combo dictionary. This remains a brainstorm proposal in [`KIT_DESIGN_BRAINSTORM_17.md`](KIT_DESIGN_BRAINSTORM_17.md), not a locked kit.
+Owner durability rule: any relay/construct that intentionally attracts enemy aggro should be targetable, destructible and tanky enough to survive briefly. A construct that does not attract aggro should be untargetable and indestructible, leaving through its timer, repositioning, transfer or explicit sacrifice instead. Which Marshal relay types draw aggro remains open.
+
+Use the player-facing vocabulary and class art/audio briefs in [`TERMINOLOGY_PRESENTATION_17.md`](TERMINOLOGY_PRESENTATION_17.md). Preserve older code identifiers rather than performing a broad cosmetic rename.
+
+For the third and final current class concept, the owner approves deeper exploration of the experimental **Racer** direction without locking a final kit. Its fun-first gameplay axis is alternating a short controllable Overdrive with a capable ranged Cruise state, using near-pass damage and route-shaped effects rather than a large combo dictionary. The staged movement-first brief and explicit stop gates are in [`RACER_EXPERIMENT_17.md`](RACER_EXPERIMENT_17.md).
 
 ## Requested progression flow
 
@@ -127,14 +134,16 @@ Define touch damage as a separate source type with a repeat-hit grace policy. Pr
 - Store healing while the player is away, up to a cap; discharge when the player returns.
 - Apply value in order: missing hull → missing energy → small damaging shock wave.
 - Cap every conversion and block recursive generation.
+- Moving or replacing the totem clears all stored healing and starts accumulation again from zero; warn clearly before confirming the move.
 
 ### 4 — cooldown/energy totem
 
 - Replace the paired zap robots; relay-pair damage now belongs exclusively to Marshal.
 - Deploy a short-lived power totem, initially suggested at approximately five seconds of uptime and a 15-second cooldown.
 - While the benefit applies, double cooldown recovery so affected abilities recharge in roughly half their normal time and give the player unlimited energy.
+- Both benefits require the player to stand inside the visible aura.
 - The totem must not accelerate its own cooldown or recursively extend its own uptime.
-- Decide whether the benefit requires standing inside a visible aura, when the 15-second cooldown starts, whether R/D/F are affected, and how stored charges recover before tuning uptime.
+- Begin its approximately 15-second cooldown after the totem expires. Whether R/D/F are affected and how stored charges recover remain open before tuning uptime.
 
 ### Non-aggro deployment rule
 
@@ -142,7 +151,7 @@ Define touch damage as a separate source type with a repeat-hit grace policy. Pr
 - They expire after a finite lifetime.
 - Natural expiry normally starts a 10-second redeploy wait; the slot-4 power totem's newer approximately 15-second cooldown proposal supersedes that generic timing for its own ability.
 - Manual redeployment before expiry replaces/moves the construct and resets its lifetime, encouraging active repositioning.
-- Specify whether stored healing survives a move and whether repositioning the power totem refreshes its duration.
+- Stored healing never survives a move. Specify whether repositioning the power totem refreshes its duration.
 
 ## Requested ability directions
 
@@ -174,6 +183,8 @@ Terrain must look and collide as substantial volume, retain clear starts and abi
 
 The owner wants Practice cleaned up into a faster combat laboratory. Preserve its strict progression/checkpoint isolation, but research a live left-side interface for selecting complete loadouts, changing focused player stats, choosing enemies and placing them with the mouse. Use one simple smallish test arena with a few substantial large and medium rocks rather than another campaign map.
 
+The normal Practice build choice is now the **class**, which loads its fixed kit. Old, stashed and unreleased content remains confined to a labeled Practice-only testing area until the owner explicitly releases it; merely existing in Practice never adds it to normal class selection, progression or rewards.
+
 The source comparison, proposed four-section dock, mouse-placement grammar, greybox ingredients, honest modified-test labels, metrics and phased acceptance plan are in [`PRACTICE_SANDBOX_RESEARCH_17.md`](PRACTICE_SANDBOX_RESEARCH_17.md). The leading recommendation is a collapsible live dock with Build, Player, Enemies and Session sections; Point/Line/Ring/Cluster placement; a few named test scenarios; and a collapsed per-source measurement strip. Do not expose every internal variable on the main surface, implement a campaign editor or let Practice write rewards/loadouts back to the real profile.
 
 This is research and future implementation direction only. `QA_17.md` remains the current Practice behavior until the redesign is implemented and verified.
@@ -202,24 +213,34 @@ The owner proposes researching a low-input **Robot AI mode**. The motivation is 
 
 The split is intended to make low-input power a legitimate build axis without making it universally optimal.
 
+### Selected automation models
+
+The owner now selects two complementary systems and rejects background auto-repeat as the current focus:
+
+- **Visible Robot AI:** run the real simulation on screen at approximately 75% strength with intentionally simplistic movement and ability use. It should visibly play worse than a person and remain for farming already-cleared content, not pushing first clears.
+- **Offline salvage:** accrue a very slow deterministic reward while the game is closed, capped at 48 hours. A full two-day claim should be worth only about three runs of the last cleared level—approximately one run-equivalent per 16 hours. The detailed note recommends using only manual clears as the reference so automation cannot bootstrap itself; that restriction still needs owner confirmation.
+
+Offline claims may eventually include ordinary resources and loot-box progress for equipment, decorative loot, charms with bonus effects and money for boxes/consumables. These reward systems must be introduced only as they become real and transaction-safe. The detailed interpretation, risks and remaining policy questions are in [`ROBOT_AI_MODE_17.md`](ROBOT_AI_MODE_17.md).
+
+The owner also parks a future `C` consumable concept: simple hull-repair and energy-regeneration potions are possible, but consumable inventory, economics and exact tap/menu behavior should be designed later rather than added to the first automation pass.
+
 ### Research required before implementation
 
-Do not treat “AI mode,” “auto-repeat” and “offline progress” as synonyms. The next agent should compare at least:
+Do not treat the selected visible AI and offline salvage as the same simulation. Background auto-repeat is not selected for the current direction:
 
 1. **Visible autoplay:** the actual simulation runs and the owner can watch or take control.
-2. **Background/auto-repeat:** completed runs repeat with limited interaction while the application remains active.
-3. **Offline simulation:** elapsed real time converts into rewards without running combat.
+2. **Offline salvage:** elapsed real time converts into capped rewards without running combat.
 
 These models have different engineering, balance, energy-use, save-integrity and player-expectation consequences. Research should answer:
 
 - What proof unlocks automation for a stage: one manual clear, several clears, a power threshold, an ascension gap or a combination?
 - Must a player manually clear each stage/ascension before AI farming, and how far below the highest clear must AI remain?
 - Does AI use the live combat simulation or a deterministic reward model?
-- What reward percentage, drop table and daily/session cap preserve the value of active play without making the feature feel pointless?
+- How should the approximate three-runs-per-48-hours target divide across currency, equipment boxes, decorative boxes and later charms?
 - May AI earn permanent equipment, credits and unlocks, or only already-farmable resources?
 - Can the player watch, interrupt and take over without duplicating rewards or corrupting a checkpoint?
 - How are death, timeout, disconnected sessions, app closure and save failures resolved transactionally?
-- How deliberately weak should AI targeting, dodging, ability timing and loadout selection be?
+- Does 75% strength mean outgoing damage/healing only, or another clearly disclosed modifier, in addition to deliberately simple movement and casting?
 - Will players feel encouraged to design reliable farming builds, or merely obligated to leave the game running?
 - Does drop-rate equipment become mandatory for unattended progression and distort the active game economy?
 - How does this interact with the current rule that automated tests and fixtures never grant permanent loot?
@@ -237,7 +258,7 @@ These are conservative research hypotheses, not settled owner rules:
 - Prefer finite queued runs or a capped claim window over an uncapped always-on economy until data supports more.
 - Keep the AI intentionally understandable rather than secretly scaling its competence to guarantee success.
 
-The next research artifact should review idle/AFK games, auto-battlers and auto-repeat systems in adjacent action RPGs. It should distinguish healthy convenience and return motivation from compulsory uptime, inflation, battery/compute waste and progression that bypasses play.
+The next research/implementation pass should follow [`ROBOT_AI_MODE_17.md`](ROBOT_AI_MODE_17.md): prototype visible AI without real rewards first, then validate transactional offline accrual with one currency before adding boxes or future item categories.
 
 ## Assistant research findings: Swarm
 
@@ -267,7 +288,8 @@ The research explicitly advises against importing Swarm's champion classes, exac
 | 5 | Three terrain greyboxes and one-landmark variants | Finished environment art |
 | 6 | Rank milestones, wave grammar and selected synergies | Broad catalog expansion |
 | 7 | Focused owner playtest, tune, then decide what returns | Deletion of old content |
-| 8 | Robot AI research and economy/gating proposal only | Autoplay implementation before owner selects a model |
+| 8 | Approve Robot AI eligibility/economy policy, then prototype the selected visible AI in isolated Practice with no rewards | Permanent rewards or offline boxes before takeover/failure transactions are proven |
+| 9 | Validate capped offline accrual with one currency in disposable fixtures, then one existing box track | Charms, decorative loot and consumables before their systems are separately designed |
 
 Commit coherent verified milestones. Preserve saves, user music, migration fixtures and old skill data. Practice and automated tests must never award permanent loot.
 
@@ -297,7 +319,7 @@ Before the combat sessions, ask the owner to load the Vanguard rank-5 preset, pl
 ### Session C — modules
 
 - Test each slot alone, then all four together.
-- Ask the player to explain both orbit modes, why the summon drew aggro, when the totem pays out and what the zap line damages.
+- Ask the player to explain both orbit modes, why the summon drew aggro, when the healing totem pays out and when standing in the cooldown/energy aura is worthwhile.
 - Allow natural expiry once, then proactive redeployment.
 - Observe whether active upkeep is engaging or becomes four maintenance timers.
 
@@ -317,7 +339,7 @@ Before the combat sessions, ask the owner to load the Vanguard rank-5 preset, pl
 
 ### Conditional Session F — Robot AI
 
-Run only after the separate research resolves the automation model, unlock gate and reward policy.
+Run only after the separate research resolves the remaining unlock gate, meaning of 75% strength and reward policy. The visible-autoplay model itself is selected.
 
 - Compare the same manually cleared lower-stage content with manual play and the intentionally mediocre AI.
 - Test a low-input farming loadout and a level-pushing loadout under AI; the farming build should be more reliable without becoming the best manual push build.
@@ -325,6 +347,15 @@ Run only after the separate research resolves the automation model, unlock gate 
 - Interrupt, take over, close/reopen and fail the run while checking that rewards commit exactly once.
 - Record success rate, run time, rewards per active hour, rewards per unattended hour and failure causes.
 - Ask whether the system feels like optional convenience and accumulated progress or compulsory upkeep.
+
+### Conditional Session G — offline salvage
+
+Run only in disposable save fixtures until claims are transactional.
+
+- Check 0, 8, 16, 47, 48 and more-than-48 elapsed hours against the approximate one-run-per-16-hours target.
+- Roll back the clock, claim twice, interrupt a write and load a corrupt record; no case may duplicate rewards or erase a recoverable original.
+- Confirm that AI clears cannot silently improve the offline reference unless the owner later approves that rule.
+- Begin with one currency, then one existing box track. Do not use unfinished charms, decorative loot or consumables as implementation dependencies.
 
 ## Evidence to return to the owner
 

@@ -6,7 +6,7 @@ Status: **owner notes for future research, design and playtesting; not implement
 
 **Later owner direction:** the first/default kit is now locked and kits should remain static for the next design pass. Body slam/Piston thrust is therefore the default E for that locked composition. Cross-kit ability swapping, stored alternatives and replacement choices are deferred rather than deleted. See [`KIT_DESIGN_BRAINSTORM_17.md`](KIT_DESIGN_BRAINSTORM_17.md) and the consolidated [`OWNER_PLAYTEST_REQUEST_17.md`](OWNER_PLAYTEST_REQUEST_17.md).
 
-**Latest owner direction:** the locked default kit is named **Vanguard**. Its slot 4 paired zap robots are removed and reserved for Marshal's relay-pair interaction. Vanguard slot 4 becomes a short-lived cooldown/energy totem: approximately five seconds of doubled cooldown recovery and unlimited energy on an approximately 15-second cooldown, with exact aura and cooldown timing still unresolved.
+**Latest owner direction:** the locked default kit is named **Vanguard**. Its slot 4 paired zap robots are removed and reserved for Marshal's relay-pair interaction. Vanguard slot 4 becomes a short-lived cooldown/energy totem: approximately five seconds of doubled cooldown recovery and unlimited energy while the player stands inside its aura. Its approximately 15-second cooldown begins after expiry. Moving the slot-3 healing totem resets its stored healing to zero.
 
 ## Research request: classify abilities by function
 
@@ -259,9 +259,11 @@ This is a rework direction for the Repair anchor concept, replacing a simple con
 - Remove the paired zap robots from Vanguard. Marshal exclusively owns relay-pair and triangle shock geometry.
 - Deploy a temporary power totem. Initial owner targets are approximately five seconds of uptime and a 15-second cooldown.
 - While active for the player, cooldowns recover at double speed and energy is effectively unlimited.
+- The player must stand inside the visible aura to receive either benefit.
 - The totem must not accelerate its own cooldown. Otherwise its benefit could recursively approach permanent uptime.
+- Its approximately 15-second cooldown begins after the totem expires, not on placement.
 - Make the five-second window unmistakable through a visible aura, countdown and audio start/end cues.
-- Decide whether the player must remain within the aura, whether the cooldown begins on placement or expiry, whether R/D/F are affected, and how charges recover before implementation.
+- Whether R/D/F are affected and how stored charges recover remain open before implementation.
 
 The ability is intended to create a brief high-output sequence for Vanguard's strong standalone actives. It should feel like permission to unload the kit, not a passive maintenance buff.
 
@@ -270,11 +272,12 @@ The ability is intended to create a brief high-output sequence for Vanguard's st
 - The aggressive slot-2 summon is the aggro-drawing, targetable and killable exception.
 - Deployables that do not draw aggro should not be targetable or killable. Under the current mapping, this clearly applies to the slot-3 healing totem and slot-4 cooldown/energy totem; orbiting tools remain attached to the player rather than becoming enemy targets.
 - Non-aggro deployables expire after a finite lifetime.
-- If one expires naturally, the generic earlier rule was a 10-second redeploy wait. The newer slot-4 power-totem proposal instead uses its own approximately 15-second cooldown; its cooldown start remains unresolved.
+- If one expires naturally, the generic earlier rule was a 10-second redeploy wait. The slot-4 power totem instead begins its own approximately 15-second cooldown after expiry.
 - If the player redeploys it before expiration, move or replace it and reset its lifetime timer. This lets active management maintain the effect and encourages repositioning.
+- Moving/redeploying the healing totem discards all stored healing and restarts it from zero. The reset needs clear feedback before the placement is confirmed.
 - A redeploy must be visibly different from placing an additional copy. Old collision/effects should end cleanly, and summon-capacity accounting must not leak an extra entity.
 
-Still unresolved: lifetimes, placement range, energy costs, the aggressive summon's death cooldown, whether redeployment itself has a short input cooldown, what happens to stored healing on a moved totem, and whether moving the slot-4 power totem refreshes or preserves its five-second window.
+Still unresolved: lifetimes, placement range, energy costs, the aggressive summon's death cooldown, whether redeployment itself has a short input cooldown, and whether moving the slot-4 power totem refreshes or preserves its five-second window.
 
 ## Proposed focused roster
 

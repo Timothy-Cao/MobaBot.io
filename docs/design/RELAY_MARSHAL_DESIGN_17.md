@@ -159,6 +159,7 @@ The decision is deliberately sharp: retain the huge attack-speed network or sacr
 - Relay health, the player's health and cooldown ownership during a software transfer require an explicit rule before code. Avoid a swap that becomes a hidden full heal.
 - A relay that naturally reaches 30 seconds gives a clear shutdown tell. Natural expiry does not inherit Overclock's massive explosion unless the owner later requests it.
 - Relay death, expiry, repositioning and Overclock sacrifice must be distinguishable in sound, silhouette and reward logic.
+- Owner direction now separates durability by aggro role: a relay that intentionally attracts enemy aggro should be targetable, destructible and visibly tanky enough to hold attention briefly. A relay that does not attract aggro should not be targetable or destructible; it leaves only through timeout, repositioning, transfer rules or an explicit sacrifice.
 
 ## Intended skill curve
 
@@ -228,7 +229,7 @@ Only then add a second relay, EMP and the first E line. The third relay, Battle 
 - Does Relay Network regeneration stack per relay, apply only once or require standing within X?
 - Should Q missiles also explode on the first enemy/terrain collision, or only at maximum distance?
 - Is Arc Relay's third projectile better as chaining damage, a slow or another support effect?
-- Are summons destructible as well as timed? The current owner note confirms the lifetime but does not settle health.
+- Which of Needle, Blast and Arc actually attract aggro? Destructibility follows that role: aggro-drawing relays are tanky/destructible; non-aggro relays are untargetable and time out.
 - Does normal repositioning preserve or refresh the 30-second lifetime?
 - During a normal software transfer, which health value and cooldowns follow the player's control software versus the physical chassis?
 - Does Focus/Coverage still deserve slot 4 after Command Fire gives the player direct focus control?

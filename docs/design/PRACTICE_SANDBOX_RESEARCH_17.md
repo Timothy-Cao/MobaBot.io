@@ -11,6 +11,8 @@ The Practice tool needs a cleanup pass focused on quickly testing builds and com
 - a simple, fairly small test map with a few large and medium rocks;
 - research into useful ideas from League of Legends' Practice Tool, Bloons TD 6 Sandbox and other focused testing modes;
 - a tool that makes many comparisons easy without becoming a second progression mode.
+- class selection as the normal build choice; players do not assemble arbitrary mixed kits in the primary Practice flow;
+- old, legacy and unreleased tools remain confined to Practice until the owner explicitly releases them.
 
 This is a request to research and record the best direction for the home development agent. It is not authorization to replace the current Practice implementation in this notes session.
 
@@ -80,7 +82,7 @@ The dock header should always show **Pause/Resume**, **Reset**, **Clear** and a 
 
 ### Full-loadout handling
 
-The first useful workflow is choosing one of the static-kit prototypes—Vanguard first, then Marshal or later kits as they are implemented—and seeing the full row immediately. A tester should be able to:
+The first useful workflow is choosing one of the static-kit prototypes—Vanguard first, then Marshal or later kits as they are implemented—and seeing the full row immediately. **The normal user choice is the class, not each individual ability.** A tester should be able to:
 
 1. choose the kit or a saved Practice-only preset;
 2. set all skills to rank 0, 5 or 10 with one action;
@@ -88,7 +90,7 @@ The first useful workflow is choosing one of the static-kit prototypes—Vanguar
 4. choose a small equipment/stat preset such as Starter, Mid-run or End-run;
 5. apply once, then begin a clean measurement window.
 
-Avoid unrestricted skill mixing in the first redesign. The current owner direction is to prove synergistic static kits before revisiting swaps. If arbitrary fitting remains for regression, place it under **Advanced / legacy skill pool**, not in the primary flow.
+Do not offer unrestricted skill mixing in the primary flow. Old, stashed and unreleased tools may exist only in a clearly labeled **Practice prototypes / legacy** area until the owner explicitly releases them; they never enter ordinary class selection, progression or loot by existing here. If arbitrary fitting remains necessary for regression, keep it inside that testing-only area.
 
 Practice presets, if added, belong in a separate Practice-only file and must never alter `mobabot_forge.json`, collection data, checkpoint state, equipment ownership or unlocks. **Copy current campaign build into Practice** can be one-way; Practice can never write the result back.
 
@@ -157,7 +159,7 @@ Do not infer fun from the metrics. Damage and uptime help diagnose balance; anim
 - Test-only cheats never become campaign settings.
 - Show a persistent modified-state label when measurements are affected by invulnerability, frozen AI, free energy, instant recharge, custom time scale or custom stat multipliers.
 - Keep simulation and presentation separate: placement previews do not create enemies, rendered ranges match collision geometry and a detached camera never changes spawn coordinates.
-- Do not unlock content or reveal hidden campaign rewards merely by opening Practice; decide separately whether test access includes the entire development roster or only owner-approved prototypes.
+- Old, legacy and unreleased abilities may be exercised in Practice, but remain clearly labeled and cannot enter the released class roster, campaign rewards or unlocks until the owner explicitly releases them.
 
 ## Recommended implementation order
 
@@ -186,11 +188,10 @@ Record time to complete each task, mistaken clicks, clipped controls, whether pl
 
 ## Open decisions for the owner
 
-- Should Practice expose every not-yet-unlocked prototype, or only the current approved testing roster?
 - Is a single rank preset plus per-slot overrides enough, or is direct rank 1–10 entry useful?
 - Should equipment be represented by a few power presets first or a full eight-slot editor?
 - Should opening the dock pause by default, or remember the previous pause state?
 - Are Practice-only named presets worth adding before the core placement workflow is proven?
 - Which metrics are actually useful during feel testing, and which would distract from animation/readability review?
 
-The recommended defaults are: approved roster only, rank presets plus individual overrides, three equipment presets before a full editor, pause on first open, no named presets in the first pass, and a collapsed metrics strip limited to elapsed time, total damage, DPS and damage by source.
+Owner decision: normal users choose a class, while old/legacy/unreleased content remains Practice-only until explicitly released. The remaining recommended defaults are rank presets plus individual overrides, three equipment presets before a full editor, pause on first open, no named presets in the first pass, and a collapsed metrics strip limited to elapsed time, total damage, DPS and damage by source.
