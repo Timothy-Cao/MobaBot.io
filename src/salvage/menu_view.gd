@@ -14,7 +14,8 @@ static func draw(ui: CanvasLayer) -> void:
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.overlay.add_child(art)
 	var robot:=Control.new(); robot.set_script(HOVER)
-	robot.name="HoverBot"; robot.position=Vector2(565,183); robot.size=Vector2(286,310)
+	robot.name="HoverBot"; robot.position=Vector2(555,75); robot.size=Vector2(286,310)
+	robot.scale=Vector2.ONE*1.15
 	robot.mouse_filter=Control.MOUSE_FILTER_IGNORE; robot.reduced=ui.reduced
 	ui.overlay.add_child(robot)
 	# Native gradient protects text without a visible seam or a boxed illustration.
