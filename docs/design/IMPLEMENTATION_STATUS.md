@@ -1,5 +1,7 @@
 # Workshop Salvager implementation
 
+> **Historical record through v0.9.** For the current v0.17 implementation and handoff, see [QA_17.md](QA_17.md) and the [documentation index](../README.md).
+
 ## Latest — v0.8 demo / motion, shake and visual QA
 
 September 8, 2026. Reproductions, fixes, limitations and handoff: `QA_08.md`.

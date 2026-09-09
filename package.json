@@ -1,0 +1,13 @@
+{
+  "name": "mobabot-io-tools",
+  "private": true,
+  "scripts": {
+    "check:catalog": "node scripts/check_catalog.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
