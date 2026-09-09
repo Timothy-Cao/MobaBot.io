@@ -13,6 +13,12 @@ This document consolidates the owner's 9 September 2026 directions. It is a work
 
 If summaries conflict, the latest dated owner statement in the detailed feedback documents wins. Preserve old implementations as regression/stashed content until replacements are verified; do not delete the wider ability catalog.
 
+## Provenance boundary
+
+The default kit, progression, controls, modules, ability refinements, terrain direction and Robot AI concept below originate from owner feedback. Implementation cautions and unresolved questions organize that direction without claiming owner approval for the answers.
+
+The section titled **Assistant research findings: Swarm** is analytical output, not an owner statement. The implementation sequence and playtest exercises are also assistant-authored scaffolding for carrying out the owner's requests safely.
+
 ## Proposed default kit for testing
 
 | Input/system | Current proposal | Core test question |
@@ -145,7 +151,76 @@ Create greybox alternatives before environment art:
 
 Terrain must look and collide as substantial volume, retain clear starts and ability space, route ordinary enemies without snagging, support bosses, and remain below threats/pickups in visual hierarchy. Preserve the current layout as a regression reference.
 
-Swarm-inspired hypothesis: give each prototype at most one original functional landmark or short optional route objective. Test destination → exposure → payoff without copying Swarm's maps, fountain, cannon or art.
+## Owner research request: Robot AI mode
+
+The owner proposes researching a low-input **Robot AI mode**. The motivation is to let time and earlier progression compound into useful results without making autoplay the strongest way to clear new content.
+
+### Owner concept
+
+- The AI pilots the player's robot with intentionally mediocre ability use and lower effectiveness than a capable human.
+- It farms lower ascensions or easier stages only after the player has become strong enough for that content.
+- It should not push the player's current hardest stage or replace manual mastery of new encounters.
+- The feature creates a reason to maintain two kinds of builds:
+
+| Build goal | Desired strengths |
+| --- | --- |
+| Low-input / farming | Passive power, magnet or pickup reach, drop rate, reliability, survivability and tolerance for mediocre decisions |
+| Level pushing | Maximum potential damage, precise active combos, manual outplay, stage-specific counterplay and higher execution ceiling |
+
+The split is intended to make low-input power a legitimate build axis without making it universally optimal.
+
+### Research required before implementation
+
+Do not treat “AI mode,” “auto-repeat” and “offline progress” as synonyms. The next agent should compare at least:
+
+1. **Visible autoplay:** the actual simulation runs and the owner can watch or take control.
+2. **Background/auto-repeat:** completed runs repeat with limited interaction while the application remains active.
+3. **Offline simulation:** elapsed real time converts into rewards without running combat.
+
+These models have different engineering, balance, energy-use, save-integrity and player-expectation consequences. Research should answer:
+
+- What proof unlocks automation for a stage: one manual clear, several clears, a power threshold, an ascension gap or a combination?
+- Must a player manually clear each stage/ascension before AI farming, and how far below the highest clear must AI remain?
+- Does AI use the live combat simulation or a deterministic reward model?
+- What reward percentage, drop table and daily/session cap preserve the value of active play without making the feature feel pointless?
+- May AI earn permanent equipment, credits and unlocks, or only already-farmable resources?
+- Can the player watch, interrupt and take over without duplicating rewards or corrupting a checkpoint?
+- How are death, timeout, disconnected sessions, app closure and save failures resolved transactionally?
+- How deliberately weak should AI targeting, dodging, ability timing and loadout selection be?
+- Will players feel encouraged to design reliable farming builds, or merely obligated to leave the game running?
+- Does drop-rate equipment become mandatory for unattended progression and distort the active game economy?
+- How does this interact with the current rule that automated tests and fixtures never grant permanent loot?
+
+### Initial guardrails to evaluate
+
+These are conservative research hypotheses, not settled owner rules:
+
+- Require a manual clear before a stage can be automated.
+- Keep AI at least one meaningful difficulty tier below the highest manually proven content.
+- Never let AI claim a first clear, unlock a new stage/ascension or complete a skill-check achievement.
+- Make rewards atomic: validate the result, write once, and roll back any failed transaction.
+- Use a separate saved farming loadout so switching back to the pushing build is effortless.
+- Show expected time, likely reward range, allowed content and why a stage is locked before starting.
+- Prefer finite queued runs or a capped claim window over an uncapped always-on economy until data supports more.
+- Keep the AI intentionally understandable rather than secretly scaling its competence to guarantee success.
+
+The next research artifact should review idle/AFK games, auto-battlers and auto-repeat systems in adjacent action RPGs. It should distinguish healthy convenience and return motivation from compulsory uptime, inflation, battery/compute waste and progression that bypasses play.
+
+## Assistant research findings: Swarm
+
+The following findings come from [`SWARM_DESIGN_RESEARCH_17.md`](SWARM_DESIGN_RESEARCH_17.md). They are not explicit owner thoughts or approved implementation requirements.
+
+- Continuous baseline offense can lower attention demand while manual tools preserve a higher skill ceiling.
+- Map destinations, pickups and short optional objectives give movement a purpose beyond retreating in circles.
+- Rank/evolution moments feel stronger when they transform function and presentation rather than only raising numbers.
+- Wave direction, shape, composition and terrain relationship can provide content variety before adding many enemies.
+- Synergies are strongest when the player can see and plan the setup/payoff relationship.
+- Persistent progression can give failure direction, but must not conceal unfair balance or make starter difficulty depend on grinding.
+- Large enemy/effect counts create clarity and performance costs; bounded spectacle is more relevant to MobaBot than copying Swarm's scale.
+
+One derived terrain hypothesis is to give each greybox at most one original functional landmark or short optional route objective. Test destination → exposure → payoff without copying Swarm's maps, fountain, cannon or art.
+
+The research explicitly advises against importing Swarm's champion classes, exact weapon/passive recipes, modal level-up flow, co-op balance, fifteen-minute pacing, map devices or enemy counts.
 
 ## Implementation sequence
 
@@ -158,6 +233,7 @@ Swarm-inspired hypothesis: give each prototype at most one original functional l
 | 5 | Three terrain greyboxes and one-landmark variants | Finished environment art |
 | 6 | Rank milestones, wave grammar and selected synergies | Broad catalog expansion |
 | 7 | Focused owner playtest, tune, then decide what returns | Deletion of old content |
+| 8 | Robot AI research and economy/gating proposal only | Autoplay implementation before owner selects a model |
 
 Commit coherent verified milestones. Preserve saves, user music, migration fixtures and old skill data. Practice and automated tests must never award permanent loot.
 
@@ -200,6 +276,17 @@ Use the same short encounter with permanent gun only, then gun + hammer/Q/W/E/R.
 - Repeat with one optional landmark and with wave directions that use each entrance/corridor.
 - Record path failures, unavoidable traps, camping exploits, travel downtime and location recall.
 - Ask which geometry created useful decisions and which merely obstructed movement.
+
+### Conditional Session F — Robot AI
+
+Run only after the separate research resolves the automation model, unlock gate and reward policy.
+
+- Compare the same manually cleared lower-stage content with manual play and the intentionally mediocre AI.
+- Test a low-input farming loadout and a level-pushing loadout under AI; the farming build should be more reliable without becoming the best manual push build.
+- Verify the AI cannot enter or first-clear unapproved content.
+- Interrupt, take over, close/reopen and fail the run while checking that rewards commit exactly once.
+- Record success rate, run time, rewards per active hour, rewards per unattended hour and failure causes.
+- Ask whether the system feels like optional convenience and accumulated progress or compulsory upkeep.
 
 ## Evidence to return to the owner
 

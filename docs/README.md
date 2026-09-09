@@ -11,7 +11,7 @@ The current playable version is **0.17 Field Test**. `QA_17.md` supersedes earli
 
 ## Active owner direction
 
-- [Owner implementation and playtest request](design/OWNER_PLAYTEST_REQUEST_17.md) — consolidated pull-and-work handoff covering the proposed default kit, progression, D/F/E behavior, modules, ability refinements, terrain prototypes, implementation order and focused owner test sessions.
+- [Owner implementation and playtest request](design/OWNER_PLAYTEST_REQUEST_17.md) — consolidated pull-and-work handoff covering the proposed default kit, progression, D/F/E behavior, modules, terrain, a future Robot AI/low-input-farming research request, implementation order and focused owner tests. Owner direction and assistant Swarm findings are labeled separately.
 - [Ability direction and owner feedback](design/ABILITY_FEEDBACK_17.md) — current owner notes for fixed slots, non-modal progression, a permanent autonomous gun, default D/F mechanics, the leading body-slam E proposal, and the proposed 1–4 row of orbiting tools plus three summon concepts. These are future design inputs, not current implemented behavior.
 - [Ability taxonomy and roster research](design/ABILITY_TAXONOMY_RESEARCH_17.md) — source-backed multi-axis taxonomy, Q/W/E/R/D/F/module slot proposal, design-purpose audit of abilities 12–49, recommended default summon and four powered toggles, and a focused Practice test plan. Recommendations are hypotheses, not implemented behavior or proven fun.
 - [Environment and terrain owner feedback](design/ENVIRONMENT_FEEDBACK_17.md) — direction away from thin basic walls toward substantial thick forms, clustered pockets, corridors and simple multi-entrance macro-shapes, with reference and greybox questions for a later terrain pass.
