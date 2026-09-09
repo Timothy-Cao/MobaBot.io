@@ -46,7 +46,7 @@ var music_player = preload("res://src/salvage/music_director.gd").new()
 var gear_return := "home"
 
 func _ready() -> void:
-	get_window().title = "MobaBot.io - 0.12 Combat Foundations"
+	get_window().title = "MobaBot.io - 0.13 Minimal UI"
 	get_tree().auto_accept_quit = false
 	add_child(camera)
 	camera.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
@@ -81,6 +81,7 @@ func _ready() -> void:
 	ui.settings_closed.connect(_close_settings)
 	ui.loadout_requested.connect(func() -> void:
 		screen = "loadout"
+		ui.loadout_page = "abilities"
 		ui.show_loadout())
 	ui.loadout_closed.connect(func() -> void:
 		ui.rebind_slot = ""
@@ -231,6 +232,8 @@ func _open_settings() -> void:
 		_close_build()
 	settings_return_screen = screen
 	ui.settings_in_run = screen != "home"
+	ui.settings_page = "options"
+	ui.rebind_slot = ""
 	_clear_held_movement()
 	mouse_moving = false
 	pending_cast_slot = ""
@@ -240,6 +243,8 @@ func _open_settings() -> void:
 func _close_settings() -> void:
 	if screen != "settings":
 		return
+	ui.rebind_slot = ""
+	ui.settings_open = false
 	screen = settings_return_screen
 	match screen:
 		"home": ui.show_home()
@@ -287,6 +292,14 @@ func _close_build() -> void:
 		_: ui.show_running()
 
 func _input(event: InputEvent) -> void:
+	if screen == "build" and ui.overlay.has_node("BuildDetail") and event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		ui.overlay.get_node("BuildDetail/DetailBack").pressed.emit()
+		get_viewport().set_input_as_handled()
+		return
+	if screen == "settings" and not ui.rebind_slot.is_empty() and event is InputEventKey and event.pressed and not event.echo:
+		ui.capture_binding(event.keycode)
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventKey and event.keycode == KEY_SPACE:
 		recenter_held = event.pressed and screen == "running"
 		get_viewport().set_input_as_handled()
@@ -309,7 +322,7 @@ func _input(event: InputEvent) -> void:
 		if event.pressed and screen in ["running", "upgrade", "paused", "result", "stage_reward"]:
 			_open_build()
 			tab_held = true
-			ui.build_page = "mastery" if model.mastery.available(model.level) > 0 else "abilities"
+			ui.build_page = "mastery" if model.mastery.available(model.level) > 0 else "overview"
 			ui.show_build(model, false)
 			get_viewport().set_input_as_handled()
 			return
@@ -685,7 +698,7 @@ func _save_settings() -> void:
 	config.set_value("visual", "zoom", zoom_value)
 	config.set_value("visual", "camera_locked", camera_locked)
 	config.set_value("moba", "r_quickcast", r_quickcast)
-	config.set_value("moba", "version", 12)
+	config.set_value("moba", "version", 13)
 	config.set_value("moba", "loadout", loadout_setting)
 	config.set_value("moba", "keys", key_setting)
 	if config.save("user://salvage_settings.cfg") != OK:
@@ -701,7 +714,7 @@ func _save_result() -> void:
 	if not measured.is_empty():
 		record.render_timing = {"frames": measured.size(), "median_ms": measured[measured.size() / 2],
 			"p95_ms": measured[int(measured.size() * 0.95)], "peak_enemies": peak_enemies}
-	record.build = "slice-12-mobabot"
+	record.build = "slice-13-mobabot"
 	record.equipment = gear.equipped.duplicate()
 	record.wall_seconds = snappedf(run_wall_seconds, 0.01)
 	record.screen_seconds = screen_seconds.duplicate()
@@ -779,8 +792,11 @@ func _fixture(kind: String) -> void:
 		ui.build_page = "gear"
 		ui.show_build(ui.build_model, false)
 		return
-	if kind == "settings":
+	if kind in ["settings", "controls"]:
 		_open_settings()
+		if kind == "controls":
+			ui.settings_page = "controls"
+			ui.show_settings()
 		return
 	if kind in ["loadout", "passives", "keys", "utility"]:
 		screen = "loadout"
@@ -837,9 +853,13 @@ func _fixture(kind: String) -> void:
 		ui.show_result(model)
 	elif kind == "pause":
 		ui.show_pause()
-	elif kind in ["build", "stats", "abilities", "utility_tree", "weapons", "milestone_tree"]:
+	elif kind in ["build", "overview", "overview_detail", "stats", "abilities", "utility_tree", "weapons", "milestone_tree"]:
 		ui.show_build(model)
+		if kind == "overview_detail":
+			for child in ui.overlay.get_children():
+				if child.get_meta("overview_slot", "") == "q": child.pressed.emit()
 		if kind in ["utility_tree", "weapons", "milestone_tree"]:
+			ui.build_page = "upgrades"
 			ui.track_group = "utility" if kind == "utility_tree" else ("weapons" if kind == "weapons" else "skills")
 			ui.selected_item = "skill_w" if kind == "milestone_tree" else ("magnet" if kind == "utility_tree" else "grinder")
 			ui.selected_rank = 5

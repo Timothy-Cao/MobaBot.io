@@ -25,7 +25,7 @@ func _run() -> void:
 	game.camera_locked = true
 	game.r_quickcast = false
 	game.set_physics_process(false)
-	for name in ["mastery", "laser", "laser_milestone", "rocket", "equipment", "equipment_compare", "equipment_max", "gear", "home", "gameplay", "upgrade", "upgrade_milestone", "pause", "result", "build", "stats", "loadout", "passives", "keys", "abilities", "stage_reward", "settings", "utility", "utility_tree", "weapons", "milestone", "milestone_tree", "demo_recovery", "death_recap"]:
+	for name in ["overview", "controls", "mastery", "laser", "laser_milestone", "rocket", "equipment", "equipment_compare", "equipment_max", "gear", "home", "gameplay", "upgrade", "upgrade_milestone", "pause", "result", "build", "stats", "loadout", "passives", "keys", "abilities", "stage_reward", "settings", "utility", "utility_tree", "weapons", "milestone", "milestone_tree", "demo_recovery", "death_recap"]:
 		game.show_home()
 		game._fixture(name)
 		await process_frame
@@ -38,6 +38,7 @@ func _run() -> void:
 			for rank_value in [1, 5, 10]:
 				if rank_value > game.model.upgrade_data(id).max: continue
 				game.ui.show_build(game.model)
+				game.ui.build_page = "upgrades"
 				game.ui.selected_item = id
 				game.ui.selected_rank = rank_value
 				game.ui.show_build(game.model, false)

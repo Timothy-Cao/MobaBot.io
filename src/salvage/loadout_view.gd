@@ -6,9 +6,9 @@ static func draw(ui) -> void:
 	ui._dim()
 	ui._panel(Rect2(24, 24, 912, 492), Color("172932"))
 	ui._label(ui.overlay, "Loadout", Rect2(46, 38, 210, 45), 30, ui.CREAM, true)
-	for i in range(4):
-		var page: String = ["abilities", "passives", "utility", "keys"][i]
-		ui._tab(page.capitalize(), Rect2(300 + i * 123, 43, 115, 34), func() -> void:
+	for i in range(2):
+		var page: String = ["abilities", "passives"][i]
+		ui._tab(page.capitalize(), Rect2(491 + i * 154, 43, 140, 34), func() -> void:
 			ui.loadout_page = page
 			ui.rebind_slot = ""
 			draw(ui), ui.loadout_page == page)
@@ -96,7 +96,7 @@ static func _equipment(ui) -> void:
 		else:
 			ui._ability_icon(tile, id, Rect2(9, 10, 51, 51))
 		ui._label(tile, data.name, Rect2(67, 9, 121, 33), 12, ui.CREAM, true)
-		ui._label(tile, "Toggle" if passive else "%ss / %d charge%s" % [data.cd, data.max, "s" if data.max > 1 else ""], Rect2(67, 37, 121, 18), 10, ui.MUTED)
+		if not passive: tile.tooltip_text += "\n%ss recharge · %d charges" % [data.cd, data.max]
 		ui._label(tile, ("%s energy/s" % MobaKit.UPKEEP[id] if MobaKit.UPKEEP.has(id) else "Free") if passive else MobaKit.cost_text(id), Rect2(9, 64, 174, 18), 10, ui.TEAL)
 	if passive:
 		ui._label(ui.overlay, "ONE PET", Rect2(48, 298, 220, 20), 11, ui.MUTED, true)

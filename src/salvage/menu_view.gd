@@ -28,25 +28,12 @@ static func draw(ui: CanvasLayer) -> void:
 	ui._label(ui.overlay, "MOBA", Rect2(53, 65, 270, 45), 35, ui.TEAL, true)
 	ui._label(ui.overlay, "BOT", Rect2(48, 94, 271, 86), 76, ui.CREAM, true)
 	ui._label(ui.overlay, ".io", Rect2(188, 125, 95, 49), 37, ui.GOLD, true)
-	ui._surface(ui.overlay, Rect2(55, 185, 31, 3), ui.GOLD, 0, ui.GOLD, 0)
-	ui._label(ui.overlay, "THE FOUNDRY", Rect2(98, 179, 240, 24), 13, ui.CREAM, true)
 	var play := _nav(ui, "Play", Rect2(54, 229, 267, 44), func() -> void: ui.start_requested.emit("salvage"), true)
 	_nav(ui, "Loadout", Rect2(54, 281, 267, 36), func() -> void: ui.loadout_requested.emit())
 	_nav(ui, "Equipment", Rect2(54, 322, 267, 36), func() -> void: ui.gear_requested.emit())
-	_nav(ui, "Mastery", Rect2(54, 363, 267, 36), func() -> void:
-		ui.build_requested.emit()
-		ui.build_page = "mastery"
-		ui.show_build(ui.build_model, false))
-	_nav(ui, "Settings", Rect2(54, 418, 122, 30), func() -> void: ui.settings_requested.emit())
-	_nav(ui, "Quit", Rect2(188, 418, 132, 30), func() -> void: ui.quit_requested.emit())
-	ui._label(ui.overlay, "0.12  /  DEMO", Rect2(55, 492, 249, 20), 11, ui.MUTED, true)
-	# The existing three encounters, not a fake level-selection or future campaign.
-	ui._surface(ui.overlay, Rect2(534, 455, 388, 57), Color("0b1923dd"), 0, Color("536465"), 1)
-	for i in range(3):
-		var x := 546 + i * 122
-		ui._label(ui.overlay, "%02d" % (i + 1), Rect2(x, 462, 27, 26), 19, ui.GOLD, true)
-		ui._label(ui.overlay, ["LOADING BAY", "ASSEMBLY", "REACTOR"][i], Rect2(x + 33, 464, 86, 20), 10, ui.CREAM, true)
-		ui._label(ui.overlay, ["Horde", "Wardens", "Foreman"][i], Rect2(x + 33, 482, 86, 18), 10, ui.MUTED)
+	_nav(ui, "Settings", Rect2(54, 377, 122, 30), func() -> void: ui.settings_requested.emit())
+	_nav(ui, "Quit", Rect2(188, 377, 132, 30), func() -> void: ui.quit_requested.emit())
+	ui._label(ui.overlay, "0.13", Rect2(55, 492, 249, 20), 11, ui.MUTED, true)
 	play.grab_focus()
 
 static func _nav(ui, text: String, rect: Rect2, action: Callable, primary: bool = false) -> Button:

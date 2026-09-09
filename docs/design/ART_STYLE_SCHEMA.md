@@ -1,4 +1,8 @@
-# MobaBot.io — art style schema 1.7
+# MobaBot.io — art style schema 1.8
+
+## v0.13 pruning override
+
+Keep existing art; reduce interface surface area. Home: title, Play, Loadout, Equipment, Settings, Quit, tiny version. No subtitle or route itinerary. Build: Overview/Mastery only; current-kit icons and six stat rows replace separate dashboards. Equipment: fitted items, collection, selected comparison; no decorative robot schematic. Settings: four option rows, separate Controls page. Remove repeated instructions and zero-value rank clutter; inspect by hover or selection. Preserve readable costs, locked states, warnings, mastery choices and numerical upgrade gains. Stable top-right Back and restrained tab underlines remain the navigation language.
 
 ## v0.12 additions
 

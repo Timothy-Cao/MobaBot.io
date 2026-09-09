@@ -66,7 +66,7 @@ func _run() -> void:
 	game.gear = BotEquipment.new()
 	game.show_home()
 	check(game.ui.overlay.get_node_or_null("FoundryBackdrop") != null, "Home uses full-bleed illustration")
-	for label in ["Play", "Loadout", "Equipment", "Mastery", "Settings", "Quit"]:
+	for label in ["Play", "Loadout", "Equipment", "Settings", "Quit"]:
 		check(button(game.ui.overlay, label) != null, "Home action exists: " + label)
 	var play := button(game.ui.overlay, "Play")
 	check(play.has_focus(), "Play receives initial keyboard focus")
@@ -76,8 +76,11 @@ func _run() -> void:
 	root.push_input(nav)
 	await process_frame
 	check(root.gui_get_focus_owner() != play, "Native directional navigation moves focus")
-	button(game.ui.overlay, "Mastery").pressed.emit()
-	check(game.screen == "build" and game.ui.build_page == "mastery", "Home opens mastery directly")
+	check(button(game.ui.overlay, "Mastery") == null, "Home omits the nonessential mastery preview route")
+	game._open_build()
+	game.ui.build_page = "mastery"
+	game.ui.show_build(game.ui.build_model, false)
+	check(game.screen == "build" and game.ui.build_page == "mastery", "Retained preview supports internal inspection")
 	var preview = game.ui.build_model
 	check(preview.mastery.read_only, "Home mastery is read-only")
 	tagged(game.ui.overlay, "mastery_id", "reach").pressed.emit()

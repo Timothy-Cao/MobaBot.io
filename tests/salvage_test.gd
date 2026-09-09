@@ -256,8 +256,11 @@ func _run() -> void:
 	check(game.ui.build_model.rank_of("grinder") == 0, "Home upgrade browser does not claim decorative preview upgrades as owned")
 	game._close_build()
 	check(game.screen == "home", "Home browser returns to menu")
+	game.sound.set_muted(true)
+	game.music_player.shutdown()
+	await create_timer(0.2).timeout
 	game.queue_free()
 	await process_frame
-	await create_timer(0.08).timeout # Let the audio mixer retire stopped voices before shutdown.
+	await create_timer(0.2).timeout # Let the audio mixer retire stopped voices before shutdown.
 	print("SALVAGE TESTS: ", checks, " checks; ", failures.size(), " failures")
 	quit(0 if failures.is_empty() else 1)

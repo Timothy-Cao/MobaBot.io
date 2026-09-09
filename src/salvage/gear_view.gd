@@ -10,25 +10,18 @@ static func draw(ui, gear: BotEquipment, back_action: Callable) -> void:
 	ui._rule(Vector2(46, 87), 866)
 	var data: Dictionary = BotEquipment.ITEMS[ui.gear_selected]
 	var chosen: Dictionary = gear.inventory[ui.gear_selected]
-	ui._label(ui.overlay, "ASSEMBLY", Rect2(46, 103, 280, 20), 12, ui.TEAL, true)
-	var schematic := SCHEMATIC.new()
-	schematic.position = Vector2(81, 129)
-	schematic.size = Vector2(215, 212)
-	schematic.highlighted = data.slot
-	schematic.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ui.overlay.add_child(schematic)
+	ui._label(ui.overlay, "EQUIPPED", Rect2(46, 103, 280, 20), 12, ui.TEAL, true)
 	for i in range(3):
 		var slot: String = ["Core", "Chassis", "Drive"][i]
 		var id: String = gear.equipped[slot]
-		var y := 352 + i * 43
-		var tile: Button = ui._button("", Rect2(46, y, 280, 38), func() -> void:
+		var y := 148 + i * 112
+		var tile: Button = ui._button("", Rect2(46, y, 280, 83), func() -> void:
 			ui.gear_selected = id
 			ui.show_equipment(gear, back_action), false)
 		tile.set_meta("fitted_slot", slot)
-		ui._icon(tile, BotEquipment.ITEMS[id].icon, Rect2(3, 3, 32, 32))
-		ui._label(tile, slot.to_upper(), Rect2(43, 2, 151, 15), 9, ui.TEAL, true)
-		ui._label(tile, BotEquipment.ITEMS[id].name, Rect2(43, 15, 171, 22), 13, ui.CREAM, true)
-		ui._label(tile, "★%d" % gear.inventory[id].stars, Rect2(225, 9, 46, 20), 12, ui.GOLD, true, HORIZONTAL_ALIGNMENT_RIGHT)
+		ui._icon(tile, BotEquipment.ITEMS[id].icon, Rect2(9, 10, 60, 60))
+		ui._label(tile, slot.to_upper(), Rect2(82, 15, 177, 18), 10, ui.TEAL, true)
+		ui._label(tile, BotEquipment.ITEMS[id].name, Rect2(82, 42, 187, 24), 14, ui.CREAM, true)
 		tile.tooltip_text = gear.item_text(id)
 	ui._surface(ui.overlay, Rect2(345, 103, 1, 371), ui.EDGE, 0, ui.EDGE, 0)
 	ui._label(ui.overlay, "COLLECTION", Rect2(367, 103, 220, 20), 12, ui.TEAL, true)
@@ -46,7 +39,7 @@ static func draw(ui, gear: BotEquipment, back_action: Callable) -> void:
 		tile.add_theme_stylebox_override("normal", ui._style(ui.PANEL, 0, ui.GOLD if id == ui.gear_selected else ui.EDGE, 2 if id == ui.gear_selected else 1))
 		ui._icon(tile, BotEquipment.ITEMS[id].icon, Rect2(16, 5, 59, 59), item.copies == 0)
 		ui._label(tile, "II" if i % 2 else "I", Rect2(5, 3, 24, 18), 10, ui.GOLD, true)
-		ui._label(tile, "FITTED" if id in gear.equipped.values() else ("—" if item.copies == 0 else "OWNED"), Rect2(6, 64, 57, 15), 9, ui.TEAL if id in gear.equipped.values() else ui.MUTED, true)
+		ui._label(tile, "✓" if id in gear.equipped.values() else "", Rect2(6, 64, 57, 15), 11, ui.TEAL, true)
 		ui._label(tile, "x%d" % item.copies, Rect2(61, 64, 27, 15), 10, ui.CREAM, true, HORIZONTAL_ALIGNMENT_RIGHT)
 		tile.tooltip_text = BotEquipment.ITEMS[id].name + "\n" + gear.item_text(id)
 	ui._surface(ui.overlay, Rect2(603, 103, 1, 371), ui.EDGE, 0, ui.EDGE, 0)
@@ -61,10 +54,9 @@ static func draw(ui, gear: BotEquipment, back_action: Callable) -> void:
 	ui._rule(Vector2(625, 315), 281)
 	var differences := gear.compare_to_fitted(ui.gear_selected)
 	var fitted: bool = ui.gear_selected in gear.equipped.values()
-	ui._label(ui.overlay, "FITTED" if fitted else "VS FITTED", Rect2(625, 324, 281, 18), 10, ui.TEAL, true)
+	if not fitted: ui._label(ui.overlay, "VS FITTED", Rect2(625, 324, 281, 18), 10, ui.TEAL, true)
 	if differences.is_empty():
-		var spare := maxi(0, chosen.copies - 1)
-		ui._label(ui.overlay, "No stat change" if not fitted else "%d spare %s" % [spare, "copy" if spare == 1 else "copies"], Rect2(625, 347, 281, 22), 13, ui.MUTED)
+		if not fitted: ui._label(ui.overlay, "No stat change", Rect2(625, 347, 281, 22), 13, ui.MUTED)
 	else:
 		var i := 0
 		for stat in differences:

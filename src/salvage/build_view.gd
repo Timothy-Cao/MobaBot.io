@@ -5,25 +5,17 @@ extends RefCounted
 static func draw(ui: CanvasLayer, model: SalvageRun) -> void:
 	ui._panel(Rect2(24, 24, 912, 492), Color("172932"))
 	ui._label(ui.overlay, "Build", Rect2(47, 39, 212, 42), 30, ui.CREAM, true)
-	ui._tab("Mastery", Rect2(253, 42, 104, 34), func() -> void:
+	ui._tab("Overview", Rect2(491, 42, 140, 34), func() -> void:
+		ui.build_page = "overview"
+		ui.show_build(model, false), ui.build_page == "overview")
+	ui._tab("Mastery", Rect2(645, 42, 140, 34), func() -> void:
 		ui.build_page = "mastery"
 		ui.show_build(model, false), ui.build_page == "mastery")
-	ui._tab("Upgrades", Rect2(363, 42, 104, 34), func() -> void:
-		ui.build_page = "upgrades"
-		ui.show_build(model, false), ui.build_page == "upgrades")
-	ui._tab("Stats", Rect2(473, 42, 104, 34), func() -> void:
-		ui.build_page = "stats"
-		ui.show_build(model, false), ui.build_page == "stats")
-	if model.kit != null:
-		ui._tab("Abilities", Rect2(583, 42, 104, 34), func() -> void:
-			ui.build_page = "abilities"
-			ui.show_build(model, false), ui.build_page == "abilities")
-	ui._tab("Gear", Rect2(693, 42, 104, 34), func() -> void:
-		ui.build_page = "gear"
-		ui.show_build(model, false), ui.build_page == "gear")
 	var close: Button = ui._button("Back", Rect2(811, 42, 102, 34), func() -> void: ui.build_closed.emit(), false)
 	if ui.build_page == "mastery":
 		_mastery(ui, model)
+	elif ui.build_page == "overview":
+		preload("res://src/salvage/build_overview.gd").draw(ui, model)
 	elif ui.build_page == "upgrades":
 		_tree(ui, model)
 	elif ui.build_page == "abilities":

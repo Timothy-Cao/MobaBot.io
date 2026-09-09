@@ -1,8 +1,8 @@
-# MobaBot.io — 0.12 Combat Foundations
+# MobaBot.io — 0.13 Minimal UI
 
 A Windows-first, single-player survivor-like with MOBA mouse controls. Build a small salvage robot into a crowd-clearing machine. Stage 1 contains three levels and ends with the Foreman.
 
-0.12 adds separate commanded basic attacks and an autonomous machine gun, attack move, machine/sniper/off modes, a coolant-trail toggle and mastery points every Power level. The 0.11 foundry presentation remains. The larger eight-stage/class/chest/equipment overhaul is a design plan, not implemented content. See [systems direction and backlog](docs/design/SYSTEMS_REFINEMENT_12.md) and [change log / QA](docs/design/QA_12.md).
+0.13 aggressively prunes the interface: five home actions, two Build pages, two Loadout pages and four basic settings. Combat and progression are unchanged from 0.12. The larger campaign overhaul remains planned, not implemented. See [systems direction](docs/design/SYSTEMS_REFINEMENT_12.md) and [menu changes / QA](docs/design/QA_13.md).
 
 ## Play
 
@@ -32,17 +32,19 @@ This is a Godot development project, not a standalone exported Windows release. 
 | L / hold Space | Toggle camera lock / temporarily follow |
 | Screen edges | Pan when the camera is unlocked |
 | Wheel | Zoom 65–100% |
-| Hold Tab | Spend mastery points; inspect abilities, upgrades, stats and gear |
+| Hold Tab | Overview of equipped kit and six core stats; Mastery to spend points |
 | Esc | Settings; cancels targeting first |
 | M / F2 | Mute audio / reduced effects |
 
-No WASD movement. Settings offers camera lock and optional area quick cast. Other actives quick-cast by default; Shift + ability previews and casts on key release. R channel starts immediately. Loadout edits and ability bindings apply next run. A, S, L, M, Space, Tab, Esc, 5 and 6 are reserved. Occupied ability bindings swap; older conflicting bindings migrate to a free letter. Old R-nuke saves migrate to E nuke / R laser; custom Q/W choices remain. Choose **Loadout → Default kit** to try the full new preset.
+No WASD movement. Settings → Options contains Sound, Reduced effects, Camera lock and Area quick cast. Settings → Controls contains keybindings (including while paused); changes apply next run. The zoom slider is removed; wheel zoom remains. Other actives quick-cast by default; Shift + ability previews and casts on key release. R channel starts immediately. A, S, L, M, Space, Tab, Esc, 5 and 6 are reserved. Occupied ability bindings swap; older conflicting bindings migrate to a free letter. Old R-nuke saves migrate to E nuke / R laser; custom Q/W choices remain. Choose **Loadout → Default kit** to try the full new preset.
+
+Tab has only **Overview** and **Mastery**. Overview combines equipped ability/passive/gear icons with hull, energy, ability damage, auto fire rate, movement speed and pickup reach. Hover or select a tile for detail; Esc closes detail before Build. Separate stat dashboards, damage-source charts and ability-rank preview pages are removed from normal navigation. Upgrade choices still show their numerical gains. The title-screen mastery preview and decorative route itinerary are removed. In-run Settings retains a confirmed Main menu exit.
 
 Default passives are Auto gun, Scrap orbit, Arc coil and Reactive plating. Fully enabled they consume 10 energy/sec before 8/sec base regeneration. Energy depletion switches powered passives off; use their number keys to restore them once energy is available. Reactor upgrades and equipment improve the budget. R costs 40 energy and roots you while firing; D/F remain free escapes. The autonomous gun ignores S, movement and channels; its powered state and energy budget control it. Basic attacks have a separate cooldown and require attack orders.
 
 Slot 1 is the starting gun. Select slots 2–4 in Loadout to try **Coolant trail**: 3 energy/sec on, no upkeep off, no self-damage. Laid patches persist four seconds and deal 8 base damage/sec; overlapping patches do not stack. Weapon power scales the damage. Old custom loadouts are normalized in memory to include the starting gun while preserving Orbit/Ricochet dependencies.
 
-Mastery is run-only: start with one point, earn another every Power level. The HUD ◇ count shows unspent points. Tab opens the tree first when points await; no extra level-up popup. The current nine-node tree remains; the larger six-branch tree is planned. Main-menu mastery is a read-only preview.
+Mastery is run-only: start with one point, earn another every Power level. The HUD ◇ count shows unspent points. Tab opens the tree first when points await; no extra level-up popup. The current nine-node tree remains; the larger six-branch tree is planned. There is no main-menu mastery button.
 
 Start with the auto gun and Q; D/F also remain immediately available. Later unlocks still follow combat time: W at 20s, passive 2 at 32s, E at 45s, passive 3 at 58s, R at 70s, T at 95s, passive 4 at 110s. Pauses do not advance this clock. Chest discovery and duplicate +2 ranks will replace this temporary schedule in the next progression milestone. The optional Relaxed kit and individual loadout choices retain low-mechanics alternatives.
 
@@ -97,6 +99,6 @@ Run from the project folder:
 
 The full check includes legacy simulations, MOBA mechanics, progression, boss readability, movement at multiple physics rates, equipment/camera, UI text layout, laser/ghost/lightning and mastery effects. Behavior probes compare idle, stationary, passive-only, moving-casting and adaptive policies with normal health. They do not establish human difficulty or fun.
 
-[Latest audit and handoff](docs/design/QA_12.md). Use `--refined` for current combat; omitting it retains the historical probe baseline. Earlier iteration documents are historical; this README and QA_12 supersede their controls and scope. Preserve the old Neon Collector sample at `src/main/main.tscn`.
+[Latest audit and handoff](docs/design/QA_13.md). Use `--refined` for current combat; omitting it retains the historical probe baseline. Earlier iteration documents are historical; this README and QA_13 supersede their menu descriptions. Preserve the old Neon Collector sample at `src/main/main.tscn`.
 
 Commit coherent, verified changes; do not commit engine/cache folders, generated test captures, temp files or local player records. Public-release work still includes export packaging, audio balance/listening, music-rights confirmation, and human tuning of camera speed, rewards and combat difficulty.

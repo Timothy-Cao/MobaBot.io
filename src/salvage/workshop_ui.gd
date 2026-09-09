@@ -78,12 +78,13 @@ var muted := false
 var reduced := false
 var textures: Dictionary = {}
 var build_model: SalvageRun
-var build_page := "upgrades"
+var build_page := "overview"
 var track_group := "skills"
 var selected_item := "grinder"
 var selected_rank := 1
 var mini_map: Control
 var settings_open := false
+var settings_page := "options"
 var camera_locked := true
 var r_quickcast := false
 var gear_selected := "coil"
@@ -276,6 +277,7 @@ func _upgrade_icon(parent: Node, model: SalvageRun, id: String, rect: Rect2) -> 
 	return _icon(parent, id, rect)
 
 func show_loadout() -> void:
+	settings_open = false
 	LOADOUT_VIEW.draw(self)
 
 func capture_binding(key: int) -> void:
@@ -297,7 +299,8 @@ func capture_binding(key: int) -> void:
 			loadout_changed.emit(loadout_config, key_config)
 		else:
 			loadout_message = "Reserved: A attack, S stop, L camera, M mute, 5/6 items."
-	show_loadout()
+	if settings_open: show_settings()
+	else: show_loadout()
 
 func _ability_hud(model: SalvageRun) -> void:
 	ability_bar.visible = model.kit != null
@@ -418,9 +421,9 @@ func update_hud(model: SalvageRun) -> void:
 		energy_bar.value = model.kit.energy
 		energy_label.text = "ENERGY"
 		energy_bar.tooltip_text = "%d / %d energy" % [model.kit.energy, model.kit.energy_max()]
-	stat_label.text = "Power %d   %d kills   ◇ %d" % [model.level, model.kills, model.mastery.available(model.level)]
+	stat_label.text = "Power %d   ◇ %d" % [model.level, model.mastery.available(model.level)]
 	stat_label.mouse_filter = Control.MOUSE_FILTER_STOP
-	stat_label.tooltip_text = "Mastery points. Hold Tab to spend. One point every two power levels. Run only."
+	stat_label.tooltip_text = "Hold Tab to spend mastery points. One per Power level."
 	consumable_label.text = "5  +  x%d\n\n6  E  x%d" % [model.consumables[0], model.consumables[1]]
 	health_bar.max_value = model.max_health()
 	health_bar.value = model.health
@@ -468,34 +471,16 @@ func show_home() -> void:
 	preload("res://src/salvage/menu_view.gd").draw(self)
 
 func show_settings() -> void:
+	var focused := get_viewport().gui_get_focus_owner()
+	var focus_setting: String = focused.get_meta("setting", "") if is_instance_valid(focused) else ""
+	var focus_bind: String = focused.get_meta("bind_slot", "") if is_instance_valid(focused) else ""
 	settings_open = true
 	clear_overlay()
 	_dim()
-	_panel(Rect2(176, 22, 608, 496))
-	_label(overlay, "Settings", Rect2(204, 33, 550, 40), 28, CREAM, true)
-	_settings(204, 85)
-	_button("Camera: " + ("Locked" if camera_locked else "Free"), Rect2(204, 142, 260, 34), func() -> void: camera_lock_changed.emit(not camera_locked), false)
-	_button("Area cast: " + ("Quick" if r_quickcast else "Confirm"), Rect2(480, 142, 276, 34), func() -> void: quickcast_changed.emit(not r_quickcast), false)
-	_label(overlay, "Camera zoom", Rect2(204, 187, 240, 23), 16, CREAM, true)
-	var zoom_label := _label(overlay, "%d%%" % roundi(zoom_value * 100), Rect2(650, 187, 100, 23), 15, GOLD, true, HORIZONTAL_ALIGNMENT_RIGHT)
-	var slider := HSlider.new()
-	slider.position = Vector2(204, 220)
-	slider.size = Vector2(552, 24)
-	slider.min_value = 0.65
-	slider.max_value = 1.0
-	slider.step = 0.05
-	slider.value = zoom_value
-	slider.value_changed.connect(func(value: float) -> void:
-		zoom_label.text = "%d%%" % roundi(value * 100)
-		zoom_changed.emit(value))
-	overlay.add_child(slider)
-	_label(overlay, "Right-click move / enemy: attack / A + click: attack move\nS stops movement + basic attacks / Wheel zoom\nL camera lock / Hold Space follow / Edges pan\nHold Tab build / Esc settings / Shift + key aim\n5 repair / 6 energy / E + click: strike\nR: channel / Right-click: steer / R again: cancel", Rect2(204, 259, 552, 146), 13, MUTED)
-	if not settings_in_run:
-		_button("Loadout & keybinds", Rect2(204, 393, 552, 36), func() -> void: loadout_requested.emit(), false)
-	else:
-		_label(overlay, "Run paused. Change loadouts from the main menu.", Rect2(204, 393, 552, 24), 13, MUTED)
-	var back := _button("Back", Rect2(204, 452, 552, 38), func() -> void: settings_closed.emit())
-	back.grab_focus()
+	preload("res://src/salvage/settings_view.gd").draw(self)
+	for child in overlay.get_children():
+		if child is Button and ((not focus_setting.is_empty() and child.get_meta("setting", "") == focus_setting) or (not focus_bind.is_empty() and child.get_meta("bind_slot", "") == focus_bind)):
+			child.grab_focus()
 
 func show_equipment(gear, back_action: Callable) -> void:
 	clear_overlay()
@@ -532,20 +517,17 @@ func show_pause() -> void:
 	clear_overlay()
 	notice_time = 0
 	_dim()
-	_panel(Rect2(258, 108, 444, 378))
+	_panel(Rect2(258, 108, 444, 328))
 	_label(overlay, "Paused", Rect2(289, 133, 382, 42), 30, CREAM, true)
 	var resume := _button("Resume", Rect2(288, 198, 384, 42), func() -> void: resume_requested.emit())
-	_button("Build", Rect2(288, 251, 384, 38), func() -> void: build_requested.emit(), false)
-	_button("Restart", Rect2(288, 299, 185, 36), func() -> void: restart_requested.emit(), false)
-	_button("Main menu", Rect2(483, 299, 189, 36), func() -> void: menu_requested.emit(), false)
-	_settings(288, 355)
-	_button("Settings", Rect2(288, 406, 384, 36), func() -> void: settings_requested.emit(), false)
+	_button("Settings", Rect2(288, 251, 384, 38), func() -> void: settings_requested.emit(), false)
+	_button("Main menu", Rect2(288, 304, 384, 38), func() -> void: menu_requested.emit(), false)
 	resume.grab_focus()
 
 func show_build(model: SalvageRun, reset: bool = true) -> void:
 	build_model = model
 	if reset:
-		build_page = "upgrades"
+		build_page = "overview"
 		selected_item = "grinder" if model.mode == "salvage" else "power"
 		selected_rank = mini(3, model.rank_of(selected_item) + 1)
 	clear_overlay()
@@ -561,11 +543,10 @@ func show_result(model: SalvageRun, saved: bool = false) -> void:
 	_panel(Rect2(188, 126, 584, 353))
 	_label(overlay, ("Demo complete" if model.demo_mode else "Shift complete") if model.state == "won" else "Destroyed", Rect2(222, 151, 516, 52), 33, CREAM, true)
 	_label(overlay, "%d\nKills" % model.kills, Rect2(230, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
-	_label(overlay, "%d\nScrap" % model.collected, Rect2(405, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
+	_label(overlay, "%d\nCredits" % model.coins, Rect2(405, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
 	_label(overlay, "%ds\nSurvived" % int(model.time), Rect2(580, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
 	if model.state == "lost" and not model.last_damage.is_empty():
 		_label(overlay, "Final hit: " + model.last_damage, Rect2(219, 305, 522, 20), 13, CREAM, true, HORIZONTAL_ALIGNMENT_CENTER)
-		_label(overlay, CombatReadability.hint(model.last_damage), Rect2(219, 325, 522, 20), 12, MUTED, false, HORIZONTAL_ALIGNMENT_CENTER)
 	var again := _button("Play again", Rect2(228, 353, 244, 44), func() -> void: restart_requested.emit())
 	_button("Main menu", Rect2(488, 353, 244, 44), func() -> void: menu_requested.emit(), false)
 	_button("View build", Rect2(388, 413, 184, 33), func() -> void: build_requested.emit(), false)
