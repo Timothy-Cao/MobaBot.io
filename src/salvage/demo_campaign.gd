@@ -93,16 +93,27 @@ static func spawns(run, delta: float) -> void:
 
 static func enemy_step(run, enemy: Dictionary, delta: float) -> void:
 	var role: String = enemy.role
-	var direction: Vector2 = (run.player - Vector2(enemy.pos)).normalized()
+	var tracked: Vector2 = run.kit.extra.decoy_position if run.kit.extra.decoy_left > 0 else run.player
+	var direction: Vector2 = (tracked - Vector2(enemy.pos)).normalized()
 	if role == "foreman" and enemy.hp <= enemy.max_hp * 0.5 and not enemy.enraged:
 		enemy.enraged = true
 		run.emit_event("boss_phase", enemy.pos)
 	enemy.clock -= delta
+	if run.exp != null and enemy.has("exp_boss"):
+		# Large bosses break barricades instead of becoming permanently trapped.
+		for wall in run.kit.extra.walls:
+			if Geometry2D.get_closest_point_to_segment(enemy.pos, wall.a, wall.b).distance_to(enemy.pos) < enemy.radius + 20: wall.life = 0
+		enemy.summon_clock -= delta
+		if enemy.summon_clock <= 0:
+			enemy.summon_clock = 7 if enemy.enraged else 10
+			run._spawn_pack(3 + int(enemy.exp_boss) / 2, true)
+		if run.exp.ascension >= 4 and enemy.phase == "recover": enemy.clock -= delta * 0.25
 	if enemy.phase == "approach":
 		if Vector2(enemy.pos).distance_to(run.player) > 340:
 			enemy.pos += direction * (270 if enemy.enraged else 235) * delta
 		elif enemy.clock <= 0:
 			var pattern: Array = ["charge", "fan"] if role == "rammer" else (["shells", "fan"] if role == "artillery" else ["charge", "shells", "fan", "ring"])
+			if enemy.has("patterns"): pattern = enemy.patterns
 			enemy.attack = pattern[enemy.sequence % pattern.size()]
 			enemy.sequence += 1
 			enemy.phase = "telegraph"

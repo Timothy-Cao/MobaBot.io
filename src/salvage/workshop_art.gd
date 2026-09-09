@@ -80,6 +80,7 @@ func _draw() -> void:
 	if world_mode:
 		_draw_caches()
 		_moba_ground()
+		ExpeditionArt.draw(self, model)
 		for patch in model.kit.poison_trail:
 			var opacity := minf(1.0, patch.life) * 0.28
 			draw_circle(patch.pos, 26, Color("77b9a5") * Color(1, 1, 1, opacity))
@@ -177,7 +178,7 @@ func _demo_tells() -> void:
 	for enemy in model.enemies:
 		if enemy.dead or not enemy.has("role"): continue
 		var p: Vector2 = enemy.pos
-		var title: String = {"rammer": "RAM WARDEN", "artillery": "ARTILLERY WARDEN", "foreman": "FOREMAN"}[enemy.role]
+		var title: String = CombatReadability.enemy_name(enemy).to_upper()
 		if enemy.phase == "recover":
 			draw_arc(p, enemy.radius + 9, 0, TAU, 40, GOLD, 3, true)
 			title += " / EXPOSED"
@@ -489,24 +490,38 @@ func _moba_ground() -> void:
 		var end := kit.target_point(model, preview_slot, cursor_world)
 		var color := TEAL if kit.preview_ready(model, preview_slot, cursor_world) else CORAL
 		draw_arc(model.player, radius if radius > 0 else 38, 0, TAU, 80, Color(color, 0.3), 1.5, true)
-		if kit.loadout[preview_slot] == "flame":
+		if kit.loadout[preview_slot] in ["flame","sweep","tractor","repulsor"]:
 			var cone := PackedVector2Array([model.player])
 			var facing := (cursor_world - model.player).normalized()
-			for i in range(17): cone.append(model.player + facing.rotated(lerpf(-PI / 5, PI / 5, i / 16.0)) * radius * kit.area_scale(preview_slot))
+			var angle: float = PI / 5 if kit.loadout[preview_slot] == "flame" else PI * 0.34
+			for i in range(17): cone.append(model.player + facing.rotated(lerpf(-angle, angle, i / 16.0)) * radius * kit.area_scale(preview_slot))
 			draw_colored_polygon(cone, Color(color, 0.13))
 			cone.append(model.player)
 			draw_polyline(cone, color, 2, true)
 		elif data.aim == "line":
 			var line_end := end
+			if kit.loadout[preview_slot] == "thrust":
+				line_end = model.player + (cursor_world-model.player).normalized() * (440 if kit.extra.combo==2 else 230) * kit.area_scale(preview_slot)
 			if data.glyph in ["beam", "rail"]:
 				line_end = (model.player + (cursor_world - model.player).normalized() * radius).clamp(SalvageRun.ARENA.position + Vector2.ONE * 16, SalvageRun.ARENA.end - Vector2.ONE * 16)
-			_line(model.player, line_end, Color(color, 0.20), 56 * kit.area_scale(preview_slot) if data.glyph == "beam" else 8)
+			var width: float = {"thrust":40,"returner":24}.get(kit.loadout[preview_slot],56 if data.glyph == "beam" else 8) * kit.area_scale(preview_slot)
+			_line(model.player, line_end, Color(color, 0.20), width)
 			_line(model.player, line_end, color, 2)
 			if kit.loadout[preview_slot] == "rocket": draw_arc(line_end, 62 * kit.area_scale(preview_slot), 0, TAU, 40, Color(color, 0.5), 1, true)
 		elif data.aim == "ground":
-			draw_arc(end, (135 if kit.loadout[preview_slot] == "nuke" else 90) * kit.area_scale(preview_slot) if data.glyph == "target" else 22, 0, TAU, 48, color, 2, true)
+			if kit.loadout[preview_slot] == "echo_dash": end=kit.extra.solid_point(model.player,end,12)
+			if kit.loadout[preview_slot] == "wall":
+				var side: Vector2=(end-model.player).normalized().orthogonal()*95*kit.area_scale(preview_slot)
+				_line(end-side,end+side,color,11)
+			var actual_radius: float = {"gravity":115,"strike":110,"artillery":110,"hop":90,"landing":150,"echo_dash":85}.get(kit.loadout[preview_slot],(135 if kit.loadout[preview_slot] == "nuke" else 90) if data.glyph == "target" else 22)
+			draw_arc(end, actual_radius * kit.area_scale(preview_slot), 0, TAU, 48, color, 2, true)
+			if kit.loadout[preview_slot] == "strike": draw_arc(end,actual_radius*0.35*kit.area_scale(preview_slot),0,TAU,32,color,1,true)
+			if kit.extra.recasts.has(preview_slot) and kit.extra.recasts[preview_slot].id == "crosswire": _line(kit.extra.recasts[preview_slot].pos,end,color,2)
 			_line(end - Vector2(8, 0), end + Vector2(8, 0), color, 2)
 			_line(end - Vector2(0, 8), end + Vector2(0, 8), color, 2)
+		elif kit.loadout[preview_slot] == "reap":
+			draw_arc(model.player,165*kit.area_scale(preview_slot),0,TAU,64,color,2,true)
+			draw_arc(model.player,100*kit.area_scale(preview_slot),0,TAU,64,Color(color,0.5),1,true)
 	if model.moving:
 		draw_arc(model.move_target, 12, 0, TAU, 24, Color(TEAL, 0.8), 2, true)
 		for i in range(4):

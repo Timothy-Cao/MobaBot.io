@@ -49,10 +49,14 @@ static func draw(ui, model: SalvageRun) -> void:
 		if before.size() > 1: rows.append(before.size() - 1 if id.begins_with("skill_") and not milestone else 1)
 		for row in range(rows.size()):
 			var index: int = rows[row]
-			var next: Variant = after[index].value if id != "repair" else mini(model.max_health(), model.health + 1)
+			var next: Variant = after[index].value if id != "repair" else minf(model.max_health(), model.health + (20 if model.exp != null else 1))
 			ui._label(card, before[index].label, Rect2(18, 238 + row * 28, 135, 24), 12, ui.MUTED)
-			ui._label(card, "%s → %s%s" % [before[index].value, next, before[index].unit], Rect2(139, 238 + row * 28, 121, 24), 14, ui.GOLD, true, HORIZONTAL_ALIGNMENT_RIGHT)
+			ui._label(card, "%s → %s%s" % [number(before[index].value), number(next), before[index].unit], Rect2(139, 238 + row * 28, 121, 24), 14, ui.GOLD, true, HORIZONTAL_ALIGNMENT_RIGHT)
 		var details: String = data.name + "\n" + ("Rank %d → %d\n" % [current, current + 1] if id != "repair" else "")
-		for row in range(before.size()): details += "%s: %s → %s%s\n" % [before[row].label, before[row].value, after[row].value if id != "repair" else mini(model.max_health(), model.health + 1), before[row].unit]
+		for row in range(before.size()): details += "%s: %s → %s%s\n" % [before[row].label, before[row].value, after[row].value if id != "repair" else minf(model.max_health(), model.health + (20 if model.exp != null else 1)), before[row].unit]
 		card.tooltip_text = details + model.upgrade_note(id, current + 1)
 	if first != null: first.grab_focus()
+
+static func number(value: Variant) -> String:
+	if (value is int or value is float) and is_equal_approx(value,floorf(value)): return str(int(value))
+	return str(value)

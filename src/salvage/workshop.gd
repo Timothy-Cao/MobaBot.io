@@ -391,7 +391,7 @@ func _confirm_cast(slot: String) -> bool:
 func _cast_slot(slot: String) -> void:
 	if not model.kit.cast(model, slot, get_global_mouse_position()):
 		ui.announce(model.kit.last_failure)
-	elif model.kit.loadout[slot] in ["lunge", "dash", "blink", "laser"]:
+	elif model.kit.loadout[slot] in ["lunge", "dash", "blink", "laser"] or model.kit.extra.rooted() or model.kit.dash_left > 0 or model.kit.extra.roll_left > 0:
 		mouse_moving = false
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -557,13 +557,13 @@ func _drain_events() -> void:
 		elif event.kind == "energy_low":
 			ui.announce("Passives offline")
 		elif event.kind == "stage_start":
-			ui.announce("Level %d / %s" % [model.stage, DemoCampaign.info(model).name] if model.demo_mode else "Stage %d" % model.stage)
+			ui.announce(model.exp.label() if model.exp != null else ("Level %d / %s" % [model.stage, DemoCampaign.info(model).name] if model.demo_mode else "Stage %d" % model.stage))
 		elif event.kind == "demo_level":
-			ui.announce("Level %d / %s" % [model.stage, DemoCampaign.info(model).name])
+			ui.announce(model.exp.label() if model.exp != null else "Level %d / %s" % [model.stage, DemoCampaign.info(model).name])
 		elif event.kind == "demo_boss":
-			ui.announce(CombatReadability.NAMES[event.role], 2)
+			ui.announce(BotExpedition.BOSSES[BotExpedition.ROUTE[model.exp.route_index][0]-1] if model.exp != null and event.role == "foreman" else CombatReadability.NAMES[event.role], 2)
 		elif event.kind == "miniboss_down":
-			ui.announce("Warden defeated / %d of 2" % model.demo_minis_killed)
+			ui.announce("Warden defeated" if model.exp != null else "Warden defeated / %d of 2" % model.demo_minis_killed)
 		elif event.kind == "boss_phase":
 			ui.announce("OVERCLOCKED", 2)
 		elif event.kind == "unlock":
@@ -714,8 +714,11 @@ func _save_result() -> void:
 	if not measured.is_empty():
 		record.render_timing = {"frames": measured.size(), "median_ms": measured[measured.size() / 2],
 			"p95_ms": measured[int(measured.size() * 0.95)], "peak_enemies": peak_enemies}
-	record.build = "slice-13-mobabot"
+	record.build = "slice-14-expedition" if model.exp != null else "slice-13-mobabot"
 	record.equipment = gear.equipped.duplicate()
+	if model.exp != null:
+		record.campaign = {"round":model.exp.route_index+1,"stage":BotExpedition.ROUTE[model.exp.route_index][0],"ascension":model.exp.ascension,"class":model.exp.class_id,"chests":model.exp.chests_opened}
+		record.equipment = model.equipment_snapshot.duplicate(true)
 	record.wall_seconds = snappedf(run_wall_seconds, 0.01)
 	record.screen_seconds = screen_seconds.duplicate()
 	record.timestamp = Time.get_datetime_string_from_system()

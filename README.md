@@ -1,104 +1,121 @@
-# MobaBot.io — 0.13 Minimal UI
+# MobaBot.io — 0.14 Expedition
 
-A Windows-first, single-player survivor-like with MOBA mouse controls. Build a small salvage robot into a crowd-clearing machine. Stage 1 contains three levels and ends with the Foreman.
+A Windows-first, single-player survivor-like with MOBA mouse controls. Build a salvage robot through an eight-stage expedition: independent automatic fire, commanded basic attacks, aimed abilities and deployed machines.
 
-0.13 aggressively prunes the interface: five home actions, two Build pages, two Loadout pages and four basic settings. Combat and progression are unchanged from 0.12. The larger campaign overhaul remains planned, not implemented. See [systems direction](docs/design/SYSTEMS_REFINEMENT_12.md) and [menu changes / QA](docs/design/QA_13.md).
+**Implemented:** three classes, 22 rounds, chest discoveries, 34 active choices, 15 powered passives, a 48-node mastery tree, 40 equipment items, shops, Ascensions 0–5 and between-round checkpoints. The old three-round scene remains a regression fixture, not the normal entry point.
+
+[Research and design](docs/design/EXPEDITION_RESEARCH_14.md) · [Changes, tests and limitations](docs/design/QA_14.md)
 
 ## Play
 
-Double-click **Play MobaBot.io.cmd**. Relaunch any older game window to load this version.
+Double-click **Play MobaBot.io.cmd**. Close an older game window and relaunch to load this version.
 
-On a fresh clone, run `scripts/setup.ps1` first; the portable Godot 4.7.2 engine is intentionally not committed. Then launch the game or run `scripts/open_editor.ps1`. The launcher works with spaces in the folder path.
+Fresh clone: run `scripts/setup.ps1` first. The portable Godot 4.7.2 engine is intentionally not committed. Use `scripts/open_editor.ps1` for the editor. Paths containing spaces work.
 
-This is a Godot development project, not a standalone exported Windows release. No accounts, API keys or online services are required to play. Repository: [Timothy-Cao/MobaBot.io](https://github.com/Timothy-Cao/MobaBot.io).
+This is a Godot development project, not an exported Windows release. No accounts, API keys or online services are needed to play. [Repository](https://github.com/Timothy-Cao/MobaBot.io).
 
 ## Controls
 
 | Input | Action |
 | --- | --- |
-| Right-click ground / hold | Move / steer; autonomous gun keeps firing |
-| Right-click enemy | Approach into basic-attack range and attack |
-| A, then left-click | Show basic range; cursor-priority attack move |
-| S | Stop movement and commanded basic attacks, NOT the auto gun; committed short dash still finishes |
-| Q | Impact bolt: straight skillshot; impact and end-of-range explosion |
-| W | Welding torch: two-second cone, steered with the cursor |
-| E, then left-click | Reactor drop; right-click or Esc cancels |
-| R | Channel Core cutter for up to 5s; right-click steers slowly, R again cancels |
-| D / F | Ghost drive (3s intangible) / charged blink; either can interrupt R |
-| T | Deploy one sentry; replaces the previous one |
-| 1 | Auto machine gun → auto sniper → off → machine gun |
-| 2–4 | Passive toggles; orbit close/wide; Arc Coil chain/focused/off |
-| 5 / 6, or their HUD buttons | Repair +2 hull / restore 50 energy; two of each per run |
-| L / hold Space | Toggle camera lock / temporarily follow |
-| Screen edges | Pan when the camera is unlocked |
+| Right-click ground / hold | Move / steer; automatic gun continues |
+| Right-click enemy | Approach and perform commanded basic attacks |
+| A, then left-click | Cursor-priority attack move, with range preview |
+| S | Stop movement and commanded attacks, never the automatic gun |
+| Q / W / E | Three active slots; Q starts as an aimed Impact bolt |
+| R | Ultimate; default Core cutter channels up to 5s, right-click steers with inertia, R cancels |
+| D / F | Speed/escape and mobility; default Ghost drive / charged Blink |
+| T | Deploy a major summon; replaces oldest when capacity is full |
+| 1 | Machine gun → sniper → off |
+| 2–4 | Powered passive modes; energy upkeep while enabled |
+| 5 / 6 | Repair 40 hull / restore 50 energy; two of each initially |
+| Hold Tab | Build: Overview and Mastery; also accessible between rounds |
+| Esc | Settings or back; cancels targeting first |
+| L / hold Space | Toggle camera lock / temporarily recenter |
+| Screen edge | Pan with unlocked camera |
 | Wheel | Zoom 65–100% |
-| Hold Tab | Overview of equipped kit and six core stats; Mastery to spend points |
-| Esc | Settings; cancels targeting first |
-| M / F2 | Mute audio / reduced effects |
+| M / F2 | Mute / reduced effects |
 
-No WASD movement. Settings → Options contains Sound, Reduced effects, Camera lock and Area quick cast. Settings → Controls contains keybindings (including while paused); changes apply next run. The zoom slider is removed; wheel zoom remains. Other actives quick-cast by default; Shift + ability previews and casts on key release. R channel starts immediately. A, S, L, M, Space, Tab, Esc, 5 and 6 are reserved. Occupied ability bindings swap; older conflicting bindings migrate to a free letter. Old R-nuke saves migrate to E nuke / R laser; custom Q/W choices remain. Choose **Loadout → Default kit** to try the full new preset.
+No WASD. Settings contains four options and a separate keybinding page. Ability bindings can swap; reserved movement/menu/item inputs remain protected. Changes to bindings apply next run. Shift + ability previews and casts on release. Reactor drop and non-laser R use confirm targeting unless Area quick cast is enabled. Right-click cancels targeting; during Siege battery it cancels the channel.
 
-Tab has only **Overview** and **Mastery**. Overview combines equipped ability/passive/gear icons with hull, energy, ability damage, auto fire rate, movement speed and pickup reach. Hover or select a tile for detail; Esc closes detail before Build. Separate stat dashboards, damage-source charts and ability-rank preview pages are removed from normal navigation. Upgrade choices still show their numerical gains. The title-screen mastery preview and decorative route itinerary are removed. In-run Settings retains a confirmed Main menu exit.
+The automatic gun and commanded basic attacks have separate clocks. Energy depletion can switch powered passives off, including the gun; their keys re-enable them. S does not switch the gun off. Committed short dashes finish before stopping.
 
-Default passives are Auto gun, Scrap orbit, Arc coil and Reactive plating. Fully enabled they consume 10 energy/sec before 8/sec base regeneration. Energy depletion switches powered passives off; use their number keys to restore them once energy is available. Reactor upgrades and equipment improve the budget. R costs 40 energy and roots you while firing; D/F remain free escapes. The autonomous gun ignores S, movement and channels; its powered state and energy budget control it. Basic attacks have a separate cooldown and require attack orders.
+## Classes and skills
 
-Slot 1 is the starting gun. Select slots 2–4 in Loadout to try **Coolant trail**: 3 energy/sec on, no upkeep off, no self-damage. Laid patches persist four seconds and deal 8 base damage/sec; overlapping patches do not stack. Weapon power scales the damage. Old custom loadouts are normalized in memory to include the starting gun while preserving Orbit/Ricochet dependencies.
+All classes start with the auto gun and Q; D/F remain immediate safety tools. W/E/R/T and passive slots 2–4 are discovered in chests, not unlocked by a timer.
 
-Mastery is run-only: start with one point, earn another every Power level. The HUD ◇ count shows unspent points. Tab opens the tree first when points await; no extra level-up popup. The current nine-node tree remains; the larger six-branch tree is planned. There is no main-menu mastery button.
+- **Gunner:** long-range basics, brief movement burst after commanded fire. Preferred discoveries: Return blade, Core strike, Line sentry.
+- **Brawler:** short-range heavy basics, more speed, resistance and regeneration. Preferred discoveries: Rim cutter, Guard sweep, Pulse anchor.
+- **Engineer:** two major summons and construct bonuses. Preferred discoveries: Gravity well, Repulsor, Echo sentry.
 
-Start with the auto gun and Q; D/F also remain immediately available. Later unlocks still follow combat time: W at 20s, passive 2 at 32s, E at 45s, passive 3 at 58s, R at 70s, T at 95s, passive 4 at 110s. Pauses do not advance this clock. Chest discovery and duplicate +2 ranks will replace this temporary schedule in the next progression milestone. The optional Relaxed kit and individual loadout choices retain low-mechanics alternatives.
+Loadout edits the selected class's preferred first discoveries. It does not immediately grant every skill. Q is fixed at run start; later chests can replace it. Fifteen passives include the retained gun/orbit/lightning/poison family and seven additions: Split barrel, Plate magazine, Third contact, Flywheel, Hop drive, Life converter and Shoulder drones.
 
-## The demo
+The new active roster includes returning blades, two-anchor stuns, center/rim damage tests, directional displacement, healing commitments, barriers, kill-refund lunges, return dashes, vaults, rolling crashes, aimed artillery and six summon behaviors. Default R remains the steerable laser. See the [mechanic inventory](docs/design/QA_14.md) for the exact mapping.
 
-- Level 1 — Loading bay: 75 seconds of mobs.
-- Level 2 — Assembly line: 90 seconds of harder mobs and two required wardens.
-- Level 3 — Reactor floor: 90 seconds of mobs, then the Foreman.
+Major summon capacity starts at one, or two for Engineer, and can reach four through mastery/gear. Small mounted drones do not consume it. One separately equipped pet remains available. Pulse anchor swaps positions and Repair anchor teleports you when cast near an existing matching construct, using the normal charge and energy cost.
 
-The build carries between levels; the demo ends after the boss. Numerical rank ceilings rise 5 → 8 → 10. Ranks 5 and 10 transform effect size or behavior. End-level promotions raise ability rarity separately from ranks. XP Power is separate from encounter Level.
+## Run progression
 
-The map is 5360 × 3400 world units, with three sectors, caches and distant boundaries. It is not infinite and has no obstacle/pathfinding system yet. Off-screen spawns stay centered on the player even when the camera is panned elsewhere.
+1. XP gives numerical upgrade choices. Ranks cap at 10; ranks 5 and 10 improve actual size, reach, duration, healing or behavior.
+2. Chests from stronger enemies, every fifth Power level and round completion unlock or replace skills. Duplicate actives grant two ranks; overflow becomes 20 field credits per excess rank. Duplicate passives grant 40 field credits. Replacement resets that slot's rank. Common/Rare/Epic variants affect active damage and recharge; selected complex abilities have lower discovery weights.
+3. Mastery starts with one point and earns two per subsequent Power level. Its 48 nodes cover Armament, Mobility, Hull, Reactor, Salvage and Command. Spend in Tab; refund freely between rounds. Prerequisites and rank caps apply.
+4. Equipment is a rarer chest outcome and the permanent progression track.
 
-Magnet is separate free utility: 88 → 180 px reach, a free rank every three level-ups, and faster pull speed. Mastery can add 105 reach. There is no full-map vacuum. Bonus drops require 48 px proximity. Ordinary kills have independent baseline chances of 1/25 for 25 credits and 1/15 for a six-second speed boost or QWE charge refill. Drop bonuses multiply those chances, with caps. Wardens/bosses also drop 75 credits. Difficult enemies retain larger scrap showers and energy/repair supplies.
+Magnet remains free utility outside passive slots. Its automatic ranks improve pickup reach and pull speed; mastery adds more reach. Bonus drops still require close collection. Ordinary kills retain independent baseline 1/25 credit-cache and 1/15 temporary-boost chances, modified by capped drop bonuses. Strong enemies scatter larger rewards.
 
-Enemies now hit harder. Heavy/elite contact and boss shots/blasts cost 2 hull; boss charges cost 3. Foreman is larger, faster, summons reinforcements and overclocks at half health. Tanks and radial shots can briefly slow you by 20%. D blocks damage and slows for three seconds. Mastery can raise maximum hull from 5 to 8.
+### Route
 
-## Equipment
+| Stage | Rounds | Afterwards |
+| --- | --- | --- |
+| 1 | Neutral, neutral, boss | Camp |
+| 2 | Neutral, neutral, boss | Shop |
+| 3 | Neutral, boss, loot | Camp |
+| 4 | Neutral, boss | Camp |
+| 5 | Neutral, boss | Shop |
+| 6 | Neutral, boss, neutral, boss | Camp |
+| 7 | Loot, neutral, boss | Shop |
+| 8 | Boss, final boss | Finish |
 
-Main menu → Equipment. Three slots: Core, Chassis, Drive; two equipment types per slot. Mk I and Mk II deliberately share each slot's art silhouette.
+Neutral rounds last 50s, loot rounds 40s, and boss rounds have a 35s lead-in followed by the fight. Modal choices pause combat. A clear gathers remaining rewards, restores 20% hull and refills energy. Finish pending chests before advancing.
 
-- Equip a replacement without consuming the old item.
-- Reroll only the bonus for 35 credits. Results can be better, worse or the same.
-- Add up to five stars with spare copies of that exact item and credits. Star N costs N duplicates and 25 × N credits. One owned copy is always retained.
-- Each star adds 20% of that item's base stat, not 20 percentage points.
-- Starter gear includes one spare of each equipped item and 150 credits, so you can try both systems immediately.
-- Each cleared level awards one random equipment copy and 50 credits in addition to collected money. Level 1–2 rewards bank when you select the clear reward; final rewards bank on victory. Collected credits also bank on defeat. Quitting/restarting mid-level abandons that level's unbanked loot.
-- Equipment is persistent; combat ranks, ability rarity and consumables reset each run. Equipment purchases apply next run.
+Eight named boss configurations share the industrial boss body but use different pattern sequences. The final boss adds hull and combines learned patterns. Enemies scale across stages; higher ascensions add damage, speed, hull, resource pressure and tighter recovery windows. Winning unlocks the next ascension up to A5. Lower ascensions remain replayable for gear.
 
-Saves use a temporary file followed by replacement; failed purchases roll back. Unreadable/corrupt equipment saves are preserved rather than overwritten. Automated runs and screenshot fixtures cannot earn persistent rewards.
+The world reuses three sectors of the existing large arena. New barriers block projectiles and ordinary movement; actors use local end-of-wall detours. Vault/phasing actions can cross walls. This is not eight new maps or a general navigation-mesh implementation.
 
-Preferences and local run diagnostics retain the original folder for compatibility:
-`%APPDATA%/Godot/app_userdata/Workshop Salvager`.
-Equipment: `mobabot_equipment.json`. Preferences: `salvage_settings.cfg`. Results: `salvage_runs.jsonl`.
-No telemetry is uploaded. There is no mid-run save or cloud sync.
+## Equipment and saves
 
-## Art and audio
+Eight slots: helmet, chest, legs, boots, charm, ring, flower, cape. Five sets: Courier, Bastion, Dynamo, Relay, Reclaimer. Forty original native icon variants use eight silhouettes and controlled material/motif changes—not forty separate paintings.
 
-Original code-native world graphics, animation and one unified icon family across abilities, passives, mastery and equipment. The nine earlier generated illustrations remain preserved but are not mixed into the current interface. [Art schema](docs/design/ART_STYLE_SCHEMA.md), [research and design decisions](docs/design/ITERATION_10.md), and [archived equipment provenance](assets/upgrades/EQUIPMENT_PROVENANCE.md).
+- Equip only owned items. Only equipped pieces contribute stats.
+- Sets activate at two and four pieces. Hover the set label for effects.
+- Reroll the bonus for 35 banked credits; the result can improve, worsen or stay equal.
+- Star N costs N spare copies and 25 × N credits, up to five stars. Each star adds 20% of the base stat. One owned copy remains.
+- Higher-tier accessories have an individual specialty even without a set.
+- Field credits buy items during the three shops; those purchases enter the permanent collection.
+- Banked credits pay workshop costs. Cleared-round loot banks separately from temporary field money.
+- Equipment changes between rounds apply immediately. Changes at home apply to new runs.
 
-User-provided MP3s in `music/` play by context: menu, settings, equipment/results, the three levels, wardens, Foreman and overclocked Foreman. Two music voices crossfade; combat inspection and upgrade screens keep the current track. Mute affects both music and synthesized effects. Music defaults quieter than effects. Music is disabled under the headless dummy driver; normal Windows playback is enabled.
+Equipment, banked credits, class preferences and ascension access persist. Ability discoveries/ranks/rarity, mastery, XP, consumables and field credits reset for a new run.
 
-## Verify and continue development
+**Continue run** restores the last cleared-round checkpoint, including pending chests, build, consumables and shop stock. Closing during a fight returns you to that camp, not the exact combat frame. Starting over asks before replacing the checkpoint. A lost run clears it; already banked gear stays.
 
-Run from the project folder:
+Save folder remains `%APPDATA%/Godot/app_userdata/Workshop Salvager`. New collection/checkpoint: `mobabot_expedition.json`. The old `mobabot_equipment.json` is read-only migration input and remains intact; the new snapshot records the mapping and original collection. Preferences remain `salvage_settings.cfg`; local diagnostics use `salvage_runs.jsonl`. No telemetry or cloud sync.
+
+Writes use validation, a temporary file and rename. Failed transactions roll back. Corrupt/unreadable saves are preserved and visibly block progression writes. Automated tests and captures never earn permanent loot.
+
+## Art, audio and verification
+
+One code-native icon/actor/effect family, plus the existing generated foundry title illustration. [Art schema](docs/design/ART_STYLE_SCHEMA.md). Older generated equipment illustrations remain archived with provenance, not mixed into the HUD. User music plays by menu, camp, combat and boss context.
+
+Run `scripts/check.ps1` for the complete suite. It checks engine errors even when Godot exits with code zero. Additional probes:
 
 ```powershell
-.\scripts\check.ps1
+.\.tools\godot\Godot_v4.7.2-stable_win64_console.exe --headless --path . --script res://tests/expedition_behavior_probe.gd
+.\.tools\godot\Godot_v4.7.2-stable_win64_console.exe --headless --path . --script res://tests/expedition_behavior_probe.gd -- --soak
 .\.tools\godot\Godot_v4.7.2-stable_win64_console.exe --headless --path . --script res://tests/mobabot09_behavior_probe.gd -- --refined
 .\.tools\godot\Godot_v4.7.2-stable_win64_console.exe --headless --path . --script res://tests/mobabot10_behavior_probe.gd -- --refined
 ```
 
-The full check includes legacy simulations, MOBA mechanics, progression, boss readability, movement at multiple physics rates, equipment/camera, UI text layout, laser/ghost/lightning and mastery effects. Behavior probes compare idle, stationary, passive-only, moving-casting and adaptive policies with normal health. They do not establish human difficulty or fun.
+The soak uses artificial health for completion/performance, not balance. Render menus/skills with `tests/expedition_ui_test.gd -- --render` using the normal renderer; captures go to ignored `output/`.
 
-[Latest audit and handoff](docs/design/QA_13.md). Use `--refined` for current combat; omitting it retains the historical probe baseline. Earlier iteration documents are historical; this README and QA_13 supersede their menu descriptions. Preserve the old Neon Collector sample at `src/main/main.tscn`.
-
-Commit coherent, verified changes; do not commit engine/cache folders, generated test captures, temp files or local player records. Public-release work still includes export packaging, audio balance/listening, music-rights confirmation, and human tuning of camera speed, rewards and combat difficulty.
+Remaining release work: human balance/feel testing, audio listening, music-rights confirmation, export packaging, wider hardware checks and richer stage identity. See [QA_14](docs/design/QA_14.md). Earlier QA/design documents describe historical versions unless explicitly carried forward.

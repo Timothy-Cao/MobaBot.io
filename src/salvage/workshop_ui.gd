@@ -52,6 +52,8 @@ var loadout_config := MobaKit.preset()
 var key_config := MobaKit.DEFAULT_BINDS.duplicate()
 var loadout_page := "abilities"
 var loadout_slot := "q"
+var loadout_gallery_page := 0
+var expedition_ui := false
 var passive_index := 0
 var rebind_slot := ""
 var loadout_message := "Applies to your next run."
@@ -370,6 +372,8 @@ func _ability_hud(model: SalvageRun) -> void:
 		var state_text := "ON" if active else "OFF"
 		if kit.onboarding and kit.loadout.passives[i] == "orbit" and active: state_text = "FAR" if kit.orbit_far else "NEAR"
 		if kit.loadout.passives[i] == "lightning" and active: state_text = "FOCUS" if kit.arc_focused else "CHAIN"
+		if kit.discovery and kit.loadout.passives[i] == "lightning" and active: state_text = "LONG" if kit.arc_focused else "NEAR"
+		if kit.loadout.passives[i] == "converter" and active: state_text = "HULL" if kit.extra.converter_mode == 0 else "CELL"
 		if kit.starting_gun and kit.loadout.passives[i] == "bolt" and active: state_text = "SNIPE" if kit.gun_sniper else "AUTO"
 		if model.attacks.enabled and kit.loadout.passives[i] == "bolt":
 			toggle_tiles[i].tooltip_text = "%s\n%.1f damage · %.2f shots/sec · %d range\nCycle machine gun / sniper / off. Independent of movement and S.\n2 energy/sec while powered." % ["Auto sniper" if kit.gun_sniper else "Auto machine gun", model.attacks.auto_damage(model), 1.0 / model.attacks.auto_interval(model), model.attacks.auto_range(model)]
@@ -382,7 +386,10 @@ func _ability_hud(model: SalvageRun) -> void:
 		ability_shades[slot].visible = kit.charges[slot] == 0 or not affordable or not kit.unlocked(slot)
 		ability_labels[slot].text = str(ceili(kit.recharge[slot])) if kit.charges[slot] == 0 else ("LOW" if not affordable else (str(kit.charges[slot]) if data.max > 1 else ""))
 		ability_recharge[slot].value = kit.cooldown(slot) - kit.recharge[slot]
-		if not kit.unlocked(slot): ability_labels[slot].text = "%ds" % ceili(kit.UNLOCKS[slot] - kit.elapsed)
+		if not kit.unlocked(slot): ability_labels[slot].text = "LOCK" if kit.discovery else "%ds" % ceili(kit.UNLOCKS[slot] - kit.elapsed)
+		if kit.extra.recasts.has(slot):
+			ability_shades[slot].visible = false
+			ability_labels[slot].text = "↻ %d" % ceili(kit.extra.recasts[slot].life)
 		if kit.laser_left > 0 and slot == kit.laser_slot:
 			ability_labels[slot].text = "%.1f" % kit.laser_left
 			ability_recharge[slot].value = kit.cooldown(slot) * kit.laser_left / 5.0
@@ -414,6 +421,10 @@ func update_hud(model: SalvageRun) -> void:
 	mission_rail.stage = model.stage
 	mission_rail.progress = clampf(model.stage_time / maxf(1, model.encounter_seconds()), 0, 1)
 	mission_rail.queue_redraw()
+	if model.exp != null:
+		stage_label.text = model.exp.label().to_upper()
+		time_label.text = "BOSS" if model.boss_spawned else ("CLEAR" if remaining == 0 else "%02d:%02d" % [remaining / 60, remaining % 60])
+		mission_rail.visible = false
 	energy_bar.visible = model.kit != null
 	energy_label.visible = model.kit != null
 	if model.kit != null:
@@ -457,7 +468,7 @@ func update_hud(model: SalvageRun) -> void:
 		if not enemy.is_empty():
 			boss_label.visible = true
 			boss_bar.visible = true
-			var name_text: String = {"rammer": "Ram Warden", "artillery": "Artillery Warden", "foreman": "Foreman"}[enemy.role]
+			var name_text: String = CombatReadability.enemy_name(enemy)
 			var phase_text := "EXPOSED" if enemy.phase == "recover" else ("OVERCLOCKED" if enemy.enraged else "")
 			boss_label.text = name_text
 			if not phase_text.is_empty(): boss_label.text += " / " + phase_text
@@ -541,9 +552,9 @@ func show_result(model: SalvageRun, saved: bool = false) -> void:
 	notice_time = 0
 	_dim()
 	_panel(Rect2(188, 126, 584, 353))
-	_label(overlay, ("Demo complete" if model.demo_mode else "Shift complete") if model.state == "won" else "Destroyed", Rect2(222, 151, 516, 52), 33, CREAM, true)
+	_label(overlay, ("Expedition complete" if model.exp != null else ("Demo complete" if model.demo_mode else "Shift complete")) if model.state == "won" else "Destroyed", Rect2(222, 151, 516, 52), 33, CREAM, true)
 	_label(overlay, "%d\nKills" % model.kills, Rect2(230, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
-	_label(overlay, "%d\nCredits" % model.coins, Rect2(405, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
+	_label(overlay, "%d\nRounds" % (model.exp.route_index+(1 if model.state=="won" else 0)) if model.exp != null else "%d\nCredits" % model.coins, Rect2(405, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
 	_label(overlay, "%ds\nSurvived" % int(model.time), Rect2(580, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
 	if model.state == "lost" and not model.last_damage.is_empty():
 		_label(overlay, "Final hit: " + model.last_damage, Rect2(219, 305, 522, 20), 13, CREAM, true, HORIZONTAL_ALIGNMENT_CENTER)

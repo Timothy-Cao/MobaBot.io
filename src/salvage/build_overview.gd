@@ -17,7 +17,7 @@ static func draw(ui, model: SalvageRun) -> void:
 		ui._label(ui.overlay, (str(kit.ranks[slot]) if kit.ranks[slot] > 0 else "") if kit.unlocked(slot) else "Locked", Rect2(x, y + 68, 74, 18), 11, ui.MUTED, false, HORIZONTAL_ALIGNMENT_CENTER)
 		tile.tooltip_text = "%s · Rank %d\n%s\n%.1fs recharge · %s\nBase: %s" % [MobaKit.ABILITIES[id].name, kit.ranks[slot], MobaKit.RARITIES[kit.tiers[slot]], kit.cooldown(slot), MobaKit.cost_text(id), MobaKit.ABILITIES[id].text]
 		if MobaKit.deals_damage(id): tile.tooltip_text += "\nDamage ×%.2f" % kit.damage_scale(slot)
-		if not kit.unlocked(slot): tile.tooltip_text += "\nUnlocks in %ds" % ceili(kit.UNLOCKS[slot] - kit.elapsed)
+		if not kit.unlocked(slot): tile.tooltip_text += "\nFind in a chest" if kit.discovery else "\nUnlocks in %ds" % ceili(kit.UNLOCKS[slot] - kit.elapsed)
 	ui._label(ui.overlay, "PASSIVES", Rect2(49, 336, 370, 21), 12, ui.TEAL, true)
 	for i in range(4):
 		var id: String = kit.loadout.passives[i]
@@ -28,8 +28,8 @@ static func draw(ui, model: SalvageRun) -> void:
 	ui._label(ui.overlay, "GEAR", Rect2(49, 467, 60, 20), 12, ui.TEAL, true)
 	for i in range(model.equipment_snapshot.size()):
 		var item: Dictionary = model.equipment_snapshot[i]
-		var tile := _tile(ui, Rect2(124 + i * 66, 451, 50, 48))
-		ui._icon(tile, item.icon, Rect2(4, 3, 42, 42))
+		var tile := _tile(ui, Rect2(103 + i * 42, 451, 39, 48)) if model.exp != null else _tile(ui, Rect2(124 + i * 66, 451, 50, 48))
+		ui._icon(tile, item.icon, Rect2(2, 3, 35, 42) if model.exp != null else Rect2(4, 3, 42, 42))
 		tile.tooltip_text = "%s · %s\n%d stars\n%s" % [item.slot, item.name, item.stars, item.stats]
 	ui._surface(ui.overlay, Rect2(455, 112, 1, 379), ui.EDGE, 0, ui.EDGE, 0)
 	var stats := model.stats()
@@ -39,7 +39,8 @@ static func draw(ui, model: SalvageRun) -> void:
 		["Ability damage", "+%.0f%%" % (kit.gear_damage * 100 + kit.mastery_damage * 100), "Bonus from equipment and mastery. Ability ranks and rarity apply separately."],
 		["Fire rate", "%.2f /s" % (1.0 / model.attacks.auto_interval(model)), "Auto gun. Basic attacks: %.2f/sec; %.2f damage. Auto damage: %.2f." % [1.0 / model.attacks.interval(model), model.attacks.damage(model), model.attacks.auto_damage(model)]],
 		["Move speed", "%.0f" % (stats.move_speed * (0.8 if model.slow_left > 0 else 1.0)), "Includes current boosts and slows."],
-		["Pickup reach", "%.0f" % stats.magnet_radius, "XP bonus: +%d%%. Drop bonus: +%.0f%%. Bonus drops require close collection." % [model.mastery.rank_of("learning") * 10, model.drop_bonus * 100]]]
+		["Pickup reach", "%.0f" % stats.magnet_radius, "XP bonus: +%d%%. Drop bonus: +%.0f%%. Bonus drops require close collection." % [float(model.exp.stats.get("xp",0))*100 if model.exp != null else model.mastery.rank_of("learning") * 10, model.drop_bonus * 100]]]
+	if model.exp != null: rows[0][2] = "Resistance: %.0f. Hull regeneration: %.2f/sec." % [model.exp.resistance, (model.exp.stats.get("health_regen",0)+(0.35 if model.exp.class_id=="melee" else 0.12))*(0.8 if model.exp.ascension>=3 else 1)]
 	for i in range(rows.size()):
 		var row: Array = rows[i]
 		var tile := _tile(ui, Rect2(501, 112 + i * 51, 407, 43), false)

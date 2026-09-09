@@ -2,6 +2,8 @@
 
 Design direction, implementation boundary and backlog · 8 September 2026
 
+Historical 0.12 plan. The 0.14 expedition now implements the class/chest/tree/equipment/campaign milestones. Use `QA_14.md`, `EXPEDITION_RESEARCH_14.md` and the current README for shipped scope and deliberate adaptations; the implementation statements below describe 0.12 only.
+
 ## Decision
 
 Build a survivor-like with **two simultaneous layers**: autonomous tools create steady spectacle, while deliberate basic attacks, aimed skills and positioning create agency. Three eventual classes emphasize ranged kiting, melee sustain or summon placement. They share the same input language and art grammar.

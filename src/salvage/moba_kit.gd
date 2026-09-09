@@ -6,12 +6,12 @@ const SLOTS := ["q", "w", "e", "r", "d", "f", "t"]
 const BIND_SLOTS := ["q", "w", "e", "r", "d", "f", "t", "p1", "p2", "p3", "p4"]
 const DEFAULT_BINDS := {"q": KEY_Q, "w": KEY_W, "e": KEY_E, "r": KEY_R, "d": KEY_D, "f": KEY_F, "t": KEY_T, "p1": KEY_1, "p2": KEY_2, "p3": KEY_3, "p4": KEY_4}
 const ENERGY_COST := {"salvo": 14.0, "nova": 16.0, "shield": 20.0, "rail": 12.0, "mortar": 18.0, "lunge": 12.0, "overdrive": 30.0, "beam": 30.0, "turret": 20.0, "pylon": 24.0}
-const UPKEEP := {"bolt": 2.0, "orbit": 2.0, "pulse": 3.0, "ricochet": 2.0, "plating": 2.0, "thorns": 1.0, "lightning": 4.0, "poison": 3.0}
+const UPKEEP := {"bolt": 2.0, "orbit": 2.0, "pulse": 3.0, "ricochet": 2.0, "plating": 2.0, "thorns": 1.0, "lightning": 4.0, "poison": 3.0, "sidebolts": 3.0, "plates": 3.0, "threehit": 3.0, "momentum": 3.0, "hopdrive": 2.0, "converter": 0.0, "mounted": 3.0}
 const RARITIES := ["Common", "Rare", "Epic"]
 const RARITY_COLORS := [Color("a0b3b7"), Color("69b9ed"), Color("c697eb")]
-const PASSIVES := {
+const LEGACY_PASSIVES := {
 	"poison": {"name": "Coolant trail", "icon": "poison", "text": "Leave a 4-second coolant trail while powered. 8 damage/sec to enemies inside; overlapping patches do not stack. 3 energy/sec. Toggle off to stop laying trails. No self-damage."},
-	"lightning": {"name": "Arc coil", "icon": "lightning", "text": "Chain lightning every 1.8s. 7 damage, up to 4 targets. Toggle between chaining and focused double-damage strikes."},
+	"lightning": {"name": "Arc coil", "icon": "lightning", "text": "Cycle short-range chain lightning, long-range focused strikes and off. Expedition: 200 range / 0.9s chain; 440 range / 2.2s focused double damage. 4 energy/sec in either mode."},
 	"bolt": {"name": "Auto gun", "icon": "power", "text": "Autonomous weapon, separate from basic attacks. Cycle machine gun, sniper and off. Machine gun: rapid short-range shots with spread. Sniper: slower, stronger, longer shots. Neither homes. S does not stop it."},
 	"orbit": {"name": "Scrap orbit", "icon": "grinder", "text": "Collected scrap becomes orbiting tools."},
 	"pulse": {"name": "Collection pulse", "icon": "pulse", "text": "Every 8 scrap releases a damaging pulse."},
@@ -19,7 +19,7 @@ const PASSIVES := {
 	"plating": {"name": "Reactive plating", "icon": "capacity", "text": "After taking damage, gain 0.65 seconds of extra invulnerability."},
 	"thorns": {"name": "Recoil shell", "icon": "thorns", "text": "Taking hull damage releases a 6-damage ring in 100 radius."},
 }
-const ABILITIES := {
+const LEGACY_ABILITIES := {
 	"rocket": {"name": "Impact bolt", "category": "active", "icon": "power", "glyph": "rail", "cd": 3.0, "max": 2, "range": 540.0, "aim": "line", "text": "Aim a straight rocket. 15 impact damage plus an 8-damage blast on contact or at maximum range."},
 	"flame": {"name": "Welding torch", "category": "active", "icon": "rapid", "glyph": "flame", "cd": 7.0, "max": 1, "range": 190.0, "aim": "line", "text": "Burn a forward cone for 2 seconds: 24 damage total. Steer with the cursor while moving."},
 	"nuke": {"name": "Reactor drop", "category": "active", "icon": "pulse", "glyph": "target", "cd": 16.0, "max": 1, "range": 480.0, "aim": "ground", "text": "85 damage in a 135-radius area after 0.65s. Confirm with left click; right click cancels."},
@@ -40,6 +40,25 @@ const ABILITIES := {
 	"sacrifice": {"name": "Emergency cell", "category": "active", "icon": "magnet", "glyph": "cell", "cd": 16.0, "max": 1, "range": 0.0, "aim": "self", "text": "Spend 1 hull to restore 55 energy. Cannot cast at 1 hull or when energy is full. Ignores shields; cannot kill you."},
 }
 const PETS := {"scout": "Scrap scout", "drone": "Bolt drone", "none": "No pet"}
+static var ABILITIES: Dictionary = _all_abilities()
+static var PASSIVES: Dictionary = _all_passives()
+var extra := BotSkillEngine.new()
+var discovery := false
+var discovered: Array = ["q", "d", "f", "p1"]
+var cooldown_bonus := 0.0
+var attack_speed_bonus := 0.0
+var attack_damage_bonus := 0.0
+var attack_range_bonus := 0.0
+
+static func _all_abilities() -> Dictionary:
+	var data := LEGACY_ABILITIES.duplicate(true)
+	data.merge(BotSkillCatalog.actives())
+	return data
+
+static func _all_passives() -> Dictionary:
+	var data := LEGACY_PASSIVES.duplicate(true)
+	data.merge(BotSkillCatalog.passives())
+	return data
 var loadout: Dictionary
 var bindings: Dictionary
 var charges: Dictionary = {}
@@ -105,6 +124,7 @@ static func demo_preset() -> Dictionary:
 	return config
 
 func unlocked(slot: String) -> bool:
+	if discovery: return slot in discovered
 	if starting_gun and slot.begins_with("p") and loadout.passives[int(slot.substr(1)) - 1] == "bolt": return true
 	return not onboarding or elapsed >= float(UNLOCKS.get(slot, 0))
 
@@ -121,10 +141,10 @@ static func with_starter_gun(config: Dictionary) -> Dictionary:
 	return result
 
 func ability_cost(id: String) -> float:
-	return float({"rocket": 8, "flame": 18, "nuke": 28, "laser": 40}.get(id, ENERGY_COST.get(id, 0)))
+	return float({"rocket": 8, "flame": 18, "nuke": 28, "laser": 40}.get(id, ENERGY_COST.get(id, ABILITIES[id].get("cost", 0))))
 
 static func deals_damage(id: String) -> bool:
-	return id not in ["shield", "sprint", "blink", "dash", "pylon", "sacrifice"]
+	return id not in ["shield", "sprint", "blink", "dash", "pylon", "sacrifice", "repair_channel", "wall", "medic_sentry", "tumble", "veil_dash", "vault", "consume"]
 
 static func migrate_loadout(config: Dictionary) -> Dictionary:
 	var result := config.duplicate(true)
@@ -149,7 +169,7 @@ func area_scale(slot: String) -> float:
 
 func cast_range(slot: String) -> float:
 	var id: String = loadout[slot]
-	return float(ABILITIES[id].range) * (area_scale(slot) if id in ["nova", "overdrive", "blink", "dash", "lunge"] else 1.0)
+	return float(ABILITIES[id].range) * (area_scale(slot) if id in ["nova", "overdrive", "blink", "dash", "lunge", "tumble", "echo_dash", "veil_dash", "hop", "vault", "pursuit", "landing"] else 1.0)
 
 func rank_up(slot: String) -> bool:
 	if slot not in SLOTS or ranks[slot] >= 10:
@@ -182,6 +202,11 @@ func toggle(index: int) -> bool:
 	if index < 0 or index >= 4:
 		return false
 	if not unlocked("p%d" % (index + 1)): return false
+	if loadout.passives[index] == "converter":
+		if not toggles[index]: toggles[index] = true; extra.converter_mode = 0
+		elif extra.converter_mode == 0: extra.converter_mode = 1
+		else: toggles[index] = false
+		return true
 	if starting_gun and loadout.passives[index] == "bolt":
 		if not toggles[index]:
 			if energy < 1: return false
@@ -214,7 +239,7 @@ func cooldown(slot: String) -> float:
 
 func cooldown_at(slot: String, rank_value: int, tier_value: int = -1) -> float:
 	var tier := int(tiers.get(slot, 0)) if tier_value < 0 else tier_value
-	return float(ABILITIES[loadout[slot]].cd) * (1.0 - tier * 0.08) * (1.0 - SalvageProgression.bonus(rank_value) * 0.5)
+	return float(ABILITIES[loadout[slot]].cd) * (1.0 - tier * 0.08) * (1.0 - SalvageProgression.bonus(rank_value) * 0.5) / (1.0 + cooldown_bonus)
 
 func damage_scale(slot: String) -> float:
 	return damage_scale_at(slot, int(ranks.get(slot, 0)))
@@ -232,6 +257,7 @@ func promote(slot: String) -> bool:
 	return true
 
 static func cost_text(id: String) -> String:
+	if BotSkillCatalog.SPECS.has(id): return "%d energy" % ABILITIES[id].cost if ABILITIES[id].cost > 0 else "Free"
 	if id in ["rocket", "flame", "nuke", "laser"]: return "%d energy" % {"rocket": 8, "flame": 18, "nuke": 28, "laser": 40}[id]
 	return "1 hull -> 55 energy" if id == "sacrifice" else ("%d energy" % ENERGY_COST[id] if ENERGY_COST.has(id) else "Free")
 
@@ -312,10 +338,12 @@ func target_point(run, slot: String, cursor: Vector2) -> Vector2:
 	return point.clamp(run.ARENA.position + Vector2.ONE * 16, run.ARENA.end - Vector2.ONE * 16)
 
 func preview_ready(run, slot: String, cursor: Vector2) -> bool:
+	if extra.recasts.has(slot): return true
 	if laser_left > 0 and slot not in ["d", "f"]: return false
 	if slot not in SLOTS or charges[slot] <= 0 or not unlocked(slot): return false
 	var id: String = loadout[slot]
 	if energy < ability_cost(id): return false
+	if not extra.can_cast(run, id, target_point(run, slot, cursor), cast_range(slot)): return false
 	if id == "sacrifice": return run.health > 1 and energy < energy_max()
 	if id == "salvo":
 		var target: Dictionary = run.nearest_enemy(run.player)
@@ -326,6 +354,8 @@ func preview_ready(run, slot: String, cursor: Vector2) -> bool:
 
 func cast(run, slot: String, cursor: Vector2) -> bool:
 	last_failure = "Not ready"
+	if run.state != "running": return false
+	if extra.recast(run, slot, target_point(run, slot, cursor)): return true
 	if laser_left > 0:
 		if slot == laser_slot:
 			cancel_laser()
@@ -336,7 +366,7 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	if run.state != "running" or not SLOTS.has(slot) or charges[slot] <= 0:
 		return false
 	if not unlocked(slot):
-		last_failure = "Unlocks at %d seconds" % UNLOCKS[slot]
+		last_failure = "Find in a chest" if discovery else "Unlocks at %d seconds" % UNLOCKS[slot]
 		return false
 	var id: String = loadout[slot]
 	var data: Dictionary = ABILITIES[id]
@@ -344,6 +374,9 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	if data.aim == "line" and direction == Vector2.ZERO:
 		return false
 	var point := target_point(run, slot, cursor)
+	if not extra.can_cast(run, id, point, cast_range(slot)):
+		last_failure = "No valid target"
+		return false
 	if id in ["dash", "lunge", "blink"] and point.distance_squared_to(run.player) <= 0.01:
 		last_failure = "No room to move"
 		return false
@@ -368,6 +401,7 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	if recharge[slot] <= 0:
 		recharge[slot] = cooldown(slot)
 	var multiplier := damage_scale(slot)
+	extra.repair_left = 0
 	cast_counts[id] = int(cast_counts.get(id, 0)) + 1
 	run.aim = direction if direction != Vector2.ZERO else run.aim
 	run.emit_event("cast", run.player, {"ability": id, "target": point, "milestone": milestone(slot)})
@@ -402,6 +436,7 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 		"rail": run._add_projectile(run.player, direction * 850, (8 + run.bolt_damage()) * multiplier, "rail", 3 + milestone(slot) * 2)
 		"mortar": zones.append({"pos": point, "time": 0.55, "duration": 0.55, "radius": 90.0 * area_scale(slot), "kind": "blast", "scale": multiplier})
 		"lunge", "dash":
+			extra.dash_crosses_walls = false
 			dash_left = 0.18
 			dash_velocity = (point - run.player) / dash_left
 			dash_damage = 12.0 * multiplier if id == "lunge" else 0.0
@@ -416,7 +451,7 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 			sprint = 3.0 + milestone(slot)
 			run.invincible = maxf(run.invincible, 3.0)
 			run.slow_left = 0
-			if run.mastery.rank_of("resolve") > 0: run.health = mini(run.max_health(), run.health + 1)
+			if run.mastery.rank_of("resolve") > 0: run.heal(1)
 		"blink":
 			run.emit_event("blink", run.player, {"target": point})
 			run.player = point
@@ -427,6 +462,8 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 			run.health -= 1
 			health_spent += 1
 			energy = minf(energy_max(), energy + 55 + milestone(slot) * 15)
+		_: extra.cast(run, slot, id, point, direction, multiplier)
+	extra.mirror(run, id, direction, multiplier)
 	last_failure = ""
 	return true
 
@@ -435,7 +472,7 @@ func step(run, delta: float) -> void:
 	_step_arc(run, delta)
 	var previous := elapsed
 	elapsed += delta
-	if onboarding:
+	if onboarding and not discovery:
 		for slot in UNLOCKS:
 			if starting_gun and slot.begins_with("p") and loadout.passives[int(slot.substr(1)) - 1] == "bolt": continue
 			if previous < UNLOCKS[slot] and elapsed >= UNLOCKS[slot]:
@@ -512,7 +549,7 @@ func step(run, delta: float) -> void:
 			else:
 				summon.clock = 5.0
 				if run.player.distance_to(summon.pos) <= 100 * (1 + summon.get("milestone", 0) * 0.5):
-					run.health = mini(run.max_health(), run.health + 1)
+					run.heal(1)
 					run.emit_event("equipped", run.player, {"id": "repair"})
 		if summon.life <= 0:
 			summon.clear()
@@ -525,6 +562,7 @@ func step(run, delta: float) -> void:
 		for pickup in run.pickups:
 			if Vector2(pickup.pos).distance_to(pet_position) < 105:
 				pickup.pull = true
+	extra.step(run, delta)
 
 func cancel_laser() -> void:
 	laser_left = 0
@@ -576,12 +614,13 @@ func _step_arc(run, delta: float) -> void:
 	arc_clock -= delta
 	if arc_clock > 0: return
 	var target: Dictionary = run.nearest_enemy(run.player)
-	if target.is_empty() or Vector2(target.pos).distance_to(run.player) > 280: return
-	arc_clock = 1.8 # No stored burst after a long interval without targets.
+	var reach := (440.0 if arc_focused else 200.0) if discovery else 280.0
+	if target.is_empty() or Vector2(target.pos).distance_to(run.player) > reach: return
+	arc_clock = (2.2 if arc_focused else 0.9) if discovery else 1.8
 	var origin: Vector2 = run.player
 	var visited: Array = []
 	for i in range(1 if arc_focused else 4):
-		if target.is_empty() or Vector2(target.pos).distance_to(origin) > (280 if i == 0 else 145): break
+		if target.is_empty() or Vector2(target.pos).distance_to(origin) > (reach if i == 0 else 145): break
 		visited.append(target.id)
 		run.emit_event("lightning", origin, {"target": target.pos})
 		if run.mastery.rank_of("shock") > 0 and not target.has("role"):
@@ -596,6 +635,7 @@ func move_dash(run, delta: float) -> void:
 	var travel := minf(delta, dash_left)
 	run.velocity = dash_velocity
 	run.player = (before + dash_velocity * travel).clamp(run.ARENA.position + Vector2.ONE * 16, run.ARENA.end - Vector2.ONE * 16)
+	if not extra.dash_crosses_walls: run.player = extra.solid_point(before,run.player,16)
 	dash_left = maxf(0, dash_left - delta)
 	if dash_damage > 0:
 		for enemy in run.enemies:

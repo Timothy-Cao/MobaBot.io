@@ -3,47 +3,24 @@ $ErrorActionPreference = "Stop"
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $godot = (Resolve-Path (Join-Path $projectRoot ".tools\godot\Godot_v4.7.2-stable_win64_console.exe")).Path
 
-& $godot --headless --path $projectRoot --editor --import --quit
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+function Invoke-GodotCheck {
+    param([string[]]$EngineArguments)
+    # Godot can return exit 0 after a GDScript error. Check its output as well.
+    $testOutput = & $godot --headless --path $projectRoot @EngineArguments 2>&1
+    $testExit = $LASTEXITCODE
+    $testOutput | ForEach-Object { Write-Host $_ }
+    if ($testExit -ne 0 -or ($testOutput | Select-String -Pattern '(^|\s)(SCRIPT ERROR:|ERROR:)')) {
+        throw "Godot check failed: $($EngineArguments -join ' ')"
+    }
+}
 
-& $godot --headless --path $projectRoot --script "res://tests/smoke_test.gd"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-& $godot --headless --path $projectRoot --script "res://tests/salvage_test.gd"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-& $godot --headless --path $projectRoot --script "res://tests/moba_test.gd"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-& $godot --headless --path $projectRoot --script "res://tests/iteration04_test.gd"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-& $godot --headless --path $projectRoot --script "res://tests/iteration05_test.gd"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-& $godot --headless --path $projectRoot --script "res://tests/demo_test.gd"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-& $godot --headless --path $projectRoot --script "res://tests/readability_test.gd"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-& $godot --headless --path $projectRoot --script "res://tests/motion_qa_test.gd"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-& $godot --headless --path $projectRoot --script "res://tests/mobabot09_test.gd"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-& $godot --headless --path $projectRoot --script "res://tests/layout_audit.gd"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-& $godot --headless --path $projectRoot --script "res://tests/mobabot10_test.gd"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-& $godot --headless --path $projectRoot --script "res://tests/mobabot11_test.gd"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-& $godot --headless --path $projectRoot --script "res://tests/mobabot12_test.gd"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-& $godot --headless --path $projectRoot --script "res://tests/mobabot13_test.gd"
-exit $LASTEXITCODE
+Invoke-GodotCheck -EngineArguments @('--editor', '--import', '--quit')
+foreach ($testName in @(
+    'smoke_test', 'salvage_test', 'moba_test', 'iteration04_test', 'iteration05_test',
+    'demo_test', 'readability_test', 'motion_qa_test', 'mobabot09_test', 'layout_audit',
+    'mobabot10_test', 'mobabot11_test', 'mobabot12_test', 'mobabot13_test',
+    'expedition_test', 'expedition_ui_test'
+)) {
+    Invoke-GodotCheck -EngineArguments @('--script', "res://tests/$testName.gd")
+}
+exit 0

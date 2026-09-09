@@ -13,22 +13,22 @@ var auto_cooldown := 0.0
 var auto_shots := 0
 
 func attack_range(run) -> float:
-	return 310.0
+	return (105.0 if run.exp != null and run.exp.class_id == "melee" else 310.0) + run.kit.attack_range_bonus
 
 func interval(run) -> float:
-	return 0.43 / SalvageProgression.multiplier(run.rank_of("rapid"))
+	return 0.43 / SalvageProgression.multiplier(run.rank_of("rapid")) / (1 + run.kit.attack_speed_bonus)
 
 func damage(run) -> float:
-	return 2.0 * SalvageProgression.multiplier(run.rank_of("power"))
+	return (7.0 if run.exp != null and run.exp.class_id == "melee" else 2.0) * SalvageProgression.multiplier(run.rank_of("power")) * (1 + run.kit.attack_damage_bonus) * (1.75 if run.kit.extra.empowered else 1.0)
 
 func auto_range(run) -> float:
 	return 470.0 if run.kit.gun_sniper else 265.0
 
 func auto_interval(run) -> float:
-	return (0.8 if run.kit.gun_sniper else 0.16) / SalvageProgression.multiplier(run.rank_of("rapid"))
+	return (0.8 if run.kit.gun_sniper else 0.16) / SalvageProgression.multiplier(run.rank_of("rapid")) / (1 + run.kit.attack_speed_bonus)
 
 func auto_damage(run) -> float:
-	return (7.0 if run.kit.gun_sniper else 1.5) * SalvageProgression.multiplier(run.rank_of("power"))
+	return (7.0 if run.kit.gun_sniper else 1.5) * SalvageProgression.multiplier(run.rank_of("power")) * (1 + run.kit.attack_damage_bonus)
 
 func valid(enemy: Dictionary) -> bool:
 	return not enemy.is_empty() and not enemy.dead and enemy.warmup <= 0 and enemy.hp > 0
@@ -124,6 +124,8 @@ func fire(run) -> void:
 	run.projectiles.back().basic_attack = true
 	cooldown += interval(run)
 	shots += 1
+	run.kit.extra.empowered = false
+	run.kit.extra.after_basic(run, direction)
 	run.emit_event("shot", run.player)
 
 func _fire_auto(run) -> void:

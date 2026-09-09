@@ -6,6 +6,7 @@ const NAMES := {"rammer": "Ram Warden", "artillery": "Artillery Warden", "forema
 const SAFE_VIEW := Rect2(54, 133, 852, 218)
 
 static func enemy_name(enemy: Dictionary) -> String:
+	if enemy.has("title"): return enemy.title
 	return NAMES.get(enemy.get("role", ""), ["Bumper", "Charger", "Foreman", "Armored tank"][enemy.kind])
 
 static func hint(cause: String) -> String:

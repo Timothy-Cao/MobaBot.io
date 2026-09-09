@@ -41,6 +41,9 @@ static func note(run, id: String, r: int) -> String:
 		var ability: String = run.kit.loadout[slot]
 		if ability in ["rocket", "flame", "nuke"]: return "5 / 10: effect size +25% / +50%."
 		if ability == "laser": return "5 / 10: cutter width +25% / +50%; twin outer rails."
+		if BotSkillCatalog.SPECS.has(ability):
+			var metric := expedition_effect(ability, 0)
+			return "5 / 10: %s +25%% / +50%%." % String(metric[0]).to_lower()
 		return {"salvo": "5 / 10: volley fires 7 / 9 bolts.", "nova": "5 / 10: ring radius +25% / +50%.", "mortar": "5 / 10: blast radius +25% / +50%.", "beam": "5 / 10: beam width +25% / +50%.", "rail": "5 / 10: +2 / +4 pierces; gold core.", "shield": "5 / 10: blocks 2 / 3 hits.", "sprint": "5 / 10: lasts 4 / 5 seconds.", "blink": "5 / 10: range +25% / +50%.", "dash": "5 / 10: range +25% / +50%.", "lunge": "5 / 10: range +25% / +50%.", "overdrive": "5 / 10: radius +25% / +50%.", "turret": "5 / 10: sentry fires 25% / 50% faster.", "pylon": "5 / 10: heal radius +50% / +100%.", "sacrifice": "5 / 10: restores 70 / 85 energy."}.get(ability, "")
 	return {"power": "5 / 10: +25% / +50% damage, +1 / +2 pierces.", "rapid": "5 / 10: +25% / +50% firing speed.", "grinder": "5 / 10: larger orbit, +1 / +2 tool hits.", "ricochet": "5 / 10: +2 / +4 extra bounces.", "pulse": "5 / 10: +25% / +50% pulse radius.", "capacity": "5 / 10: +2 / +4 extra tool slots.", "reactor": "5 / 10: +2 / +4 extra energy/sec.", "cell": "5 / 10: +20 / +40 extra capacity."}.get(id, "")
 
@@ -60,7 +63,7 @@ static func values(run, id: String, r: int) -> Array[Dictionary]:
 			"dash": ["Range", 220 * (1 + m * 0.25), " px"], "lunge": ["Range", 170 * (1 + m * 0.25), " px"],
 			"overdrive": ["Radius", 180 * (1 + m * 0.25), " px"], "turret": ["Sentry shots/sec", snappedf((1 + m * 0.25) / 0.6, 0.01), ""],
 			"pylon": ["Heal radius", 100 * (1 + m * 0.5), " px"], "sacrifice": ["Energy restored", 55 + m * 15, ""]}
-		var effect: Array = effects[run.kit.loadout[slot]]
+		var effect: Array = effects.get(run.kit.loadout[slot], expedition_effect(run.kit.loadout[slot], m))
 		return [{"label": "Damage bonus" if combat else "Recharge cut", "value": snappedf(b * (100 if combat else 50), 0.1), "unit": "%"}, {"label": effect[0], "value": effect[1], "unit": effect[2]}, {"label": "Recharge", "value": snappedf(run.kit.cooldown_at(slot, r), 0.01), "unit": "s"}]
 	match id:
 		"power":
@@ -83,3 +86,17 @@ static func values(run, id: String, r: int) -> Array[Dictionary]:
 		"cell": return [{"label": "Max energy", "value": 100 + r * 10 + m * 20 + run.kit.energy_bonus, "unit": ""}]
 		"magnet": return [{"label": "Pickup radius", "value": 65 + r * 23 if run.kit != null and run.kit.onboarding else 150 + r * 100, "unit": " px"}, {"label": "Pull speed", "value": 800 + r * 180, "unit": " px/s"}]
 	return [{"label": "Hull", "value": run.health, "unit": " / %d" % run.max_health()}]
+
+static func expedition_effect(id: String, m: int) -> Array:
+	var metric: Array = {
+		"returner":["Blade width",24," px"], "recall":["Blade width",24," px"],
+		"gravity":["Field radius",115," px"], "strike":["Blast radius",110," px"], "crosswire":["Wire width",32," px"],
+		"repulsor":["Cone reach",230," px"], "sweep":["Cone reach",160," px"], "tractor":["Cone reach",245," px"],
+		"reap":["Rim radius",165," px"], "thrust":["Thrust reach",230," px"], "consume":["Hull restored",15,"%"],
+		"repair_channel":["Hull restored",24,"%"], "wall":["Barrier width",190," px"],
+		"tumble":["Range",135," px"], "echo_dash":["Range",260," px"], "veil_dash":["Range",250," px"],
+		"hop":["Range",210," px"], "vault":["Range",290," px"], "pursuit":["Range",310," px"], "landing":["Range",800," px"],
+		"artillery":["Blast radius",110," px"], "roller":["Crash radius",135," px"],
+		"forward_sentry":["Lifetime",18,"s"], "pulse_sentry":["Lifetime",18,"s"], "medic_sentry":["Lifetime",20,"s"],
+		"mirror_sentry":["Lifetime",20,"s"], "hook_sentry":["Lifetime",20,"s"], "crawler":["Lifetime",20,"s"]}.get(id,["Effect scale",100,"%"])
+	return [metric[0],float(metric[1])*(1+m*0.25),metric[2]]

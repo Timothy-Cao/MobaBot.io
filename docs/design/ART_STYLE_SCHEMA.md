@@ -1,4 +1,14 @@
-# MobaBot.io — art style schema 1.8
+# MobaBot.io — art style schema 1.9
+
+## v0.14 expedition override
+
+Extend the native 64-unit icon family, not the archived painted equipment style. Twenty-eight new action drawings and eight gear silhouettes use steel edges, enamel bodies and sparse brass/cream highlights. Forty equipment variants are five controlled set treatments over those eight shapes; their small motif counts supplement color. They are not forty independently painted assets. `expedition_icon.gd` is the original source; no new external art pack or bitmap generation was used in this pass.
+
+Six mastery branches use stat-specific icons, two prerequisite lanes, four depths, small rank counters and one hover/focus inspector. Equipment shows eight fitted slots, five matching collection variants and one signed comparison, including removed stats. Keep the two Build pages and four basic settings. Chest choices display a slot, icon and short Unlock/Replace/+2 ranks consequence; mechanics remain in tooltips. Do not add a dashboard for each progression currency.
+
+Constructs share a tripod grammar but use distinct barrel, pulse ring, repair cross, paired mirror cores, hook and crawler tread details. The major-summon limit is separate from small shoulder drones and the one equipped pet. Returning blades use non-self-intersecting steel polygons. Cones use their actual angle/reach; only center-critical strikes show an inner damage ring. Barrier width, dash landing points and previews respect collision rules. Milestones improve actual effect geometry, reach, healing or lifetime; a bigger decorative circle alone is not an upgrade.
+
+The campaign reuses three world sectors and eight boss pattern configurations on the same industrial body. Retain hostile coral/plum and functional telegraphs above friendly effects. Do not imply eight original boss illustrations or eight independently built maps. The foundry menu illustration and user music remain unchanged. See `QA_14.md` for rendered checks and remaining art scope.
 
 ## v0.13 pruning override
 

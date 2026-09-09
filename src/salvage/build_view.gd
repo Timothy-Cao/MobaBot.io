@@ -27,6 +27,9 @@ static func draw(ui: CanvasLayer, model: SalvageRun) -> void:
 	close.grab_focus()
 
 static func _mastery(ui, model: SalvageRun) -> void:
+	if model.exp != null:
+		ExpeditionView.mastery(ui, model)
+		return
 	preload("res://src/salvage/mastery_view.gd").draw(ui, model)
 
 static func _gear(ui, model: SalvageRun) -> void:

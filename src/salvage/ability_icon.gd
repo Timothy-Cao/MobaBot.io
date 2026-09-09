@@ -41,6 +41,7 @@ func _draw() -> void:
 	line(Vector2(5, 5), Vector2(5, 59), Color("557976"), 1)
 	line(Vector2(59, 5), Vector2(59, 59), Color("10232c"), 2)
 	line(Vector2(5, 59), Vector2(59, 59), Color("10232c"), 2)
+	if ExpeditionIcon.draw(self, ability): return
 	match ability:
 		"poison":
 			poly([Vector2(24, 13), Vector2(40, 13), Vector2(39, 24), Vector2(49, 48), Vector2(44, 53), Vector2(20, 53), Vector2(15, 48), Vector2(25, 24)], STEEL)

@@ -13,7 +13,7 @@ config_version=5
 config/name="MobaBot.io"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="Godot/app_userdata/Workshop Salvager"
-run/main_scene="res://src/salvage/workshop.tscn"
+run/main_scene="res://src/salvage/expedition.tscn"
 config/features=PackedStringArray("4.7")
 
 [display]

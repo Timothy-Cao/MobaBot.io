@@ -10,6 +10,7 @@ static func draw(ui) -> void:
 		var page: String = ["abilities", "passives"][i]
 		ui._tab(page.capitalize(), Rect2(491 + i * 154, 43, 140, 34), func() -> void:
 			ui.loadout_page = page
+			ui.loadout_gallery_page = 0
 			ui.rebind_slot = ""
 			draw(ui), ui.loadout_page == page)
 	ui._button("Back", Rect2(811, 43, 102, 34), func() -> void: ui.loadout_closed.emit(), false)
@@ -40,6 +41,7 @@ static func _equipment(ui) -> void:
 		var id: String = ui.loadout_config.passives[i] if passive else ui.loadout_config[slot]
 		var data: Dictionary = MobaKit.PASSIVES[id] if passive else MobaKit.ABILITIES[id]
 		var row: Button = ui._button("", Rect2(47, 101 + i * 44, 227, 39), func() -> void:
+			ui.loadout_gallery_page = 0
 			if passive:
 				ui.passive_index = int(slot)
 			else:
@@ -61,6 +63,16 @@ static func _equipment(ui) -> void:
 		for id in MobaKit.ABILITIES:
 			if MobaKit.ABILITIES[id].category == MobaKit.category(ui.loadout_slot):
 				pool.append(id)
+		if ui.expedition_ui: pool = BotSkillCatalog.modern_ids(MobaKit.category(ui.loadout_slot))
+	var pages: int = ceili(pool.size() / 9.0)
+	ui.loadout_gallery_page = clampi(ui.loadout_gallery_page, 0, maxi(0, pages - 1))
+	if pages > 1:
+		ui._button("‹", Rect2(710,422,48,37), func() -> void:
+			ui.loadout_gallery_page = (ui.loadout_gallery_page - 1 + pages) % pages; draw(ui), false)
+		ui._label(ui.overlay, "%d / %d" % [ui.loadout_gallery_page+1,pages], Rect2(765,430,81,25), 13, ui.MUTED, false, HORIZONTAL_ALIGNMENT_CENTER)
+		ui._button("›", Rect2(853,422,48,37), func() -> void:
+			ui.loadout_gallery_page = (ui.loadout_gallery_page + 1) % pages; draw(ui), false)
+	pool = pool.slice(ui.loadout_gallery_page * 9, ui.loadout_gallery_page * 9 + 9)
 	for i in range(pool.size()):
 		var id: String = pool[i]
 		var data: Dictionary = MobaKit.PASSIVES[id] if passive else MobaKit.ABILITIES[id]
@@ -88,6 +100,9 @@ static func _equipment(ui) -> void:
 		if id == selected_id:
 			tile.add_theme_stylebox_override("normal", ui._style(Color("29434c"), 6, ui.TEAL, 2))
 		tile.tooltip_text = data.text
+		if ui.expedition_ui and not passive and ((ui.loadout_slot == "q" and id != "rocket") or (ui.loadout_slot != "q" and id == "rocket")):
+			tile.disabled = true
+			tile.tooltip_text += "\nRuns start with Impact bolt in Q. Discover Q replacements in chests."
 		if passive and ((ui.passive_index == 0 and id != "bolt") or (ui.passive_index != 0 and id == "bolt")):
 			tile.disabled = true
 			tile.tooltip_text = "Slot 1 is the starting auto gun. Select slots 2–4 to equip other toggles."
@@ -105,12 +120,15 @@ static func _equipment(ui) -> void:
 			ui.loadout_config.pet = pets[(pets.find(ui.loadout_config.pet) + 1) % pets.size()]
 			ui.loadout_changed.emit(ui.loadout_config, ui.key_config)
 			draw(ui), false)
-	else:
+	elif not ui.expedition_ui:
 		ui._button("Default kit", Rect2(48, 422, 109, 37), func() -> void:
 			ui.loadout_config = MobaKit.demo_preset()
 			ui.loadout_changed.emit(ui.loadout_config, ui.key_config)
 			draw(ui), false)
 		ui._button("Relaxed", Rect2(165, 422, 109, 37), func() -> void: _preset(ui, false), false)
+	if ui.expedition_ui:
+		var note: Label = ui._label(ui.overlay, "Preferred discoveries", Rect2(48,469,300,25), 12, ui.MUTED)
+		note.tooltip_text = "The selected class uses these choices for its first slot unlocks. Each run still starts with auto gun and Impact bolt. Other skills can replace them through chests."
 
 static func _preset(ui, precision: bool) -> void:
 	ui.loadout_config = MobaKit.preset(precision)

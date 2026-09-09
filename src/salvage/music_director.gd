@@ -23,9 +23,9 @@ func update_context(screen: String, run, muted: bool) -> void:
 		silenced = muted
 		for voice in voices: voice.stream_paused = muted
 	var track := "menu"
-	if screen in ["build", "upgrade"] and run != null and run.demo_mode and not current.is_empty(): return
+	if screen in ["build", "upgrade", "chest"] and run != null and run.demo_mode and not current.is_empty(): return
 	if screen in ["settings", "paused"]: track = "settings"
-	elif screen in ["loadout", "equipment", "build", "result", "stage_reward"]: track = "casual"
+	elif screen in ["loadout", "equipment", "gear", "camp", "build", "result", "stage_reward"]: track = "casual"
 	elif run != null and run.demo_mode and screen in ["running", "upgrade"]:
 		track = "main_loop%d" % run.stage
 		for enemy in run.enemies:
