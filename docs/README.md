@@ -13,6 +13,7 @@ The current playable version is **0.17 Field Test**. `QA_17.md` supersedes earli
 
 - [Ability direction and owner feedback](design/ABILITY_FEEDBACK_17.md) — description-based notes for abilities 1–11, proposed fixed slot identities, a focused test roster, learned-ability loadouts and a non-modal alternating learn/upgrade progression flow. These are future design inputs, not current implemented behavior.
 - [Ability taxonomy and roster research](design/ABILITY_TAXONOMY_RESEARCH_17.md) — source-backed multi-axis taxonomy, Q/W/E/R/D/F/module slot proposal, design-purpose audit of abilities 12–49, recommended default summon and four powered toggles, and a focused Practice test plan. Recommendations are hypotheses, not implemented behavior or proven fun.
+- [Environment and terrain owner feedback](design/ENVIRONMENT_FEEDBACK_17.md) — direction away from thin basic walls toward substantial thick forms, clustered pockets, corridors and simple multi-entrance macro-shapes, with reference and greybox questions for a later terrain pass.
 
 ## Current supporting specifications
 
