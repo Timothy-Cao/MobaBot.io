@@ -4,6 +4,8 @@ Status: **owner notes for future research, design and playtesting; not implement
 
 `QA_17.md` and the root README continue to describe the current build until a later implementation is verified.
 
+**Later owner direction:** the first/default kit is now locked and kits should remain static for the next design pass. Body slam/Piston thrust is therefore the default E for that locked composition. Cross-kit ability swapping, stored alternatives and replacement choices are deferred rather than deleted. See [`KIT_DESIGN_BRAINSTORM_17.md`](KIT_DESIGN_BRAINSTORM_17.md) and the consolidated [`OWNER_PLAYTEST_REQUEST_17.md`](OWNER_PLAYTEST_REQUEST_17.md).
+
 ## Research request: classify abilities by function
 
 Research how ability roles are normally classified across several game mediums, choose a practical taxonomy for MobaBot.io, and research what gives each type a satisfying purpose and feel. Do not settle the taxonomy from intuition alone.

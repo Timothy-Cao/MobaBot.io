@@ -16,6 +16,7 @@ The current playable version is **0.17 Field Test**. `QA_17.md` supersedes earli
 - [Ability taxonomy and roster research](design/ABILITY_TAXONOMY_RESEARCH_17.md) — source-backed multi-axis taxonomy, Q/W/E/R/D/F/module slot proposal, design-purpose audit of abilities 12–49, recommended default summon and four powered toggles, and a focused Practice test plan. Recommendations are hypotheses, not implemented behavior or proven fun.
 - [Environment and terrain owner feedback](design/ENVIRONMENT_FEEDBACK_17.md) — direction away from thin basic walls toward substantial thick forms, clustered pockets, corridors and simple multi-entrance macro-shapes, with reference and greybox questions for a later terrain pass.
 - [Swarm design research](design/SWARM_DESIGN_RESEARCH_17.md) — source-backed analysis of Swarm's baseline offense, map destinations, evolutions, optional objectives, wave authoring, progression and technical constraints, translated into non-copying MobaBot hypotheses.
+- [Static-kit design brainstorm](design/KIT_DESIGN_BRAINSTORM_17.md) — records the locked default-kit composition and clearly labeled assistant proposals for summon-network, geometric-combo and intermittent-speed kits. Only the default is owner-locked; the other kits remain concepts to prototype and review.
 
 ## Current supporting specifications
 

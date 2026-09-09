@@ -8,6 +8,7 @@ This document consolidates the owner's 9 September 2026 directions. It is a work
 - [`ABILITY_TAXONOMY_RESEARCH_17.md`](ABILITY_TAXONOMY_RESEARCH_17.md)
 - [`ENVIRONMENT_FEEDBACK_17.md`](ENVIRONMENT_FEEDBACK_17.md)
 - [`SWARM_DESIGN_RESEARCH_17.md`](SWARM_DESIGN_RESEARCH_17.md)
+- [`KIT_DESIGN_BRAINSTORM_17.md`](KIT_DESIGN_BRAINSTORM_17.md)
 - [`QUALITY_BAR.md`](QUALITY_BAR.md)
 - [`QA_17.md`](QA_17.md)
 
@@ -19,15 +20,17 @@ The default kit, progression, controls, modules, ability refinements, terrain di
 
 The section titled **Assistant research findings: Swarm** is analytical output, not an owner statement. The implementation sequence and playtest exercises are also assistant-authored scaffolding for carrying out the owner's requests safely.
 
-## Proposed default kit for testing
+## Locked default kit for testing
 
-| Input/system | Current proposal | Core test question |
+The owner locked this first kit on 9 September 2026. For the next focused design pass, treat it as one static all-rounder kit: do not offer cross-kit ability swapping or discovery replacements. Ranks and milestones may improve its fixed tools, but its composition stays stable. Revisit ability swapping only after several complete static kits have distinct, testable identities.
+
+| Input/system | Locked tool | Core test question |
 | --- | --- | --- |
 | Permanent passive | Autonomous machine gun; always owned, upgradeable, cannot be unequipped | Does it provide continuity without making manual play irrelevant? |
 | Left click | Large positional hammer swing | Is the head/handle distinction readable and worth the movement commitment? |
 | Q | Impact bolt | Does it remain a satisfying reliable damage baseline? |
 | W | Core strike | Does long-range center payoff feel different from Q? |
-| E | Leading proposal: body slam/Piston thrust | Does aim → collision → push feel like the best default tactical verb? |
+| E | Body slam/Piston thrust | Does aim → collision → push feel like the best default tactical verb? |
 | R | Reactor drop | Does it read as the highest-impact event and support meaningful rank milestones? |
 | D | Hold-to-use Ghost drive | Is active lockout acceptable while passives continue? |
 | F | Full-blink Phase hop | Are cast-origin buffering and thick-wall traversal predictable? |
@@ -36,9 +39,15 @@ The section titled **Assistant research findings: Swarm** is analytical output, 
 | 3 | Stored-healing totem with energy/damage overflow | Is leave-and-return timing understandable and bounded? |
 | 4 | Paired zap robots placed within four seconds | Does active line placement create useful terrain play? |
 
-Default E is still a proposal pending owner confirmation. Prototype body slam first and Repulsor as the clean comparison.
+This lock is a design direction for a future implementation pass, not a statement about the current build. Preserve the existing shared pool and older abilities for regression until a static-kit migration is designed and verified.
+
+## Owner kit concepts and assistant brainstorm
+
+The owner next requested three highly synergistic static-kit directions: a summon network whose machines mirror casts and can trade places with the player, a geometry-heavy combo kit whose abilities transform one another, and a speedster with powerful but deliberately intermittent speed windows. The organized assistant proposals, interaction grammar, risks and prototype order are in [`KIT_DESIGN_BRAINSTORM_17.md`](KIT_DESIGN_BRAINSTORM_17.md). They are brainstorm material, not approved ability specifications; only the first/default kit above is locked.
 
 ## Requested progression flow
+
+The bullets below preserve the owner's earlier progression concept. The later static-kit decision narrows it for the next design pass: a player may still learn or rank the fixed abilities belonging to the selected kit, but cross-kit discoveries, storage swaps and replacement choices are deferred with general ability swapping. Do not implement the older inventory/replacement bullets until the owner revisits that system.
 
 - Before all skills are learned, alternate XP rewards between an existing-skill upgrade event and a locked-skill learn event.
 - Never mix owned and locked abilities in one choice.
