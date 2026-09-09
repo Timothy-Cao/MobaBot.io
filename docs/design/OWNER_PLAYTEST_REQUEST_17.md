@@ -1,0 +1,212 @@
+# Owner Implementation and Playtest Request
+
+Status: **organized handoff for the next development session; no item in this document is implemented merely because it appears here.** Pull the latest `main`, read the linked source notes, implement coherent prototypes in small milestones, run relevant automated checks, and keep owner experience separate from technical verification.
+
+This document consolidates the owner's 9 September 2026 directions. It is a working request, not a replacement for the full detail in:
+
+- [`ABILITY_FEEDBACK_17.md`](ABILITY_FEEDBACK_17.md)
+- [`ABILITY_TAXONOMY_RESEARCH_17.md`](ABILITY_TAXONOMY_RESEARCH_17.md)
+- [`ENVIRONMENT_FEEDBACK_17.md`](ENVIRONMENT_FEEDBACK_17.md)
+- [`SWARM_DESIGN_RESEARCH_17.md`](SWARM_DESIGN_RESEARCH_17.md)
+- [`QUALITY_BAR.md`](QUALITY_BAR.md)
+- [`QA_17.md`](QA_17.md)
+
+If summaries conflict, the latest dated owner statement in the detailed feedback documents wins. Preserve old implementations as regression/stashed content until replacements are verified; do not delete the wider ability catalog.
+
+## Proposed default kit for testing
+
+| Input/system | Current proposal | Core test question |
+| --- | --- | --- |
+| Permanent passive | Autonomous machine gun; always owned, upgradeable, cannot be unequipped | Does it provide continuity without making manual play irrelevant? |
+| Left click | Large positional hammer swing | Is the head/handle distinction readable and worth the movement commitment? |
+| Q | Impact bolt | Does it remain a satisfying reliable damage baseline? |
+| W | Core strike | Does long-range center payoff feel different from Q? |
+| E | Leading proposal: body slam/Piston thrust | Does aim → collision → push feel like the best default tactical verb? |
+| R | Reactor drop | Does it read as the highest-impact event and support meaningful rank milestones? |
+| D | Hold-to-use Ghost drive | Is active lockout acceptable while passives continue? |
+| F | Full-blink Phase hop | Are cast-origin buffering and thick-wall traversal predictable? |
+| 1 | Close/fast versus far/slow orbiting tools | Do the two modes change positioning? |
+| 2 | Targetable aggressive summon with weak gun, local pulse and short aggro draw | Does it create useful temporary space without tanking the whole encounter? |
+| 3 | Stored-healing totem with energy/damage overflow | Is leave-and-return timing understandable and bounded? |
+| 4 | Paired zap robots placed within four seconds | Does active line placement create useful terrain play? |
+
+Default E is still a proposal pending owner confirmation. Prototype body slam first and Repulsor as the clean comparison.
+
+## Requested progression flow
+
+- Before all skills are learned, alternate XP rewards between an existing-skill upgrade event and a locked-skill learn event.
+- Never mix owned and locked abilities in one choice.
+- Treat locked abilities as rank 0 and learning as raising one to rank 1.
+- Do not pause combat for an ability popup.
+- Show eligible level-up indicators on owned live abilities; support Ctrl + assigned key and a small clickable upgrade control.
+- Provide a compact non-modal route to rank-0 skills that are not on the live bar.
+- Newly learned same-family skills enter storage. They may replace the equipped skill only at a safe between-phase/stage arrangement point.
+- Consider faster XP only after the new interaction proves readable and pending rewards do not create pressure.
+
+Resolve stacking pending rewards, max-rank fallback, controller access, storage interaction and exact stage timing before changing save or discovery rules.
+
+## Requested combat and control behavior
+
+### Permanent gun and hammer
+
+- Keep the autonomous machine gun independent from the manual hammer and from ability cooldowns.
+- Keep the gun working during Ghost drive and other passive-compatible states.
+- Make the hammer a roughly 90-degree committed left-click swing with a high-value head and low-value handle.
+- The head deals greater damage, pushes and briefly stuns; the handle deals little damage and does not push.
+- Initial hammer cadence target is approximately one swing every two seconds.
+
+### D — Ghost drive
+
+- Hold for movement speed used for escape, traversal and collection.
+- While held, block the hammer/basic and every active ability, including F and active modules.
+- Keep the permanent machine gun and all other passives running on their own clocks.
+- Existing orbit effects and already-deployed constructs continue if they are passive/persistent, but D blocks toggling, casting or redeploying them until released.
+- Add a readable afterimage and dedicated speed sound.
+
+### F — Phase hop
+
+- Implement a true instantaneous blink with departure/arrival smoke-poof and a dedicated sound; do not draw a travel trail.
+- If F follows an eligible ability input by less than 0.1 seconds and that ability has not released, originate the effect from the post-blink location.
+- Spend each action once and define aim preservation per targeting family.
+- If a capped endpoint is inside thick terrain and past its midpoint along the blink ray, land at the nearest valid far-side point; otherwise remain/snap to the near side.
+- Include the owner's 1.9-times-wall test and body-clearance/corner/connected-obstacle cases.
+
+### E — body slam
+
+- Approximate eight-second cooldown and short aimed dash.
+- Extend the enemy hit shape slightly beyond the robot's front.
+- Stop on first enemy contact and create a circular damage impact around the robot.
+- Push ordinary enemies; bosses and future heavy enemies resist displacement.
+- At base rank, briefly ignore touch damage only. Projectiles, poison and other enemy abilities still damage.
+- Rank 5 adds a very brief stun.
+- Rank 10 grants a clear full-immunity shield during the dash and for one second after successful impact.
+- Add a speed/air-resistance envelope, launch sound and impact sound without implying pre-impact fire damage.
+
+Define touch damage as a separate source type with a repeat-hit grace policy. Projectile and poison damage must not consume or inherit touch grace.
+
+## Requested default modules
+
+### 1 — orbiting tools
+
+- Close/fast default mode and far/slow alternate mode.
+- Make radius and angular speed affect actual positioning and contact, not only appearance.
+- Decide contact damage, energy and switch cadence after the two modes are visually readable.
+
+### 2 — aggressive summon
+
+- Weak machine gun plus low local AoE pulse.
+- Targetable, destructible and visibly durable enough to matter briefly.
+- Draw enemy aggro only within a smaller local range than the player's.
+- Show health, pulse timing and aggro transfer.
+
+### 3 — healing totem
+
+- Store healing while the player is away, up to a cap; discharge when the player returns.
+- Apply value in order: missing hull → missing energy → small damaging shock wave.
+- Cap every conversion and block recursive generation.
+
+### 4 — paired zap robots
+
+- Place a first robot, then its partner within four seconds.
+- Damage enemies between the pair.
+- Show pairing time, valid placement and active line clearly.
+
+### Non-aggro deployment rule
+
+- Slot 3 and slot 4 deployables are not targetable or killable.
+- They expire after a finite lifetime.
+- Natural expiry starts a 10-second redeploy wait.
+- Manual redeployment before expiry replaces/moves the construct and resets its lifetime, encouraging active repositioning.
+- Specify whether stored healing survives a move and whether the pair moves together.
+
+## Requested ability directions
+
+Implement only after the baseline kit is isolated and testable. The exact owner descriptions in `ABILITY_FEEDBACK_17.md` win.
+
+- Impact bolt: default Q; preserve its bread-and-butter identity.
+- Welding torch: longer facing/movement-directed channel with rank 5/10 width/duration/range changes; not default E.
+- Reactor drop: default R; rank 5 heals/speeds the player inside; rank 10 strikes twice and stuns.
+- Return blade: W alternative; larger, farther, slower, piercing, with player movement affecting return.
+- Gravity well: low damage and primarily grouping; larger/longer milestones; later explicit boss movement denial.
+- Core strike: default W; rank 5 stores three charges, rank 10 stores four with more reach and larger center.
+- Crosswire: E/module idea but now overlaps paired robots; reconcile rather than duplicate.
+- Repulsor: E alternative focused on shove; rank 5 wider, rank 10 boss interaction/stun.
+- Guard sweep: replace conceptually with the hammer, preserving old implementation for regression until transition is proven.
+- Rim cutter: stash/consolidate useful purpose into Repulsor; do not delete.
+- Piston thrust: use the later body-slam E rules, which supersede the initial always-stun note.
+
+## Requested terrain exploration
+
+Create greybox alternatives before environment art:
+
+1. A few long, thick terrain masses forming broad corridors.
+2. Clusters of natural blob-like and partially rigid forms creating pockets with several exits.
+3. A large circular structure or enclosure with four wide entrances and combat space inside/outside.
+
+Terrain must look and collide as substantial volume, retain clear starts and ability space, route ordinary enemies without snagging, support bosses, and remain below threats/pickups in visual hierarchy. Preserve the current layout as a regression reference.
+
+Swarm-inspired hypothesis: give each prototype at most one original functional landmark or short optional route objective. Test destination → exposure → payoff without copying Swarm's maps, fountain, cannon or art.
+
+## Implementation sequence
+
+| Pass | Scope | Do not combine yet |
+| --- | --- | --- |
+| 1 | Permanent gun, hammer, Q/W and body-slam E in isolated Practice | Terrain overhaul, new progression, all four modules |
+| 2 | Ghost drive restriction/effects and Phase hop blink rules/effects | XP increase |
+| 3 | Each 1–4 module alone, then combined with explicit caps | Stashed skill reintroduction |
+| 4 | Non-modal alternating learn/upgrade interaction | Faster XP until usability passes |
+| 5 | Three terrain greyboxes and one-landmark variants | Finished environment art |
+| 6 | Rank milestones, wave grammar and selected synergies | Broad catalog expansion |
+| 7 | Focused owner playtest, tune, then decide what returns | Deletion of old content |
+
+Commit coherent verified milestones. Preserve saves, user music, migration fixtures and old skill data. Practice and automated tests must never award permanent loot.
+
+## Focused owner playtest script
+
+### Session A — baseline combat
+
+Use the same short encounter with permanent gun only, then gun + hammer/Q/W/E/R.
+
+- Can the player identify what continues automatically?
+- Does the hammer head feel substantially better than the handle?
+- Is body slam chosen for engage/peel rather than ordinary travel?
+- Does Q remain useful after W/E/R are available?
+- Can the player explain what hit them?
+
+### Session B — D/F
+
+- Hold D while enemies, pickups and passive gun targets are present.
+- Confirm every active/manual input is blocked with feedback while passives continue.
+- Test ordinary F, F through three terrain thicknesses and four representative ability → F buffers.
+- Ask whether D feels intentionally restricted and F feels instantaneous/predictable.
+
+### Session C — modules
+
+- Test each slot alone, then all four together.
+- Ask the player to explain both orbit modes, why the summon drew aggro, when the totem pays out and what the zap line damages.
+- Allow natural expiry once, then proactive redeployment.
+- Observe whether active upkeep is engaging or becomes four maintenance timers.
+
+### Session D — progression flow
+
+- Alternate at least three upgrade and three learn rewards without pausing.
+- Let one reward remain pending through combat and create two pending rewards.
+- Learn a same-family replacement and fit it only at the intended safe point.
+- Measure missed inputs, time-to-choice and whether indicators feel rewarding or stressful.
+
+### Session E — terrain and wave shape
+
+- Run identical enemies/loadout through all three greyboxes.
+- Repeat with one optional landmark and with wave directions that use each entrance/corridor.
+- Record path failures, unavoidable traps, camping exploits, travel downtime and location recall.
+- Ask which geometry created useful decisions and which merely obstructed movement.
+
+## Evidence to return to the owner
+
+Keep three sections in the handoff:
+
+1. **Implemented:** exact behavior and intentionally deferred questions.
+2. **Verified:** automated checks, rendered actual-size captures and fixed-scenario measurements.
+3. **Experienced:** owner's comments, confusion, preferred option and remaining feel issues.
+
+Do not call a feature fun because tests pass. Do not raise `QUALITY_BAR.md` scores without corresponding human evidence. Preserve every new dated owner comment verbatim or faithfully paraphrased without overwriting older snapshots.

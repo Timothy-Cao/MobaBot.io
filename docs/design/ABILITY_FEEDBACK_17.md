@@ -104,6 +104,7 @@ The owner likes the current D direction. Preserve it as the movement-speed tool 
 - Give D its own movement-speed sound treatment, with a clear start, sustained state and/or end as appropriate to the final hold implementation.
 - While D is active, block manual basic attacks and every active ability. The proposed hammer therefore cannot swing, and Q/W/E/R/F/1–4 actives cannot be cast during the held speed state.
 - Do not suspend the permanent autonomous machine gun or other passive effects. Their independent timers and effects continue normally during D.
+- Already-active orbit effects and deployed constructs continue if they are persistent/passive, but the player cannot toggle, cast or redeploy them until D is released.
 - Confirm the final duration, cooldown, early-release behavior and relationship between the held speed state and current intangibility before implementation; this note does not supply new balance numbers.
 
 ### F — Phase hop as a full blink
