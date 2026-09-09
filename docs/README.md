@@ -9,6 +9,10 @@ The current playable version is **0.17 Field Test**. `QA_17.md` supersedes earli
 - [Quality bar](design/QUALITY_BAR.md) — editable acceptance contract, dated owner feedback and human-review gates.
 - [Ability review](review/abilities.html) — interactive catalog for the 49 current ability icons.
 
+## Active owner direction
+
+- [Ability direction and owner feedback](design/ABILITY_FEEDBACK_17.md) — description-based notes for abilities 1–8, a functional-taxonomy research request, proposed fixed slot identities and a learned-ability loadout direction. These are future design inputs, not current implemented behavior.
+
 ## Current supporting specifications
 
 - [Balance study](design/BALANCE_16.md) — damage model and measurement limits carried into the current pass where `QA_17.md` does not override them.
@@ -23,7 +27,7 @@ The current playable version is **0.17 Field Test**. `QA_17.md` supersedes earli
 - [0.15 skill presentation and quality baseline](design/QA_15.md)
 - [0.14 expedition implementation](design/QA_14.md)
 
-These documents explain how current systems arrived, but `QA_17.md`, the root README and `AGENTS.md` win if descriptions conflict.
+These documents explain how current systems arrived, but `QA_17.md`, the root README and [`AGENTS.md`](../AGENTS.md) win if descriptions conflict.
 
 ## Historical material
 

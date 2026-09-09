@@ -37,6 +37,8 @@ Release gates: no known save-loss bug; no repeatable stuck movement; no misleadi
 
 Owner feedback: Q and the channeled laser feel good; other actives lack impact and passive states are unclear. Rounds feel short, levels too frequent, collection ends too abruptly. Owner requests no classes, lasting skill ownership and an isolated Practice tool. This is direct evidence of remaining pacing/identity gaps, not a reason to raise scores.
 
+Additional description-only feedback on 9 September proposes functional ability taxonomy research, fixed Q/W/E/R identities, learned-ability inventory/loadouts and specific direction for abilities 1–8. Preserve it separately in [ABILITY_FEEDBACK_17.md](ABILITY_FEEDBACK_17.md). It has not been playtested and does not change the current numeric baseline or implemented-behavior record.
+
 Implemented: longer phases, slower XP, collection grace, heavier commanded attacks, six close-range buffs, native cast/recoil changes, explicit passive states, three ranged threats, wider-spread cover, skill storage, Practice, toggle Tab and layered menu animation. Verified separately in QA_17. **Retain the numeric baseline below.** Most important unproven questions are whether three-minute rounds sustain interest and whether attack commitment earns its risk. A full-route artificial-health soak takes 74 simulated minutes, excluding menus. That is a warning to evaluate run length, not a retention success. The 49-skill review sheet gives the owner a way to prune weak skills.
 
 ### Retained 0.16 note
