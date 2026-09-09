@@ -174,7 +174,7 @@ func mirror(run, id: String, direction: Vector2, scale_value: float) -> void:
 		if unit.id != "mirror_sentry" or unit.mirror > 0: continue
 		unit.mirror = 3.0
 		unit["flash"] = 0.22
-		var damage: float = {"rocket": 23, "returner": 22, "thrust": 25, "sweep": 26, "flame": 24, "repulsor": 20}[id] * 0.45 * scale_value * unit.scale
+		var damage: float = {"rocket": 23, "returner": 22, "thrust": 25, "sweep": 26, "flame": 26, "repulsor": 20}[id] * 0.45 * scale_value * unit.scale
 		if id in ["sweep", "flame"]:
 			line_hit(run, unit.pos, unit.pos + direction * 160, 55, damage, 0)
 		else: blade(unit.pos, unit.pos + direction * 400, damage, true, 1)
@@ -214,7 +214,7 @@ func commanded_hit(run, enemy: Dictionary) -> void:
 			run.emit_event("lightning", run.player, {"target": enemy.pos})
 		hits[enemy.id] = counter
 	if run.kit.passive_active("plates"):
-		if plates.size() >= 12: plates.pop_front()
+		if plates.size() >= int(12*run.kit.passive_scale("plates")): plates.pop_front()
 		plates.append(enemy.pos)
 
 func after_basic(run, direction: Vector2) -> void:
@@ -225,7 +225,7 @@ func after_basic(run, direction: Vector2) -> void:
 			var enemy: Dictionary = run.nearest_enemy(run.player, excluded)
 			if enemy.is_empty() or Vector2(enemy.pos).distance_to(run.player) > run.attacks.attack_range(run): break
 			excluded.append(enemy.id)
-			run._add_projectile(run.player, (enemy.pos - run.player).normalized() * 800, run.attacks.damage(run) * 0.45, "sidebolt", 0)
+			run._add_projectile(run.player, (enemy.pos - run.player).normalized() * 800, run.attacks.damage(run) * 0.45 * run.kit.passive_scale("sidebolts"), "sidebolt", 0)
 	if run.exp != null and run.exp.class_id == "ranged": run.kit.boost_speed = maxf(run.kit.boost_speed, 0.55)
 	if run.exp != null and run.exp.set_counts.get("courier", 0) >= 4 and run.exp.courier_clock <= 0:
 		empowered = true; run.exp.courier_clock = 5
@@ -236,7 +236,7 @@ func movement_order(run, point: Vector2) -> bool:
 		if recasts[slot].id == "artillery": recasts.erase(slot)
 	if hop_ready and run.kit.dash_left <= 0:
 		hop_ready = false
-		dash(run, run.player + (point - run.player).limit_length(65), 0.12, 0)
+		dash(run, run.player + (point - run.player).limit_length(65*run.kit.passive_scale("hopdrive")), 0.12, 0)
 		return true
 	return false
 
@@ -312,11 +312,11 @@ func step(run, delta: float) -> void:
 		if flywheel >= 1 and crash_cd <= 0:
 			for enemy in run.enemies:
 				if live(enemy) and Vector2(enemy.pos).distance_to(run.player) < 38 + enemy.radius:
-					MobaKit.area(run, run.player, 110, 45, "flywheel", 280); crash_cd = 5; flywheel = 0; break
+					MobaKit.area(run, run.player, 110, 45*run.kit.passive_scale("momentum"), "flywheel", 280); crash_cd = 5; flywheel = 0; break
 	else: flywheel = 0
 	if run.kit.passive_active("converter"):
 		var amount: float = minf(10 * delta, run.kit.energy if converter_mode == 0 else maxf(0, run.kit.energy_max() - run.kit.energy))
-		var hp_per_energy: float = run.max_health() * 0.002
+		var hp_per_energy: float = run.max_health() * 0.002 * (run.kit.passive_scale("converter") if converter_mode==0 else 1.0/run.kit.passive_scale("converter"))
 		if converter_mode == 0:
 			amount = minf(amount, (run.max_health() - run.health) / hp_per_energy)
 			run.kit.energy -= amount; run.health += amount * hp_per_energy
@@ -326,7 +326,7 @@ func step(run, delta: float) -> void:
 	mounted_clock -= delta
 	if run.kit.passive_active("mounted") and mounted_clock <= 0:
 		mounted_clock = 0.7
-		for offset in [-22, 22]: MobaKit.fire_companion(run, run.player + Vector2(offset, -22), 300, 3, "mounted")
+		for offset in [-22, 22]: MobaKit.fire_companion(run, run.player + Vector2(offset, -22), 300, 3*run.kit.passive_scale("mounted"), "mounted")
 	for f in fields:
 		var dt: float = minf(delta, f.life)
 		f.life -= delta

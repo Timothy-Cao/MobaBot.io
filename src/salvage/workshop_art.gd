@@ -165,6 +165,7 @@ func _draw() -> void:
 	_player()
 	if world_mode:
 		_companions()
+		if model.kit.flexible(): _local_resources()
 	# Danger projectiles receive a final outline pass for visibility in crowded FX.
 	for bullet in model.projectiles:
 		if bullet.kind == "hostile":
@@ -242,11 +243,13 @@ func _floor() -> void:
 func _world_floor() -> void:
 	var origin := model.camera_origin()
 	var view := Rect2(origin - Vector2(100, 100), model.view_size + Vector2(200, 200))
-	draw_rect(view, Color("293e46"))
+	var sector: int=clampi(model.stage-1,0,2)
+	var bases: Array=[Color("293e46"),Color("403c3c"),Color("353b49")]
+	draw_rect(view, bases[sector])
 	for x in range(int(floor(view.position.x / 640)), int(ceil(view.end.x / 640))):
 		for y in range(int(floor(view.position.y / 480)), int(ceil(view.end.y / 480))):
 			var p := Vector2(x * 640, y * 480)
-			var color := Color("304851") if posmod(x + y, 2) == 0 else Color("2d444c")
+			var color: Color=bases[sector].lightened(0.055 if posmod(x+y,2)==0 else 0.025)
 			draw_rect(Rect2(p + Vector2(4, 4), Vector2(632, 472)), color)
 			# Flush service panels, painted bay markings and floor conduits stay walkable.
 			_box(Rect2(p + Vector2(60, 82), Vector2(92, 46)), Color("243a42"), 3, Color("3b545b"), 1)
@@ -576,7 +579,7 @@ func _companions() -> void:
 			_box(Rect2(-6, -13, 12, 6), GOLD, 2)
 		_box(Rect2(-18, 26, 36 * kit.summon.life / 18.0, 3), TEAL, 1, TEAL, 0)
 		draw_set_transform(Vector2.ZERO)
-	if kit.loadout.pet != "none":
+	if kit.loadout.pet != "none" or kit.forge_pet:
 		var p: Vector2 = kit.pet_position + Vector2(0, sin(visual_time * 5) * 2)
 		draw_circle(p + Vector2(0, 9), 10, Color(INK, 0.45))
 		draw_set_transform(p)
@@ -648,3 +651,14 @@ func _effect(effect: Dictionary) -> void:
 			draw_circle(p, 5 * (1 - t), Color(CREAM, 1 - t))
 		"equipped":
 			draw_arc(p, 20 + t * 55, 0, TAU, 48, Color(TEAL, 1 - t), 4, true)
+
+
+func _local_resources() -> void:
+	# Fixed logical-pixel size even at wide zoom; no numeric clutter over the actor.
+	var scale_value: float=1.0/maxf(0.35, get_viewport_transform().get_scale().x)
+	var origin: Vector2=model.player+Vector2(-23,-38)*scale_value
+	draw_rect(Rect2(origin-Vector2.ONE*scale_value,Vector2(48,11)*scale_value),Color("0c1720bf"))
+	draw_rect(Rect2(origin,Vector2(46,4)*scale_value),Color("30404aaf"))
+	draw_rect(Rect2(origin,Vector2(46*clampf(model.health/model.max_health(),0,1),4)*scale_value),Color("94cfb9dc"))
+	draw_rect(Rect2(origin+Vector2(0,6)*scale_value,Vector2(46,3)*scale_value),Color("30404aaf"))
+	draw_rect(Rect2(origin+Vector2(0,6)*scale_value,Vector2(46*clampf(model.kit.energy/model.kit.energy_max(),0,1),3)*scale_value),Color("82bfe6dc"))

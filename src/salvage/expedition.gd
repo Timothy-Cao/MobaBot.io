@@ -84,6 +84,8 @@ func sync_stats(run) -> void:
 	run.kit.attack_speed_bonus = minf(1.0, stats.haste)
 	run.kit.attack_range_bonus = minf(120, stats.range)
 	run.kit.cooldown_bonus = minf(0.6, stats.cooldown)
+	run.kit.rank_bonus=int(stats.get("ability_rank",0))
+	run.kit.forge_pet=stats.get("forge_pet",0)>0
 	run.kit.extra.capacity = mini(4, (2 if class_id == "summoner" else 1) + int(stats.capacity))
 	run.kit.extra.duration_bonus = stats.duration + (0.2 if class_id == "summoner" else 0)
 	run.kit.extra.summon_power = 1 + stats.summon_damage + (0.2 if class_id == "summoner" else 0)
@@ -211,7 +213,7 @@ func finish_step(run, delta: float) -> void:
 			field_credits += 65 + int(ROUTE[route_index][0]) * 15
 			run.coins = 0
 			pending_chests += (3 if kind == "loot" else 1) + loot_chests.size(); loot_chests.clear(); clear_clock = -2
-			if kind == "loot": pending_items.append(ExpeditionGear.roll_item(run.loot_rng,ascension))
+			if kind == "loot": pending_items.append(ForgeEquipment.roll_item(run.loot_rng,ascension) if run.kit.flexible() else ExpeditionGear.roll_item(run.loot_rng,ascension))
 			run.enemies.clear(); run.projectiles.clear(); run.hazards.clear()
 			run.health = minf(max_health(run), run.health + max_health(run) * 0.2)
 			run.kit.energy = run.kit.energy_max()
@@ -223,6 +225,7 @@ func finish_step(run, delta: float) -> void:
 		make_chest(run); run.state = "chest"
 
 func make_chest(run) -> void:
+	if run.kit.flexible(): KeyboardRewards.make_chest(run); return
 	chest_choices.clear()
 	chest_return = "camp" if run.state == "camp" else "running"
 	var slots: Array = MobaKit.SLOTS.duplicate()
@@ -251,6 +254,7 @@ func make_chest(run) -> void:
 		chest_choices.append({"slot": slot, "id": id, "tier": rarity})
 
 func choose_chest(run, index: int) -> bool:
+	if run.kit.flexible(): return KeyboardRewards.choose(run,index)
 	if run.state != "chest" or index < 0 or index >= chest_choices.size() or pending_chests <= 0: return false
 	var choice: Dictionary = chest_choices[index]
 	var slot: String = choice.slot

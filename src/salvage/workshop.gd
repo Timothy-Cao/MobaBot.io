@@ -367,7 +367,8 @@ func _input(event: InputEvent) -> void:
 				model.attacks.stop(model)
 				get_viewport().set_input_as_handled()
 				return
-			for slot in MobaKit.SLOTS:
+			for slot in model.kit.active_slots():
+				if model.kit.flexible() and not model.kit.unlocked(slot): continue
 				if event.keycode == model.kit.bindings[slot]:
 					pending_attack = false
 					if model.kit.laser_left > 0 and slot == model.kit.laser_slot:
@@ -379,14 +380,15 @@ func _input(event: InputEvent) -> void:
 						_cast_slot(slot)
 					get_viewport().set_input_as_handled()
 					return
-			for i in range(4):
+			for i in range(model.kit.loadout.passives.size()):
+				if model.kit.flexible() and not model.kit.unlocked("p%d"%(i+1)): continue
 				if event.keycode == model.kit.bindings["p%d" % (i + 1)]:
 					model.kit.toggle(i)
 					get_viewport().set_input_as_handled()
 					return
 
 func _confirm_cast(slot: String) -> bool:
-	return not r_quickcast and (model.kit.loadout[slot] == "nuke" or (slot == "r" and model.kit.loadout[slot] != "laser"))
+	return not r_quickcast and (model.kit.loadout[slot] == "nuke" or (MobaKit.ABILITIES[model.kit.loadout[slot]].category == "ultimate" and model.kit.loadout[slot] != "laser"))
 
 func _cast_slot(slot: String) -> void:
 	if not model.kit.cast(model, slot, get_global_mouse_position()):
@@ -572,7 +574,7 @@ func _drain_events() -> void:
 			ui.announce("%s  [%s]" % [title, OS.get_keycode_string(model.kit.bindings[slot])], 1)
 		elif event.kind == "supply":
 			if event.supply in ["coins", "speed", "reset"]:
-				ui.announce({"coins": "Credits collected", "speed": "Overclock / 6 seconds", "reset": "Q W E refreshed"}[event.supply])
+				ui.announce({"coins": "Credits collected", "speed": "Overclock / 6 seconds", "reset": "Active skills refreshed" if model.kit.flexible() else "Q W E refreshed"}[event.supply])
 	model.events.clear()
 
 func _choose(index: int) -> void:
@@ -714,7 +716,7 @@ func _save_result() -> void:
 	if not measured.is_empty():
 		record.render_timing = {"frames": measured.size(), "median_ms": measured[measured.size() / 2],
 			"p95_ms": measured[int(measured.size() * 0.95)], "peak_enemies": peak_enemies}
-	record.build = "slice-14-expedition" if model.exp != null else "slice-13-mobabot"
+	record.build = "slice-16-keyboard-forge" if model.exp != null else "slice-13-mobabot"
 	record.equipment = gear.equipped.duplicate()
 	if model.exp != null:
 		record.campaign = {"round":model.exp.route_index+1,"stage":BotExpedition.ROUTE[model.exp.route_index][0],"ascension":model.exp.ascension,"class":model.exp.class_id,"chests":model.exp.chests_opened}

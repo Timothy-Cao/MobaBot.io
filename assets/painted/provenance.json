@@ -1,0 +1,466 @@
+{
+  "version": 1,
+  "generator": "OpenAI built-in image generation",
+  "date": "2026-09-09",
+  "style_manifest": "manifest.json",
+  "original_style_reference": {
+    "asset": "rocket.png",
+    "sha256": "05c57c1791a076a7925e3847b72687ed29031aedd9ca920a993ea6dfe3129d5a",
+    "source": "exec-2f96ab87-bbb2-4619-a03c-82b984cc9c93.png"
+  },
+  "rocket_revision": {
+    "prompt": "Use case: precise-object-edit. Edit target: the attached MobaBot.io rocket icon. Make the entire image fully opaque: alpha 255 at EVERY pixel, including background and subject. Preserve the exact rocket silhouette, diagonal composition, steel/teal/brass material planes, cream light, orange exhaust and dark navy background. This is an alpha/opacity correction only, not a redesign. Do not add any objects, frame, lettering, logos, details, or extra glow. Keep the square canvas and existing artwork as closely as possible; fully opaque solid dark navy background across the whole canvas, no transparency anywhere.",
+    "source": "exec-81133187-3d91-4f2e-ad6d-9dddc525ae98.png"
+  },
+  "laser_revision": {
+    "prompt": "Edit this MobaBot.io Core cutter ability icon. Keep the same medium-detail digital gouache/cel-painted material rendering, dark navy background, matte teal enamel, steel, ochre brass and cream upper-left light. CRITICAL replace the saw/circular cutter concept COMPLETELY. This skill fires a long, rigid continuous laser BEAM, not a spinning tool or projectile. New silhouette: a compact angular open-fork beam emitter in the bottom-left quarter, projecting a long straight cream-white beam diagonally toward the top-right, two thin golden parallel rails surrounding the beam, tiny triangular hot contact spark at beam tip. Beam spans most of composition; device occupies at most 25%. No disc, no saw teeth, no rocket, no round front cap, no chunky orb, no lettering, no frame. Clear 12% margin; preserve square canvas. Large simple readable silhouette at 32px, restrained edge light; not chrome or cinematic bloom. One high-quality cartoon action icon.",
+    "source": "exec-0b5b3d70-ba98-4a2a-9f90-054cc80308de.png"
+  },
+  "assets": [
+    {
+      "asset": "artillery.png",
+      "sha256": "5f970532f9fcc6c5b349a9a72641d43077f9566eeca517589bcef9bdf715a721",
+      "source": "exec-32306857-7788-48cc-a17c-3b6bea165e1b.png"
+    },
+    {
+      "asset": "blink.png",
+      "sha256": "3d21e09927fa6d0f2905bf32f2bb9ab97de253fffc23616a938b0d1275235427",
+      "source": "exec-f599e8b7-db8c-42df-939c-94aa5705e26f.png"
+    },
+    {
+      "asset": "bolt.png",
+      "sha256": "be22534a5afd4ceb98feeddd58cc55d8a90a1555e2c8595e24413b11b9db96a8",
+      "source": "exec-50066e80-8c88-4aa5-a781-58d4fb07d40a.png"
+    },
+    {
+      "asset": "consume.png",
+      "sha256": "691df771adbb92eb2a5a0080df4188e61ea600fd7342702ef1380dd9d3bfbcc5",
+      "source": "exec-fd6b310d-0c82-4c5e-b261-7ec28de739e4.png"
+    },
+    {
+      "asset": "converter.png",
+      "sha256": "1d4b8acbbf38667e7d39f832bb58750daa1f489ee53b5afd05722f2ef29fda46",
+      "source": "exec-1a09176b-d02d-4c2e-9b92-3b9467bac43e.png"
+    },
+    {
+      "asset": "crawler.png",
+      "sha256": "579bd2b0335875ecd6498cfedb25b7f032b1a1248422f27c79c30647e20548d4",
+      "source": "exec-77f3728d-aae6-4c21-8576-f91d6313590b.png"
+    },
+    {
+      "asset": "crosswire.png",
+      "sha256": "9ed323c9171bef06009ad6ce945e66c06e23a49d9b1aa3e53d18184fda69ffad",
+      "source": "exec-f291db15-1d69-447a-bd55-e4d1d933b221.png"
+    },
+    {
+      "asset": "echo_dash.png",
+      "sha256": "7da6dc17b2a23bb2b08dcd3b63692141f9c2fcdffcb67d7ca657b80897e544e3",
+      "source": "exec-a7d7265b-0531-460c-bf75-7735578982d3.png"
+    },
+    {
+      "asset": "flame.png",
+      "sha256": "a89b47531c6c9201e055684f878a0a7c15b855b3fda8c51b7eed20cab52f97d8",
+      "source": "exec-33086165-8d96-449e-bff5-101e1d2cf738.png"
+    },
+    {
+      "asset": "forward_sentry.png",
+      "sha256": "08d6387f9b22f5d423a59532cd2dc4eff3937aacf6860a01998b3bd7cf3b279c",
+      "source": "exec-bb5299f9-be45-45da-a74f-cf3d74e7ddd6.png"
+    },
+    {
+      "asset": "gear_bastion_boots.png",
+      "sha256": "835a61d63a8547c9b10f439f22f813fa1973265a200771a461d382b147301fd4",
+      "source": "exec-fc2eb1be-7fac-43eb-8337-917b931e2622.png"
+    },
+    {
+      "asset": "gear_bastion_cape.png",
+      "sha256": "ca3133cfcd1487cf8a1f103ec59a17e821825356712992f93f07596e97bdf51e",
+      "source": "exec-823b1d0f-e2c6-42fc-9049-979ceb4b30b2.png"
+    },
+    {
+      "asset": "gear_bastion_charm.png",
+      "sha256": "16e0e560b1022ca1f29571928de2da710d8d6375882bb09f13449e75b0d9a308",
+      "source": "exec-fa86a517-2756-4cc7-bfd2-ae5cad9828b3.png"
+    },
+    {
+      "asset": "gear_bastion_chest.png",
+      "sha256": "167afed89fbf62be2d2e68ca6fa950959873f343ca5dfa88596c601a6b6f6d99",
+      "source": "exec-3a8a8f31-2491-455f-a044-b8410fdff680.png"
+    },
+    {
+      "asset": "gear_bastion_flower.png",
+      "sha256": "7c17ddc61572d4d7e5a1562879ca4d3aeff301aef8f97806726838ba993e7ebf",
+      "source": "exec-49b43f10-c1ba-4680-96c2-d90f22b3f11b.png"
+    },
+    {
+      "asset": "gear_bastion_helmet.png",
+      "sha256": "e463cfceee5056d1c979abaf39e4db5435d4f76e69ec62caa3e587be204f824a",
+      "source": "exec-52cf12d4-2135-4bdd-9602-74ca4a0ed55c.png"
+    },
+    {
+      "asset": "gear_bastion_legs.png",
+      "sha256": "c3287f237f91e89cbded365bd34bddaa66078a3d20068b3bef33eb1a6b91222e",
+      "source": "exec-ce515190-bf38-4663-a2f1-a70629a069df.png"
+    },
+    {
+      "asset": "gear_bastion_ring.png",
+      "sha256": "a1e218b1385c280a18e62645c8c3ef809ef5cbdc5b6d50592551359ace699d4a",
+      "source": "exec-ff71d2ce-fd48-4540-b6d6-a9f2cba36735.png"
+    },
+    {
+      "asset": "gear_courier_boots.png",
+      "sha256": "2efa45a4f9add59552d9edbd4f30357eb734b62e59be9788954f9ceb462ff58e",
+      "source": "exec-df38f749-2653-458b-ad2c-0a3daa9f2d5c.png"
+    },
+    {
+      "asset": "gear_courier_cape.png",
+      "sha256": "8985761bd48d5426bbf88073f980b003160f8d67d98a3904013a929f28e706e3",
+      "source": "exec-4f319b6f-eca1-4b19-8b11-9d377cfd222b.png"
+    },
+    {
+      "asset": "gear_courier_charm.png",
+      "sha256": "2e195b06357d6be0ff0c1e21284eb10585efca49de1695a1d16a6aade7442deb",
+      "source": "exec-76d3c0a1-71ca-4bf6-91e8-4a7c82bcd9dd.png"
+    },
+    {
+      "asset": "gear_courier_chest.png",
+      "sha256": "1e41b6ec0bb9dd1ad7b9c34b383febfdddf144d18f938aa49f0eb002241fcfa4",
+      "source": "exec-e2b9b58c-4fc2-45ac-911a-cf74fd9966c6.png"
+    },
+    {
+      "asset": "gear_courier_flower.png",
+      "sha256": "e3f6d97618c634cc9dcbe9de7a8e4f6abf7226c2c76733de1f9b2f9394ab9415",
+      "source": "exec-03ffbbd2-fae8-4a03-b8c7-b71c2180657a.png"
+    },
+    {
+      "asset": "gear_courier_helmet.png",
+      "sha256": "c4f5cf6e498522a432944a13e2364ec0a8e51766edc9e8f38ed453b7999282d1",
+      "source": "exec-6dcdcc47-fa06-4805-bf91-42845c94ae61.png"
+    },
+    {
+      "asset": "gear_courier_legs.png",
+      "sha256": "1fc890f638a620e98c00cd0620200b76989c7e9405a55703253e936697afa1b9",
+      "source": "exec-c02b18f9-1651-41c9-a10d-afe0c32f0997.png"
+    },
+    {
+      "asset": "gear_courier_ring.png",
+      "sha256": "4336e9ff9023ff5e956d96daec2bed636f6b1982f7e72b8a4d4f48bfce4af982",
+      "source": "exec-cbd6e997-5fbc-4ca5-876c-34c173742f56.png"
+    },
+    {
+      "asset": "gear_dynamo_boots.png",
+      "sha256": "e4f90a10730f1a31d6af888b4bbcd7f970588115819119cd2466173ab45a5be7",
+      "source": "exec-c7a1b436-5001-4914-9ffb-f75a66a88187.png"
+    },
+    {
+      "asset": "gear_dynamo_cape.png",
+      "sha256": "efbca57af661aa7446cb2d5c393ff4210efcd9fc2c15b88b365811a4bedd274e",
+      "source": "exec-a1bcc0cc-42ea-4159-af74-fd35a2312727.png"
+    },
+    {
+      "asset": "gear_dynamo_charm.png",
+      "sha256": "29ab935507dfec257def4a4570c293265ed595d420ae12c2ecc943d55181899b",
+      "source": "exec-0f661363-06a3-45c3-b422-216459b63b85.png"
+    },
+    {
+      "asset": "gear_dynamo_chest.png",
+      "sha256": "837ba9f6ebd59376864f077f30eca8c4d5cbde90c9d9ac9dbbe380798a4cc07f",
+      "source": "exec-9cabee1c-b4b2-439f-85e5-feac3807760f.png"
+    },
+    {
+      "asset": "gear_dynamo_flower.png",
+      "sha256": "e166c875ee07672f6b3e0671712bba2ee3763fcada05f450a8b5384a22fa8db3",
+      "source": "exec-1d1de6e5-36c9-4a1a-9531-be23b596151c.png"
+    },
+    {
+      "asset": "gear_dynamo_helmet.png",
+      "sha256": "2c8a7ba63f41272fbd6a6002a2e4a713321b865f7309ccaba03e109e067ae83e",
+      "source": "exec-92c80250-63ba-40b4-a0ed-b336768ea841.png"
+    },
+    {
+      "asset": "gear_dynamo_legs.png",
+      "sha256": "1c232eee99effc9ce48721d7cafc98381a03eb12f0a56072bda88b9e4cc0028a",
+      "source": "exec-a4b5bbbd-83e0-4cf0-bb01-ca3042541aee.png"
+    },
+    {
+      "asset": "gear_dynamo_ring.png",
+      "sha256": "944d1de48d5fbc46cf3d39b487213ee50c4b457f1d7143ab6006ef3db089dd43",
+      "source": "exec-0ac9fe4f-80a7-4565-9045-45d4b15e9f16.png"
+    },
+    {
+      "asset": "gear_reclaimer_boots.png",
+      "sha256": "fba88703710d0978d8bafa7f9a601bcd4701f1658634adf56418341156db1848",
+      "source": "exec-285d891b-f7b2-4f2a-8e42-85b6b1050995.png"
+    },
+    {
+      "asset": "gear_reclaimer_cape.png",
+      "sha256": "985ec3e522c6ba4e30be1a108c7f823cd9c3b5cf15560de3ad4ffdf19324222d",
+      "source": "exec-d0497f29-ef41-40fe-ad49-2031757d8559.png"
+    },
+    {
+      "asset": "gear_reclaimer_charm.png",
+      "sha256": "26d856fbd3e1b2b55992a0767c766a2bdd6f71cf97de63a58aa266c57ac0f366",
+      "source": "exec-ccb4f118-2190-48e8-8c7a-3a1e5c856782.png"
+    },
+    {
+      "asset": "gear_reclaimer_chest.png",
+      "sha256": "c202ea2a216ed7557b90de15ea029678ecfc0b3ffbc75084f8283c7942f2e5d1",
+      "source": "exec-54ad22d7-2d4f-45c9-9d6c-aad6ed59998a.png"
+    },
+    {
+      "asset": "gear_reclaimer_flower.png",
+      "sha256": "28a7e03e15eb46c4c15a4a8cfd4029037718c65b6c5fe0743f66e1f9f894d913",
+      "source": "exec-d15af196-fa73-4e41-a27e-18b4c8b69989.png"
+    },
+    {
+      "asset": "gear_reclaimer_helmet.png",
+      "sha256": "a48bc48c1b6f93dea8c2653fc4900debe3f1cd069dfb503e76196a7159826924",
+      "source": "exec-531727bd-8bc3-4dc0-b3a4-8594b3772350.png"
+    },
+    {
+      "asset": "gear_reclaimer_legs.png",
+      "sha256": "095e6d25540a76a9afe2e28e42da7ab02c8e7e5e6747f72d847408774d4db3e2",
+      "source": "exec-6a62fef5-1da0-49a1-86d0-43547baae053.png"
+    },
+    {
+      "asset": "gear_reclaimer_ring.png",
+      "sha256": "adaf1a968a7284d29dbf13746db5d5167f8142635812a895115cd8da9cc0a4da",
+      "source": "exec-f1a9ad6a-4d03-440c-aee7-5f191c582330.png"
+    },
+    {
+      "asset": "gear_relay_boots.png",
+      "sha256": "0332cf141b07825702f6b439bc15ad1d2d3e7e943013b2a37036c7195aa8f9db",
+      "source": "exec-b61650ed-9780-40a1-8c38-5be4f7ff4f6f.png"
+    },
+    {
+      "asset": "gear_relay_cape.png",
+      "sha256": "b15580cde729be3e237944d6e8884e69c0359e6d4683dccc6a5a9aeddf2a19fa",
+      "source": "exec-930fad7a-7a3a-4bf8-829c-6489c582d53b.png"
+    },
+    {
+      "asset": "gear_relay_charm.png",
+      "sha256": "c1ba6787ee45b0e30e3d498b99ff805a4cd5767fc6f58dd521c836dec1500520",
+      "source": "exec-79971de2-960d-48d1-9114-0177bf325ed3.png"
+    },
+    {
+      "asset": "gear_relay_chest.png",
+      "sha256": "d73f3ca8100295a32f8b276bfbf49877961d4ee242c9f41fd074009cc2b9b1cd",
+      "source": "exec-6255012f-0599-4bd0-8d86-3cb65e19fcc7.png"
+    },
+    {
+      "asset": "gear_relay_flower.png",
+      "sha256": "2a16d1d010c8cf2066468c6cae9599277e1643d125f00b1f88dfb511e550ea4f",
+      "source": "exec-9f068ada-b4cf-4769-bd7a-3bb78eb60b99.png"
+    },
+    {
+      "asset": "gear_relay_helmet.png",
+      "sha256": "da2b00a5c9cd578572a24351842791d865e25534989e4eaaafe3edbcfb58d55c",
+      "source": "exec-990e6968-b1f0-47f0-bfb5-8110fe6c6166.png"
+    },
+    {
+      "asset": "gear_relay_legs.png",
+      "sha256": "ad464f181e70280f3d24edcb4198acb9670759fd6081f2914430810382f84d57",
+      "source": "exec-84a80c11-08a6-4474-99ff-946170a96aed.png"
+    },
+    {
+      "asset": "gear_relay_ring.png",
+      "sha256": "a5189a99dced7c64bbff8f0981b560610a46e4b598319f88c00c3a732f48be7d",
+      "source": "exec-3102293f-8bf5-4944-9c03-cec1a0b1be89.png"
+    },
+    {
+      "asset": "gravity.png",
+      "sha256": "ed8d5b3c0a4329300e079fa4564df45558ccc5ed974f8e8f555316f8fe327718",
+      "source": "exec-ab3422ef-3b07-452a-bc53-60e8638edfd6.png"
+    },
+    {
+      "asset": "hook_sentry.png",
+      "sha256": "1aa7fe378eacd8fa96ec4160147235272763abb23c3a26684744d19a5c9d8f24",
+      "source": "exec-39cd4345-635f-484e-b10c-b35b821ea8b8.png"
+    },
+    {
+      "asset": "hop.png",
+      "sha256": "6d35eb9b25892ec1955e7759b1d08cd8353a55f416de781c2969d169e7bb1bb0",
+      "source": "exec-129eec00-f2eb-4114-8912-53f42e1cc013.png"
+    },
+    {
+      "asset": "hopdrive.png",
+      "sha256": "c5fae016e5ebba2557fa6169ff6a3a98c3e9817dfbaae1ea727d888745273643",
+      "source": "exec-3f78a863-a1b3-482f-a54e-b75372fcb676.png"
+    },
+    {
+      "asset": "landing.png",
+      "sha256": "14a88b2a0f17181bd8a235115e1896611684a8da3d0fb4557ece00955d15ecb7",
+      "source": "exec-bc2231a0-76b2-4e8b-960d-02608a30ddde.png"
+    },
+    {
+      "asset": "laser.png",
+      "sha256": "a7a6a0551e9e9e3b1664d7af57b8868542a3d88477a6c2b58353e12046bff4fd",
+      "source": "exec-0b5b3d70-ba98-4a2a-9f90-054cc80308de.png"
+    },
+    {
+      "asset": "lightning.png",
+      "sha256": "7dc902ba033f3482dd2951f93e8ac3ba74eeec192f97626aae21ad4a606b2d5a",
+      "source": "exec-6308bbe9-4d1f-435e-a14f-4c3fd3b3b0c1.png"
+    },
+    {
+      "asset": "medic_sentry.png",
+      "sha256": "afa6e807ce39fc4ee8582d0a3972ed86d2f7cdfce8245fcbace0bb4a1616d71e",
+      "source": "exec-51f33593-6f91-4b82-83d8-d767d97a3b6e.png"
+    },
+    {
+      "asset": "mirror_sentry.png",
+      "sha256": "7d6c3d6491ed2450699b83387bf0990d2894f4a60ad95fab9f0a4fcacee6a475",
+      "source": "exec-acc3b51d-c9c2-408e-98be-4f6c28bb9f1e.png"
+    },
+    {
+      "asset": "momentum.png",
+      "sha256": "054de976fb0caa1d086c9420e592943df65ea9c03d0e442d55bf6cfc54ad3a8f",
+      "source": "exec-42d7d0ae-b062-45b8-aafa-321382166671.png"
+    },
+    {
+      "asset": "mounted.png",
+      "sha256": "94794763b49515eebc0c9d62e101c2c52312b0302ace4ca7e9029da5b3fac7ff",
+      "source": "exec-f0089b97-5a1e-4c8d-95c5-4ab69cfce872.png"
+    },
+    {
+      "asset": "nuke.png",
+      "sha256": "e82a839961d90eb0c814fc239a5dbf869488dc316d0f5e77279f4d834b27f10a",
+      "source": "exec-a38a68ac-3463-4e30-a96c-0575cdf18b3b.png"
+    },
+    {
+      "asset": "orbit.png",
+      "sha256": "24a430a1829f195753847625687718e1f3c5f7918a3fedde9910a81014957e9e",
+      "source": "exec-9efaec59-5ec7-44c3-8de2-2586e3451500.png"
+    },
+    {
+      "asset": "plates.png",
+      "sha256": "1b40c963b2f6c139eb9cd2de5633aefe8d663630974bc177c4d586d67ca48aba",
+      "source": "exec-6835f86f-babf-4c11-b1f7-d0de40553cb2.png"
+    },
+    {
+      "asset": "plating.png",
+      "sha256": "901ff811e2ec48b9af8cbc57b8db1679cf444f4e632932fa632c44736391948e",
+      "source": "exec-f40726ad-9f23-4711-86eb-690265c4dc23.png"
+    },
+    {
+      "asset": "poison.png",
+      "sha256": "1ffe434ef027ec51fbf22fce524d54a33e2b40b9fc77aa841ba6085a7c0bb162",
+      "source": "exec-b7d5684e-0142-4df5-b5bd-d7445e81cfe5.png"
+    },
+    {
+      "asset": "pulse_sentry.png",
+      "sha256": "816709445fa6179c0362b94f05b770d711e101986010ff4d0fbf88675fa98ff2",
+      "source": "exec-29f9ec4c-2144-469a-bccc-da5f38265594.png"
+    },
+    {
+      "asset": "pulse.png",
+      "sha256": "547f2770d2c0c392bae46038b0f662c69ff9359d7825056a9d3c8f85e247137e",
+      "source": "exec-90990fdd-7b88-445f-8c98-f5d3049d23c8.png"
+    },
+    {
+      "asset": "pursuit.png",
+      "sha256": "9a8ca5cebe01d04bd2720108ce4ff6703399b6db554c641182ab1795242dd89f",
+      "source": "exec-30a4dbe4-0479-46cf-b6ff-22de56060503.png"
+    },
+    {
+      "asset": "reap.png",
+      "sha256": "4fe3c28d7372ef4b58fb5bbbabbc5486873f7100151468bac1613997d3b08e71",
+      "source": "exec-94a3e881-910a-45e3-a184-ca1c5442277b.png"
+    },
+    {
+      "asset": "recall.png",
+      "sha256": "148b285baf9af5847ca124cff99523b5b3eab494f4b6ad3c120b11db14917c5b",
+      "source": "exec-580cef74-d453-40e7-9325-920bcf090760.png"
+    },
+    {
+      "asset": "repair_channel.png",
+      "sha256": "9f3c1ff991efe0b0f283e150194362e55dd4c904ce1712e4379a22bfc45d4b1d",
+      "source": "exec-c718c1df-045b-4e40-ac46-2469faa89f93.png"
+    },
+    {
+      "asset": "repulsor.png",
+      "sha256": "815d46ad7dfd230ba9597b011653f0cc3308f34940060fa484b646b61b6f684a",
+      "source": "exec-18d98114-1cea-4c18-9d6b-8dbc78de9ded.png"
+    },
+    {
+      "asset": "returner.png",
+      "sha256": "9e83df476d91b23e148143ab76cc65b9fb22dbfe668a21e3e2fee17a0b0ed266",
+      "source": "exec-dd86d5bc-64e5-4eb7-b56c-f357d5d9b2ca.png"
+    },
+    {
+      "asset": "ricochet.png",
+      "sha256": "de6164c43a4e691a269117730983af188bdb87115a31f46988c758fa3091caee",
+      "source": "exec-d4603b20-c398-4a90-a080-0c12cfc5b1fa.png"
+    },
+    {
+      "asset": "rocket.png",
+      "sha256": "2c3011e8e5be03777d0160cd39b353e05b8ae2c5026e6e3741164d7ec245ec17",
+      "source": "exec-81133187-3d91-4f2e-ad6d-9dddc525ae98.png"
+    },
+    {
+      "asset": "roller.png",
+      "sha256": "af3d29a348e056eb5f916283f086d6c8cc46f364a20f5a18459598e13f22d5f0",
+      "source": "exec-60effb7b-baf6-49c3-856c-ce23e131a315.png"
+    },
+    {
+      "asset": "sidebolts.png",
+      "sha256": "c98a1bc97300c38fd9619e72709297a8ae0726cca582217ee96f9bb6fbed2ae5",
+      "source": "exec-1d75ec99-7ee6-4a3c-bc90-49d303e09de5.png"
+    },
+    {
+      "asset": "sprint.png",
+      "sha256": "dfdf3371a0605e245c98db0a585cc672582a98220a6779d8127f68e353265245",
+      "source": "exec-eaf9e5ea-7040-47ca-bfbe-2141eb252fbd.png"
+    },
+    {
+      "asset": "strike.png",
+      "sha256": "8b074f514fae6a6b6c5e43e985159f85a20e220bf579d884fea3de72ff7c23d8",
+      "source": "exec-79c7d84d-d4c3-477f-807b-3f069566046d.png"
+    },
+    {
+      "asset": "sweep.png",
+      "sha256": "48898a576b813817d6a7cfe3719c89a5db162e11fdcba4da3a20004b0f242ae8",
+      "source": "exec-5e06414f-f38c-4882-8b42-f767ca79efcf.png"
+    },
+    {
+      "asset": "thorns.png",
+      "sha256": "e83c1a4793faa4c0e0afee206f3f0fafacabd50351fdafcad644648c87526451",
+      "source": "exec-28e4c632-2295-4d5a-8893-0f697859f207.png"
+    },
+    {
+      "asset": "threehit.png",
+      "sha256": "92dd72ec48a18f22d10de4d15b909ff8fd65aa7d14983e6833870e51a6a56ffa",
+      "source": "exec-d0961a75-1930-42bd-90ea-5d6b447a3669.png"
+    },
+    {
+      "asset": "thrust.png",
+      "sha256": "16bc441b5a03488a8b58a3ba0f8d182bb16a34c03e59abffeabcee5744d1abcc",
+      "source": "exec-540f2c27-ebc4-4e77-85d9-eda2af3501a5.png"
+    },
+    {
+      "asset": "tractor.png",
+      "sha256": "036f57224ef496344d9c36076bee0e714c2ada9b9f99e56b4d86cfec5220ddde",
+      "source": "exec-b9199ea6-65b3-419c-bbd4-a66184263b58.png"
+    },
+    {
+      "asset": "tumble.png",
+      "sha256": "9c7c2d9da9abda5f4b96b617943727e34c7fe735c13e1884b1cbf426c7ab11ea",
+      "source": "exec-674bc794-2672-4264-a358-ef658c6c9e7e.png"
+    },
+    {
+      "asset": "vault.png",
+      "sha256": "9fc8f8bc10d0e71f60cce15ca1651f71b2a840ba354412fe40a0457872604926",
+      "source": "exec-1e76c550-c093-48a7-b448-65c78ed2a362.png"
+    },
+    {
+      "asset": "veil_dash.png",
+      "sha256": "425ad12b8f3c32177f156a99cc2314d7e75bd5b0765b96b8b1c400567cd76ac4",
+      "source": "exec-bd381ace-5e45-4cab-b020-86c10f61d409.png"
+    },
+    {
+      "asset": "wall.png",
+      "sha256": "02fd6f9bae32cba755b6277139952fae98fbcfc8822fd866be17c85d4f38b98a",
+      "source": "exec-a6e5dcd4-a9c4-4827-a90a-c9fd02cb27d6.png"
+    }
+  ]
+}

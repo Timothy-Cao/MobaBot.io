@@ -136,7 +136,7 @@ func upgrade_data(id: String) -> Dictionary:
 func upgrade_ids() -> Array:
 	var ids: Array = UPGRADES.keys()
 	if staged:
-		for slot in MobaKit.SLOTS:
+		for slot in kit.active_slots():
 			ids.append("skill_" + slot)
 	return ids
 
@@ -231,13 +231,13 @@ func passive_enabled(id: String) -> bool:
 
 func upgrade_available(id: String) -> bool:
 	if id == "power" and kit != null:
-		for index in range(4):
-			if kit.loadout.passives[index] in ["bolt", "lightning"] and kit.unlocked("p%d" % (index + 1)): return true
+		for index in range(kit.loadout.passives.size()):
+			if kit.loadout.passives[index] in ["bolt", "lightning", "poison", "threehit"] and kit.unlocked("p%d" % (index + 1)): return true
 		for slot in MobaKit.SLOTS:
 			if kit.loadout[slot] in ["salvo", "rail"] and kit.unlocked(slot): return true
 		return false
 	if staged and id.begins_with("skill_"):
-		return id.trim_prefix("skill_") in MobaKit.SLOTS and kit.unlocked(id.trim_prefix("skill_"))
+		return id.trim_prefix("skill_") in kit.active_slots() and kit.unlocked(id.trim_prefix("skill_"))
 	if kit != null and kit.onboarding:
 		var passive: String = {"grinder": "orbit", "capacity": "orbit", "ricochet": "ricochet", "pulse": "pulse", "rapid": "bolt"}.get(id, "")
 		if not passive.is_empty():
@@ -326,7 +326,11 @@ func stats() -> Dictionary:
 		"shard_damage": shard_damage(), "bounces": shard_bounces() if passive_enabled("ricochet") else 0, "pulse_damage": pulse_damage(), "pulse_radius": pulse_radius()}
 
 func rank_of(id: String) -> int:
-	return int(upgrades.get(id, 0))
+	var bonus:=0
+	if kit!=null and kit.rank_bonus>0 and id in ["power","rapid","grinder","ricochet","pulse","capacity"]:
+		var owner: String={"power":"bolt","rapid":"bolt","grinder":"orbit","ricochet":"ricochet","pulse":"pulse","capacity":"orbit"}[id]
+		if BotKeyboard.learned(kit,owner)!="" or (id=="power" and (BotKeyboard.learned(kit,"lightning")!="" or BotKeyboard.learned(kit,"poison")!="" or BotKeyboard.learned(kit,"threehit")!="")): bonus=kit.rank_bonus
+	return mini(10,int(upgrades.get(id,0))+bonus)
 
 func capacity() -> int:
 	if staged:
@@ -658,9 +662,9 @@ func hurt_player(source: Vector2, cause: String = "Collision", amount: int = 1) 
 	if damage_history.size() > 32: damage_history.pop_front()
 	invincible = 0.85 if demo_mode else 1.35
 	if kit != null and kit.passive_active("plating"):
-		invincible += 0.65
+		invincible += 0.65 * kit.passive_scale("plating")
 	if health > 0 and kit != null and kit.passive_active("thorns"):
-		MobaKit.area(self, player, 100, 6, "active", 180)
+		MobaKit.area(self, player, 100, 6 * kit.passive_scale("thorns"), "active", 180)
 	emit_event("hurt", player)
 	for enemy in enemies:
 		if Vector2(enemy.pos).distance_to(player) < 85.0:
@@ -1034,7 +1038,8 @@ func _collect_supply(supply: Dictionary) -> void:
 		"coins": coins += supply.value
 		"speed": kit.boost_speed = 6.0
 		"reset":
-			for slot in ["q", "w", "e"]:
+			for slot in (kit.active_slots() if kit.flexible() else ["q", "w", "e"]):
+				if kit.flexible() and (not kit.unlocked(slot) or MobaKit.ABILITIES[kit.loadout[slot]].category!="active"): continue
 				kit.charges[slot] = MobaKit.ABILITIES[kit.loadout[slot]].max
 				kit.recharge[slot] = 0
 	emit_event("supply", player, {"supply": supply.kind})

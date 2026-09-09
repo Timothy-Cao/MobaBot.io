@@ -35,6 +35,7 @@ static func prepare(game) -> void:
 	if not game.collection.message.is_empty(): ui._label(ui.overlay,game.collection.message,Rect2(48,491,856,21),12,ui.CORAL)
 
 static func chest(game) -> void:
+	if game.model.kit.flexible(): KeyboardRewards.chest(game); return
 	var ui=game.ui
 	var run: SalvageRun=game.model
 	frame(ui,"Salvage chest",func() -> void: pass)
@@ -74,13 +75,13 @@ static func camp(game) -> void:
 		ui._button("Finish" if exp.route_index==21 else "Next round",Rect2(652,423,260,44),game.continue_expedition).grab_focus()
 	if exp.is_shop():
 		if exp.shop_stock.is_empty():
-			for i in range(3): exp.shop_stock.append(ExpeditionGear.roll_item(run.loot_rng,exp.ascension))
+			for i in range(3): exp.shop_stock.append(ForgeEquipment.roll_item(run.loot_rng,exp.ascension) if run.kit.flexible() else ExpeditionGear.roll_item(run.loot_rng,exp.ascension))
 		for i in range(exp.shop_stock.size()):
 			var id: String=exp.shop_stock[i]
 			if id == "":
 				ui._label(ui.overlay,"Sold",Rect2(48+i*292,259,276,30),20,ui.MUTED,true,HORIZONTAL_ALIGNMENT_CENTER)
 				continue
-			var data: Dictionary=ExpeditionGear.ITEMS[id]
+			var data: Dictionary=ForgeEquipment.ITEMS[id] if game.collection is ForgeEquipment else ExpeditionGear.ITEMS[id]
 			var price: int=100+data.tier*100
 			var card: Button=ui._button("",Rect2(48+i*292,202,276,166),func() -> void: game.buy_item(i),false)
 			card.disabled=exp.field_credits<price
@@ -89,10 +90,11 @@ static func camp(game) -> void:
 			ui._label(card,str(price),Rect2(16,118,240,26),19,ui.GOLD,true)
 			card.tooltip_text=game.collection.item_text(id)+"\nAdded to permanent collection. Equip at the workshop."
 	else:
-		ui._ability_icon(ui.overlay,"repair_channel",Rect2(410,201,140,140))
+		var reward:=RewardMotion.new(); reward.position=Vector2(405,194); reward.size=Vector2(150,150); reward.reduced=ui.reduced; ui.overlay.add_child(reward)
 	if not game.collection.message.is_empty(): ui._label(ui.overlay,game.collection.message,Rect2(48,478,856,24),12,ui.CORAL)
 
 static func gear(game) -> void:
+	if game.collection is ForgeEquipment: ForgeView.draw(game); return
 	var ui=game.ui
 	var collection: ExpeditionGear=game.collection
 	frame(ui,"Equipment",game.close_gear)

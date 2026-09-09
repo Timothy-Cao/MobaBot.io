@@ -1,5 +1,19 @@
 # MobaBot.io — art style schema 2.0
 
+## v0.16 Painted / Base skin override
+
+The owner's new request explicitly introduces generated bitmap icons. **Painted** is the experimental default; **Base** preserves the native icon drawings and is selectable in Settings. This supersedes the older no-bitmap instructions below, not the combat-motion or readability rules. World actors and skill animations remain native; this is not a replacement character-animation pack.
+
+Art direction: medium-detail digital gouache / cel-painted salvage machinery. Use bold functional silhouettes, three broad value groups, matte petrol-teal enamel, steel working surfaces, ochre-brass joints and a cream upper-left edge light. Orange identifies heat, icy blue electricity, violet gravity and mint repair. Use broad material planes; avoid chrome, bloom fog, ornament and microtexture. See `assets/painted/manifest.json` for the reusable shared generation prompt and every subject. These are AI-generated illustrations, not claims of human authorship.
+
+Each of 49 skill/toggle icons and 40 equipment icons is generated individually. The rocket establishes the reference material language; subsequent jobs reference its style, not its shape. The laser was revised after inspection because the first result resembled a saw rather than a continuous beam. Keep source originals, recorded hashes and revision provenance. Equipment has eight silhouettes across five **tiers**, no set effects. Richer tiers may add structural detail, but a cape must still read as a cape at small size.
+
+The icon backgrounds deliberately remain opaque dark navy, matching the UI. Alpha validation therefore requires fully opaque square sources, not transparent cutouts. No bitmap is used as a world sprite. Import at a maximum 256 pixels with mipmaps for stable small-scale presentation; retain full source PNGs for revision. Validate with `painted_art_test.gd`: 128 / 64 / 32 px alongside 32 px Base symbols. A recognizable silhouette matters more than details visible only when enlarged. Missing images fall back to Base.
+
+Color restraint: preserve the warm player/pickup highlights and hostile warning contrast. Three floor-sector families gain muted blue, warm foundry and violet variation without making the floor compete with damage tells. Resource bars above the player are compact, partially transparent and outlined; no repeated numeric labels. Normal and reduced effects must preserve the same gameplay information.
+
+The Painted experiment still needs the owner's recognition/preference test. Keep the Base escape hatch; do not infer better art or better gameplay from the number of generated assets.
+
 ## v0.15 motion and recognition override
 
 Use distinct mechanical motion within the existing native family. Returning blades spin with steel edges and change the hub/trail from teal outbound to brass inbound. Gravity arms and motes travel inward. Pull/push cones use oppositely directed chevrons; hold their initial contrast before a quick fade. Rim cuts trace the actual outer payoff and inner boundary. Thrusts use a piston-like shaft and directional head. Delayed strikes show a descending steel core and a countdown on the true ground radius. Impacts use a fast expanding thin ring and a few material shards, never an opaque disc over threats.

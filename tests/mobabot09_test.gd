@@ -65,7 +65,7 @@ func _run() -> void:
 		var behind := enemy(run, Vector2(-100, 0))
 		run.kit.cast(run, "w", run.player + Vector2.RIGHT * 150)
 		for tick in range(hz * 2 + 1): run.kit.step(run, 1.0 / hz)
-		check(is_equal_approx(front.hp, 76), "Flame total damage 24 at %d Hz" % hz)
+		check(is_equal_approx(front.hp, 74), "Flame total damage 26 at %d Hz" % hz)
 		check(behind.hp == 100, "Flame excludes rear hemisphere")
 		run = fresh()
 		var blast := enemy(run, Vector2(100, 0))

@@ -3,6 +3,7 @@ extends RefCounted
 static func draw(ui, model: SalvageRun) -> void:
 	var kit := model.kit
 	if kit == null: return
+	if kit.flexible(): KeyboardView.overview(ui,model); return
 	ui._label(ui.overlay, "ABILITIES", Rect2(49, 109, 370, 23), 12, ui.TEAL, true)
 	for i in range(MobaKit.SLOTS.size()):
 		var slot: String = MobaKit.SLOTS[i]

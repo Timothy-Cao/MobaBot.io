@@ -8,7 +8,8 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 	run.enable_moba(MobaKit.demo_preset()); run.enable_demo()
 	run.kit.onboarding=true; run.kit.starting_gun=true; run.attacks.enabled=true
 	BotExpedition.new().start(run,class_id,difficulty)
-	ExpeditionGear.new().apply_to(run)
+	BotKeyboard.enable(run)
+	ForgeEquipment.new().apply_to(run)
 	run.health=run.max_health()
 	var peak:=0
 	var max_us:=0
@@ -36,7 +37,8 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 				if not enemy.is_empty():
 					run.kit.extra.cursor=enemy.pos
 					if frame%20==0:
-						for slot in ["q","w","e","r","t"]: run.kit.cast(run,slot,enemy.pos)
+						for slot in run.kit.active_slots():
+							if slot not in ["d","f"] and run.kit.unlocked(slot): run.kit.cast(run,slot,enemy.pos)
 						run.kit.steer_laser(run,enemy.pos)
 						if run.player.distance_to(enemy.pos)<130: run.kit.cast(run,"d",run.player+direction*200)
 						if run.player.distance_to(enemy.pos)<85: run.kit.cast(run,"f",run.player+direction*200)

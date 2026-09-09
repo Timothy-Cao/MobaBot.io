@@ -1,5 +1,6 @@
 extends RefCounted
 static func draw(ui) -> void:
+	if ui.expedition_ui and ui.host!=null: KeyboardView.settings(ui); return
 	ui._panel(Rect2(24, 24, 912, 492))
 	ui._label(ui.overlay, "Settings", Rect2(47, 39, 300, 42), 30, ui.CREAM, true)
 	for i in range(2):

@@ -1,0 +1,44 @@
+class_name ForgeView
+extends RefCounted
+
+static func draw(game) -> void:
+	var ui=game.ui; var collection: ForgeEquipment=game.collection
+	ExpeditionView.frame(ui,"Equipment",game.close_gear)
+	for i in range(8):
+		var slot: String=ForgeEquipment.SLOTS[i]
+		var id: String=collection.equipped[slot]
+		var button: Button=ui._button("",Rect2(48+(i%4)*79,124+(i/4)*84,68,68),func() -> void:
+			game.gear_slot=slot; game.gear_item=collection.equipped[slot] if collection.equipped[slot]!="" else "courier_"+slot; draw(game),false)
+		ui._ability_icon(button,"gear_courier_"+slot if id=="" else ForgeEquipment.ITEMS[id].icon,Rect2(5,5,58,58)).modulate=Color(0.3,0.3,0.3) if id=="" else Color.WHITE
+		button.tooltip_text=slot.capitalize()+(" · Empty" if id=="" else "\n"+collection.item_text(id))
+	ui._label(ui.overlay,game.gear_slot.capitalize(),Rect2(48,323,312,30),22,ui.CREAM,true)
+	for i in range(5):
+		var id: String=ForgeEquipment.SETS[i]+"_"+game.gear_slot
+		var button: Button=ui._button("",Rect2(48+i*63,371,56,64),func() -> void: game.gear_item=id; draw(game),false)
+		ui._ability_icon(button,ForgeEquipment.ITEMS[id].icon,Rect2(3,3,50,50)).modulate=Color.WHITE if collection.inventory[id].copies>0 else Color(0.3,0.3,0.3)
+		ui._label(button,str(collection.inventory[id].copies),Rect2(2,46,50,18),11,ui.GOLD,true,HORIZONTAL_ALIGNMENT_RIGHT)
+		button.tooltip_text="Tier %d\n%s"%[i+1,collection.item_text(id)]
+	ui._surface(ui.overlay,Rect2(392,124,1,332),ui.EDGE,0)
+	var selected: String=game.gear_item
+	if selected!="":
+		var data: Dictionary=ForgeEquipment.ITEMS[selected]; var item: Dictionary=collection.inventory[selected]
+		ui._ability_icon(ui.overlay,data.icon,Rect2(429,130,90,90))
+		ui._label(ui.overlay,data.slot.capitalize(),Rect2(538,135,373,40),25,ui.CREAM,true)
+		ui._label(ui.overlay,"Tier %d · %d copies"%[data.tier,item.copies],Rect2(538,180,373,26),15,ui.GOLD)
+		var values:=collection.values(selected)
+		var fitted: String=collection.equipped[data.slot]
+		var old: Dictionary={} if fitted=="" else collection.values(fitted)
+		for i in range(values.size()):
+			var key: String=values.keys()[i]; var factor:=100 if key=="speed" else 1
+			var delta: float=(values[key]-old.get(key,0))*factor
+			ui._label(ui.overlay,key.capitalize(),Rect2(429,244+i*36,230,28),16,ui.MUTED)
+			ui._label(ui.overlay,"%s%s"%[snappedf(values[key]*factor,0.1),"%" if key=="speed" else ""],Rect2(658,244+i*36,130,28),18,ui.CREAM,true,HORIZONTAL_ALIGNMENT_RIGHT)
+			ui._label(ui.overlay,("%+.1f"%delta+("%" if key=="speed" else "")) if delta!=0 else "—",Rect2(806,244+i*36,86,28),14,ui.TEAL if delta>0 else ui.MUTED,false,HORIZONTAL_ALIGNMENT_RIGHT)
+		if data.tier>=4:
+			var bonus: Label=ui._label(ui.overlay,"+1 skill ranks"+(" · Gun companion" if data.tier==5 else ""),Rect2(429,361,470,28),15,ui.GOLD)
+			bonus.mouse_filter=Control.MOUSE_FILTER_STOP; bonus.tooltip_text=collection.item_text(selected)
+		var equip: Button=ui._button("Equipped" if fitted==selected else "Equip",Rect2(429,412,175,42),func() -> void: game.gear_action("equip",selected),false)
+		equip.disabled=item.copies<1 or fitted==selected or collection.blocked
+		var forge: Button=ui._button("Forge · 3 → 1" if data.tier<5 else "Highest tier",Rect2(625,412,267,42),func() -> void: game.gear_action("forge",selected))
+		forge.disabled=item.copies<3 or data.tier>=5 or collection.blocked
+	if not collection.message.is_empty(): ui._label(ui.overlay,collection.message,Rect2(48,478,858,25),12,ui.CORAL)

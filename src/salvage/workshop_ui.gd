@@ -1,4 +1,8 @@
 extends CanvasLayer
+signal keyboard_requested
+var host
+var system_keys: Dictionary=BotKeyboard.SYSTEM_DEFAULTS.duplicate()
+var rebind_system := ""
 
 signal start_requested(mode: String)
 signal upgrade_selected(index: int)
@@ -276,6 +280,8 @@ func _ability_icon(parent: Node, id: String, rect: Rect2) -> Control:
 func _upgrade_icon(parent: Node, model: SalvageRun, id: String, rect: Rect2) -> Control:
 	if id.begins_with("skill_"):
 		return _ability_icon(parent, model.kit.loadout[id.trim_prefix("skill_")], rect)
+	if model.kit.flexible() and id in ["power","rapid","grinder","ricochet","pulse"]:
+		return _ability_icon(parent,{"power":"bolt","rapid":"bolt","grinder":"orbit","ricochet":"ricochet","pulse":"pulse"}[id],rect)
 	return _icon(parent, id, rect)
 
 func show_loadout() -> void:
@@ -308,6 +314,7 @@ func _ability_hud(model: SalvageRun) -> void:
 	ability_bar.visible = model.kit != null
 	if model.kit == null:
 		return
+	if model.kit.flexible(): KeyboardView.hud(self,model); return
 	var kit := model.kit
 	var signature := JSON.stringify([kit.loadout, kit.bindings, kit.tiers, kit.ranks])
 	if signature != bar_signature:

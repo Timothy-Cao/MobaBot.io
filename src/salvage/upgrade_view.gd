@@ -6,8 +6,8 @@ static func draw(ui, model: SalvageRun) -> void:
 	ui._label(ui.overlay, "POWER %d" % model.level, Rect2(44, 130, 275, 21), 12, ui.TEAL, true)
 	var build: Button = ui._button("Build", Rect2(802, 88, 114, 32), func() -> void: ui.build_requested.emit(), false)
 	build.set_meta("utility", true)
-	build.tooltip_text = "Inspect build and mastery. Tab."
-	if model.kit != null:
+	build.tooltip_text = "Build · "+OS.get_keycode_string(ui.system_keys.build)
+	if model.kit != null and not model.kit.flexible():
 		for i in range(11):
 			var tile = ui._surface(ui.overlay, Rect2(554 + i * 33, 129, 29, 29), ui.PANEL, 0)
 			tile.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -56,6 +56,7 @@ static func draw(ui, model: SalvageRun) -> void:
 		for row in range(before.size()): details += "%s: %s → %s%s\n" % [before[row].label, before[row].value, after[row].value if id != "repair" else minf(model.max_health(), model.health + (20 if model.exp != null else 1)), before[row].unit]
 		card.tooltip_text = details + model.upgrade_note(id, current + 1)
 	if first != null: first.grab_focus()
+	if model.kit!=null and model.kit.flexible(): RewardMotion.compact(ui)
 
 static func number(value: Variant) -> String:
 	if (value is int or value is float) and is_equal_approx(value,floorf(value)): return str(int(value))

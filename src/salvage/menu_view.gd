@@ -29,11 +29,11 @@ static func draw(ui: CanvasLayer) -> void:
 	ui._label(ui.overlay, "BOT", Rect2(48, 94, 271, 86), 76, ui.CREAM, true)
 	ui._label(ui.overlay, ".io", Rect2(188, 125, 95, 49), 37, ui.GOLD, true)
 	var play := _nav(ui, "Play", Rect2(54, 229, 267, 44), func() -> void: ui.start_requested.emit("salvage"), true)
-	_nav(ui, "Loadout", Rect2(54, 281, 267, 36), func() -> void: ui.loadout_requested.emit())
-	_nav(ui, "Equipment", Rect2(54, 322, 267, 36), func() -> void: ui.gear_requested.emit())
-	_nav(ui, "Settings", Rect2(54, 377, 122, 30), func() -> void: ui.settings_requested.emit())
-	_nav(ui, "Quit", Rect2(188, 377, 132, 30), func() -> void: ui.quit_requested.emit())
-	ui._label(ui.overlay, "0.15" if ui.expedition_ui else "0.13", Rect2(55, 492, 249, 20), 11, ui.MUTED, true)
+	if not ui.expedition_ui: _nav(ui, "Loadout", Rect2(54, 281, 267, 36), func() -> void: ui.loadout_requested.emit())
+	_nav(ui, "Equipment", Rect2(54, 281 if ui.expedition_ui else 322, 267, 36), func() -> void: ui.gear_requested.emit())
+	_nav(ui, "Settings", Rect2(54, 336 if ui.expedition_ui else 377, 122, 30), func() -> void: ui.settings_requested.emit())
+	_nav(ui, "Quit", Rect2(188, 336 if ui.expedition_ui else 377, 132, 30), func() -> void: ui.quit_requested.emit())
+	ui._label(ui.overlay, "0.16" if ui.expedition_ui else "0.13", Rect2(55, 492, 249, 20), 11, ui.MUTED, true)
 	play.grab_focus()
 
 static func _nav(ui, text: String, rect: Rect2, action: Callable, primary: bool = false) -> Button:
@@ -52,5 +52,5 @@ static func _nav(ui, text: String, rect: Rect2, action: Callable, primary: bool 
 	var press: StyleBoxFlat = hover.duplicate()
 	press.bg_color = ui.TEAL if primary else Color("335459")
 	button.add_theme_stylebox_override("pressed", press)
-	button.tooltip_text = {"Play": "Start Stage 1.", "Loadout": "Abilities, passives and key bindings.", "Equipment": "Fit, reroll and star equipment.", "Mastery": "Preview the run-only mastery tree.", "Settings": "Audio, effects, camera and controls.", "Quit": "Close MobaBot.io."}[text]
+	button.tooltip_text = {"Play": "Start Stage 1.", "Loadout": "Abilities, passives and key bindings.", "Equipment": "Equip and forge." if ui.expedition_ui else "Fit, reroll and star equipment.", "Mastery": "Preview the run-only mastery tree.", "Settings": "Audio, effects, camera and controls.", "Quit": "Close MobaBot.io."}[text]
 	return button

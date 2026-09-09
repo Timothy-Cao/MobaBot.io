@@ -21,7 +21,7 @@ const LEGACY_PASSIVES := {
 }
 const LEGACY_ABILITIES := {
 	"rocket": {"name": "Impact bolt", "category": "active", "icon": "power", "glyph": "rail", "cd": 3.0, "max": 2, "range": 540.0, "aim": "line", "text": "Aim a straight rocket. 15 impact damage plus an 8-damage blast on contact or at maximum range."},
-	"flame": {"name": "Welding torch", "category": "active", "icon": "rapid", "glyph": "flame", "cd": 7.0, "max": 1, "range": 190.0, "aim": "line", "text": "Burn a forward cone for 2 seconds: 24 damage total. Steer with the cursor while moving."},
+	"flame": {"name": "Welding torch", "category": "active", "icon": "rapid", "glyph": "flame", "cd": 7.0, "max": 1, "range": 190.0, "aim": "line", "text": "Burn a forward cone for 2 seconds: 26 damage total. Steer with the cursor while moving."},
 	"nuke": {"name": "Reactor drop", "category": "active", "icon": "pulse", "glyph": "target", "cd": 16.0, "max": 1, "range": 480.0, "aim": "ground", "text": "85 damage in a 135-radius area after 0.65s. Confirm with left click; right click cancels."},
 	"laser": {"name": "Core cutter", "category": "ultimate", "icon": "power", "glyph": "beam", "cd": 30.0, "max": 1, "range": 700.0, "aim": "line", "text": "Channel for up to 5s: 75 damage/sec. Rooted while firing. Right click to steer with inertia; R again cancels. D or F cancels into an escape."},
 	"salvo": {"name": "Homing salvo", "category": "active", "icon": "rapid", "glyph": "salvo", "cd": 8.0, "max": 3, "range": 440.0, "aim": "auto", "text": "5 seeking bolts over 1 second. Each deals 2 + bolt damage. Needs a nearby enemy."},
@@ -44,6 +44,11 @@ static var ABILITIES: Dictionary = _all_abilities()
 static var PASSIVES: Dictionary = _all_passives()
 var extra := BotSkillEngine.new()
 var discovery := false
+var rank_bonus := 0
+
+func flexible() -> bool: return loadout.get("flexible",false)
+func active_slots() -> Array: return BotKeyboard.ACTIVE_BANKS if flexible() else SLOTS
+func effective_rank(slot: String) -> int: return mini(10,int(ranks.get(slot,0))+(rank_bonus if unlocked(slot) else 0))
 var discovered: Array = ["q", "d", "f", "p1"]
 var cooldown_bonus := 0.0
 var attack_speed_bonus := 0.0
@@ -68,6 +73,8 @@ var zones: Array[Dictionary] = []
 var summon: Dictionary = {}
 var pet_position := Vector2.ZERO
 var pet_clock := 0.0
+var forge_pet := false
+var forge_pet_clock := 0.0
 var shield := 0.0
 var sprint := 0.0
 var overdrive := 0.0
@@ -162,7 +169,7 @@ static func migrate_loadout(config: Dictionary) -> Dictionary:
 	return result
 
 func milestone(slot: String) -> int:
-	return SalvageProgression.milestone(int(ranks.get(slot, 0)))
+	return SalvageProgression.milestone(effective_rank(slot))
 
 func area_scale(slot: String) -> float:
 	return 1.0 + milestone(slot) * 0.25
@@ -172,7 +179,7 @@ func cast_range(slot: String) -> float:
 	return float(ABILITIES[id].range) * (area_scale(slot) if id in ["nova", "overdrive", "blink", "dash", "lunge", "tumble", "echo_dash", "veil_dash", "hop", "vault", "pursuit", "landing"] else 1.0)
 
 func rank_up(slot: String) -> bool:
-	if slot not in SLOTS or ranks[slot] >= 10:
+	if slot not in active_slots() or ranks[slot] >= 10:
 		return false
 	var old := cooldown(slot)
 	ranks[slot] += 1
@@ -193,13 +200,14 @@ func drain_rate() -> float:
 	return rate
 
 func passive_active(id: String) -> bool:
+	if id=="": return false
 	var index: int = loadout.passives.find(id)
 	if index < 0 or not toggles[index] or not unlocked("p%d" % (index + 1)):
 		return false
 	return id != "ricochet" or passive_active("orbit")
 
 func toggle(index: int) -> bool:
-	if index < 0 or index >= 4:
+	if index < 0 or index >= loadout.passives.size():
 		return false
 	if not unlocked("p%d" % (index + 1)): return false
 	if loadout.passives[index] == "converter":
@@ -239,17 +247,17 @@ func cooldown(slot: String) -> float:
 
 func cooldown_at(slot: String, rank_value: int, tier_value: int = -1) -> float:
 	var tier := int(tiers.get(slot, 0)) if tier_value < 0 else tier_value
-	return float(ABILITIES[loadout[slot]].cd) * (1.0 - tier * 0.08) * (1.0 - SalvageProgression.bonus(rank_value) * 0.5) / (1.0 + cooldown_bonus)
+	return float(ABILITIES[loadout[slot]].cd) * (1.0 - tier * 0.08) * (1.0 - SalvageProgression.bonus(mini(10,rank_value+(rank_bonus if unlocked(slot) else 0))) * 0.5) / (1.0 + cooldown_bonus)
 
 func damage_scale(slot: String) -> float:
 	return damage_scale_at(slot, int(ranks.get(slot, 0)))
 
 func damage_scale_at(slot: String, rank_value: int, tier_value: int = -1) -> float:
 	var tier: int = int(tiers.get(slot, 0)) if tier_value < 0 else tier_value
-	return (1.0 + gear_damage + mastery_damage) * (1.0 + tier * 0.15) * (1.0 + SalvageProgression.bonus(rank_value))
+	return (1.0 + gear_damage + mastery_damage) * (1.0 + tier * 0.15) * (1.0 + SalvageProgression.bonus(mini(10,rank_value+(rank_bonus if unlocked(slot) else 0))))
 
 func promote(slot: String) -> bool:
-	if slot not in SLOTS or tiers[slot] >= 2:
+	if slot not in active_slots() or tiers[slot] >= 2:
 		return false
 	var old := cooldown(slot)
 	tiers[slot] += 1
@@ -287,6 +295,8 @@ static func category(slot: String) -> String:
 	return {"q": "active", "w": "active", "e": "active", "r": "ultimate", "d": "speed", "f": "mobility", "t": "summon"}.get(slot, "")
 
 static func valid_loadout(config: Dictionary) -> bool:
+	if config.get("flexible",false): return BotKeyboard.valid_config(config)
+	if config.get("flexible",false): return BotKeyboard.valid_config(config)
 	var passives: Variant = config.get("passives", [])
 	if not passives is Array or passives.size() != 4:
 		return false
@@ -318,14 +328,18 @@ func _init(config: Dictionary = {}, keys: Dictionary = {}) -> void:
 	config = migrate_loadout(config)
 	loadout = config.duplicate(true) if valid_loadout(config) else preset()
 	bindings = resolve_bindings(keys) if valid_bindings(keys) else DEFAULT_BINDS.duplicate()
-	for slot in SLOTS:
+	while toggles.size()<loadout.passives.size(): toggles.append(false)
+	for slot in active_slots():
 		charges[slot] = int(ABILITIES[loadout[slot]].max)
 		recharge[slot] = 0.0
 		tiers[slot] = 0
 		ranks[slot] = 0
 
+func passive_scale(id: String) -> float:
+	return 1.2 if rank_bonus>0 and BotKeyboard.learned(self,id)!="" else 1.0
+
 func has_passive(id: String) -> bool:
-	return id in loadout.passives
+	return id!="" and id in loadout.passives
 
 func speed() -> float:
 	return 205.0 * (1.0 + gear_speed + (0.4 if boost_speed > 0 else 0.0) + (0.65 if sprint > 0 else 0.0) + (0.25 if overdrive > 0 else 0.0))
@@ -340,7 +354,7 @@ func target_point(run, slot: String, cursor: Vector2) -> Vector2:
 func preview_ready(run, slot: String, cursor: Vector2) -> bool:
 	if extra.recasts.has(slot): return true
 	if laser_left > 0 and slot not in ["d", "f"]: return false
-	if slot not in SLOTS or charges[slot] <= 0 or not unlocked(slot): return false
+	if slot not in active_slots() or charges[slot] <= 0 or not unlocked(slot): return false
 	var id: String = loadout[slot]
 	if energy < ability_cost(id): return false
 	if not extra.can_cast(run, id, target_point(run, slot, cursor), cast_range(slot)): return false
@@ -363,7 +377,7 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 		if slot not in ["d", "f"]:
 			last_failure = "Channeling"
 			return false
-	if run.state != "running" or not SLOTS.has(slot) or charges[slot] <= 0:
+	if run.state != "running" or slot not in active_slots() or charges[slot] <= 0:
 		return false
 	if not unlocked(slot):
 		last_failure = "Find in a chest" if discovery else "Unlocks at %d seconds" % UNLOCKS[slot]
@@ -485,12 +499,12 @@ func step(run, delta: float) -> void:
 			for enemy in run.enemies:
 				var offset: Vector2 = enemy.pos - run.player
 				if not enemy.dead and enemy.warmup <= 0 and offset.length() <= cast_range(flame_slot) * area_scale(flame_slot) + enemy.radius and absf(flame_direction.angle_to(offset)) <= PI / 5:
-					run.hit_enemy(enemy, 3 * damage_scale(flame_slot), "flame")
+					run.hit_enemy(enemy, 3.25 * damage_scale(flame_slot), "flame")
 		flame_left = maxf(0, flame_left - delta)
 	var available := energy + energy_regen() * delta
 	var drain := drain_rate() * delta
 	if drain > available:
-		for i in range(4):
+		for i in range(loadout.passives.size()):
 			if UPKEEP.has(loadout.passives[i]):
 				toggles[i] = false
 		run.emit_event("energy_low", run.player)
@@ -499,7 +513,7 @@ func step(run, delta: float) -> void:
 	_step_poison(run, delta)
 	shield = maxf(0, shield - delta)
 	sprint = maxf(0, sprint - delta)
-	for slot in SLOTS:
+	for slot in active_slots():
 		var data: Dictionary = ABILITIES[loadout[slot]]
 		if charges[slot] < data.max:
 			recharge[slot] -= delta
@@ -554,6 +568,10 @@ func step(run, delta: float) -> void:
 		if summon.life <= 0:
 			summon.clear()
 	pet_position = pet_position.move_toward(run.player + Vector2(-34, 26), delta * 290)
+	forge_pet_clock=maxf(0,forge_pet_clock-delta)
+	if forge_pet and forge_pet_clock<=0:
+		forge_pet_clock=run.attacks.auto_interval(run)
+		fire_companion(run,pet_position,run.attacks.auto_range(run),run.attacks.auto_damage(run),"forge_pet")
 	pet_clock -= delta
 	if loadout.pet == "drone" and pet_clock <= 0:
 		pet_clock = 1.3
@@ -648,7 +666,12 @@ func move_dash(run, delta: float) -> void:
 static func fire_companion(run, point: Vector2, radius: float, damage: float, source: String) -> void:
 	var target: Dictionary = run.nearest_enemy(point)
 	if not target.is_empty() and point.distance_to(target.pos) <= radius:
-		run._add_projectile(point, (Vector2(target.pos) - point).normalized() * 450, damage, source, 0)
+		var count: int=run.projectiles.size()
+		var speed: float=700 if source=="forge_pet" else 450
+		run._add_projectile(point, (Vector2(target.pos) - point).normalized() * speed, damage, source, run.bolt_pierces() if source=="forge_pet" else 0)
+		if source=="forge_pet" and run.projectiles.size()>count:
+			run.projectiles.back().life=radius/speed
+			run.projectiles.back().basic_attack=true
 
 static func area(run, point: Vector2, radius: float, damage: float, source: String, force: float) -> void:
 	run.emit_event("pulse", point, {"radius": radius})

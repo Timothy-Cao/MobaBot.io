@@ -1,0 +1,452 @@
+{
+  "version": 1,
+  "style_prompt": "Use case: stylized-concept. Asset type: ONE square production icon for MobaBot.io, a cartoon salvage-robot action roguelite. Style: skilled digital gouache/cel-painted game illustration, medium detail, bold functional silhouette, three broad value groups, crisp cream upper-left edge light, matte broad material planes, slightly hand-shaped graphite contours. Quiet dark navy backdrop, no frame. Steel working surfaces, petrol-teal enamel, warm ochre-brass joints; a single restrained functional accent selected for subject (orange heat, icy blue electricity, violet gravity, mint repair). Same original art direction as the reference rocket, but DO NOT include the rocket: reference is style/material/lighting only. Show one clear mechanical metaphor for the named ability, not a diagram of all mechanics. Equipment is a single item (or matched pair for boots/legs). Centered, 75% square occupancy, 12% clean safe margin, readable at 32-64px. No writing, numerals, watermark, logo, border, character scene, photoreal chrome, bloom fog, excessive bolts, random ornament, noisy microtexture or cinematic gloss.",
+  "reference": "rocket.png",
+  "assets": [
+    {
+      "id": "rocket",
+      "name": "Impact bolt",
+      "subject": "Aim a straight rocket. 15 impact damage plus an 8-damage blast on contact or at maximum range."
+    },
+    {
+      "id": "flame",
+      "name": "Welding torch",
+      "subject": "Burn a forward cone for 2 seconds: 24 damage total. Steer with the cursor while moving."
+    },
+    {
+      "id": "nuke",
+      "name": "Reactor drop",
+      "subject": "85 damage in a 135-radius area after 0.65s. Confirm with left click; right click cancels."
+    },
+    {
+      "id": "laser",
+      "name": "Core cutter",
+      "subject": "Channel for up to 5s: 75 damage/sec. Rooted while firing. Right click to steer with inertia; R again cancels. D or F cancels into an escape."
+    },
+    {
+      "id": "sprint",
+      "name": "Ghost drive",
+      "subject": "+65% movement speed. Intangible for 3 seconds; pass through enemies and ignore damage and slows."
+    },
+    {
+      "id": "blink",
+      "name": "Phase hop",
+      "subject": "Blink toward the cursor, up to 185 distance. Brief protection on arrival."
+    },
+    {
+      "id": "returner",
+      "name": "Return blade",
+      "subject": "Throw a blade for 22 damage each way. Move to steer its return."
+    },
+    {
+      "id": "gravity",
+      "name": "Gravity well",
+      "subject": "Pull ordinary enemies into a 115-radius field for 3s. 12 damage/sec. Bosses resist the pull."
+    },
+    {
+      "id": "strike",
+      "name": "Core strike",
+      "subject": "Strike after 0.6s: 32 damage, doubled in the center."
+    },
+    {
+      "id": "crosswire",
+      "name": "Crosswire",
+      "subject": "Place two anchors within 4s. The connecting wire deals 30 damage and stuns ordinary enemies for 0.7s."
+    },
+    {
+      "id": "repulsor",
+      "name": "Repulsor",
+      "subject": "Push a cone for 20 damage. Nearby placed plates fire forward for another 18 damage."
+    },
+    {
+      "id": "sweep",
+      "name": "Guard sweep",
+      "subject": "Sweep a broad arc for 26 damage. Hitting an enemy grants one shield for 2s."
+    },
+    {
+      "id": "reap",
+      "name": "Rim cutter",
+      "subject": "Sweep for 16 damage. The outer rim deals 36 and repairs up to 15% hull per cast."
+    },
+    {
+      "id": "thrust",
+      "name": "Piston thrust",
+      "subject": "Thrust for 25 damage. Every third cast extends to 440 and stuns ordinary enemies for 0.6s."
+    },
+    {
+      "id": "tractor",
+      "name": "Tractor cone",
+      "subject": "Pull enemies in a cone toward you for 18 damage. Bosses resist displacement."
+    },
+    {
+      "id": "consume",
+      "name": "Scrap crusher",
+      "subject": "Crush an ordinary enemy below half health. Restore 15% hull. Cannot consume bosses or elites."
+    },
+    {
+      "id": "repair_channel",
+      "name": "Self repair",
+      "subject": "Channel for 3s to restore 24% hull. Movement, another cast or damage interrupts."
+    },
+    {
+      "id": "wall",
+      "name": "Bulkhead",
+      "subject": "Raise a 190-wide barrier for 5s. Blocks movement and projectiles; enemies route around its ends."
+    },
+    {
+      "id": "recall",
+      "name": "Plate recall",
+      "subject": "Recall planted plates through enemies for 18 damage per plate. Three plates stun ordinary enemies."
+    },
+    {
+      "id": "tumble",
+      "name": "Tumble jets",
+      "subject": "A short directional dodge. Empowers the next commanded basic attack by 75%."
+    },
+    {
+      "id": "echo_dash",
+      "name": "Echo drive",
+      "subject": "Dash into a 24-damage landing. Recast within 3s to return to the starting point."
+    },
+    {
+      "id": "veil_dash",
+      "name": "Veil drive",
+      "subject": "Dash through enemies. Become intangible for 1s; enemies briefly pursue your last position."
+    },
+    {
+      "id": "hop",
+      "name": "Spring vault",
+      "subject": "Hop untouchably for 0.55s, then slam for 24 damage. Can cross barriers."
+    },
+    {
+      "id": "vault",
+      "name": "Wall runner",
+      "subject": "Vault over a nearby barrier. Each barrier has a separate 12s reuse lockout."
+    },
+    {
+      "id": "pursuit",
+      "name": "Scrap pursuit",
+      "subject": "Lunge to a target for 32 damage. A kill refunds the charge, once per target."
+    },
+    {
+      "id": "landing",
+      "name": "Orbital entry",
+      "subject": "Commit to a 0.9s leap. Land for 120 damage in a 150-radius impact."
+    },
+    {
+      "id": "artillery",
+      "name": "Siege battery",
+      "subject": "Root for up to 6s. Recast to fire 3 aimed shells for 65 damage each. Right-click cancels."
+    },
+    {
+      "id": "roller",
+      "name": "Ballast roll",
+      "subject": "Accelerate for up to 4s, steering with the cursor. Crash for 35–100 damage. Recast to brake."
+    },
+    {
+      "id": "forward_sentry",
+      "name": "Line sentry",
+      "subject": "Deploy an 18s sentry. Fires in the cursor direction. Replaces the oldest when capacity is full."
+    },
+    {
+      "id": "pulse_sentry",
+      "name": "Pulse anchor",
+      "subject": "Deploy an 18s anchor. Pulses for 12 damage every 1.5s. Recast nearby to swap positions."
+    },
+    {
+      "id": "medic_sentry",
+      "name": "Repair anchor",
+      "subject": "Deploy a 20s repair aura: 2% hull/sec within 120. Recast nearby to teleport to it."
+    },
+    {
+      "id": "mirror_sentry",
+      "name": "Echo sentry",
+      "subject": "For 20s, mirrors an eligible skillshot or sweep at 45% strength every 3s. Mirrors never trigger mirrors."
+    },
+    {
+      "id": "hook_sentry",
+      "name": "Winch sentry",
+      "subject": "For 20s, hooks a nearby enemy every 2s for 16 damage. Bosses cannot be dragged."
+    },
+    {
+      "id": "crawler",
+      "name": "Blast crawler",
+      "subject": "A moving 20s summon. Fires 5-damage shots; detonates for 55 when surrounded by 4 enemies."
+    },
+    {
+      "id": "poison",
+      "name": "Coolant trail",
+      "subject": "Leave a 4-second coolant trail while powered. 8 damage/sec to enemies inside; overlapping patches do not stack. 3 energy/sec. Toggle off to stop laying trails. No self-damage."
+    },
+    {
+      "id": "lightning",
+      "name": "Arc coil",
+      "subject": "Cycle short-range chain lightning, long-range focused strikes and off. Expedition: 200 range / 0.9s chain; 440 range / 2.2s focused double damage. 4 energy/sec in either mode."
+    },
+    {
+      "id": "bolt",
+      "name": "Auto gun",
+      "subject": "Autonomous weapon, separate from basic attacks. Cycle machine gun, sniper and off. Machine gun: rapid short-range shots with spread. Sniper: slower, stronger, longer shots. Neither homes. S does not stop it."
+    },
+    {
+      "id": "orbit",
+      "name": "Scrap orbit",
+      "subject": "Collected scrap becomes orbiting tools."
+    },
+    {
+      "id": "pulse",
+      "name": "Collection pulse",
+      "subject": "Every 8 scrap releases a damaging pulse."
+    },
+    {
+      "id": "ricochet",
+      "name": "Ricochet",
+      "subject": "Spent orbit tools become bouncing shards. Requires Scrap orbit."
+    },
+    {
+      "id": "plating",
+      "name": "Reactive plating",
+      "subject": "After taking damage, gain 0.65 seconds of extra invulnerability."
+    },
+    {
+      "id": "thorns",
+      "name": "Recoil shell",
+      "subject": "Taking hull damage releases a 6-damage ring in 100 radius."
+    },
+    {
+      "id": "sidebolts",
+      "name": "Split barrel",
+      "subject": "Commanded basic attacks fire two additional non-proccing bolts at nearby targets for 45% damage."
+    },
+    {
+      "id": "plates",
+      "name": "Plate magazine",
+      "subject": "Commanded hits plant plates, up to 12. Plate recall pulls them through enemies."
+    },
+    {
+      "id": "threehit",
+      "name": "Third contact",
+      "subject": "Every third commanded hit on one target deals 12 bonus damage. Counters expire after 6s."
+    },
+    {
+      "id": "momentum",
+      "name": "Flywheel",
+      "subject": "Moving builds momentum. At full speed, collide for a capped 45-damage blast. Five-second crash recovery."
+    },
+    {
+      "id": "hopdrive",
+      "name": "Hop drive",
+      "subject": "After a commanded basic attack, your next move order makes a short 65-distance hop. Never moves you without a command."
+    },
+    {
+      "id": "converter",
+      "name": "Life converter",
+      "subject": "Cycle energy-to-hull, hull-to-energy, off. Transfers 10 energy/sec for 2% hull/sec; reverse stops at 30% hull."
+    },
+    {
+      "id": "mounted",
+      "name": "Shoulder drones",
+      "subject": "Two small mounted drones fire alternating 3-damage bolts. They do not use major summon capacity."
+    },
+    {
+      "id": "gear_courier_helmet",
+      "name": "Tier 1 helmet",
+      "subject": "compact robot helmet with a broad visor, no face or head inside. Armor tier 1 of 5: simple repaired slate-steel, teal strap, sparse copper fittings. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_courier_chest",
+      "name": "Tier 1 chest",
+      "subject": "broad robot breastplate, fitted metal torso armor without body or limbs. Armor tier 1 of 5: simple repaired slate-steel, teal strap, sparse copper fittings. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_courier_legs",
+      "name": "Tier 1 legs",
+      "subject": "a pair of segmented robotic greaves, without torso or feet. Armor tier 1 of 5: simple repaired slate-steel, teal strap, sparse copper fittings. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_courier_boots",
+      "name": "Tier 1 boots",
+      "subject": "a pair of mechanical speed boots with small side thrusters. Armor tier 1 of 5: simple repaired slate-steel, teal strap, sparse copper fittings. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_courier_charm",
+      "name": "Tier 1 charm",
+      "subject": "a compact metal protective pendant on a short loop. Armor tier 1 of 5: simple repaired slate-steel, teal strap, sparse copper fittings. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_courier_ring",
+      "name": "Tier 1 ring",
+      "subject": "a broad machined ring with one inset protective core. Armor tier 1 of 5: simple repaired slate-steel, teal strap, sparse copper fittings. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_courier_flower",
+      "name": "Tier 1 flower",
+      "subject": "a mechanical flower with six metal petals around one enamel core. Armor tier 1 of 5: simple repaired slate-steel, teal strap, sparse copper fittings. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_courier_cape",
+      "name": "Tier 1 cape",
+      "subject": "a short weighty protective cape with a metal clasp, no wearer. Armor tier 1 of 5: simple repaired slate-steel, teal strap, sparse copper fittings. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_bastion_helmet",
+      "name": "Tier 2 helmet",
+      "subject": "compact robot helmet with a broad visor, no face or head inside. Armor tier 2 of 5: reinforced cobalt-blue enamel and steel, two clear armor layers. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_bastion_chest",
+      "name": "Tier 2 chest",
+      "subject": "broad robot breastplate, fitted metal torso armor without body or limbs. Armor tier 2 of 5: reinforced cobalt-blue enamel and steel, two clear armor layers. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_bastion_legs",
+      "name": "Tier 2 legs",
+      "subject": "a pair of segmented robotic greaves, without torso or feet. Armor tier 2 of 5: reinforced cobalt-blue enamel and steel, two clear armor layers. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_bastion_boots",
+      "name": "Tier 2 boots",
+      "subject": "a pair of mechanical speed boots with small side thrusters. Armor tier 2 of 5: reinforced cobalt-blue enamel and steel, two clear armor layers. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_bastion_charm",
+      "name": "Tier 2 charm",
+      "subject": "a compact metal protective pendant on a short loop. Armor tier 2 of 5: reinforced cobalt-blue enamel and steel, two clear armor layers. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_bastion_ring",
+      "name": "Tier 2 ring",
+      "subject": "a broad machined ring with one inset protective core. Armor tier 2 of 5: reinforced cobalt-blue enamel and steel, two clear armor layers. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_bastion_flower",
+      "name": "Tier 2 flower",
+      "subject": "a mechanical flower with six metal petals around one enamel core. Armor tier 2 of 5: reinforced cobalt-blue enamel and steel, two clear armor layers. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_bastion_cape",
+      "name": "Tier 2 cape",
+      "subject": "a short weighty protective cape with a metal clasp, no wearer. Armor tier 2 of 5: reinforced cobalt-blue enamel and steel, two clear armor layers. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_dynamo_helmet",
+      "name": "Tier 3 helmet",
+      "subject": "compact robot helmet with a broad visor, no face or head inside. Armor tier 3 of 5: deep violet enamel with silver edge bracing, substantial interlocking plates. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_dynamo_chest",
+      "name": "Tier 3 chest",
+      "subject": "broad robot breastplate, fitted metal torso armor without body or limbs. Armor tier 3 of 5: deep violet enamel with silver edge bracing, substantial interlocking plates. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_dynamo_legs",
+      "name": "Tier 3 legs",
+      "subject": "a pair of segmented robotic greaves, without torso or feet. Armor tier 3 of 5: deep violet enamel with silver edge bracing, substantial interlocking plates. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_dynamo_boots",
+      "name": "Tier 3 boots",
+      "subject": "a pair of mechanical speed boots with small side thrusters. Armor tier 3 of 5: deep violet enamel with silver edge bracing, substantial interlocking plates. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_dynamo_charm",
+      "name": "Tier 3 charm",
+      "subject": "a compact metal protective pendant on a short loop. Armor tier 3 of 5: deep violet enamel with silver edge bracing, substantial interlocking plates. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_dynamo_ring",
+      "name": "Tier 3 ring",
+      "subject": "a broad machined ring with one inset protective core. Armor tier 3 of 5: deep violet enamel with silver edge bracing, substantial interlocking plates. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_dynamo_flower",
+      "name": "Tier 3 flower",
+      "subject": "a mechanical flower with six metal petals around one enamel core. Armor tier 3 of 5: deep violet enamel with silver edge bracing, substantial interlocking plates. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_dynamo_cape",
+      "name": "Tier 3 cape",
+      "subject": "a short weighty protective cape with a metal clasp, no wearer. Armor tier 3 of 5: deep violet enamel with silver edge bracing, substantial interlocking plates. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_relay_helmet",
+      "name": "Tier 4 helmet",
+      "subject": "compact robot helmet with a broad visor, no face or head inside. Armor tier 4 of 5: warm ochre-gold edge guards over petrol teal, one white precision core; advanced but not ornate. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_relay_chest",
+      "name": "Tier 4 chest",
+      "subject": "broad robot breastplate, fitted metal torso armor without body or limbs. Armor tier 4 of 5: warm ochre-gold edge guards over petrol teal, one white precision core; advanced but not ornate. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_relay_legs",
+      "name": "Tier 4 legs",
+      "subject": "a pair of segmented robotic greaves, without torso or feet. Armor tier 4 of 5: warm ochre-gold edge guards over petrol teal, one white precision core; advanced but not ornate. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_relay_boots",
+      "name": "Tier 4 boots",
+      "subject": "a pair of mechanical speed boots with small side thrusters. Armor tier 4 of 5: warm ochre-gold edge guards over petrol teal, one white precision core; advanced but not ornate. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_relay_charm",
+      "name": "Tier 4 charm",
+      "subject": "a compact metal protective pendant on a short loop. Armor tier 4 of 5: warm ochre-gold edge guards over petrol teal, one white precision core; advanced but not ornate. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_relay_ring",
+      "name": "Tier 4 ring",
+      "subject": "a broad machined ring with one inset protective core. Armor tier 4 of 5: warm ochre-gold edge guards over petrol teal, one white precision core; advanced but not ornate. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_relay_flower",
+      "name": "Tier 4 flower",
+      "subject": "a mechanical flower with six metal petals around one enamel core. Armor tier 4 of 5: warm ochre-gold edge guards over petrol teal, one white precision core; advanced but not ornate. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_relay_cape",
+      "name": "Tier 4 cape",
+      "subject": "a short weighty protective cape with a metal clasp, no wearer. Armor tier 4 of 5: warm ochre-gold edge guards over petrol teal, one white precision core; advanced but not ornate. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_reclaimer_helmet",
+      "name": "Tier 5 helmet",
+      "subject": "compact robot helmet with a broad visor, no face or head inside. Armor tier 5 of 5: ivory enamel and warm brass with petrol-teal secondary panels, one small companion-drone insignia; elite restrained engineering. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_reclaimer_chest",
+      "name": "Tier 5 chest",
+      "subject": "broad robot breastplate, fitted metal torso armor without body or limbs. Armor tier 5 of 5: ivory enamel and warm brass with petrol-teal secondary panels, one small companion-drone insignia; elite restrained engineering. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_reclaimer_legs",
+      "name": "Tier 5 legs",
+      "subject": "a pair of segmented robotic greaves, without torso or feet. Armor tier 5 of 5: ivory enamel and warm brass with petrol-teal secondary panels, one small companion-drone insignia; elite restrained engineering. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_reclaimer_boots",
+      "name": "Tier 5 boots",
+      "subject": "a pair of mechanical speed boots with small side thrusters. Armor tier 5 of 5: ivory enamel and warm brass with petrol-teal secondary panels, one small companion-drone insignia; elite restrained engineering. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_reclaimer_charm",
+      "name": "Tier 5 charm",
+      "subject": "a compact metal protective pendant on a short loop. Armor tier 5 of 5: ivory enamel and warm brass with petrol-teal secondary panels, one small companion-drone insignia; elite restrained engineering. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_reclaimer_ring",
+      "name": "Tier 5 ring",
+      "subject": "a broad machined ring with one inset protective core. Armor tier 5 of 5: ivory enamel and warm brass with petrol-teal secondary panels, one small companion-drone insignia; elite restrained engineering. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_reclaimer_flower",
+      "name": "Tier 5 flower",
+      "subject": "a mechanical flower with six metal petals around one enamel core. Armor tier 5 of 5: ivory enamel and warm brass with petrol-teal secondary panels, one small companion-drone insignia; elite restrained engineering. A physical equipment item, no statistics, no labels."
+    },
+    {
+      "id": "gear_reclaimer_cape",
+      "name": "Tier 5 cape",
+      "subject": "a short weighty protective cape with a metal clasp, no wearer. Armor tier 5 of 5: ivory enamel and warm brass with petrol-teal secondary panels, one small companion-drone insignia; elite restrained engineering. A physical equipment item, no statistics, no labels."
+    }
+  ]
+}

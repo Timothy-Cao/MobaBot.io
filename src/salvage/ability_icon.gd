@@ -1,6 +1,7 @@
 extends Control
 ## Original action icons: a fixed 64-unit canvas, shared materials, no bitmap variants.
 var ability := "salvo"
+var base_only := false
 const INK := Color("14242c")
 const TEAL := Color("4cafaa")
 const LIGHT := Color("b9ead8")
@@ -34,6 +35,12 @@ func bolt(p: Vector2, scale_value: float = 1.0) -> void:
 
 func _draw() -> void:
 	draw_set_transform(Vector2.ZERO, 0, size / 64.0)
+	texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	var painted: Texture2D=null if base_only else PaintedIcons.texture(ability)
+	if painted!=null:
+		draw_texture_rect(painted,Rect2(0,0,64,64),false)
+		return
+	var icon_id: String=MobaKit.PASSIVES[ability].icon if MobaKit.PASSIVES.has(ability) and ability not in ["poison","lightning","pulse"] else ability
 	draw_rect(Rect2(0, 0, 64, 64), INK)
 	draw_rect(Rect2(3, 3, 58, 58), Color("223c46"))
 	draw_colored_polygon(PackedVector2Array([Vector2(3, 3), Vector2(61, 3), Vector2(61, 15), Vector2(3, 44)]), Color("294b54"))
@@ -41,8 +48,8 @@ func _draw() -> void:
 	line(Vector2(5, 5), Vector2(5, 59), Color("557976"), 1)
 	line(Vector2(59, 5), Vector2(59, 59), Color("10232c"), 2)
 	line(Vector2(5, 59), Vector2(59, 59), Color("10232c"), 2)
-	if ExpeditionIcon.draw(self, ability): return
-	match ability:
+	if ExpeditionIcon.draw(self, icon_id): return
+	match icon_id:
 		"poison":
 			poly([Vector2(24, 13), Vector2(40, 13), Vector2(39, 24), Vector2(49, 48), Vector2(44, 53), Vector2(20, 53), Vector2(15, 48), Vector2(25, 24)], STEEL)
 			poly([Vector2(24, 33), Vector2(40, 33), Vector2(45, 47), Vector2(20, 47)], TEAL)
@@ -65,8 +72,8 @@ func _draw() -> void:
 			draw_arc(Vector2(32, 32), 16, PI, TAU * 0.9, 24, LIGHT, 3, true)
 			draw_circle(Vector2(32, 32), 11, INK)
 			draw_circle(Vector2(32, 32), 7, GOLD)
-			if ability == "power": bolt(Vector2(34, 29), 0.8)
-			if ability == "reactor": line(Vector2(28, 32), Vector2(36, 32), CREAM, 3)
+			if icon_id == "power": bolt(Vector2(34, 29), 0.8)
+			if icon_id == "reactor": line(Vector2(28, 32), Vector2(36, 32), CREAM, 3)
 		"grinder", "ricochet":
 			var points: Array = []
 			for i in range(24): points.append(Vector2(32, 32) + Vector2.from_angle(i * TAU / 24) * (26 if i % 3 == 0 else 21))
@@ -75,7 +82,7 @@ func _draw() -> void:
 			draw_circle(Vector2(32, 32), 12, TEAL)
 			draw_arc(Vector2(32, 32), 11, PI, TAU, 20, LIGHT, 2, true)
 			draw_circle(Vector2(32, 32), 5, GOLD)
-			if ability == "ricochet":
+			if icon_id == "ricochet":
 				line(Vector2(11, 51), Vector2(44, 18), GOLD, 4)
 				line(Vector2(44, 18), Vector2(53, 40), GOLD, 4)
 		"magnet":
@@ -126,7 +133,7 @@ func _draw() -> void:
 			poly([Vector2(20, 18), Vector2(32, 14), Vector2(45, 18), Vector2(41, 36), Vector2(32, 47), Vector2(23, 36)], TEAL)
 			line(Vector2(32, 18), Vector2(32, 39), CREAM, 3)
 			line(Vector2(25, 28), Vector2(39, 28), CREAM, 3)
-			if ability == "thorns":
+			if icon_id == "thorns":
 				for side in [-1, 1]:
 					poly([Vector2(32 + side * 15, 22), Vector2(32 + side * 29, 15), Vector2(32 + side * 18, 35)], GOLD)
 		"mortar":
@@ -159,8 +166,8 @@ func _draw() -> void:
 		"sprint", "dash":
 			for i in range(2):
 				var x := i * 20
-				poly([Vector2(9 + x, 12), Vector2(31 + x, 31), Vector2(9 + x, 52), Vector2(16 + x, 32)], GOLD if ability == "sprint" else STEEL)
-			if ability == "dash":
+				poly([Vector2(9 + x, 12), Vector2(31 + x, 31), Vector2(9 + x, 52), Vector2(16 + x, 32)], GOLD if icon_id == "sprint" else STEEL)
+			if icon_id == "dash":
 				line(Vector2(6, 55), Vector2(55, 55), LIGHT, 3)
 		"blink":
 			draw_arc(Vector2(19, 40), 14, 0, TAU, 32, Color(TEAL, 0.6), 3, true)
@@ -174,7 +181,7 @@ func _draw() -> void:
 		"pylon", "sacrifice":
 			poly([Vector2(17, 16), Vector2(25, 16), Vector2(25, 10), Vector2(39, 10), Vector2(39, 16), Vector2(47, 16), Vector2(47, 53), Vector2(17, 53)], STEEL)
 			draw_rect(Rect2(22, 21, 20, 27), TEAL)
-			if ability == "pylon":
+			if icon_id == "pylon":
 				line(Vector2(25, 34), Vector2(39, 34), CREAM, 5)
 				line(Vector2(32, 27), Vector2(32, 41), CREAM, 5)
 			else:

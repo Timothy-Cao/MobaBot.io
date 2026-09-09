@@ -15,7 +15,7 @@ static func multiplier(rank_value: int) -> float:
 static func data(run, id: String) -> Dictionary:
 	if id.begins_with("skill_"):
 		var slot := id.trim_prefix("skill_")
-		return {"name": MobaKit.ABILITIES[run.kit.loadout[slot]].name, "tag": "%s / ABILITY" % slot.to_upper(), "max": 10, "description": "Numerical ranks. Milestones at 5 and 10."}
+		return {"name": MobaKit.ABILITIES[run.kit.loadout[slot]].name, "tag": "%s / ABILITY" % OS.get_keycode_string(run.kit.bindings.get(slot,0)), "max": 10, "description": "Numerical ranks. Milestones at 5 and 10."}
 	var result: Dictionary = run.UPGRADES.get(id, {"name": "Repair", "description": "Restore one hull.", "tag": "HULL", "max": 1}).duplicate()
 	if id == "power" and run.kit != null and run.kit.has_passive("lightning"): result.name = "Weapon power"
 	if id == "power" and run.attacks.enabled: result.name = "Weapon power"

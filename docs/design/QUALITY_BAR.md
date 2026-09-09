@@ -31,7 +31,17 @@ Keep three separate records: **implemented** (what exists), **verified** (what t
 
 Release gates: no known save-loss bug; no repeatable stuck movement; no misleading damage boundary; no hidden critical damage tell; no UI trap; no recurring script errors. A failed gate blocks a demo recommendation regardless of scores. This is a target policy, not a claim that exhaustive testing has established zero bugs.
 
-## Current assessment
+## 0.16 owner feedback and follow-up · 9 September 2026
+
+Owner feedback: the current enemy difficulty feels good; Stage 1's boss was reached. The requested changes prioritize flexible in-run skill placement, simpler forging, richer optional icons, smaller interruptions and immediate resource visibility. Treat this as positive evidence for the early challenge, not approval of all classes or the full expedition.
+
+Implemented in this pass: keyboard placement/swapping, five-tier three-copy forging, 89 Painted icons with Base retained, compact power-up choices, reward reveals and above-player bars. Verified separately: checkpoint/transaction fixtures, key/rank/cooldown preservation, actual-size icon sheets, rendered menus and artificial combat probes. The 0.16 experience has not yet been reviewed by the owner. Keep the numeric baseline below unchanged until that feedback; more assets and assertions do not warrant higher fun scores.
+
+Assistant judgment: the equipment presentation and high-level silhouettes are more coherent. Some neighboring skills still have similar silhouettes (Reactor drop/Core strike and Ghost drive/Veil dash), and the Painted-to-native-world detail gap remains. Keyboard placement adds one deliberate decision to discovery; whether that trade is pleasant needs timing in real play. Reward motion is an initial short native reveal, not a cinematic loot sequence. The full-route class probe strongly favors the Brawler under one deterministic policy; do not mistake this for calibrated human difficulty.
+
+Next three review targets: (1) discover, place and swap a skill without instruction; (2) compare icon recognition in Painted/Base during a busy first boss; (3) record active combat time versus choice time and compare Gunner/Brawler/Engineer before changing enemy damage. Separately, test the long-term forge grind: 3:1 fusion implies 81 tier-1 copies for a tier-5 item if no higher-tier drops occur. Existing higher-tier drops shorten that, but a healthy retention loop is not yet demonstrated.
+
+## 0.15 baseline assessment (retained)
 
 These are assistant estimates following code review, deterministic render fixtures and regression tests. There has been **no new human playtest or listening session** in this pass. Leave the last column for the owner; it is intentionally not pre-filled.
 
