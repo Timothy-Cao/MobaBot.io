@@ -1,10 +1,12 @@
-# MobaBot.io — 0.14 Expedition
+# MobaBot.io — 0.15 Expedition
 
 A Windows-first, single-player survivor-like with MOBA mouse controls. Build a salvage robot through an eight-stage expedition: independent automatic fire, commanded basic attacks, aimed abilities and deployed machines.
 
 **Implemented:** three classes, 22 rounds, chest discoveries, 34 active choices, 15 powered passives, a 48-node mastery tree, 40 equipment items, shops, Ascensions 0–5 and between-round checkpoints. The old three-round scene remains a regression fixture, not the normal entry point.
 
-[Research and design](docs/design/EXPEDITION_RESEARCH_14.md) · [Changes, tests and limitations](docs/design/QA_14.md)
+[Research and design](docs/design/EXPEDITION_RESEARCH_14.md) · [0.14 systems](docs/design/QA_14.md) · [0.15 art pass](docs/design/QA_15.md) · [Quality bar and current ratings](docs/design/QUALITY_BAR.md)
+
+0.15 focuses on skill motion and icon recognition: returning blades, directional pulls/cuts, strike descent, deployable machinery and distinct movement symbols. The quality bar separates automated verification from player feel; it is not a claim of finished balance or public-demo polish.
 
 ## Play
 

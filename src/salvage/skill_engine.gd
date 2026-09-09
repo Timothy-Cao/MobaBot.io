@@ -65,7 +65,7 @@ func recast(run, slot: String, point: Vector2) -> bool:
 		"crosswire":
 			line_hit(run, r.pos, point, 16 * run.kit.area_scale(slot), 30 * r.scale, 0.7)
 		"artillery":
-			field(point, 110 * run.kit.area_scale(slot), 0.55, 65 * r.scale, "slam")
+			field(point, 110 * run.kit.area_scale(slot), 0.55, 65 * r.scale, "slam", "artillery")
 			r.left -= 1
 			if r.left > 0: return true
 		"roller": roll_left = 0
@@ -77,18 +77,18 @@ func cast(run, slot: String, id: String, point: Vector2, direction: Vector2, sca
 	var size_scale: float = run.kit.area_scale(slot)
 	match id:
 		"returner": blade(run.player, point, 22 * scale_value, false, size_scale)
-		"gravity": field(point, 115 * size_scale, 3, 12 * scale_value, "gravity")
-		"strike": field(point, 110 * size_scale, 0.6, 32 * scale_value, "strike")
+		"gravity": field(point, 115 * size_scale, 3, 12 * scale_value, "gravity", id)
+		"strike": field(point, 110 * size_scale, 0.6, 32 * scale_value, "strike", id)
 		"crosswire": recasts[slot] = {"id": id, "pos": point, "life": 4.0, "scale": scale_value}
 		"echo_dash":
 			recasts[slot] = {"id": id, "pos": run.player, "life": 3.0}
 			var landing_point := solid_point(run.player, point, 12)
 			dash(run, landing_point, 0.2, 0.25)
-			field(landing_point, 85 * size_scale, 0.2, 24 * scale_value, "slam")
+			field(landing_point, 85 * size_scale, 0.2, 24 * scale_value, "slam", id)
 		"hop", "landing":
 			var duration := 0.55 if id == "hop" else 0.9
 			dash(run, point, duration, duration + 0.1, true)
-			field(point, (90 if id == "hop" else 150) * size_scale, duration, (24 if id == "hop" else 120) * scale_value, "slam")
+			field(point, (90 if id == "hop" else 150) * size_scale, duration, (24 if id == "hop" else 120) * scale_value, "slam", id)
 		"tumble", "veil_dash", "vault":
 			if id == "vault":
 				var wall := vault_wall(run, point)
@@ -119,7 +119,7 @@ func cast(run, slot: String, id: String, point: Vector2, direction: Vector2, sca
 				for plate in plates:
 					if plate.distance_to(run.player) < 280: blade(plate, plate + direction * 430, 18 * scale_value, true, size_scale)
 				plates.clear()
-			field(run.player,run.kit.cast_range(slot)*size_scale,0.22,0,"cone")
+			field(run.player,run.kit.cast_range(slot)*size_scale,0.22,0,"cone",id)
 			fields.back()["direction"]=direction
 		"reap":
 			var edge_hits := 0
@@ -130,10 +130,11 @@ func cast(run, slot: String, id: String, point: Vector2, direction: Vector2, sca
 				run.hit_enemy(enemy, (36 if edge else 16) * scale_value, "reap")
 				if edge: edge_hits += 1
 			run.health = minf(run.max_health(), run.health + run.max_health() * 0.05 * mini(3, edge_hits))
-			run.emit_event("pulse", run.player, {"radius": 165 * size_scale})
+			run.emit_event("skill_cut", run.player, {"radius":165*size_scale,"inner":100*size_scale,"direction":direction,"style":id})
 		"thrust":
 			combo = (combo + 1) % 3
 			line_hit(run, run.player, run.player + direction * (440 if combo == 0 else 230) * size_scale, 20 * size_scale, 25 * scale_value, 0.6 if combo == 0 else 0.0)
+			run.emit_event("skill_cut",run.player,{"target":run.player+direction*(440 if combo==0 else 230)*size_scale,"width":40*size_scale,"style":id,"empowered":combo==0})
 		"recall":
 			recall_hits.clear()
 			for plate in plates:
@@ -145,7 +146,7 @@ func cast(run, slot: String, id: String, point: Vector2, direction: Vector2, sca
 			serial += 1
 			var side := direction.orthogonal() * 95 * size_scale
 			if side == Vector2.ZERO: side = Vector2.UP * 95
-			walls.append({"uid": serial, "a": point - side, "b": point + side, "life": 5.0 * size_scale})
+			walls.append({"uid": serial, "a": point - side, "b": point + side, "life": 5.0 * size_scale, "duration":5.0*size_scale})
 			if walls.size() > 4: walls.pop_front()
 		"roller":
 			roll_left = 4; roll_speed = 205; roll_angle = direction.angle()
@@ -164,13 +165,15 @@ func cast(run, slot: String, id: String, point: Vector2, direction: Vector2, sca
 						return
 				serial += 1
 				while summons.size() >= capacity: summons.pop_front()
-				summons.append({"uid": serial, "id": id, "pos": point, "life": (18 if id in ["forward_sentry", "pulse_sentry"] else 20) * (1 + duration_bonus) * size_scale, "clock": 0.1, "mirror": 0.0, "scale": scale_value * summon_power, "direction": direction})
+				var lifetime: float=(18 if id in ["forward_sentry", "pulse_sentry"] else 20)*(1+duration_bonus)*size_scale
+				summons.append({"uid": serial, "id": id, "pos": point, "life":lifetime, "duration":lifetime, "flash":0.0, "clock": 0.1, "mirror": 0.0, "scale": scale_value * summon_power, "direction": direction})
 
 func mirror(run, id: String, direction: Vector2, scale_value: float) -> void:
 	if id not in ["rocket", "returner", "thrust", "sweep", "flame", "repulsor"]: return
 	for unit in summons:
 		if unit.id != "mirror_sentry" or unit.mirror > 0: continue
 		unit.mirror = 3.0
+		unit["flash"] = 0.22
 		var damage: float = {"rocket": 23, "returner": 22, "thrust": 25, "sweep": 26, "flame": 24, "repulsor": 20}[id] * 0.45 * scale_value * unit.scale
 		if id in ["sweep", "flame"]:
 			line_hit(run, unit.pos, unit.pos + direction * 160, 55, damage, 0)
@@ -186,9 +189,9 @@ func dash(run, point: Vector2, duration: float, protection: float, crosses_walls
 	run.kit.dash_damage = 0; run.kit.dash_hits.clear()
 	run.stop_movement(); run.invincible = maxf(run.invincible, protection)
 
-func field(point: Vector2, radius: float, seconds: float, damage: float, kind: String) -> void:
+func field(point: Vector2, radius: float, seconds: float, damage: float, kind: String, visual: String = "") -> void:
 	if fields.size() >= 24: fields.pop_front()
-	fields.append({"pos": point, "radius": radius, "life": seconds, "duration": seconds, "damage": damage, "kind": kind})
+	fields.append({"pos": point, "radius": radius, "life": seconds, "duration": seconds, "damage": damage, "kind": kind, "visual":visual})
 
 func blade(start: Vector2, end: Vector2, damage: float, one_way: bool, size_scale: float) -> void:
 	if blades.size() >= 48: return
@@ -337,7 +340,7 @@ func step(run, delta: float) -> void:
 				if live(enemy) and Vector2(enemy.pos).distance_to(f.pos) <= f.radius + enemy.radius:
 					var center: bool = f.kind == "strike" and Vector2(enemy.pos).distance_to(f.pos) < f.radius * 0.35
 					run.hit_enemy(enemy, f.damage * (2 if center else 1), "strike")
-			run.emit_event("nuke_impact", f.pos, {"radius": f.radius})
+			run.emit_event("nuke_impact", f.pos, {"radius": f.radius, "style":f.get("visual","")})
 	fields = fields.filter(func(f: Dictionary) -> bool: return f.life > 0)
 	for b in blades:
 		b.life -= delta
@@ -360,6 +363,7 @@ func step(run, delta: float) -> void:
 	blades = blades.filter(func(b: Dictionary) -> bool: return b.life > 0)
 	for unit in summons:
 		unit.life -= delta; unit.clock -= delta; unit.mirror = maxf(0, unit.mirror - delta)
+		unit["flash"] = maxf(0,float(unit.get("flash",0))-delta)
 		if unit.id == "crawler":
 			var nearest: Dictionary = run.nearest_enemy(unit.pos)
 			if not nearest.is_empty(): unit.pos = Vector2(unit.pos).move_toward(nearest.pos, delta * 100)
@@ -371,16 +375,18 @@ func step(run, delta: float) -> void:
 		unit.clock = 1.0
 		match unit.id:
 			"forward_sentry":
+				unit["flash"] = 0.16
 				unit.clock = 0.65
 				unit.direction = (cursor - Vector2(unit.pos)).normalized()
 				run._add_projectile(unit.pos, unit.direction * 600, 5 * unit.scale, "summon", 1)
-			"pulse_sentry": unit.clock = 1.5; MobaKit.area(run, unit.pos, 125, 12 * unit.scale, "summon", 20)
+			"pulse_sentry": unit.clock = 1.5; unit["flash"]=0.35; MobaKit.area(run, unit.pos, 125, 12 * unit.scale, "summon", 20)
 			"medic_sentry":
 				if run.player.distance_to(unit.pos) < 120: run.health = minf(run.max_health(), run.health + run.max_health() * 0.02)
 			"hook_sentry":
 				unit.clock = 2
 				var enemy: Dictionary = run.nearest_enemy(unit.pos)
 				if not enemy.is_empty() and Vector2(enemy.pos).distance_to(unit.pos) < 300:
+					unit["flash"]=0.22; unit.direction=(enemy.pos-Vector2(unit.pos)).normalized()
 					run.emit_event("beam", unit.pos, {"target": enemy.pos, "width": 5})
 					run.hit_enemy(enemy, 16 * unit.scale, "summon")
 					if not enemy.has("role"): enemy.pos = Vector2(enemy.pos).move_toward(unit.pos, 120)

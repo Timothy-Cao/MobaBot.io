@@ -1,6 +1,8 @@
 # MobaBot.io development
 
-Read README.md, docs/design/QA_14.md and docs/design/EXPEDITION_RESEARCH_14.md for current controls, scope and handoff. Older iteration documents are historical.
+Read README.md, docs/design/QA_14.md, docs/design/QA_15.md and docs/design/EXPEDITION_RESEARCH_14.md for current controls, systems scope and handoff. Other older iteration documents are historical.
+
+- docs/design/QUALITY_BAR.md is the editable quality contract. Keep implementation, automated verification and human experience separate; do not raise fun/quality scores just because tests pass. Preserve dated ratings and the owner's feedback. No new in-game quality dashboard is needed. Check new skill art at actual icon/combat size and normal/reduced effects, using tests/skill_visual_test.gd; the optional --showcase produces ignored review captures without player saves. Keep the behavior probe's loot seed fixed for comparable results.
 
 - The normal entry point is expedition.tscn: eight stages, 22 rounds, three classes, chest discovery, 48-node run mastery, 40 persistent equipment items and A0–A5. workshop.tscn is a legacy three-round regression fixture. Eight boss configurations reuse one body and three world sectors; do not describe these as eight new maps or unique boss assets. Multiplayer is not in scope.
 - Preserve the player's equipment/settings files and user-provided music. Never award permanent loot from automated tests or fixtures.

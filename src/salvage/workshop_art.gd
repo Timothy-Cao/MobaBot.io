@@ -43,12 +43,18 @@ func receive(event: Dictionary) -> void:
 	if kind == "hurt" and not reduced_effects:
 		shake = 5.0
 	# Automatic collection/ultimate pulses must not continuously shake the actors.
-	if kind in ["kill", "hit", "spent", "pulse", "pickup", "equipped", "boss_down", "loot", "blink", "beam", "move", "cast", "milestone", "vacuum", "hostile_blast", "nuke_impact", "rocket_impact", "lightning", "boss_summon"]:
+	if kind in ["kill", "hit", "spent", "pulse", "pickup", "equipped", "boss_down", "loot", "blink", "beam", "move", "cast", "skill_cut", "milestone", "vacuum", "hostile_blast", "nuke_impact", "rocket_impact", "lightning", "boss_summon"]:
+		# Displace a cosmetic hit/pickup first so important cast feedback survives a crowd.
+		if effects.size()>=(65 if reduced_effects else 180) and kind in ["cast","skill_cut","nuke_impact","rocket_impact","hostile_blast","boss_summon"]:
+			for i in range(effects.size()):
+				if effects[i].kind in ["pickup","hit","spent","kill"]:
+					effects.remove_at(i); break
 		if effects.size() < (65 if reduced_effects else 180):
 			var e := event.duplicate()
 			e.age = 0.0
 			e.life = 0.55 if kind in ["kill", "pulse", "boss_down", "loot", "move"] else 0.24
 			if kind in ["nuke_impact", "rocket_impact", "boss_summon"]: e.life = 0.6
+			if kind=="skill_cut": e.life=0.30
 			effects.append(e)
 
 func _box(rect: Rect2, color: Color, radius: int = 5, border: Color = INK, width: int = 2) -> void:
@@ -586,6 +592,7 @@ func _companions() -> void:
 		draw_set_transform(Vector2.ZERO)
 
 func _effect(effect: Dictionary) -> void:
+	if preload("res://src/salvage/skill_vfx.gd").draw(self,effect): return
 	var t: float = effect.age / effect.life
 	var p: Vector2 = effect.pos + frame_offset
 	match effect.kind:

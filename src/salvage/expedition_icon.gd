@@ -38,28 +38,66 @@ static func draw(c, id: String) -> bool:
 	if not BotSkillCatalog.SPECS.has(id): return false
 	match id:
 		"returner", "recall":
-			c.poly([Vector2(14,13),Vector2(48,25),Vector2(50,47),Vector2(37,36),Vector2(22,32)],c.STEEL)
-			c.draw_arc(center,22,0.1,PI*1.2,30,c.GOLD,3,true)
-			if id == "recall": c.line(Vector2(16,48),Vector2(37,36),c.LIGHT,3)
+			if id=="returner":
+				c.poly([Vector2(14,13),Vector2(48,25),Vector2(50,47),Vector2(37,36),Vector2(22,32)],c.STEEL)
+				c.draw_arc(center,22,0.1,PI*1.2,30,c.GOLD,3,true)
+			else:
+				for i in range(3):
+					var p:=Vector2(18+i*13,15+i*4)
+					c.poly([p+Vector2(-5,-4),p+Vector2(6,-4),p+Vector2(4,9),p+Vector2(-6,8)],c.STEEL)
+					c.line(p+Vector2(0,10),Vector2(32,48),c.TEAL,2)
+				c.draw_polyline(PackedVector2Array([Vector2(22,41),Vector2(32,52),Vector2(42,41)]),c.GOLD,4,true)
 		"gravity":
 			for r in [11,18,24]: c.draw_arc(center,r,0.4+r*0.07,5.4+r*0.07,32,c.TEAL if r==24 else c.STEEL,3,true)
 			c.draw_circle(center,7,c.INK); c.draw_circle(center,3,c.GOLD)
 		"crosswire", "wall":
-			for p in [Vector2(16,44),Vector2(48,20)]: c.poly([p+Vector2(-6,-10),p+Vector2(6,-10),p+Vector2(8,10),p+Vector2(-8,10)],c.STEEL)
-			c.line(Vector2(18,43),Vector2(47,20),c.TEAL,8 if id=="wall" else 3)
-			c.line(Vector2(18,39),Vector2(47,16),c.CREAM,2)
+			if id=="crosswire":
+				for p in [Vector2(16,44),Vector2(48,20)]:
+					c.poly([p+Vector2(-5,-9),p+Vector2(5,-9),p+Vector2(7,9),p+Vector2(-7,9)],c.STEEL)
+					c.draw_circle(p,3,c.GOLD)
+				c.draw_polyline(PackedVector2Array([Vector2(18,43),Vector2(27,27),Vector2(36,36),Vector2(47,20)]),c.TEAL,3,true)
+			else:
+				for i in range(3):
+					var x:=12+i*14
+					c.poly([Vector2(x,22),Vector2(x+11,17),Vector2(x+11,44),Vector2(x,49)],c.STEEL)
+					c.line(Vector2(x+4,27),Vector2(x+4,40),c.TEAL,3)
+				c.line(Vector2(11,50),Vector2(53,45),c.GOLD,3)
 		"strike", "landing", "artillery":
-			c.draw_arc(Vector2(32,43),20,0,TAU,32,c.TEAL,3,true)
-			c.bolt(Vector2(32,26),1.4)
-			if id=="artillery": c.draw_circle(Vector2(14,16),4,c.GOLD); c.draw_circle(Vector2(48,16),4,c.GOLD)
-			if id=="landing": c.line(Vector2(18,12),Vector2(28,32),c.CREAM,3)
-		"reap", "sweep", "tractor", "repulsor", "thrust":
+			if id=="strike":
+				c.draw_arc(Vector2(32,43),18,0,TAU,32,c.TEAL,3,true)
+				c.poly([Vector2(23,16),Vector2(41,16),Vector2(41,32),Vector2(32,42),Vector2(23,32)],c.STEEL)
+				c.line(Vector2(32,12),Vector2(32,29),c.GOLD,5)
+			elif id=="landing":
+				c.poly([Vector2(17,12),Vector2(46,12),Vector2(50,28),Vector2(40,33),Vector2(24,33),Vector2(13,28)],c.TEAL)
+				for x in [23,41]:
+					c.line(Vector2(x,20),Vector2(x,30),c.STEEL,7)
+					c.poly([Vector2(x-4,35),Vector2(x+4,35),Vector2(x,48)],c.GOLD)
+				c.draw_arc(Vector2(32,45),19,0,PI,24,c.CREAM,3,true)
+			else:
+				for i in range(3):
+					var p:=Vector2(16+i*16,17+abs(i-1)*10)
+					c.poly([p+Vector2(-5,-6),p+Vector2(5,-6),p+Vector2(5,7),p+Vector2(0,13),p+Vector2(-5,7)],c.STEEL)
+					c.line(p+Vector2(0,13),p+Vector2(0,19),c.GOLD,3)
+				c.line(Vector2(12,53),Vector2(52,53),c.TEAL,3)
+		"reap", "sweep":
 			c.poly([Vector2(12,44),Vector2(31,23),Vector2(47,14),Vector2(41,31),Vector2(20,51)],c.STEEL)
 			c.draw_circle(Vector2(22,42),6,c.TEAL)
-			if id in ["reap","sweep"]: c.draw_arc(center,23,-0.7,2.9,32,c.GOLD,4,true)
-			elif id=="thrust": c.line(Vector2(36,29),Vector2(54,10),c.CREAM,3)
-			else:
-				for i in range(3): c.line(Vector2(14+i*8,12),Vector2(18+i*8,23),c.TEAL,3)
+			if id=="reap": c.draw_arc(center,23,-0.7,2.9,32,c.GOLD,4,true); c.draw_arc(center,17,-0.7,2.9,28,c.TEAL,2,true)
+			elif id=="sweep": c.poly([Vector2(9,14),Vector2(23,11),Vector2(25,29),Vector2(17,36),Vector2(9,28)],c.TEAL)
+		"thrust":
+			c.poly([Vector2(10,36),Vector2(24,36),Vector2(24,51),Vector2(10,51)],c.TEAL)
+			c.line(Vector2(20,42),Vector2(39,23),c.STEEL,9)
+			c.line(Vector2(24,39),Vector2(42,20),c.CREAM,3)
+			c.poly([Vector2(32,18),Vector2(53,11),Vector2(47,33),Vector2(43,22)],c.STEEL)
+			c.line(Vector2(13,30),Vector2(20,23),c.GOLD,3)
+			c.line(Vector2(29,51),Vector2(36,44),c.GOLD,3)
+		"tractor", "repulsor":
+			c.poly([Vector2(9,24),Vector2(24,19),Vector2(28,25),Vector2(28,41),Vector2(22,47),Vector2(9,42)],c.STEEL)
+			c.line(Vector2(21,25),Vector2(21,40),c.TEAL,5)
+			for i in range(2):
+				var x:=35+i*13
+				var tip:=x-5 if id=="tractor" else x+5
+				c.draw_polyline(PackedVector2Array([Vector2(x,22),Vector2(tip,32),Vector2(x,42)]),c.GOLD,3,true)
 		"repair_channel", "consume":
 			c.poly([Vector2(17,14),Vector2(47,14),Vector2(50,49),Vector2(14,49)],c.TEAL)
 			if id=="repair_channel": c.line(Vector2(32,23),Vector2(32,43),c.CREAM,7); c.line(Vector2(22,33),Vector2(42,33),c.CREAM,7)
@@ -67,12 +105,31 @@ static func draw(c, id: String) -> bool:
 		"roller":
 			c.draw_circle(center,22,c.STEEL); c.draw_circle(center,15,c.TEAL); c.draw_circle(center,6,c.GOLD)
 			c.line(Vector2(9,46),Vector2(25,46),c.CREAM,3)
-		"tumble", "echo_dash", "veil_dash", "hop", "vault":
+		"tumble":
 			c.poly([Vector2(13,39),Vector2(36,15),Vector2(50,17),Vector2(48,31),Vector2(25,51)],c.TEAL)
 			c.line(Vector2(23,39),Vector2(40,22),c.STEEL,7)
 			c.draw_arc(Vector2(25,37),20,PI,TAU,28,c.GOLD,3,true)
-			for i in range(["tumble","echo_dash","veil_dash","hop","vault"].find(id)+1): c.line(Vector2(12+i*7,51),Vector2(16+i*7,55),c.CREAM,2)
-		"pursuit": c.bolt(center,1.7); c.draw_arc(Vector2(43,19),12,0,TAU,24,c.GOLD,2,true)
+		"echo_dash":
+			for p in [Vector2(16,44),Vector2(47,20)]: c.draw_arc(p,10,0,TAU,24,c.STEEL,4,true); c.draw_circle(p,4,c.TEAL)
+			c.draw_polyline(PackedVector2Array([Vector2(17,31),Vector2(25,17),Vector2(36,17)]),c.GOLD,3,true)
+			c.draw_polyline(PackedVector2Array([Vector2(47,33),Vector2(40,47),Vector2(29,47)]),c.GOLD,3,true)
+		"veil_dash":
+			c.poly([Vector2(30,10),Vector2(45,20),Vector2(49,49),Vector2(38,45),Vector2(29,51),Vector2(16,45),Vector2(18,20)],c.TEAL)
+			c.line(Vector2(23,26),Vector2(39,26),c.INK,8); c.line(Vector2(27,25),Vector2(35,25),c.CREAM,3)
+			c.line(Vector2(9,36),Vector2(24,36),c.STEEL,3); c.line(Vector2(6,43),Vector2(21,43),c.GOLD,3)
+		"hop":
+			c.draw_arc(Vector2(32,35),21,PI,TAU,28,c.GOLD,3,true)
+			c.poly([Vector2(22,26),Vector2(39,26),Vector2(44,36),Vector2(40,43),Vector2(20,43)],c.STEEL)
+			c.draw_polyline(PackedVector2Array([Vector2(21,46),Vector2(40,49),Vector2(23,52),Vector2(40,55)]),c.TEAL,3,true)
+		"vault":
+			c.poly([Vector2(28,26),Vector2(39,23),Vector2(41,52),Vector2(28,55)],c.STEEL)
+			c.draw_arc(Vector2(31,29),21,PI,TAU,28,c.GOLD,4,true)
+			c.draw_polyline(PackedVector2Array([Vector2(45,14),Vector2(53,28),Vector2(42,25)]),c.CREAM,3,true)
+		"pursuit":
+			c.draw_arc(Vector2(43,21),12,0,TAU,24,c.GOLD,3,true)
+			c.line(Vector2(43,6),Vector2(43,13),c.CREAM,2); c.line(Vector2(51,21),Vector2(58,21),c.CREAM,2)
+			c.poly([Vector2(10,40),Vector2(20,48),Vector2(38,30),Vector2(42,35),Vector2(44,21),Vector2(29,23),Vector2(34,27)],c.STEEL)
+			c.line(Vector2(9,51),Vector2(18,42),c.TEAL,4)
 		_:
 			c.poly([Vector2(14,47),Vector2(20,27),Vector2(44,27),Vector2(50,47)],c.STEEL)
 			c.draw_circle(Vector2(32,27),14,c.TEAL)

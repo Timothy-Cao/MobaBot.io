@@ -3,6 +3,8 @@ func _initialize() -> void: _run.call_deferred()
 
 func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary:
 	var run:=SalvageRun.new(7127)
+	# Match the game controller's seed convention; comparisons must not randomize loot.
+	run.loot_rng.seed=run.run_seed+901
 	run.enable_moba(MobaKit.demo_preset()); run.enable_demo()
 	run.kit.onboarding=true; run.kit.starting_gun=true; run.attacks.enabled=true
 	BotExpedition.new().start(run,class_id,difficulty)

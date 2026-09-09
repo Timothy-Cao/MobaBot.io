@@ -64,6 +64,7 @@ func _process(delta: float) -> void:
 
 func receive(event: Dictionary) -> void:
 	var kind: String = event.kind
+	if kind=="skill_cut": kind="pulse" if event.get("style","")=="reap" else "beam"
 	if kind == "cast" and event.get("ability", "") == "rocket": kind = "rocket"
 	if muted or not sounds.has(kind) or cooldowns.get(kind, 0.0) > 0 or players.is_empty():
 		return

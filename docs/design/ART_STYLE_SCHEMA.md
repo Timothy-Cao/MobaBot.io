@@ -1,4 +1,14 @@
-# MobaBot.io — art style schema 1.9
+# MobaBot.io — art style schema 2.0
+
+## v0.15 motion and recognition override
+
+Use distinct mechanical motion within the existing native family. Returning blades spin with steel edges and change the hub/trail from teal outbound to brass inbound. Gravity arms and motes travel inward. Pull/push cones use oppositely directed chevrons; hold their initial contrast before a quick fade. Rim cuts trace the actual outer payoff and inner boundary. Thrusts use a piston-like shaft and directional head. Delayed strikes show a descending steel core and a countdown on the true ground radius. Impacts use a fast expanding thin ring and a few material shards, never an opaque disc over threats.
+
+Constructs unfold a tripod, then show their function: barrel recoil, pulse, repair mote, opening mirror cores, aimed hook or moving tread. Remaining-life arcs use actual upgraded lifetime, not a fixed 20-second assumption. Barriers retain a visible collision line from the first frame while endpoint posts deploy. Movement trails stay behind the actor; roll armor and repair brackets do not shift its center. Reduced effects removes secondary trails and reduces repeated motifs without erasing ranges or directional feedback.
+
+Icons must separate neighboring functions at 32 px: Core strike is a descending canister, Orbital entry a landing chassis, Siege battery three shells, Bulkhead solid slabs, Crosswire wired anchors, Plate recall converging plates, and Piston thrust an extending actuator. Tumble, Echo, Veil, Spring vault and Wall runner have separate silhouettes. Preserve the fixed canvas, shared bevel, palette and original in-game text. No new raster pack or animation-generation dependency was introduced.
+
+Use [QUALITY_BAR.md](QUALITY_BAR.md) for acceptance and the honest current assessment. Technical coverage and a magnified render do not establish player recognition, perceived weight or fun. Retain simple world actors, existing menu illustration and user music; do not describe this as a complete character/environment art replacement.
 
 ## v0.14 expedition override
 
