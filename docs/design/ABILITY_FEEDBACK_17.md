@@ -77,6 +77,18 @@ Details to resolve before implementation:
 
 This is future design direction, not current behavior. The current modal timing, discovery, camp arrangement and save rules remain governed by `QA_17.md` until this flow has a full state model, migration plan and verification coverage.
 
+## Permanent baseline machine gun
+
+The player's default autonomous machine gun is a permanent passive system, not a learned or equippable ability.
+
+- It is always owned and cannot be unequipped for now.
+- It may still be upgraded through an appropriate progression track.
+- It does not occupy Q/W/E/R, D/F or 1–4 and should not appear among rank-0 locked-skill choices.
+- It continues firing independently while Ghost drive is active, just like other passive effects.
+- It remains separate from the proposed manual left-click hammer attack.
+
+The current catalog's Auto gun/powered-mode implementation needs an explicit migration decision: reuse it as this permanent baseline, preserve optional modes as later upgrades, or keep a separate historical fixture. Do not leave both systems active accidentally or make the permanent gun removable through an old loadout path.
+
 ## Default movement refinement: D and F
 
 Keep Ghost drive and Phase hop as the two default movement tools, but give them very different control promises.
@@ -90,6 +102,8 @@ The owner likes the current D direction. Preserve it as the movement-speed tool 
 - Keep D distinct from F: D improves movement over time, while F is an instantaneous discontinuous relocation.
 - Give the active speed state a visible afterimage effect. It should communicate direction and continued movement without implying a damaging trail or a second body.
 - Give D its own movement-speed sound treatment, with a clear start, sustained state and/or end as appropriate to the final hold implementation.
+- While D is active, block manual basic attacks and every active ability. The proposed hammer therefore cannot swing, and Q/W/E/R/F/1–4 actives cannot be cast during the held speed state.
+- Do not suspend the permanent autonomous machine gun or other passive effects. Their independent timers and effects continue normally during D.
 - Confirm the final duration, cooldown, early-release behavior and relationship between the held speed state and current intangibility before implementation; this note does not supply new balance numbers.
 
 ### F — Phase hop as a full blink
@@ -134,6 +148,62 @@ The terrain rule should operate on the connected obstruction crossed by the blin
 - Inspect the D afterimage and F poof at actual combat scale in normal and reduced-effects modes. Reduced effects may simplify secondary particles but must retain movement state and blink endpoints.
 
 This section records desired behavior only. Current Phase hop range, charge count, cooldown and protection values are not approved or replaced by this note.
+
+## Leading default E proposal: body slam / Piston thrust
+
+The owner proposes refining Piston thrust into the default E: a committed body slam that uses movement to deliver control rather than acting as a general-purpose escape.
+
+### Base behavior
+
+- Target cooldown: approximately 8 seconds.
+- Dash rapidly in the aimed direction.
+- Give the attack a collision/hit shape that extends slightly beyond the robot's body so a visually convincing near-front contact registers reliably.
+- Stop on the first valid enemy contacted and create one circular damage impact centered around the robot.
+- Push ordinary enemies in the impact away from the robot.
+- Bosses and future heavy enemies resist the push. Formal weight and movement-resistance attributes can be defined later.
+- Give the robot a very short protection window against **touch/contact damage only** so committing to the collision does not immediately punish the intended use.
+- Projectile, poison, ground-zone and other non-touch damage continue to work during that base protection window.
+
+The body slam should use a speed/air-resistance presentation—such as compression, streaking or an atmospheric-entry-like envelope—to communicate force during the dash. It also needs a distinct launch and impact sound. The effect should sell speed without implying that nearby enemies take fire damage before the actual collision.
+
+### Rank milestones
+
+- **Rank 5:** add the brief impact stun. This supersedes the earlier note that Piston thrust should always stun at base rank.
+- **Rank 10:** upgrade the commitment protection into an explicit full-immunity shield for the entire dash and for 1 second after impact.
+
+The rank-10 shield should be visually unmistakable and mechanically separate from the base touch-damage protection. Define what happens when the dash misses, hits terrain or is otherwise interrupted; “1 second after impact” currently names the successful enemy-impact case only.
+
+### Damage-source rules required by this proposal
+
+Damage sources should carry explicit types rather than relying on one global invulnerability rule:
+
+| Damage type | Intended interaction with base body slam |
+| --- | --- |
+| Enemy body/touch | Suppressed during the short contact-protection window |
+| Projectile | Still damages normally |
+| Poison / DoT | Continues on its own tick rules |
+| Ground zone or enemy ability | Still damages unless explicitly tagged as touch damage |
+| Rank-10 full shield | Suppresses every damage type for its stated duration |
+
+Touch damage also needs its own repeat-hit cooldown or grace policy so several overlapping bodies cannot drain the player's hull many times in one instant. Projectile hits and poison ticks should not consume or inherit that touch-damage cooldown. Decide whether touch grace is tracked per attacking enemy, per player or through another bounded policy; a single broad global invulnerability timer could accidentally erase legitimate projectiles after a body hit.
+
+### Assistant assessment for owner review
+
+This is currently the strongest default E candidate if the goal is immediate feel and a clear tactical verb. It creates a readable sequence—aim, commit, collide, push—works naturally with the proposed close-range hammer, and differs from D/F because it should stop on enemies and should not cross terrain. Moving the stun to rank 5 and full immunity to rank 10 gives both milestones a visible change.
+
+Its main risk is mobility overload: the base kit would have speed on D, blink on F and a third movement action on E. Keep the slam short, enemy-collision-focused and committed so it is a poor substitute for escaping. It also should not receive high damage, long stun, strong push and broad safety simultaneously.
+
+The best non-overlapping E alternatives remain:
+
+| Candidate | What it teaches | Why it is not the leading default right now |
+| --- | --- | --- |
+| Repulsor | Immediate peel and space creation | Clear and safe, but less expressive and less connected to the hammer's positioning game |
+| Gravity well | Grouping and setup for other abilities | Strong combo tool, but slower to explain and overlaps the default summons' area control |
+| Bulkhead | Defensive terrain and route control | Distinctive, but highly dependent on pathfinding and the unfinished terrain redesign |
+| Self repair | Create safety, then channel recovery | Good risk/reward, but starts the player with sustain rather than an active combat interaction |
+| Crosswire | Pre-plan a control line | Interesting setup, but overlaps the proposed paired robots on slot 4 |
+
+Recommendation: prototype body slam as the default E first, with Repulsor as the simplest comparison option. Treat this as an assistant recommendation awaiting owner confirmation and a human Practice test.
 
 ## Current owner proposal for default 1–4 modules
 
@@ -314,6 +384,8 @@ Keep the existing ability implementation stashed for now rather than deleting it
 - When the thrust hits an enemy, grant a short invulnerability window to prevent immediate body-contact damage.
 
 The invulnerability duration, boss interaction, collision rules and distinction between body damage and ability damage require explicit design and tests. The external reference describes the desired body-check feel; do not copy unrelated mechanics or assets.
+
+The later [default E proposal](#leading-default-e-proposal-body-slam--piston-thrust) refines and supersedes parts of this initial note: approximately 8-second cooldown, base push with touch-only protection, stun added at rank 5, and full dash-plus-one-second immunity added at rank 10.
 
 ## Pending review
 

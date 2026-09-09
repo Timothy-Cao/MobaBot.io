@@ -6,6 +6,8 @@ The current implementation remains defined by [`QA_17.md`](QA_17.md), the [root 
 
 **Subsequent owner direction:** the later proposal in `ABILITY_FEEDBACK_17.md` supersedes this document's initial default 1–4 recommendation. The current owner-proposed defaults are orbiting tools on 1, an aggressive aggro-drawing summon on 2, a stored-healing totem on 3 and paired zap robots on 4. Keep the analysis below as research history and as input to later alternatives; do not mistake its Pulse-anchor/four-toggle recommendation for the latest owner decision.
 
+The same subsequent notes reclassify the player's default autonomous machine gun as a permanent, upgradable but currently unequippable passive rather than a learned powered toggle. They also make the body-slam version of Piston thrust the leading default E proposal. The original catalog audit below remains useful historical analysis, but these later owner constraints win when preparing implementation.
+
 ## Executive findings
 
 There is no useful single-axis answer to “what type is this ability?” Q/W/E/R describes **input responsibility**, while single-target/AoE describes **target shape**, burst/DPS/DoT describes **delivery**, and wave clear/anti-boss describes **encounter purpose**. Those labels should be stored as separate axes rather than forced into one list.
