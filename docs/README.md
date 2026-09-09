@@ -17,6 +17,7 @@ The current playable version is **0.17 Field Test**. `QA_17.md` supersedes earli
 - [Environment and terrain owner feedback](design/ENVIRONMENT_FEEDBACK_17.md) — direction away from thin basic walls toward substantial thick forms, clustered pockets, corridors and simple multi-entrance macro-shapes, with reference and greybox questions for a later terrain pass.
 - [Swarm design research](design/SWARM_DESIGN_RESEARCH_17.md) — source-backed analysis of Swarm's baseline offense, map destinations, evolutions, optional objectives, wave authoring, progression and technical constraints, translated into non-copying MobaBot hypotheses.
 - [Static-kit design brainstorm](design/KIT_DESIGN_BRAINSTORM_17.md) — records the locked default-kit composition and clearly labeled assistant proposals for summon-network, geometric-combo and intermittent-speed kits. Only the default is owner-locked; the other kits remain concepts to prototype and review.
+- [Relay Marshal focused kit research](design/RELAY_MARSHAL_DESIGN_17.md) — current source-backed proposal for the summon-network character: local-range target sharing, cursor-directed synchronized missiles, three temporary relays, recast swapping, network commands and a committed detonation ultimate. The combo-kit concept is parked.
 
 ## Current supporting specifications
 

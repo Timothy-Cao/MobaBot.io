@@ -9,6 +9,7 @@ This document consolidates the owner's 9 September 2026 directions. It is a work
 - [`ENVIRONMENT_FEEDBACK_17.md`](ENVIRONMENT_FEEDBACK_17.md)
 - [`SWARM_DESIGN_RESEARCH_17.md`](SWARM_DESIGN_RESEARCH_17.md)
 - [`KIT_DESIGN_BRAINSTORM_17.md`](KIT_DESIGN_BRAINSTORM_17.md)
+- [`RELAY_MARSHAL_DESIGN_17.md`](RELAY_MARSHAL_DESIGN_17.md)
 - [`QUALITY_BAR.md`](QUALITY_BAR.md)
 - [`QA_17.md`](QA_17.md)
 
@@ -44,6 +45,8 @@ This lock is a design direction for a future implementation pass, not a statemen
 ## Owner kit concepts and assistant brainstorm
 
 The owner next requested three highly synergistic static-kit directions: a summon network whose machines mirror casts and can trade places with the player, a geometry-heavy combo kit whose abilities transform one another, and a speedster with powerful but deliberately intermittent speed windows. The organized assistant proposals, interaction grammar, risks and prototype order are in [`KIT_DESIGN_BRAINSTORM_17.md`](KIT_DESIGN_BRAINSTORM_17.md). They are brainstorm material, not approved ability specifications; only the first/default kit above is locked.
+
+Later owner direction parks the combo kit for now and focuses exclusively on the summon-network character. Turrets share target information through a connected network, but never fire beyond their individual hard ranges. One core active should launch a missile from the character and every eligible summon toward the mouse. The focused assistant proposal and source-backed design reasoning are in [`RELAY_MARSHAL_DESIGN_17.md`](RELAY_MARSHAL_DESIGN_17.md); the working name and full kit remain subject to owner review.
 
 ## Requested progression flow
 

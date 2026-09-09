@@ -4,6 +4,8 @@ Status: **owner direction plus assistant proposals for later review; no implemen
 
 Date: 9 September 2026.
 
+**Later owner focus:** park the Circuit Weaver/combo proposal without deleting it. It is not ready for approval or implementation. Focus current kit design on the summon character, now refined under the working name **Relay Marshal** in [`RELAY_MARSHAL_DESIGN_17.md`](RELAY_MARSHAL_DESIGN_17.md). That focused document supersedes the initial Relay Architect sketch below.
+
 ## Provenance
 
 ### Owner direction
@@ -44,13 +46,15 @@ Identity: readable all-rounder. Its tools mostly work alone, cover the major com
 Each kit needs one short sentence that predicts how it wins:
 
 - Default Salvager wins by choosing the right self-contained tool.
-- Relay Architect wins by creating useful firing origins and preserving its network.
+- Relay Marshal wins by creating useful firing origins and preserving its network.
 - Circuit Weaver wins by making different geometries touch at the right time.
 - Redline Runner wins by banking value, spending it during a speed window and surviving recovery.
 
 Every fixed input should reinforce that sentence. A mechanically strong ability that does not reinforce the kit belongs elsewhere.
 
-## Kit 2 proposal — Relay Architect
+## Initial Kit 2 sketch — Relay Architect (superseded)
+
+The focused [`RELAY_MARSHAL_DESIGN_17.md`](RELAY_MARSHAL_DESIGN_17.md) proposal supersedes this first sketch. It remains below as brainstorm history, not a competing current specification.
 
 ### Core promise
 
@@ -199,7 +203,7 @@ Alternate between a stable setup/recovery phase and a short high-speed release. 
 Do not build all three at once.
 
 1. Keep the locked Default Salvager as the control condition.
-2. Prototype Relay Architect with one relay, Q mirroring and recast swap. Add the other relays only after the basic loop is readable.
+2. Prototype Relay Marshal with one relay, Q mirroring and recast swap. Add the other relays only after the basic loop is readable.
 3. Prototype Circuit Weaver with only Q, W, E and the three pair reactions. Add R after players can intentionally create each pair.
 4. Prototype Redline Runner with D, side blades, Q and W in an empty arena. Add trail and Ghost lap after steering and camera behavior feel safe.
 
@@ -208,7 +212,7 @@ For each slice, compare beginner value, expert ceiling, damage taken, energy pre
 ## Decisions for the owner after a first skim
 
 - Should all kits share the permanent autonomous gun, or may a kit replace it with a different permanent passive weapon?
-- For Relay Architect, should four relay types coexist, or should 1–4 be a smaller number of summons plus network commands?
+- For Relay Marshal, should four relay types coexist, or should 1–4 be a smaller number of summons plus network commands?
 - Should mirrored casts copy the player's aim direction or converge on the marked target?
 - Should Circuit Weaver reward exactly the three pair reactions above, or should R change which reaction is produced?
 - During Redline Overdrive, should active abilities remain usable in transformed versions, or should the speed state emphasize steering and modules only?
