@@ -1,8 +1,8 @@
-# MobaBot.io — 0.11 Foundry demo
+# MobaBot.io — 0.12 Combat Foundations
 
 A Windows-first, single-player survivor-like with MOBA mouse controls. Build a small salvage robot into a crowd-clearing machine. Stage 1 contains three levels and ends with the Foreman.
 
-0.11 replaces the title-screen collage with an original foundry scene; adds assembly-style equipment comparison, a focused mastery inspector, cleaner rank/reward cards and a smaller combat dock. Combat balance is unchanged from 0.10. See [presentation research](docs/design/PRESENTATION_RESEARCH_11.md) and [change log / QA](docs/design/QA_11.md).
+0.12 adds separate commanded basic attacks and an autonomous machine gun, attack move, machine/sniper/off modes, a coolant-trail toggle and mastery points every Power level. The 0.11 foundry presentation remains. The larger eight-stage/class/chest/equipment overhaul is a design plan, not implemented content. See [systems direction and backlog](docs/design/SYSTEMS_REFINEMENT_12.md) and [change log / QA](docs/design/QA_12.md).
 
 ## Play
 
@@ -16,15 +16,18 @@ This is a Godot development project, not a standalone exported Windows release. 
 
 | Input | Action |
 | --- | --- |
-| Right-click / hold | Move to a point / steer |
-| S | Stop walking; a committed short dash still finishes |
+| Right-click ground / hold | Move / steer; autonomous gun keeps firing |
+| Right-click enemy | Approach into basic-attack range and attack |
+| A, then left-click | Show basic range; cursor-priority attack move |
+| S | Stop movement and commanded basic attacks, NOT the auto gun; committed short dash still finishes |
 | Q | Impact bolt: straight skillshot; impact and end-of-range explosion |
 | W | Welding torch: two-second cone, steered with the cursor |
 | E, then left-click | Reactor drop; right-click or Esc cancels |
 | R | Channel Core cutter for up to 5s; right-click steers slowly, R again cancels |
 | D / F | Ghost drive (3s intangible) / charged blink; either can interrupt R |
 | T | Deploy one sentry; replaces the previous one |
-| 1–4 | Passive toggles; orbit close/wide; Arc Coil chain/focused/off |
+| 1 | Auto machine gun → auto sniper → off → machine gun |
+| 2–4 | Passive toggles; orbit close/wide; Arc Coil chain/focused/off |
 | 5 / 6, or their HUD buttons | Repair +2 hull / restore 50 energy; two of each per run |
 | L / hold Space | Toggle camera lock / temporarily follow |
 | Screen edges | Pan when the camera is unlocked |
@@ -33,13 +36,15 @@ This is a Godot development project, not a standalone exported Windows release. 
 | Esc | Settings; cancels targeting first |
 | M / F2 | Mute audio / reduced effects |
 
-No WASD movement. Settings offers camera lock and optional area quick cast. Other actives quick-cast by default; Shift + ability previews and casts on key release. R channel starts immediately. Loadout edits and ability bindings apply next run. S, L, M, Space, Tab, Esc, 5 and 6 are reserved. Occupied ability bindings swap; older conflicting bindings migrate to a free letter. Old R-nuke saves migrate to E nuke / R laser; custom Q/W choices remain. Choose **Loadout → Default kit** to try the full new preset.
+No WASD movement. Settings offers camera lock and optional area quick cast. Other actives quick-cast by default; Shift + ability previews and casts on key release. R channel starts immediately. Loadout edits and ability bindings apply next run. A, S, L, M, Space, Tab, Esc, 5 and 6 are reserved. Occupied ability bindings swap; older conflicting bindings migrate to a free letter. Old R-nuke saves migrate to E nuke / R laser; custom Q/W choices remain. Choose **Loadout → Default kit** to try the full new preset.
 
-Default passives are Auto bolt, Scrap orbit, Arc coil and Reactive plating. Fully enabled they consume 10 energy/sec before 8/sec base regeneration. Energy depletion switches powered passives off; use their number keys to restore them once energy is available. Reactor upgrades and equipment improve the budget. R costs 40 energy and roots you while firing; D/F remain free escapes.
+Default passives are Auto gun, Scrap orbit, Arc coil and Reactive plating. Fully enabled they consume 10 energy/sec before 8/sec base regeneration. Energy depletion switches powered passives off; use their number keys to restore them once energy is available. Reactor upgrades and equipment improve the budget. R costs 40 energy and roots you while firing; D/F remain free escapes. The autonomous gun ignores S, movement and channels; its powered state and energy budget control it. Basic attacks have a separate cooldown and require attack orders.
 
-Mastery is run-only: start with one point, earn another every two Power levels. The HUD ◇ count shows unspent points. Tab opens the tree first when points await; no extra level-up popup. Three branches cover salvage, survival and ability effects. Main-menu mastery is a read-only preview.
+Slot 1 is the starting gun. Select slots 2–4 in Loadout to try **Coolant trail**: 3 energy/sec on, no upkeep off, no self-damage. Laid patches persist four seconds and deal 8 base damage/sec; overlapping patches do not stack. Weapon power scales the damage. Old custom loadouts are normalized in memory to include the starting gun while preserving Orbit/Ricochet dependencies.
 
-Start with Q, D and F. Unlocks follow combat time: passive 1 at 10s, W at 20s, passive 2 at 32s, E at 45s, passive 3 at 58s, R at 70s, T at 95s, passive 4 at 110s. Pauses do not advance this clock. The default kit is aimed; the optional Relaxed kit and individual loadout choices retain low-mechanics alternatives. Every run repeats this short onboarding sequence.
+Mastery is run-only: start with one point, earn another every Power level. The HUD ◇ count shows unspent points. Tab opens the tree first when points await; no extra level-up popup. The current nine-node tree remains; the larger six-branch tree is planned. Main-menu mastery is a read-only preview.
+
+Start with the auto gun and Q; D/F also remain immediately available. Later unlocks still follow combat time: W at 20s, passive 2 at 32s, E at 45s, passive 3 at 58s, R at 70s, T at 95s, passive 4 at 110s. Pauses do not advance this clock. Chest discovery and duplicate +2 ranks will replace this temporary schedule in the next progression milestone. The optional Relaxed kit and individual loadout choices retain low-mechanics alternatives.
 
 ## The demo
 
@@ -86,12 +91,12 @@ Run from the project folder:
 
 ```powershell
 .\scripts\check.ps1
-.\.tools\godot\Godot_v4.7.2-stable_win64_console.exe --headless --path . --script res://tests/mobabot09_behavior_probe.gd
-.\.tools\godot\Godot_v4.7.2-stable_win64_console.exe --headless --path . --script res://tests/mobabot10_behavior_probe.gd
+.\.tools\godot\Godot_v4.7.2-stable_win64_console.exe --headless --path . --script res://tests/mobabot09_behavior_probe.gd -- --refined
+.\.tools\godot\Godot_v4.7.2-stable_win64_console.exe --headless --path . --script res://tests/mobabot10_behavior_probe.gd -- --refined
 ```
 
 The full check includes legacy simulations, MOBA mechanics, progression, boss readability, movement at multiple physics rates, equipment/camera, UI text layout, laser/ghost/lightning and mastery effects. Behavior probes compare idle, stationary, passive-only, moving-casting and adaptive policies with normal health. They do not establish human difficulty or fun.
 
-[Latest audit and handoff](docs/design/QA_11.md). Earlier iteration documents are historical; this README and QA_11 supersede their controls and scope. Preserve the old Neon Collector sample at `src/main/main.tscn`.
+[Latest audit and handoff](docs/design/QA_12.md). Use `--refined` for current combat; omitting it retains the historical probe baseline. Earlier iteration documents are historical; this README and QA_12 supersede their controls and scope. Preserve the old Neon Collector sample at `src/main/main.tscn`.
 
 Commit coherent, verified changes; do not commit engine/cache folders, generated test captures, temp files or local player records. Public-release work still includes export packaging, audio balance/listening, music-rights confirmation, and human tuning of camera speed, rewards and combat difficulty.

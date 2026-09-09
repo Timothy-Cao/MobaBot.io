@@ -20,6 +20,7 @@ var frame_offset := Vector2.ZERO
 var world_mode := false
 var stencil_font := SystemFont.new()
 var preview_slot := ""
+var preview_attack := false
 var cursor_world := Vector2.ZERO
 
 func impact_bank() -> float:
@@ -79,6 +80,18 @@ func _draw() -> void:
 	if world_mode:
 		_draw_caches()
 		_moba_ground()
+		for patch in model.kit.poison_trail:
+			var opacity := minf(1.0, patch.life) * 0.28
+			draw_circle(patch.pos, 26, Color("77b9a5") * Color(1, 1, 1, opacity))
+			draw_arc(patch.pos, 26, 0, TAU, 24, Color(PALE, opacity), 1, true)
+			if not reduced_effects:
+				draw_circle(Vector2(patch.pos) + Vector2(-6, -5), 3, Color(PALE, opacity))
+		if model.attacks.enabled:
+			if preview_attack:
+				draw_arc(model.player, model.attacks.attack_range(model), 0, TAU, 96, Color(PALE, 0.65), 1.5, true)
+			var selected := model.attacks.target(model)
+			if not selected.is_empty():
+				draw_arc(selected.pos, float(selected.radius) + 5, 0, TAU, 40, GOLD, 2, true)
 	# Keep actors, hitboxes, ground tells and cursor geometry in the same space.
 	# Hull impact is a small player-only angular recoil, never a world displacement.
 	frame_offset = Vector2.ZERO
@@ -128,6 +141,8 @@ func _draw() -> void:
 			_line(Vector2(-13, -3), Vector2(4, -3), CREAM, 3)
 			_line(Vector2(-11, 3), Vector2(0, 3), TEAL, 4)
 			draw_set_transform(Vector2.ZERO)
+		elif bullet.get("basic_attack", false):
+			_line(bullet.pos - direction * (30 if bullet.get("sniper", false) else 10), bullet.pos, PALE, 2)
 		else:
 			var color := PALE if bullet.kind in ["rail", "pet", "summon"] else GOLD
 			if model.staged and ((bullet.kind == "rail" and model.kit.milestone("q") > 0) or (bullet.kind == "bolt" and model.milestone("power") > 0)):

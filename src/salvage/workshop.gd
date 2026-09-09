@@ -28,6 +28,7 @@ var key_setting := MobaKit.DEFAULT_BINDS.duplicate()
 var mouse_moving := false
 var bot_cast_clock := 0.0
 var pending_cast_slot := ""
+var pending_attack := false
 var zoom_value := 1.0
 const MIN_ZOOM := 0.65
 const MAX_ZOOM := 1.0
@@ -45,7 +46,7 @@ var music_player = preload("res://src/salvage/music_director.gd").new()
 var gear_return := "home"
 
 func _ready() -> void:
-	get_window().title = "MobaBot.io - 0.11 Foundry Demo"
+	get_window().title = "MobaBot.io - 0.12 Combat Foundations"
 	get_tree().auto_accept_quit = false
 	add_child(camera)
 	camera.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
@@ -156,9 +157,13 @@ func start_run(mode: String = "salvage") -> void:
 	tab_held = false
 	selected_mode = mode
 	model = SalvageRun.new(seed_value, mode)
-	model.enable_moba(loadout_setting, key_setting)
+	model.enable_moba(MobaKit.with_starter_gun(loadout_setting), key_setting)
 	model.enable_demo()
 	model.kit.onboarding = true
+	model.attacks.enabled = true
+	model.mastery.every_level = true
+	model.kit.starting_gun = true
+	pending_attack = false
 	model.loot_rng.seed = seed_value + 901
 	gear.apply_to(model)
 	free_center = model.follow_origin() + model.view_size / 2
@@ -257,6 +262,9 @@ func _open_build() -> void:
 		preview.enable_demo()
 		preview.mastery.read_only = true
 		preview.kit.onboarding = true
+		preview.attacks.enabled = true
+		preview.kit.starting_gun = true
+		preview.mastery.every_level = true
 		preview.kit.elapsed = 120.0
 		gear.apply_to(preview)
 		ui.show_build(preview)
@@ -284,6 +292,11 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if screen == "running" and event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_A:
+			pending_cast_slot = ""
+			pending_attack = true
+			get_viewport().set_input_as_handled()
+			return
 		if event.keycode == KEY_L:
 			_set_camera_lock(not camera_locked)
 			get_viewport().set_input_as_handled()
@@ -305,6 +318,7 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed and screen == "running":
+		pending_attack = false
 		pending_cast_slot = ""
 		if model.kit.laser_left > 0:
 			model.kit.steer_laser(model, get_global_mouse_position())
@@ -325,18 +339,24 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 		if screen == "running":
+			if event.keycode == KEY_ESCAPE and pending_attack:
+				pending_attack = false
+				get_viewport().set_input_as_handled()
+				return
 			if event.keycode == KEY_ESCAPE and not pending_cast_slot.is_empty():
 				pending_cast_slot = ""
 				get_viewport().set_input_as_handled()
 				return
 			if event.keycode == KEY_S:
+				pending_attack = false
 				mouse_moving = false
 				pending_cast_slot = ""
-				model.stop_movement()
+				model.attacks.stop(model)
 				get_viewport().set_input_as_handled()
 				return
 			for slot in MobaKit.SLOTS:
 				if event.keycode == model.kit.bindings[slot]:
+					pending_attack = false
 					if model.kit.laser_left > 0 and slot == model.kit.laser_slot:
 						model.kit.cancel_laser()
 					elif (event.shift_pressed and model.kit.loadout[slot] != "laser") or _confirm_cast(slot):
@@ -362,6 +382,13 @@ func _cast_slot(slot: String) -> void:
 		mouse_moving = false
 
 func _unhandled_input(event: InputEvent) -> void:
+	if screen == "running" and pending_attack and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		pending_attack = false
+		mouse_moving = false
+		model.attacks.attack_move(model, get_global_mouse_position())
+		model.emit_event("move", get_global_mouse_position())
+		get_viewport().set_input_as_handled()
+		return
 	if screen == "running" and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and not pending_cast_slot.is_empty():
 		var slot := pending_cast_slot
 		pending_cast_slot = ""
@@ -378,6 +405,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 		pending_cast_slot = ""
+		var target := model.attacks.closest(model, get_global_mouse_position(), false, true)
+		if model.attacks.attack(model, target):
+			mouse_moving = false
+			get_viewport().set_input_as_handled()
+			return
 		mouse_moving = true
 		model.command_move(get_global_mouse_position())
 		model.emit_event("move", model.move_target)
@@ -460,6 +492,8 @@ func _physics_process(delta: float) -> void:
 	ui.update_hud(model)
 
 func _process(delta: float) -> void:
+	art.preview_attack = (pending_attack and screen == "running") or capture_kind in ["attack_orders", "coolant_trail"]
+	if screen != "running": pending_attack = false
 	if music_player.is_inside_tree(): music_player.update_context(screen, model, mute_setting)
 	sound.set_channel(screen == "running" and model != null and model.kit != null and model.kit.laser_left > 0)
 	_record_screen_time(delta)
@@ -580,6 +614,7 @@ func _pause_toggle() -> void:
 		ui.show_running()
 
 func _clear_held_movement() -> void:
+	pending_attack = false
 	# Release a steering gesture when UI takes focus, without discarding a deliberate
 	# click-to-move destination. An ability dash is paused, not silently cancelled.
 	if mouse_moving and model != null:
@@ -630,6 +665,7 @@ func _load_settings() -> void:
 			loadout_setting = loaded
 		if keys is Dictionary and MobaKit.valid_bindings(keys):
 			key_setting = MobaKit.resolve_bindings(keys)
+	loadout_setting = MobaKit.with_starter_gun(loadout_setting)
 	ui.zoom_value = zoom_value
 	ui.camera_locked = camera_locked
 	ui.r_quickcast = r_quickcast
@@ -649,7 +685,7 @@ func _save_settings() -> void:
 	config.set_value("visual", "zoom", zoom_value)
 	config.set_value("visual", "camera_locked", camera_locked)
 	config.set_value("moba", "r_quickcast", r_quickcast)
-	config.set_value("moba", "version", 11)
+	config.set_value("moba", "version", 12)
 	config.set_value("moba", "loadout", loadout_setting)
 	config.set_value("moba", "keys", key_setting)
 	if config.save("user://salvage_settings.cfg") != OK:
@@ -665,7 +701,7 @@ func _save_result() -> void:
 	if not measured.is_empty():
 		record.render_timing = {"frames": measured.size(), "median_ms": measured[measured.size() / 2],
 			"p95_ms": measured[int(measured.size() * 0.95)], "peak_enemies": peak_enemies}
-	record.build = "slice-11-mobabot"
+	record.build = "slice-12-mobabot"
 	record.equipment = gear.equipped.duplicate()
 	record.wall_seconds = snappedf(run_wall_seconds, 0.01)
 	record.screen_seconds = screen_seconds.duplicate()
@@ -911,6 +947,17 @@ func _fixture(kind: String) -> void:
 	if kind == "flame":
 		pending_cast_slot = "w"
 		model.kit.cast(model, "w", model.player + Vector2(180, -40))
+	if kind in ["attack_orders", "coolant_trail"]:
+		model.kit.elapsed = 120
+		if kind == "coolant_trail":
+			model.kit.loadout.passives[3] = "poison"
+			model.kit.toggles[3] = true
+			for i in range(14): model.kit.poison_trail.append({"pos": model.player + Vector2(-i * 16, sin(i * 0.3) * 42), "life": 4.0 - i * 0.1})
+		var target := model.attacks.closest(model, model.player)
+		model.attacks.attack(model, target)
+		model.attacks.fire(model)
+		model._projectile_step(0.08)
+		ui.update_hud(model)
 	if kind == "nuke_impact":
 		model.kit.cast(model, "e", model.player + Vector2(185, -100))
 		model.kit.step(model, 0.66)

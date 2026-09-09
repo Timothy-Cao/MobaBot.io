@@ -88,6 +88,9 @@ static func _equipment(ui) -> void:
 		if id == selected_id:
 			tile.add_theme_stylebox_override("normal", ui._style(Color("29434c"), 6, ui.TEAL, 2))
 		tile.tooltip_text = data.text
+		if passive and ((ui.passive_index == 0 and id != "bolt") or (ui.passive_index != 0 and id == "bolt")):
+			tile.disabled = true
+			tile.tooltip_text = "Slot 1 is the starting auto gun. Select slots 2–4 to equip other toggles."
 		if passive:
 			ui._icon(tile, data.icon, Rect2(9, 10, 51, 51))
 		else:
@@ -132,4 +135,4 @@ static func _keys(ui) -> void:
 		ui.rebind_slot = ""
 		ui.loadout_changed.emit(ui.loadout_config, ui.key_config)
 		draw(ui), false)
-	ui._label(ui.overlay, "1–4 passives / 5–6 items / L lock / Hold Space follow\nS, M, L, 5, 6, Tab, Space and Esc reserved. Occupied keys swap.", Rect2(248, 423, 650, 47), 12, ui.MUTED)
+	ui._label(ui.overlay, "A + click attack / S stop / L lock / Hold Space follow\nA, S, M, L, 5, 6, Tab, Space and Esc reserved. Occupied keys swap.", Rect2(248, 423, 650, 47), 12, ui.MUTED)

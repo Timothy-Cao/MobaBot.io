@@ -39,7 +39,7 @@ static func draw(ui: CanvasLayer) -> void:
 		ui.show_build(ui.build_model, false))
 	_nav(ui, "Settings", Rect2(54, 418, 122, 30), func() -> void: ui.settings_requested.emit())
 	_nav(ui, "Quit", Rect2(188, 418, 132, 30), func() -> void: ui.quit_requested.emit())
-	ui._label(ui.overlay, "0.11  /  DEMO", Rect2(55, 492, 249, 20), 11, ui.MUTED, true)
+	ui._label(ui.overlay, "0.12  /  DEMO", Rect2(55, 492, 249, 20), 11, ui.MUTED, true)
 	# The existing three encounters, not a fake level-selection or future campaign.
 	ui._surface(ui.overlay, Rect2(534, 455, 388, 57), Color("0b1923dd"), 0, Color("536465"), 1)
 	for i in range(3):

@@ -296,7 +296,7 @@ func capture_binding(key: int) -> void:
 			loadout_message = "Keys updated. Applies to your next run."
 			loadout_changed.emit(loadout_config, key_config)
 		else:
-			loadout_message = "Reserved: S stop, L camera, M mute, 5/6 items."
+			loadout_message = "Reserved: A attack, S stop, L camera, M mute, 5/6 items."
 	show_loadout()
 
 func _ability_hud(model: SalvageRun) -> void:
@@ -367,6 +367,9 @@ func _ability_hud(model: SalvageRun) -> void:
 		var state_text := "ON" if active else "OFF"
 		if kit.onboarding and kit.loadout.passives[i] == "orbit" and active: state_text = "FAR" if kit.orbit_far else "NEAR"
 		if kit.loadout.passives[i] == "lightning" and active: state_text = "FOCUS" if kit.arc_focused else "CHAIN"
+		if kit.starting_gun and kit.loadout.passives[i] == "bolt" and active: state_text = "SNIPE" if kit.gun_sniper else "AUTO"
+		if model.attacks.enabled and kit.loadout.passives[i] == "bolt":
+			toggle_tiles[i].tooltip_text = "%s\n%.1f damage · %.2f shots/sec · %d range\nCycle machine gun / sniper / off. Independent of movement and S.\n2 energy/sec while powered." % ["Auto sniper" if kit.gun_sniper else "Auto machine gun", model.attacks.auto_damage(model), 1.0 / model.attacks.auto_interval(model), model.attacks.auto_range(model)]
 		if not kit.unlocked("p%d" % (i + 1)): state_text = "LOCK"
 		toggle_labels[i].text = "%s %s" % [OS.get_keycode_string(kit.bindings["p%d" % (i + 1)]), state_text]
 		toggle_labels[i].add_theme_font_size_override("font_size", 8 if toggle_labels[i].text.length() > 6 else 9)
@@ -486,7 +489,7 @@ func show_settings() -> void:
 		zoom_label.text = "%d%%" % roundi(value * 100)
 		zoom_changed.emit(value))
 	overlay.add_child(slider)
-	_label(overlay, "Right-click move / S stop / Wheel zoom\nL camera lock / Hold Space follow / Edges pan\nHold Tab build / Esc settings / Shift + key aim\n5 repair (+2 hull) / 6 energy (+50)\nE + left-click: strike / Right-click or Esc: cancel\nR: channel / Right-click: steer / R again: cancel", Rect2(204, 259, 552, 146), 13, MUTED)
+	_label(overlay, "Right-click move / enemy: attack / A + click: attack move\nS stops movement + basic attacks / Wheel zoom\nL camera lock / Hold Space follow / Edges pan\nHold Tab build / Esc settings / Shift + key aim\n5 repair / 6 energy / E + click: strike\nR: channel / Right-click: steer / R again: cancel", Rect2(204, 259, 552, 146), 13, MUTED)
 	if not settings_in_run:
 		_button("Loadout & keybinds", Rect2(204, 393, 552, 36), func() -> void: loadout_requested.emit(), false)
 	else:

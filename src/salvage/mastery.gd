@@ -15,12 +15,13 @@ const NODES := {
 var ranks: Dictionary = {}
 var spent := 0
 var read_only := false
+var every_level := false
 
 func rank_of(id: String) -> int:
 	return int(ranks.get(id, 0))
 
 func available(power_level: int) -> int:
-	return maxi(0, 1 + (power_level - 1) / 2 - spent)
+	return maxi(0, (power_level if every_level else 1 + (power_level - 1) / 2) - spent)
 
 func can_buy(id: String, power_level: int) -> bool:
 	if read_only or not NODES.has(id) or available(power_level) <= 0: return false

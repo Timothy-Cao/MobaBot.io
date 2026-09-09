@@ -29,6 +29,7 @@ var velocity := Vector2.ZERO
 var aim := Vector2.RIGHT
 var health := 5
 var mastery := BotMastery.new()
+var attacks := BotAttackOrders.new()
 var xp_fraction := 0.0
 var slow_left := 0.0
 
@@ -207,6 +208,7 @@ func enable_moba(config: Dictionary = {}, keys: Dictionary = {}) -> void:
 
 func command_move(point: Vector2) -> void:
 	if kit != null and kit.laser_left > 0: return
+	if attacks.enabled: attacks.move(point)
 	move_target = point.clamp(ARENA.position + Vector2.ONE * 16, ARENA.end - Vector2.ONE * 16)
 	moving = true
 
@@ -362,6 +364,7 @@ func step(delta: float, input_direction: Vector2) -> void:
 	slow_left = maxf(0, slow_left - delta)
 	if kit != null:
 		kit.step(self, delta)
+		attacks.prepare(self, delta)
 		if kit.dash_left > 0:
 			kit.move_dash(self, delta)
 		elif kit.laser_left > 0:
@@ -417,6 +420,7 @@ func step(delta: float, input_direction: Vector2) -> void:
 			kit.cancel_laser()
 			kit.flame_left = 0
 			kit.summon.clear()
+			kit.poison_trail.clear()
 			stop_movement()
 			if stage >= STAGE_COUNT:
 				state = "won"
@@ -656,6 +660,9 @@ func nearest_enemy(point: Vector2, excluded: Array = []) -> Dictionary:
 	return best
 
 func _weapon_step(delta: float) -> void:
+	if attacks.enabled:
+		attacks.fire(self)
+		return
 	if not passive_enabled("bolt"):
 		return
 	shot_clock -= delta
@@ -704,7 +711,7 @@ func _projectile_step(delta: float) -> void:
 			if not target.is_empty():
 				bullet.vel = Vector2(bullet.vel).lerp((Vector2(target.pos) - Vector2(bullet.pos)).normalized() * 430, minf(1, delta * 12)).normalized() * 430
 		bullet.prev = bullet.pos
-		bullet.pos += Vector2(bullet.vel) * (minf(delta, maxf(0, bullet.life)) if bullet.kind in ["rail", "rocket"] else delta)
+		bullet.pos += Vector2(bullet.vel) * (minf(delta, maxf(0, bullet.life)) if bullet.kind in ["rail", "rocket"] or bullet.get("basic_attack", false) else delta)
 		bullet.life -= delta
 		if bullet.kind == "hostile":
 			var near := Geometry2D.get_closest_point_to_segment(player, bullet.prev, bullet.pos)

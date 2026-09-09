@@ -6,12 +6,13 @@ const SLOTS := ["q", "w", "e", "r", "d", "f", "t"]
 const BIND_SLOTS := ["q", "w", "e", "r", "d", "f", "t", "p1", "p2", "p3", "p4"]
 const DEFAULT_BINDS := {"q": KEY_Q, "w": KEY_W, "e": KEY_E, "r": KEY_R, "d": KEY_D, "f": KEY_F, "t": KEY_T, "p1": KEY_1, "p2": KEY_2, "p3": KEY_3, "p4": KEY_4}
 const ENERGY_COST := {"salvo": 14.0, "nova": 16.0, "shield": 20.0, "rail": 12.0, "mortar": 18.0, "lunge": 12.0, "overdrive": 30.0, "beam": 30.0, "turret": 20.0, "pylon": 24.0}
-const UPKEEP := {"bolt": 2.0, "orbit": 2.0, "pulse": 3.0, "ricochet": 2.0, "plating": 2.0, "thorns": 1.0, "lightning": 4.0}
+const UPKEEP := {"bolt": 2.0, "orbit": 2.0, "pulse": 3.0, "ricochet": 2.0, "plating": 2.0, "thorns": 1.0, "lightning": 4.0, "poison": 3.0}
 const RARITIES := ["Common", "Rare", "Epic"]
 const RARITY_COLORS := [Color("a0b3b7"), Color("69b9ed"), Color("c697eb")]
 const PASSIVES := {
+	"poison": {"name": "Coolant trail", "icon": "poison", "text": "Leave a 4-second coolant trail while powered. 8 damage/sec to enemies inside; overlapping patches do not stack. 3 energy/sec. Toggle off to stop laying trails. No self-damage."},
 	"lightning": {"name": "Arc coil", "icon": "lightning", "text": "Chain lightning every 1.8s. 7 damage, up to 4 targets. Toggle between chaining and focused double-damage strikes."},
-	"bolt": {"name": "Auto bolt", "icon": "power", "text": "Automatically fire at the nearest enemy within 310 range."},
+	"bolt": {"name": "Auto gun", "icon": "power", "text": "Autonomous weapon, separate from basic attacks. Cycle machine gun, sniper and off. Machine gun: rapid short-range shots with spread. Sniper: slower, stronger, longer shots. Neither homes. S does not stop it."},
 	"orbit": {"name": "Scrap orbit", "icon": "grinder", "text": "Collected scrap becomes orbiting tools."},
 	"pulse": {"name": "Collection pulse", "icon": "pulse", "text": "Every 8 scrap releases a damaging pulse."},
 	"ricochet": {"name": "Ricochet", "icon": "ricochet", "text": "Spent orbit tools become bouncing shards. Requires Scrap orbit."},
@@ -87,6 +88,10 @@ var laser_turn := 0.0
 var laser_slot := "r"
 var arc_clock := 0.0
 var arc_focused := false
+var starting_gun := false
+var gun_sniper := false
+var poison_trail: Array[Dictionary] = []
+var poison_clock := 0.0
 const UNLOCKS := {"q": 0.0, "d": 0.0, "f": 0.0, "p1": 10.0, "w": 20.0, "p2": 32.0, "e": 45.0, "p3": 58.0, "r": 70.0, "t": 95.0, "p4": 110.0}
 
 static func demo_preset() -> Dictionary:
@@ -100,7 +105,20 @@ static func demo_preset() -> Dictionary:
 	return config
 
 func unlocked(slot: String) -> bool:
+	if starting_gun and slot.begins_with("p") and loadout.passives[int(slot.substr(1)) - 1] == "bolt": return true
 	return not onboarding or elapsed >= float(UNLOCKS.get(slot, 0))
+
+static func with_starter_gun(config: Dictionary) -> Dictionary:
+	var result := config.duplicate(true)
+	var index: int = result.passives.find("bolt")
+	if index < 0:
+		# Preserve orbit when an older custom kit depends on it for ricochet.
+		index = result.passives.size() - 1
+		if result.passives[index] == "orbit" and "ricochet" in result.passives:
+			index = 0
+	if index > 0: result.passives[index] = result.passives[0]
+	result.passives[0] = "bolt"
+	return result
 
 func ability_cost(id: String) -> float:
 	return float({"rocket": 8, "flame": 18, "nuke": 28, "laser": 40}.get(id, ENERGY_COST.get(id, 0)))
@@ -164,6 +182,16 @@ func toggle(index: int) -> bool:
 	if index < 0 or index >= 4:
 		return false
 	if not unlocked("p%d" % (index + 1)): return false
+	if starting_gun and loadout.passives[index] == "bolt":
+		if not toggles[index]:
+			if energy < 1: return false
+			toggles[index] = true
+			gun_sniper = false
+		elif gun_sniper:
+			toggles[index] = false
+			gun_sniper = false
+		else: gun_sniper = true
+		return true
 	if loadout.passives[index] == "lightning" and toggles[index]:
 		arc_focused = not arc_focused
 		if not arc_focused: toggles[index] = false
@@ -219,8 +247,8 @@ static func resolve_bindings(config: Dictionary) -> Dictionary:
 				result[other] = old
 		result[slot] = config[slot]
 	for slot in BIND_SLOTS:
-		if result[slot] in [KEY_S, KEY_M, KEY_L, KEY_5, KEY_6]:
-			for candidate in [KEY_Q, KEY_W, KEY_E, KEY_R, KEY_D, KEY_F, KEY_T, KEY_1, KEY_2, KEY_3, KEY_4, KEY_A, KEY_B, KEY_C, KEY_G, KEY_H, KEY_J]:
+		if result[slot] in [KEY_A, KEY_S, KEY_M, KEY_L, KEY_5, KEY_6]:
+			for candidate in [KEY_Q, KEY_W, KEY_E, KEY_R, KEY_D, KEY_F, KEY_T, KEY_1, KEY_2, KEY_3, KEY_4, KEY_B, KEY_C, KEY_G, KEY_H, KEY_J]:
 				if candidate not in result.values():
 					result[slot] = candidate
 					break
@@ -255,7 +283,7 @@ static func valid_bindings(config: Dictionary) -> bool:
 	for slot in (BIND_SLOTS if config.has("p1") else SLOTS):
 		var key := int(config.get(slot, 0))
 		# S is a hard stop; Escape/Tab and the audio shortcuts remain system keys.
-		if not ((key >= KEY_A and key <= KEY_Z) or (key >= KEY_0 and key <= KEY_9)) or key in [KEY_S, KEY_M, KEY_L, KEY_5, KEY_6] or key in used:
+		if not ((key >= KEY_A and key <= KEY_Z) or (key >= KEY_0 and key <= KEY_9)) or key in [KEY_A, KEY_S, KEY_M, KEY_L, KEY_5, KEY_6] or key in used:
 			return false
 		used.append(key)
 	return true
@@ -409,6 +437,7 @@ func step(run, delta: float) -> void:
 	elapsed += delta
 	if onboarding:
 		for slot in UNLOCKS:
+			if starting_gun and slot.begins_with("p") and loadout.passives[int(slot.substr(1)) - 1] == "bolt": continue
 			if previous < UNLOCKS[slot] and elapsed >= UNLOCKS[slot]:
 				run.emit_event("unlock", run.player, {"slot": slot})
 	boost_speed = maxf(0, boost_speed - delta)
@@ -430,6 +459,7 @@ func step(run, delta: float) -> void:
 		run.emit_event("energy_low", run.player)
 	energy_spent += minf(available, drain)
 	energy = clampf(available - drain, 0, energy_max())
+	_step_poison(run, delta)
 	shield = maxf(0, shield - delta)
 	sprint = maxf(0, sprint - delta)
 	for slot in SLOTS:
@@ -499,6 +529,23 @@ func step(run, delta: float) -> void:
 func cancel_laser() -> void:
 	laser_left = 0
 	laser_turn = 0
+
+func _step_poison(run, delta: float) -> void:
+	for patch in poison_trail: patch.life -= delta
+	poison_trail = poison_trail.filter(func(p: Dictionary) -> bool: return p.life > 0)
+	poison_clock = maxf(0, poison_clock - delta)
+	if passive_active("poison") and poison_clock <= 0:
+		poison_clock = 0.12
+		if poison_trail.is_empty() or Vector2(poison_trail.back().pos).distance_to(run.player) >= 12:
+			if poison_trail.size() >= 40: poison_trail.pop_front()
+			poison_trail.append({"pos": run.player, "life": 4.0})
+		else: poison_trail.back().life = 4.0
+	for enemy in run.enemies:
+		if enemy.dead or enemy.warmup > 0: continue
+		for patch in poison_trail:
+			if Vector2(patch.pos).distance_to(enemy.pos) <= 26 + enemy.radius:
+				run.hit_enemy(enemy, 8.0 * SalvageProgression.multiplier(run.rank_of("power")) * delta, "poison")
+				break # One damage rate, regardless of overlapping trail patches.
 
 func steer_laser(run, point: Vector2) -> void:
 	if laser_left > 0 and point.distance_squared_to(run.player) > 4:

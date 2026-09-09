@@ -181,7 +181,7 @@ func _run() -> void:
 	game._choose(0)
 	game.model.kit.elapsed = 120
 	game._input(key(KEY_1))
-	check(not game.model.kit.toggles[0], "Default 1 key toggles passive slot one in combat")
+	check(game.model.kit.gun_sniper and game.model.kit.toggles[0], "Default 1 key cycles autonomous gun into sniper mode")
 	game._input(key(KEY_TAB))
 	game._notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
 	check(game.screen == "paused" and not game.tab_held, "Focus loss while holding Tab cannot leave a stuck inspection")

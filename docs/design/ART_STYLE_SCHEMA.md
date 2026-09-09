@@ -1,4 +1,8 @@
-# MobaBot.io — art style schema 1.6
+# MobaBot.io — art style schema 1.7
+
+## v0.12 additions
+
+Keep the foundry title and native icon family. Coolant trail uses one cream/teal vial silhouette with a brass cap on the existing 64-unit canvas; no new raster style. World patches use a low-opacity mint fill and thin coverage edge matching their 26-unit damage radius. Reduced effects removes decorative bubbles but keeps coverage visible. Basic/automatic shots are small pale streaks; sniper streaks are longer. Q retains its much larger finned missile/exhaust. The A range preview is temporary and centered on the player, not the camera; a gold ring identifies the ordered target. No persistent arena control prose.
 
 ## v0.11 override
 

@@ -194,6 +194,9 @@ static func _stats(ui: CanvasLayer, model: SalvageRun) -> void:
 			["Bonus drops", "+%.0f%%" % (model.drop_bonus * 100), "Relative increase to money/boost drop odds, not percentage points."],
 			["Credits", str(model.coins), "Banked at a clear or defeat."]]}
 	]
+	if model.attacks.enabled:
+		groups[0].rows[0] = ["Basic attack", "%.2f" % model.attacks.damage(model), "Commanded attack only. %.2f attacks/sec, %d range. Right-click a target; A + click attack-moves; S stops this order." % [1.0 / model.attacks.interval(model), model.attacks.attack_range(model)]]
+		groups[0].rows[1] = ["Auto fire rate", "%.2f /s" % (1.0 / model.attacks.auto_interval(model)), "Autonomous %s: %.2f damage, %d range. Independent of S and movement; shares weapon damage/rate upgrades, not its cooldown." % ["sniper" if model.kit.gun_sniper else "machine gun", model.attacks.auto_damage(model), model.attacks.auto_range(model)]]
 	for group in groups:
 		ui._label(ui.overlay, group.title, Rect2(group.x, 106, 263, 24), 12, ui.TEAL, true)
 		for i in range(group.rows.size()):
@@ -214,7 +217,8 @@ static func _stats(ui: CanvasLayer, model: SalvageRun) -> void:
 		var id: String = sources[i]
 		var x := 49 + (i % 4) * 219
 		var y := 394 + (i / 4) * 54
-		ui._label(ui.overlay, id.capitalize(), Rect2(x, y, 119, 20), 13, ui.MUTED)
+		var source_name: String = {"bolt": "Auto gun", "basic": "Basic attack", "poison": "Coolant trail"}.get(id, id.capitalize()) if model.attacks.enabled else id.capitalize()
+		ui._label(ui.overlay, source_name, Rect2(x, y, 119, 20), 13, ui.MUTED)
 		ui._label(ui.overlay, "%.0f" % model.damage_dealt[id], Rect2(x + 121, y, 81, 20), 15, ui.GOLD, true, HORIZONTAL_ALIGNMENT_RIGHT)
 		var bar = ui._bar(ui.overlay, Rect2(x, y + 28, 200, 3), ui.TEAL, largest)
 		bar.value = model.damage_dealt[id]

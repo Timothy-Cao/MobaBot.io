@@ -42,6 +42,12 @@ func _draw() -> void:
 	line(Vector2(59, 5), Vector2(59, 59), Color("10232c"), 2)
 	line(Vector2(5, 59), Vector2(59, 59), Color("10232c"), 2)
 	match ability:
+		"poison":
+			poly([Vector2(24, 13), Vector2(40, 13), Vector2(39, 24), Vector2(49, 48), Vector2(44, 53), Vector2(20, 53), Vector2(15, 48), Vector2(25, 24)], STEEL)
+			poly([Vector2(24, 33), Vector2(40, 33), Vector2(45, 47), Vector2(20, 47)], TEAL)
+			line(Vector2(23, 14), Vector2(41, 14), GOLD, 4)
+			draw_circle(Vector2(30, 40), 3, LIGHT)
+			draw_circle(Vector2(37, 45), 2, CREAM)
 		"lightning":
 			for p in [Vector2(12, 47), Vector2(49, 15)]:
 				draw_circle(p, 10, INK)

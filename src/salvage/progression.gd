@@ -18,6 +18,7 @@ static func data(run, id: String) -> Dictionary:
 		return {"name": MobaKit.ABILITIES[run.kit.loadout[slot]].name, "tag": "%s / ABILITY" % slot.to_upper(), "max": 10, "description": "Numerical ranks. Milestones at 5 and 10."}
 	var result: Dictionary = run.UPGRADES.get(id, {"name": "Repair", "description": "Restore one hull.", "tag": "HULL", "max": 1}).duplicate()
 	if id == "power" and run.kit != null and run.kit.has_passive("lightning"): result.name = "Weapon power"
+	if id == "power" and run.attacks.enabled: result.name = "Weapon power"
 	if id in WEAPONS:
 		result.max = 10
 		result.description = "Numerical ranks. Milestones at 5 and 10."
@@ -29,6 +30,8 @@ static func data(run, id: String) -> Dictionary:
 
 static func note(run, id: String, r: int) -> String:
 	var m := milestone(r)
+	if id == "power" and run.attacks.enabled:
+		return "Basic + auto gun damage. Also scales Arc Coil and Coolant trail when equipped. 5 / 10: +25% / +50% damage; bullets gain +1 / +2 pierces."
 	if id == "power" and run.kit != null and run.kit.has_passive("lightning"):
 		return "5 / 10: +25% / +50% weapon damage. Auto bolt also gains +1 / +2 pierces." if run.kit.has_passive("bolt") else "5 / 10: +25% / +50% lightning damage."
 	if id == "magnet":
@@ -61,10 +64,17 @@ static func values(run, id: String, r: int) -> Array[Dictionary]:
 		return [{"label": "Damage bonus" if combat else "Recharge cut", "value": snappedf(b * (100 if combat else 50), 0.1), "unit": "%"}, {"label": effect[0], "value": effect[1], "unit": effect[2]}, {"label": "Recharge", "value": snappedf(run.kit.cooldown_at(slot, r), 0.01), "unit": "s"}]
 	match id:
 		"power":
+			if run.attacks.enabled:
+				var value_scale := multiplier(r) / multiplier(run.rank_of("power"))
+				return [{"label": "Auto gun damage", "value": snappedf(run.attacks.auto_damage(run) * value_scale, 0.01), "unit": ""}, {"label": "Basic damage", "value": snappedf(run.attacks.damage(run) * value_scale, 0.01), "unit": ""}, {"label": "Pierces", "value": m, "unit": ""}]
 			if run.kit != null and run.kit.has_passive("lightning"):
 				return [{"label": "Damage bonus", "value": roundi(b * 100), "unit": "%"}, {"label": "Arc damage", "value": snappedf(7 * multiplier(r), 0.01), "unit": ""}, {"label": "Bolt damage" if run.kit.has_passive("bolt") else "Focused arc", "value": snappedf((2 if run.kit.has_passive("bolt") else 14) * multiplier(r), 0.01), "unit": ""}]
 			return [{"label": "Damage bonus", "value": roundi(b * 100), "unit": "%"}, {"label": "Bolt damage", "value": snappedf(2 * multiplier(r), 0.01), "unit": ""}, {"label": "Pierces", "value": m, "unit": ""}]
-		"rapid": return [{"label": "Rate bonus", "value": roundi(b * 100), "unit": "%"}, {"label": "Shots / sec", "value": snappedf(multiplier(r) / 0.43, 0.01), "unit": ""}]
+		"rapid":
+			if run.attacks.enabled:
+				var value_scale := multiplier(r) / multiplier(run.rank_of("rapid"))
+				return [{"label": "Auto shots / sec", "value": snappedf(value_scale / run.attacks.auto_interval(run), 0.01), "unit": ""}, {"label": "Basic shots / sec", "value": snappedf(value_scale / run.attacks.interval(run), 0.01), "unit": ""}]
+			return [{"label": "Rate bonus", "value": roundi(b * 100), "unit": "%"}, {"label": "Shots / sec", "value": snappedf(multiplier(r) / 0.43, 0.01), "unit": ""}]
 		"grinder": return [{"label": "Damage bonus", "value": roundi(b * 100), "unit": "%"}, {"label": "Damage", "value": snappedf(4 * multiplier(r), 0.01), "unit": ""}, {"label": "Hits / tool", "value": 1 + m, "unit": ""}]
 		"ricochet": return [{"label": "Damage bonus", "value": roundi(b * 100), "unit": "%"}, {"label": "Shard damage", "value": snappedf(4 * multiplier(r), 0.01), "unit": ""}, {"label": "Bounces", "value": 1 + r / 2 + m * 2, "unit": ""}]
 		"pulse": return [{"label": "Damage bonus", "value": roundi(b * 100), "unit": "%"}, {"label": "Pulse damage", "value": snappedf(5 * multiplier(r), 0.01), "unit": ""}, {"label": "Radius", "value": 108 * (1 + m * 0.25), "unit": " px"}]
