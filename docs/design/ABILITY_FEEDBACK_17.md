@@ -43,6 +43,40 @@ This is design direction, not permission to remove current binding behavior befo
 - Let players choose a loadout from their learned ability inventory so they can tailor a build for a stage or boss where they are stuck.
 - Work out when and where loadouts can change, how current ranks/rarities are preserved, and how this interacts with run-only progression before implementation.
 
+## Non-interrupting skill progression proposal
+
+The owner wants leveling to create frequent rewards without repeatedly stopping combat. Remove modal ability-learn and ability-upgrade popups from the proposed flow.
+
+While at least one ability remains locked, alternate XP level rewards between two homogeneous event types:
+
+1. **Upgrade event:** choose one already-owned, non-maxed ability and increase its rank.
+2. **Learn event:** choose one locked ability, represented as rank 0, and raise it to rank 1.
+
+Never mix locked and already-owned abilities in the same choice. A given reward should ask one clear question—either which existing ability to improve or which new ability to learn. Once every ability has been learned, subsequent eligible rewards can remain upgrade events.
+
+The proposed interaction is non-modal:
+
+- Eligible already-owned abilities display a small level-up indicator on or immediately above their ability control.
+- The player may click that indicator or use **Ctrl + the ability's assigned key** to spend the pending upgrade.
+- Locked abilities appear as rank-0 choices during a learn event and use the same general level-up interaction to become rank 1.
+- Combat continues while a reward is pending; there is no full-screen selection interruption.
+- The UI must distinguish “upgrade an equipped ability,” “learn a stored ability” and ordinary ability activation so a click or shortcut cannot cast or rearrange a skill accidentally.
+
+Learning does not authorize a combat-time loadout replacement. A newly learned ability enters the player's learned inventory/storage. If its fixed family is already occupied—for example, a new Q when Q is equipped—it may be fitted only at a safe between-phase arrangement point. The intended rhythm is to handle these loadout changes after stages rather than displaying a replacement popup during play.
+
+This proposal is intended to support somewhat faster XP gain and a higher frequency of rewarding moments without the previous flow interruption. Increase XP only after the non-modal interaction is implemented and tested; reward frequency, unspent indicators and faster leveling could otherwise create visual pressure or input overload.
+
+Details to resolve before implementation:
+
+- Whether pending upgrade/learn rewards stack, and how their order remains clear if the player delays spending them.
+- Where all locked rank-0 abilities appear without crowding the combat HUD; they cannot all occupy live ability slots.
+- Whether “after stages” means the unlock itself is awarded at stage completion or only that a previously learned skill can be fitted there.
+- How Ctrl shortcuts work for abilities in storage, summons/modules without a live binding and players using non-keyboard input.
+- How the rank-10 maximum, no-eligible-upgrade cases and the transition after the final unlock affect the alternating sequence.
+- How the indicator stays readable at normal and reduced effects without competing with cooldown, charge, energy and recast information.
+
+This is future design direction, not current behavior. The current modal timing, discovery, camp arrangement and save rules remain governed by `QA_17.md` until this flow has a full state model, migration plan and verification coverage.
+
 ## Proposed focused roster
 
 Keep every existing ability in the project for now; do not delete the wider catalog. Stash abilities outside the focused set so the best candidates can be refined and tested before other options are reintroduced gradually.
