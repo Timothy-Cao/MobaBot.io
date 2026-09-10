@@ -50,6 +50,12 @@ func _draw() -> void:
 	line(Vector2(5, 59), Vector2(59, 59), Color("10232c"), 2)
 	if ExpeditionIcon.draw(self, icon_id): return
 	match icon_id:
+		"hammer":
+			line(Vector2(17,52),Vector2(40,24),INK,11)
+			line(Vector2(17,52),Vector2(40,24),STEEL,6)
+			poly([Vector2(25,17),Vector2(35,9),Vector2(56,28),Vector2(46,40)],TEAL)
+			line(Vector2(46,16),Vector2(53,24),CREAM,5)
+			line(Vector2(30,20),Vector2(44,32),GOLD,3)
 		"poison":
 			poly([Vector2(24, 13), Vector2(40, 13), Vector2(39, 24), Vector2(49, 48), Vector2(44, 53), Vector2(20, 53), Vector2(15, 48), Vector2(25, 24)], STEEL)
 			poly([Vector2(24, 33), Vector2(40, 33), Vector2(45, 47), Vector2(20, 47)], TEAL)

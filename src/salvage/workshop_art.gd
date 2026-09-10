@@ -158,13 +158,18 @@ func _draw() -> void:
 			draw_polyline(hull, INK, 2, true)
 			_line(Vector2(-13, -3), Vector2(4, -3), CREAM, 3)
 			_line(Vector2(-11, 3), Vector2(0, 3), TEAL, 4)
+			for i in range(m):
+				_line(Vector2(-15,-4+i*8),Vector2(-26-4*sin(model.time*35),-4+i*8),CREAM,2)
 			draw_set_transform(Vector2.ZERO)
 		elif bullet.get("basic_attack", false):
 			if bullet.kind=="basic" and model.exp!=null and model.exp.revised:
 				_line(bullet.pos-direction*35,bullet.pos,Color(GOLD,0.35),8)
 				_line(bullet.pos-direction*17,bullet.pos,GOLD,6)
 				_line(bullet.pos-direction*11,bullet.pos,CREAM,2)
-			else: _line(bullet.pos - direction * (30 if bullet.get("sniper", false) else 7), bullet.pos, PALE, 2)
+			else:
+				var grade: int=int(bullet.get("visual_rank",1))/5
+				_line(bullet.pos-direction*(30 if bullet.get("sniper",false) else 7+grade*4),bullet.pos,GOLD if grade>0 else PALE,2)
+				if grade==2: _line(bullet.pos-direction*5,bullet.pos,CREAM,1)
 		else:
 			var color := PALE if bullet.kind in ["rail", "pet", "summon"] else GOLD
 			if model.staged and ((bullet.kind == "rail" and model.kit.milestone("q") > 0) or (bullet.kind == "bolt" and model.milestone("power") > 0)):
@@ -174,6 +179,9 @@ func _draw() -> void:
 	if model.mode == "salvage" and model.passive_enabled("orbit"):
 		draw_arc(model.player, model.orbit_radius(), 0, TAU, 64, Color(PALE, 0.12), 1, true)
 		for i in range(model.orbit.size()):
+			if Vanguard.enabled(model) and model.milestone("grinder")>0:
+				var angle: float=(model.orbit_position(i)-model.player).angle()
+				draw_arc(model.player,model.orbit_radius(),angle-0.14*model.milestone("grinder"),angle,12,Color(GOLD,0.5),2,true)
 			_tool(model.orbit_position(i) + frame_offset, model.time * 6 + i, model.rank_of("grinder") > 0, 1.0 + model.milestone("grinder") * 0.2)
 	for effect in effects:
 		_effect(effect)

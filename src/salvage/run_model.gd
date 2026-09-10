@@ -288,6 +288,9 @@ func fire_interval() -> float:
 	return 0.43 / pow(1.22, rank_of("rapid"))
 
 func orbit_damage() -> float:
+	if Vanguard.enabled(self):
+		var count: float=mini(capacity(),3+int(rank_of("grinder"))/2)
+		return 4.8*Vanguard.power(rank_of("grinder"))/sqrt(maxf(1,count/3.0))
 	if staged:
 		return 4.0 * SalvageProgression.multiplier(rank_of("grinder"))
 	return 4.0 + rank_of("grinder") * 2.0
@@ -387,7 +390,7 @@ func step(delta: float, input_direction: Vector2) -> void:
 		attacks.prepare(self, delta)
 		if kit.dash_left > 0:
 			kit.move_dash(self, delta)
-		elif kit.laser_left > 0 or kit.extra.rooted() or (Vanguard.enabled(self) and (vanguard.slam_left>0 or vanguard.hammer>=0)):
+		elif kit.laser_left > 0 or kit.extra.rooted() or (Vanguard.enabled(self) and (vanguard.slam_left>0 or (vanguard.hammer>=0 and Vanguard.hammer_roots(self)))):
 			stop_movement()
 		elif moving:
 			var offset := kit.extra.route(player, move_target, 16) - player

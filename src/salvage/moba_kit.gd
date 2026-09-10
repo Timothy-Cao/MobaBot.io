@@ -258,6 +258,7 @@ func damage_scale(slot: String) -> float:
 
 func damage_scale_at(slot: String, rank_value: int, tier_value: int = -1) -> float:
 	var tier: int = int(tiers.get(slot, 0)) if tier_value < 0 else tier_value
+	if loadout.get("vanguard",false): return (1.0+gear_damage+mastery_damage)*(1+tier*0.15)*1.2*Vanguard.power(mini(10,rank_value+(rank_bonus if unlocked(slot) else 0)))
 	return (1.6 if loadout.get("rules17",false) and loadout.get(slot,"") in ["flame","reap","sweep","thrust","repulsor","tractor"] else 1.0) * (1.0 + gear_damage + mastery_damage) * (1.0 + tier * 0.15) * (1.0 + SalvageProgression.bonus(mini(10,rank_value+(rank_bonus if unlocked(slot) else 0))))
 
 func promote(slot: String) -> bool:

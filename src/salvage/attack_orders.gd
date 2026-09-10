@@ -17,15 +17,17 @@ func revised(run) -> bool:
 	return run.exp != null and run.exp.revised
 
 func attack_range(run) -> float:
-	if Vanguard.enabled(run): return 125.0+run.kit.attack_range_bonus
+	if Vanguard.enabled(run): return 125.0*(1+0.25*int(Vanguard.hammer_rank(run)/5))+run.kit.attack_range_bonus
 	if revised(run): return 530.0 + run.kit.attack_range_bonus
 	return (105.0 if run.exp != null and run.exp.class_id == "melee" else 310.0) + run.kit.attack_range_bonus
 
 func interval(run) -> float:
+	if Vanguard.enabled(run): return (1.05-0.05*int(Vanguard.hammer_rank(run)/5))/(1+run.kit.attack_speed_bonus)
 	if revised(run): return (1.0/0.7) / SalvageProgression.multiplier(run.rank_of("rapid")) / (1 + run.kit.attack_speed_bonus)
 	return 0.43 / SalvageProgression.multiplier(run.rank_of("rapid")) / (1 + run.kit.attack_speed_bonus)
 
 func damage(run) -> float:
+	if Vanguard.enabled(run): return 38*Vanguard.power(Vanguard.hammer_rank(run))*(1+run.kit.attack_damage_bonus)
 	if revised(run): return (14.0625/0.7) * SalvageProgression.multiplier(run.rank_of("power")) * (1 + run.kit.attack_damage_bonus) * (1.75 if run.kit.extra.empowered else 1.0)
 	return (7.0 if run.exp != null and run.exp.class_id == "melee" else 2.0) * SalvageProgression.multiplier(run.rank_of("power")) * (1 + run.kit.attack_damage_bonus) * (1.75 if run.kit.extra.empowered else 1.0)
 
@@ -33,9 +35,11 @@ func auto_range(run) -> float:
 	return 470.0 if run.kit.gun_sniper else 265.0
 
 func auto_interval(run) -> float:
+	if Vanguard.enabled(run): return 0.16*(1-0.1*int(mini(10,Vanguard.rank_of(run,"gun")+run.kit.rank_bonus)/5))/SalvageProgression.multiplier(run.rank_of("rapid"))/(1+run.kit.attack_speed_bonus)
 	return (0.8 if run.kit.gun_sniper else 0.16) / SalvageProgression.multiplier(run.rank_of("rapid")) / (1 + run.kit.attack_speed_bonus)
 
 func auto_damage(run) -> float:
+	if Vanguard.enabled(run): return 1.2*Vanguard.power(mini(10,Vanguard.rank_of(run,"gun")+run.kit.rank_bonus))*(1+run.kit.attack_damage_bonus)
 	return (7.0 if run.kit.gun_sniper else 1.5) * (0.8 if revised(run) else 1.0) * SalvageProgression.multiplier(run.rank_of("power")) * (1 + run.kit.attack_damage_bonus)
 
 func valid(enemy: Dictionary) -> bool:
@@ -129,6 +133,8 @@ func prepare(run, delta: float) -> void:
 			run.move_target = destination
 			run.moving = run.player.distance_to(destination) > 0.01
 		elif not line_of_fire(run,enemy.pos): run.move_target=enemy.pos; run.moving=true; windup=-1
+		elif Vanguard.enabled(run) and not Vanguard.hammer_roots(run):
+			run.move_target=destination; run.moving=run.player.distance_to(destination)>0.01
 		else: run.stop_movement()
 
 func fire(run) -> void:
@@ -180,6 +186,7 @@ func _fire_auto(run) -> void:
 	run.projectiles.back().life = (auto_range(run) - 20.0) / speed
 	run.projectiles.back().basic_attack = true
 	run.projectiles.back().autonomous = true
+	if Vanguard.enabled(run): run.projectiles.back().visual_rank=mini(10,Vanguard.rank_of(run,"gun")+run.kit.rank_bonus)
 	run.projectiles.back().sniper = run.kit.gun_sniper
 	auto_cooldown += auto_interval(run)
 	auto_shots += 1

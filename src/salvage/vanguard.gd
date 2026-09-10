@@ -3,6 +3,19 @@ extends RefCounted
 ## Fixed-kit rules. Durable choices live in loadout; transient combat never does.
 const KEYS := {"q":KEY_Q,"w":KEY_W,"e":KEY_E,"r":KEY_R,"d":KEY_D,"f":KEY_F,"p1":KEY_1,"x1":KEY_2,"x2":KEY_3,"x3":KEY_4}
 const TOOLS := {"q":"rocket","w":"strike","e":"body_slam","r":"reactor_drop","d":"sprint","f":"blink","p1":"orbit","x1":"guard_bot","x2":"reserve_totem","x3":"recovery_totem"}
+const POWER := [1.0,1.0,1.08,1.16,1.24,1.60,1.77,1.94,2.11,2.28,3.30]
+
+static func power(rank_value: int) -> float:
+	return POWER[clampi(rank_value,1,10)]
+
+static func hammer_rank(run) -> int:
+	return mini(10,rank_of(run,"hammer")+run.kit.rank_bonus)
+
+static func hammer_angle(run) -> float:
+	return deg_to_rad(70 if hammer_rank(run)>=10 else 60 if hammer_rank(run)>=5 else 45)
+
+static func hammer_roots(run) -> bool:
+	return hammer_rank(run)<10
 var ghost := false
 var gun_on := true
 var orbit_angle := 0.0
@@ -39,6 +52,7 @@ static func setup(run, rank_value: int = 0) -> void:
 	kit.loadout["vanguard"] = true
 	kit.loadout["rewards18"] = []
 	kit.loadout["reward_turn18"] = 0
+	kit.loadout["hammer_rank"] = maxi(1,rank_value)
 	kit.loadout["library"] = {}
 	kit.discovered.clear()
 	kit.loadout.passives = ["orbit","","","","","","","",""]
@@ -61,13 +75,14 @@ static func setup(run, rank_value: int = 0) -> void:
 	run._sync_resource_ranks()
 
 static func rank_of(run, slot: String) -> int:
+	if slot == "hammer": return int(run.kit.loadout.get("hammer_rank",1))
 	if slot == "gun": return mini(10,1+int(run.upgrades.power))
 	if slot == "p1": return int(run.upgrades.grinder) if run.kit.unlocked(slot) else 0
 	return int(run.kit.ranks.get(slot,0))
 
 static func candidates(run, kind: String) -> Array:
 	var result: Array = []
-	for slot in KEYS.keys()+["gun"]:
+	for slot in KEYS.keys()+["gun","hammer"]:
 		var rank_value := rank_of(run,slot)
 		if (kind == "learn" and rank_value == 0) or (kind == "upgrade" and rank_value > 0 and rank_value < 10): result.append(slot)
 	return result
@@ -87,7 +102,8 @@ static func earn(run) -> void:
 
 static func spend(run, slot: String) -> bool:
 	if not enabled(run) or slot not in candidates(run,reward_kind(run)) or reward_kind(run)=="": return false
-	if slot == "gun": run.upgrades.power += 1
+	if slot == "hammer": run.kit.loadout.hammer_rank=rank_of(run,slot)+1
+	elif slot == "gun": run.upgrades.power += 1
 	elif slot == "p1":
 		run.upgrades.grinder += 1
 		if slot not in run.kit.discovered: run.kit.discovered.append(slot)
@@ -97,8 +113,8 @@ static func spend(run, slot: String) -> bool:
 		if slot not in run.kit.discovered: run.kit.discovered.append(slot)
 	run.kit.loadout.rewards18.pop_front()
 	run._sync_resource_ranks()
-	run.emit_event("equipped",run.player,{"id":TOOLS.get(slot,"power")})
-	if rank_of(run,slot) in [5,10]: run.emit_event("milestone",run.player,{"id":TOOLS.get(slot,"power"),"rank":rank_of(run,slot)})
+	run.emit_event("equipped",run.player,{"id":TOOLS.get(slot,"hammer" if slot=="hammer" else "power")})
+	if rank_of(run,slot) in [5,10]: run.emit_event("milestone",run.player,{"id":TOOLS.get(slot,"hammer" if slot=="hammer" else "power"),"rank":rank_of(run,slot)})
 	return true
 
 static func progression(run) -> void:
@@ -151,7 +167,7 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	if kit.recharge[slot]<=0: kit.recharge[slot]=kit.cooldown(slot)
 	kit.cast_counts[id]=int(kit.cast_counts.get(id,0))+1
 	if slot=="f":
-		poof(run.player); poof(target)
+		poof(run.player,kit.effective_rank(slot)); poof(target,kit.effective_rank(slot))
 		run.player=target; run.stop_movement()
 		run.emit_event("v_blink",target)
 		return true
@@ -162,8 +178,8 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 		run.emit_event("v_slam",run.player); return true
 	if slot in ["x1","x2","x3"]:
 		constructs=constructs.filter(func(u): return u.id!=id)
-		constructs.append({"id":id,"pos":target,"life":5.0 if slot=="x3" else 35.0,"clock":0.3,"bank":0.0,"radius":125.0+kit.milestone(slot)*20,"hp":120.0+kit.effective_rank(slot)*15,"max_hp":120.0+kit.effective_rank(slot)*15,"slot":slot,"pulse":2.0,"hurt_clock":0.0})
-		poof(target); return true
+		constructs.append({"id":id,"pos":target,"life":5.0 if slot=="x3" else 35.0,"clock":0.3,"bank":0.0,"radius":125.0+kit.milestone(slot)*20,"hp":135.0*power(kit.effective_rank(slot)),"max_hp":135.0*power(kit.effective_rank(slot)),"slot":slot,"pulse":2.0,"hurt_clock":0.0})
+		poof(target,kit.effective_rank(slot)); return true
 	# 80ms anticipation: F can move the unreleased origin; world aim stays fixed.
 	pending={"slot":slot,"target":cursor,"left":0.08}
 	run.emit_event("cast",run.player,{"ability":id,"target":target,"milestone":kit.milestone(slot)})
@@ -174,12 +190,13 @@ func swing(run, cursor: Vector2) -> bool:
 	if run.state!="running" or ghost or slam_left>0 or hammer_cooldown>0 or hammer>=0 or not pending.is_empty(): return false
 	hammer=0.20; hammer_direction=(cursor-run.player).normalized()
 	if hammer_direction==Vector2.ZERO: hammer_direction=Vector2.RIGHT
-	hammer_cooldown=1.05/(1+run.kit.attack_speed_bonus)
-	run.stop_movement(); run.aim=hammer_direction
+	hammer_cooldown=run.attacks.interval(run)
+	if hammer_roots(run): run.stop_movement()
+	run.aim=hammer_direction
 	return true
 
-func poof(point: Vector2) -> void:
-	impacts.append({"kind":"poof","pos":point,"life":0.3,"duration":0.3,"radius":30.0})
+func poof(point: Vector2, rank_value: int=1) -> void:
+	impacts.append({"kind":"poof","pos":point,"life":0.3,"duration":0.3,"radius":30.0,"rank":rank_value})
 
 func release(run) -> void:
 	var slot: String=pending.slot
@@ -197,6 +214,7 @@ func release(run) -> void:
 	else:
 		var p: Vector2=kit.target_point(run,slot,cursor)
 		impacts.append({"kind":"strike" if slot=="w" else "reactor","pos":p,"life":0.55 if slot=="w" else 0.75,"duration":0.55 if slot=="w" else 0.75,"radius":100.0*kit.area_scale(slot) if slot=="w" else 170.0*kit.area_scale(slot),"slot":slot,"damage":38.0*scale_value if slot=="w" else 135.0*scale_value,"rank":kit.effective_rank(slot)})
+		if slot=="r" and kit.effective_rank(slot)>=10: impacts.back().damage*=0.8
 	pending.clear()
 
 func tick(run, delta: float) -> void:
@@ -221,16 +239,17 @@ func tick(run, delta: float) -> void:
 		pending.left-=delta
 		if pending.left<=0: release(run)
 	if hammer>=0:
-		hammer-=delta; run.stop_movement()
+		hammer-=delta
+		if hammer_roots(run): run.stop_movement()
 		if hammer<=0:
 			var reach: float=run.attacks.attack_range(run)
 			for enemy in run.enemies:
 				var offset: Vector2=enemy.pos-run.player
-				if run.attacks.valid(enemy) and offset.length()<=reach+enemy.radius and absf(hammer_direction.angle_to(offset))<=PI/4:
+				if run.attacks.valid(enemy) and offset.length()<=reach+enemy.radius and absf(hammer_direction.angle_to(offset))<=hammer_angle(run):
 					var head: bool=offset.length()>=reach*0.512
-					run.hit_enemy(enemy,(38 if head else 9)*(1+run.kit.attack_damage_bonus),"hammer",offset.normalized()*190 if head and not enemy.has("role") else Vector2.ZERO)
+					run.hit_enemy(enemy,(38 if head else 9)*power(hammer_rank(run))*(1+run.kit.attack_damage_bonus),"hammer",offset.normalized()*190 if head and not enemy.has("role") else Vector2.ZERO)
 					if head and not enemy.has("role"): enemy.stun=0.25
-			impacts.append({"kind":"hammer","pos":run.player,"direction":hammer_direction,"life":0.24,"duration":0.24,"radius":reach})
+			impacts.append({"kind":"hammer","pos":run.player,"direction":hammer_direction,"life":0.30,"duration":0.30,"radius":reach,"angle":hammer_angle(run),"rank":hammer_rank(run)})
 			run.emit_event("v_hammer",run.player); hammer=-1
 	if slam_left>0:
 		var before: Vector2=run.player
@@ -255,16 +274,16 @@ func tick(run, delta: float) -> void:
 			if unit.clock<=0:
 				unit.clock=0.8
 				var enemy: Dictionary=run.nearest_enemy(unit.pos)
-				if not enemy.is_empty() and Vector2(enemy.pos).distance_to(unit.pos)<320: run._add_projectile(unit.pos,(Vector2(enemy.pos)-Vector2(unit.pos)).normalized()*550,3+rank_value*0.4,"sentry",0)
-			if unit.pulse<=0: unit.pulse=2.4; blast(run,unit.pos,unit.radius,5+rank_value,"bulwark",0,40)
+				if not enemy.is_empty() and Vector2(enemy.pos).distance_to(unit.pos)<320: run._add_projectile(unit.pos,(Vector2(enemy.pos)-Vector2(unit.pos)).normalized()*550,3.4*power(rank_value),"sentry",0)
+			if unit.pulse<=0: unit.pulse=2.4; blast(run,unit.pos,unit.radius,6*power(rank_value),"bulwark",0,40)
 		elif unit.id=="reserve_totem":
-			if not inside: unit.bank=minf(80+rank_value*6,unit.bank+delta*(5+rank_value))
+			if not inside: unit.bank=minf(86*power(rank_value),unit.bank+delta*6*power(rank_value))
 			elif unit.bank>0:
-				var amount: float=minf(unit.bank,delta*45)
+				var amount: float=minf(unit.bank,delta*45*sqrt(power(rank_value)))
 				unit.bank-=amount
 				var heal: float=minf(amount,run.max_health()-run.health); run.health+=heal; amount-=heal
 				var energy: float=minf(amount,run.kit.energy_max()-run.kit.energy); run.kit.energy+=energy; amount-=energy
-				if amount>0 and unit.pulse<=0: unit.pulse=1; blast(run,unit.pos,unit.radius,12+rank_value,"reserve",0,80)
+				if amount>0 and unit.pulse<=0: unit.pulse=1; blast(run,unit.pos,unit.radius,13*power(rank_value),"reserve",0,80)
 		elif unit.id=="recovery_totem":
 			run.kit.charges[unit.slot]=0; run.kit.recharge[unit.slot]=run.kit.cooldown(unit.slot)
 			if inside:
@@ -283,10 +302,10 @@ func tick(run, delta: float) -> void:
 			if effect.rank>=10 and not enemy.has("role"): enemy.stun=0.75
 		if effect.kind=="reactor" and effect.rank>=5 and run.player.distance_to(effect.pos)<=effect.radius: shield=maxf(shield,1.5)
 		if effect.kind=="reactor" and effect.rank>=10 and not effect.get("second",false):
-			var second: Dictionary=effect.duplicate(); second.life=0.4; second.duration=0.4; second.second=true; impacts.append(second)
+			var second: Dictionary=effect.duplicate(); second.life=0.4; second.duration=0.4; second.second=true; second.damage*=0.25; impacts.append(second)
 		run.emit_event("nuke_impact",effect.pos,{"radius":effect.radius})
 		var duration: float=0.65 if effect.kind=="reactor" else 0.4
-		impacts.append({"kind":"detonation" if effect.kind=="reactor" else "blast","pos":effect.pos,"radius":effect.radius,"life":duration,"duration":duration})
+		impacts.append({"kind":"detonation" if effect.kind=="reactor" else "blast","pos":effect.pos,"radius":effect.radius,"life":duration,"duration":duration,"rank":effect.rank})
 
 func blast(run, point: Vector2, radius: float, damage: float, source: String, stun: float, knock: float) -> void:
 	for enemy in run.enemies:
@@ -294,7 +313,7 @@ func blast(run, point: Vector2, radius: float, damage: float, source: String, st
 		var ordinary: bool=not enemy.has("role") and enemy.kind!=2
 		run.hit_enemy(enemy,damage,source,(Vector2(enemy.pos)-point).normalized()*knock if ordinary else Vector2.ZERO)
 		if ordinary and stun>0: enemy.stun=stun
-	impacts.append({"kind":"slam_hit" if source=="body_slam" else "blast","pos":point,"radius":radius,"direction":slam_direction,"life":0.4,"duration":0.4})
+	impacts.append({"kind":"slam_hit" if source=="body_slam" else "blast","pos":point,"radius":radius,"direction":slam_direction,"life":0.4,"duration":0.4,"rank":run.kit.effective_rank("e") if source=="body_slam" else 1})
 
 static func valid_point(run, point: Vector2, radius: float) -> bool:
 	if not run.ARENA.grow(-radius).has_point(point): return false

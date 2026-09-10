@@ -77,10 +77,15 @@ static func draw(game) -> void:
 				var point:=Vector2(28+(i%5)*55,270+(i/5)*57)
 				ui._ability_icon(ui.overlay,VanguardHud.icon(slot),Rect2(point,Vector2(40,40)))
 				ui._label(ui.overlay,OS.get_keycode_string(Vanguard.KEYS[slot]),Rect2(point,Vector2(20,16)),10,ui.GOLD,true)
-			var slots: Array=Vanguard.KEYS.keys()
-			PracticeView.select(ui,slots.map(func(s): return OS.get_keycode_string(Vanguard.KEYS[s])),slots.find(game.practice_slot),Rect2(26,374,88,29),func(i): game.practice_slot=slots[i]; draw(game))
+			var slots: Array=Vanguard.KEYS.keys()+["hammer","gun"]
+			PracticeView.select(ui,slots.map(func(s): return s.capitalize() if s in ["hammer","gun"] else OS.get_keycode_string(Vanguard.KEYS[s])),slots.find(game.practice_slot),Rect2(26,374,88,29),func(i): game.practice_slot=slots[i]; draw(game))
 			PracticeView.select(ui,["Locked","Rank 1","Rank 2","Rank 3","Rank 4","Rank 5","Rank 6","Rank 7","Rank 8","Rank 9","Rank 10"],Vanguard.rank_of(game.model,game.practice_slot),Rect2(124,374,180,29),func(i):
 				var slot: String=game.practice_slot
+				if slot in ["hammer","gun"]:
+					if slot=="hammer": game.model.kit.loadout.hammer_rank=maxi(1,i)
+					else: game.model.upgrades.power=maxi(0,i-1)
+					draw(game)
+					return
 				if slot=="p1": game.model.upgrades.grinder=i; game.model.orbit.clear()
 				else: game.model.kit.ranks[slot]=i; game.model.upgrades["skill_"+slot]=i
 				if i==0: game.model.kit.discovered.erase(slot)

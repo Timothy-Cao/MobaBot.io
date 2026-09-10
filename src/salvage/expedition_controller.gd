@@ -247,7 +247,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			practice_placing=false; open_practice()
 		get_viewport().set_input_as_handled(); return
 	if screen=="running" and Vanguard.enabled(model) and event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT and pending_cast_slot=="" and not pending_attack:
-		model.vanguard.swing(model,get_global_mouse_position()); mouse_moving=false
+		model.vanguard.swing(model,get_global_mouse_position())
+		if Vanguard.hammer_roots(model): mouse_moving=false
 		get_viewport().set_input_as_handled(); return
 	super._unhandled_input(event)
 

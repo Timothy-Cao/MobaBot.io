@@ -101,8 +101,67 @@ func execute() -> void:
 	check(run.state=="camp" and run.exp.pending_chests==0 and run.kit.loadout.rewards18.size()>0,"Camp rewards queued without popup")
 	check(ForgeEquipment.valid_checkpoint(gear.pack_run(run)),"End-round save validates")
 	playtest_refinements()
+	rank_milestones()
 	await ui_checks()
 	print("VANGUARD: %d checks, %d failures"%[checks,failures]); quit(1 if failures else 0)
+
+func rank_milestones() -> void:
+	var run:=fresh(1)
+	check("hammer" in Vanguard.candidates(run,"upgrade"),"Hammer participates in upgrade queue")
+	for rank_value in range(2,11):
+		run.kit.loadout.rewards18=["upgrade"]
+		check(Vanguard.spend(run,"hammer") and Vanguard.hammer_rank(run)==rank_value,"Hammer earned rank %d"%rank_value)
+	check("hammer" not in Vanguard.candidates(run,"upgrade"),"Hammer cap is ten")
+	var gear:=ForgeEquipment.new()
+	run.state="camp"
+	var packed:=gear.pack_run(run)
+	check(ForgeEquipment.valid_checkpoint(packed),"Rank ten hammer checkpoint valid")
+	gear.checkpoint=packed
+	var restored:=fresh()
+	check(gear.resume_into(restored) and Vanguard.hammer_rank(restored)==10,"Hammer checkpoint roundtrip")
+	packed.loadout.erase("hammer_rank")
+	check(ForgeEquipment.valid_checkpoint(packed),"Old checkpoint without hammer rank remains valid")
+	gear.checkpoint=packed
+	check(gear.resume_into(restored) and Vanguard.hammer_rank(restored)==1,"Old checkpoint defaults hammer rank one")
+	packed.loadout.hammer_rank=11
+	check(not ForgeEquipment.valid_checkpoint(packed),"Out of range hammer rejected")
+	for rank_value in [1,5,10]:
+		run=fresh(rank_value)
+		run.vanguard.gun_on=false
+		var origin: Vector2=run.player
+		run.command_move(origin+Vector2(400,0))
+		check(run.vanguard.swing(run,origin+Vector2(100,0)),"Hammer accepts moving swing")
+		for i in range(8): run.step(0.025,Vector2.ZERO)
+		check((run.player.distance_to(origin)>5)==(rank_value==10),"Only rank ten moves during windup")
+		check(is_equal_approx(run.attacks.damage(run),38*Vanguard.power(rank_value)),"Hammer damage curve")
+		check(is_equal_approx(run.kit.damage_scale("q"),1.2*Vanguard.power(rank_value)),"Q damage curve")
+		run=fresh(rank_value); run.vanguard.gun_on=false
+		run.spawn_enemy(run.player+Vector2.from_angle(deg_to_rad(54))*110,3)
+		run.enemies[0].warmup=0; run.enemies[0].hp=10000
+		run.vanguard.swing(run,run.player+Vector2(200,0)); run.vanguard.tick(run,0.21)
+		check((run.enemies[0].hp<10000)==(rank_value>=5),"Rank five wider collision sweep")
+		check(is_equal_approx(run.vanguard.impacts.back().angle,Vanguard.hammer_angle(run)),"Rendered hammer angle follows collision")
+	for rank_value in range(2,11): check(Vanguard.power(rank_value)>Vanguard.power(rank_value-1),"Strictly growing rank power")
+	run=fresh(10); run.vanguard.gun_on=false
+	var start: Vector2=run.player
+	run.spawn_enemy(start+Vector2(100,0),3); run.enemies[0].warmup=0; run.enemies[0].hp=10000
+	run.attacks.attack_move(run,start+Vector2(400,0))
+	for i in range(10): run.step(0.025,Vector2.ZERO)
+	check(run.player.distance_to(start)>10,"Rank ten attack-move keeps walking through a nearby attack")
+	var baseline:=fresh(1)
+	for rank_value in [1,5,10]:
+		run=fresh(rank_value)
+		var hammer_dps: float=run.attacks.damage(run)/run.attacks.interval(run)
+		var gun_dps: float=run.attacks.auto_damage(run)/run.attacks.auto_interval(run)
+		var active_ratio: float=(run.kit.damage_scale("q")/run.kit.cooldown("q"))/(baseline.kit.damage_scale("q")/baseline.kit.cooldown("q"))
+		check(active_ratio>=1 and active_ratio<=4.5,"Sustained active curve stays inside budget")
+		print("VANGUARD_POWER rank=%d hammer_dps=%.2f gun_dps=%.2f active_ratio=%.2f radius_ratio=%.2f"%[rank_value,hammer_dps,gun_dps,active_ratio,run.kit.area_scale("q")])
+	run=fresh(10); run.vanguard.cast(run,"r",run.player)
+	run.vanguard.tick(run,0.081)
+	var first: float=run.vanguard.impacts[0].damage
+	run.vanguard.tick(run,0.8)
+	var echo: Dictionary=run.vanguard.impacts.filter(func(e): return e.get("second",false))[0]
+	check(is_equal_approx(first+echo.damage,135*run.kit.damage_scale("r")),"R echo shares milestone damage budget")
 
 func playtest_refinements() -> void:
 	var run:=fresh(1)
@@ -226,6 +285,17 @@ func ui_checks() -> void:
 		await process_frame; await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://output/vanguard/practice.png")
 		game.close_practice(); game.model.kit.extra.walls.clear()
+		for rank_value in [1,5,10]:
+			for reduced in [false,true]:
+				game.art.reduced_effects=reduced; game.art.effects.clear()
+				game.model.enemies.clear(); game.model.projectiles.clear(); game.model.orbit.clear()
+				Vanguard.setup(game.model,rank_value); game.model.vanguard.gun_on=false
+				game.model.player=Vector2(480,300)
+				game.model.vanguard.swing(game.model,game.model.player+Vector2(200,0))
+				game.model.vanguard.tick(game.model,0.21); game.model.vanguard.tick(game.model,0.055)
+				game._update_camera(); game.ui.update_hud(game.model)
+				await process_frame; await RenderingServer.frame_post_draw
+				root.get_texture().get_image().save_png("res://output/vanguard/hammer-%d-%s.png"%[rank_value,"reduced" if reduced else "normal"])
 		for reduced in [false,true]:
 			for phase in ["slam-travel","slam-impact","reactor-impact"]:
 				game.art.reduced_effects=reduced; game.model.enemies.clear(); game.art.effects.clear()

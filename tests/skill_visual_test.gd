@@ -90,12 +90,12 @@ func review() -> void:
 						root.get_texture().get_image().save_png(folder+"/frame-%04d.png"%frame_number); frame_number+=1
 	for rank_value in [1,5,10]:
 		for reduced in [false,true]:
-			for slot in Vanguard.KEYS:
+			for slot in Vanguard.KEYS.keys()+["hammer"]:
 				var run:=fixture("rocket",0)
 				BotKeyboard.enable(run); run.exp.enable_revision(run); Vanguard.setup(run,rank_value)
 				run.projectiles.clear(); run.kit.extra.walls.clear()
 				art.model=run; art.effects.clear(); art.reduced_effects=reduced
-				check(run.vanguard.cast(run,slot,run.player+Vector2(160,0)),"Vanguard visual cast")
+				check(run.vanguard.swing(run,run.player+Vector2(160,0)) if slot=="hammer" else run.vanguard.cast(run,slot,run.player+Vector2(160,0)),"Vanguard visual cast")
 				for tick in range(30):
 					run.vanguard.tick(run,1.0/30)
 					if tick not in [0,6,15,29]: continue

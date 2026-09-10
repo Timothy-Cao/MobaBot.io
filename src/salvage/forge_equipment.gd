@@ -74,6 +74,7 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 	if c.get("class","")!="shared" and not BotExpedition.CLASSES.has(c.get("class","")): return false
 	if not BotKeyboard.valid_config(c.loadout): return false
 	if c.loadout.has("vanguard"):
+		if not integer(c.loadout.get("hammer_rank",1),1,10): return false
 		if not c.get("bindings") is Dictionary: return false
 		if c.loadout.vanguard!=true or not c.loadout.get("rewards18") is Array or c.loadout.rewards18.size()>256: return false
 		if not integer(c.loadout.get("reward_turn18"),0,1000000): return false

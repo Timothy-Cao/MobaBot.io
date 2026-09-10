@@ -1,5 +1,26 @@
 # 0.16 — Focused design and damage pass
 
+## Vanguard rank-power pass · 9 September 2026
+
+Current Vanguard only; historical shared-pool formulas below remain regression references. Damage multipliers by earned rank 1–10: **1 / 1.08 / 1.16 / 1.24 / 1.60 / 1.77 / 1.94 / 2.11 / 2.28 / 3.30**. Gear's learned-rank bonus remains capped at 10.
+
+Fresh Practice fixture, no gear/mastery/rarity bonuses, theoretical continuous hits:
+
+| Metric | Rank 1 | Rank 5 | Rank 10 |
+|---|---:|---:|---:|
+| Hammer head DPS | 36.19 | 60.80 | 132.00 |
+| Hammer reach / full angle | 125 / 90° | 156.25 / 120° | 187.5 / 140° |
+| Hammer movement during swing | Stops | Stops | Allowed |
+| Independent MG DPS | 7.50 | 13.33 | 30.94 |
+| Q/W/E/R sustained damage ratio | 1.00 | 1.80 | 4.40 |
+| Active effect radius ratio | 1.00 | 1.25 | 1.50 |
+
+The requested approximately 2× then another 2–3× is a **practical-power target**, not a mathematically measurable fun score. Active sustained damage rises 1.8× then 2.44×; increased area and milestone utility supply additional reliability. Hammer's wider arc/reach and removal of attack rooting add substantial usability beyond its raw DPS. MG grows 1.78× then 2.32×. These figures exclude energy starvation, travel, missed centers, armor, enemy density and interrupted casts. Radius must not be multiplied blindly into single-target DPS.
+
+R rank 10 splits its 3.3× per-cast budget 80% primary / 20% echo, instead of doubling the new curve again. Orbit per-blade damage divides by sqrt(blade_count / 3), partially compensating for its extra blades; unmodified capacity gives total blade-budget ratios approximately 1 / 2.07 / 4.67, not guaranteed delivered DPS. Bulwark HP/gun/pulse and Reserve storage/banking/overflow share the curve; Reserve discharge scales by its square root. Mobility and the five-second Overclock well keep their existing utility rules and recharge bonuses. Overclock doubles charge refill as well as cooldown ticking.
+
+Automated verification: `tests/vanguard_test.gd` prints this damage table and checks rank/save/movement/geometry invariants. Bot probes validate simulation and pressure only. Human review should compare rank 1/5/10 against the same dummy and cluster, with MG disabled when measuring hammer or actives.
+
 ## 0.18 second-playtest addendum (9 September 2026)
 
 Third-playtest follow-up: E stores two charges at its existing recharge/damage/energy cost. This increases available burst/escape storage, not sustained charge generation. Walls no longer absorb friendly or enemy shots in current rules; cover-based survivability changes even though no enemy damage values changed. Re-evaluate ranged pressure in human playtests.

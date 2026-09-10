@@ -153,6 +153,8 @@ Variants change **one** thing at a time: functional silhouette, power-tier attac
 
 ## Review checklist / current audit
 
+9 September Vanguard rank pass: code-native hammer icon and effects use the existing graphite/steel/teal/brass palette. Rank 5 adds broader geometry and charged accents; rank 10 adds cream cores and a second restrained trail. Q exhaust, W/R cores and impact rings, E shoulder plates, D/F travel accents, orbit trails and construct indicators share these materials. No bitmap asset or provenance changes. Hammer sweep boundaries use the collision angle/range; cosmetic rocket exhaust is not a hitbox. Inspect rank 1/5/10 at actual combat/icon size in normal/reduced modes with `tests/skill_visual_test.gd` and `tests/vanguard_test.gd -- --render` (captures ignored under output).
+
 Existing seven generated PNGs: retain as the equipment master set. Prompts and origins stay in `assets/upgrades/PROVENANCE.md`. They already share teal/steel/brass forms. Rapid/Capacity have non-square source canvases; UI aspect-ratio fitting is intentional.
 
 This pass: world outlines and reward gold aligned to UI; orbit tools shifted from solid gold to steel/teal/brass; pet, sentry and beacon use the common construction language; tank threat uses plated plum/steel; ability glyphs distinguish reused equipment; pickup trails and cast telegraphs follow semantic colours.
