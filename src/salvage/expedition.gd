@@ -15,6 +15,13 @@ const CLASSES := {
 	"melee": {"name": "Brawler", "text": "Short-range heavy basics. Faster movement, stronger hull and repair.", "w": "reap", "e": "sweep", "t": "pulse_sentry", "passives": ["bolt", "orbit", "momentum", "converter"]},
 	"summoner": {"name": "Engineer", "text": "Two major summons. Stronger constructs and extended battery life.", "w": "gravity", "e": "repulsor", "t": "mirror_sentry", "passives": ["bolt", "mounted", "poison", "lightning"]}}
 var route_index := 0
+var operation_chapter := 0
+
+func route() -> Array:
+	return [[operation_chapter,"neutral"],[operation_chapter,"neutral"],[operation_chapter,"boss"]] if operation_chapter>0 else ROUTE
+
+func stage_number() -> int: return int(route()[route_index][0])
+func final_round() -> bool: return route_index==route().size()-1
 var ascension := 0
 var class_id := "ranged"
 var pending_chests := 0
@@ -121,8 +128,8 @@ func sync_stats(run) -> void:
 func incoming(run, hull_units: float) -> float:
 	var value := hull_units * 20 * (1 + ascension * 0.12) * 100 / (100 + resistance)
 	if Vanguard.enabled(run) and not practice:
-		value*=stage_damage(ROUTE[route_index][0])*round_damage()
-		if encounter_spawned and ROUTE[route_index][1] in ["boss","final"]: value*=1.25
+		value*=(0.55*(1+0.1*(operation_chapter-1))*(1+0.15*route_index) if operation_chapter>0 else stage_damage(stage_number())*round_damage())
+		if encounter_spawned and route()[route_index][1] in ["boss","final"]: value*=1.25
 		if ReviewRules.enabled(run): value*=1.0+minf(9.0,ReviewRules.boss_overtime(run)/10.0)
 	if run.kit.extra.roll_left > 0: value *= 0.65
 	if run.kit.extra.flywheel >= 1: value *= 0.85
@@ -146,22 +153,25 @@ func scale_enemy(run, enemy: Dictionary) -> void:
 	enemy.stage_scaled=true
 	# Boss HP is set explicitly after spawn; every other spawn path shares this rule.
 	if enemy.has("exp_boss"): return
-	var number: int=ROUTE[route_index][0]
-	var factor:=stage_health(number)*round_health()
+	var number: int=stage_number()
+	var factor: float=OperationRules.chapter_health(number)*[0.8,1.25,1.9][route_index] if operation_chapter>0 else stage_health(number)*round_health()
 	if enemy.has("role"):
-		if number>1: factor*=3.0
+		if number>1 and operation_chapter==0: factor*=3.0
 	else: factor*=1.2 if ascension>=2 else 1.0
 	enemy.hp*=factor; enemy.max_hp*=factor
 	if ReviewRules.enabled(run): ReviewRules.scale_role(run,enemy)
 
 func enemy_speed(run=null) -> float:
+	if operation_chapter>0: return 1.0+minf(0.18,(operation_chapter-1)*0.015+route_index*0.025)+ascension*0.02
 	return 1 + (0.08 if ascension >= 1 else 0) + (0.07 if ascension >= 4 else 0) + (minf(0.18,route_index*0.008) if run!=null and Vanguard.enabled(run) and not practice else 0.0)
 
 func round_seconds() -> float:
+	if operation_chapter>0: return OperationRules.ROUND_SECONDS[route_index]
 	if revised: return 120.0
 	return 35.0 if ROUTE[route_index][1] in ["boss", "final"] else (40.0 if ROUTE[route_index][1] == "loot" else 50.0)
 
 func label() -> String:
+	if operation_chapter>0: return "Chapter %d · Round %d / 3"%[operation_chapter,route_index+1]
 	if revised:
 		var round_number:=1
 		for i in range(route_index):
@@ -181,7 +191,7 @@ static func difficulty_text(value: int) -> String:
 func enter(run) -> void:
 	sample_time=-1; sample_damage.clear()
 	if Vanguard.enabled(run): run.vanguard.clear(); run.kit.emp_left=0
-	run.stage = mini(3, int(ROUTE[route_index][0])) # Legacy renderer sectors, not campaign ownership.
+	run.stage = mini(3, stage_number()) # Legacy renderer sectors, not campaign ownership.
 	run.stage_time = 0; run.boss_spawned = false; run.boss_defeated = false
 	run.stage_clear_wait = -1; run.spawn_clock = 0.8; run.demo_minis_killed = 0
 	encounter_spawned = false; last_wave = -1; clear_clock = -1
@@ -203,14 +213,16 @@ func enter(run) -> void:
 
 func spawns(run, delta: float) -> void:
 	if practice or clear_clock >= 0: return
-	var kind: String = ROUTE[route_index][1]
-	var stage_number: int = ROUTE[route_index][0]
+	var kind: String = route()[route_index][1]
+	var stage_number: int = stage_number()
 	if run.stage_time >= round_seconds():
 		if revised and kind not in ["boss", "final"] and not encounter_spawned:
 			encounter_spawned = true
 			DemoCampaign.spawn_special(run, "rammer" if route_index % 2 == 0 else "artillery")
 			var mini: Dictionary = run.enemies.back()
 			mini.hp = (100 + stage_number*30) * (1.2 if ascension >= 2 else 1); mini.max_hp = mini.hp
+			if operation_chapter>0:
+				mini.hp=(320.0+route_index*280)*OperationRules.chapter_health(operation_chapter)*(1+ascension*0.12); mini.max_hp=mini.hp
 		if kind in ["boss", "final"] and not encounter_spawned:
 			encounter_spawned = true; run.boss_spawned = true
 			DemoCampaign.spawn_special(run, "foreman")
@@ -219,6 +231,7 @@ func spawns(run, delta: float) -> void:
 			boss["title"] = BOSSES[stage_number - 1]
 			boss.hp = (350 + stage_number * 150) * (1.2 if ascension >= 2 else 1) * (1.7 if kind == "final" else 1)
 			if Vanguard.enabled(run): boss.hp*=50.0
+			if operation_chapter>0: boss.hp=OperationRules.boss_hp(run)
 			boss.max_hp = boss.hp
 			boss["patterns"] = [["charge","fan"],["shells","charge"],["ring","shells"],["fan","charge","fan"],["ring","fan"],["shells","ring","charge"],["charge","shells","fan"],["ring","shells","charge","fan"]][stage_number - 1]
 		return
@@ -230,6 +243,7 @@ func spawns(run, delta: float) -> void:
 			if Vanguard.enabled(run):
 				roster=["breacher","volley","lancer","scatter"] if route_index==0 else ["breacher","mender","scatter","lancer","volley","bomber"]
 				if ReviewRules.enabled(run): roster=ReviewRules.specialist_roster(route_index)
+				if operation_chapter>0: roster=OperationRules.roster(run)
 			RangedThreats.spawn(run,roster[(threat_index+route_index-1)%roster.size()])
 	run.spawn_clock -= delta
 	if run.spawn_clock <= 0:
@@ -265,6 +279,7 @@ func level_up(run) -> void:
 
 func finish_step(run, delta: float) -> void:
 	if run.state != "running": return
+	OperationRules.pace(run)
 	if ReviewRules.enabled(run) and not practice: RunDiagnostics.sample_progression(run)
 	if practice:
 		if god_mode: run.health = run.max_health()
@@ -292,7 +307,7 @@ func finish_step(run, delta: float) -> void:
 		chest.life -= delta
 		if run.player.distance_to(chest.pos) < 52 or chest.life <= 0: pending_chests += 1; chest.life = -1
 	loot_chests = loot_chests.filter(func(c: Dictionary) -> bool: return c.life > 0)
-	var kind: String = ROUTE[route_index][1]
+	var kind: String = route()[route_index][1]
 	var ready: bool = run.boss_defeated if kind in ["boss", "final"] else run.stage_time >= round_seconds() and run.enemies.filter(func(e: Dictionary) -> bool: return e.has("role") and not e.dead).is_empty()
 	if ready:
 		if clear_clock < 0:
@@ -308,8 +323,10 @@ func finish_step(run, delta: float) -> void:
 			for supply in run.supply_drops: run._collect_supply(supply)
 			run.supply_drops.clear()
 			carry_credits += run.coins
-			field_credits += 65 + int(ROUTE[route_index][0]) * 15
-			if Vanguard.enabled(run): reward_receipt.credits+=65+int(ROUTE[route_index][0])*15
+			if operation_chapter>0: carry_credits+=40+route_index*15+operation_chapter*5
+			var field_reward: int=OperationRules.FIELD_REWARD[route_index] if operation_chapter>0 else 65+stage_number()*15
+			field_credits += field_reward
+			if Vanguard.enabled(run): reward_receipt.credits+=field_reward
 			run.coins = 0
 			pending_chests += (3 if kind == "loot" else 1) + loot_chests.size(); loot_chests.clear(); clear_clock = -2
 			if kind == "loot":
@@ -393,11 +410,12 @@ func install(run, slot: String, id: String, unlock: bool = true) -> void:
 
 func advance(run) -> void:
 	if run.state != "camp" or pending_chests > 0: return
-	if route_index == ROUTE.size() - 1: run.state = "won"; return
+	if final_round(): run.state = "won"; return
 	route_index += 1
 	enter(run)
 
 func is_shop(every_stage: bool=false) -> bool:
+	if operation_chapter>0: return false # Field shops sell modules; permanent crates live at Home.
 	if every_stage: return route_index==ROUTE.size()-1 or ROUTE[route_index+1][0]!=ROUTE[route_index][0]
 	return route_index in [5,12,19]
 

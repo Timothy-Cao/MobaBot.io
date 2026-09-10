@@ -88,6 +88,8 @@ static func setup(run, rank_value: int = 0) -> void:
 	BotKeyboard.enable(run)
 	run.kit.loadout.erase("review19"); run.kit.emp_left=0
 	run.kit.loadout.erase("unified_mastery")
+	run.kit.loadout.erase("operation20"); run.kit.loadout.erase("operation_xp")
+	if run.exp!=null: run.exp.operation_chapter=0
 	if run.mastery is ExpeditionTree: run.mastery.unified=false
 	var kit: MobaKit = run.kit
 	kit.loadout["vanguard"] = true
@@ -164,9 +166,9 @@ static func spend(run, slot: String) -> bool:
 	return true
 
 static func progression(run) -> void:
-	while run.total_xp >= run.next_level:
+	while run.total_xp >= run.next_level and (not OperationRules.enabled(run) or run.level<26):
 		run.level += 1
-		run.next_level += ceili((12+run.level*8)*BotExpedition.xp_factor(run.level))
+		run.next_level += OperationRules.XP_PER_LEVEL if OperationRules.enabled(run) else ceili((12+run.level*8)*BotExpedition.xp_factor(run.level))
 		earn(run)
 		if ReviewRules.enabled(run): earn(run); earn(run)
 		if (run.level-1)%3==0: run.grant_utility()
@@ -180,7 +182,7 @@ static func progression(run) -> void:
 		elif run.kit.loadout.rewards18.size()<256 and not candidates(run,"upgrade").is_empty():
 			earn(run); receipt.points+=1
 		else: receipt.credits+=20; run.exp.field_credits+=20
-		if run.loot_rng.randf()<0.18:
+		if not OperationRules.enabled(run) and run.loot_rng.randf()<0.18:
 			var item:=ForgeEquipment.roll_item(run.loot_rng,run.exp.ascension)
 			run.exp.pending_items.append(item); receipt.items[item]=int(receipt.items.get(item,0))+1
 	if receipt.chests>0:

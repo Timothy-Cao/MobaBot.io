@@ -16,6 +16,11 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 	BotKeyboard.enable(run)
 	if "--revised" in OS.get_cmdline_user_args() or "--vanguard" in OS.get_cmdline_user_args(): run.exp.enable_revision(run)
 	if "--vanguard" in OS.get_cmdline_user_args(): Vanguard.setup(run); ReviewRules.enable(run)
+	if "--vanguard" in OS.get_cmdline_user_args() and "--long-route" not in OS.get_cmdline_user_args():
+		var chapter:=1
+		for arg in OS.get_cmdline_user_args():
+			if arg.begins_with("--chapter="): chapter=int(arg.trim_prefix("--chapter="))
+		OperationRules.enable(run,chapter)
 	ForgeEquipment.new().apply_to(run)
 	# Reliability only: a normal-HP refill can still die to several hits in one
 	# frame. Inflate maximum health too, preserving all AI/damage/collision paths.
@@ -24,6 +29,7 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 	var peak:=0
 	var max_us:=0
 	var samples: Array[int]=[]
+	var arrivals: Array[Dictionary]=[]
 	for frame in range(240000 if run.exp.revised else 120000):
 		if Vanguard.enabled(run): run.vanguard.ghost=false
 		if Vanguard.enabled(run) and not ReviewRules.enabled(run):
@@ -73,12 +79,14 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 						if run.mastery.can_buy(id,run.level): run.mastery.buy(run,id); break
 			var before:=Time.get_ticks_usec()
 			run.step(1.0/30,Vector2.ZERO)
+			if run.exp.encounter_spawned and arrivals.size()<=run.exp.route_index:
+				arrivals.append({"round":run.exp.route_index+1,"seconds":snappedf(run.time,0.1),"level":run.level,"xp":run.total_xp,"mastery":run.mastery.spent,"credits":run.exp.field_credits})
 			var elapsed:=Time.get_ticks_usec()-before
 			if samples.size()<60000: samples.append(elapsed)
 			max_us=maxi(max_us,elapsed); peak=maxi(peak,run.enemies.size())
 			run.events.clear()
 	samples.sort()
-	return {"class":class_id,"policy":policy,"artificial_health":policy=="soak","ascension":difficulty,"state":run.state,"round":run.exp.route_index+1,"seconds":snappedf(run.time,0.1),"level":run.level,"kills":run.kills,"peak_enemies":peak,"p95_step_us":samples[int(samples.size()*0.95)] if not samples.is_empty() else 0,"max_step_us":max_us,"casts":run.kit.cast_counts}
+	return {"class":class_id,"policy":policy,"artificial_health":policy=="soak","chapter":run.exp.operation_chapter,"arrivals":arrivals,"ascension":difficulty,"state":run.state,"round":run.exp.route_index+1,"seconds":snappedf(run.time,0.1),"level":run.level,"kills":run.kills,"peak_enemies":peak,"p95_step_us":samples[int(samples.size()*0.95)] if not samples.is_empty() else 0,"max_step_us":max_us,"casts":run.kit.cast_counts}
 
 func _run() -> void:
 	if "--soak" in OS.get_cmdline_user_args():

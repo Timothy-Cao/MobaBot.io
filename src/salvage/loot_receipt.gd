@@ -34,8 +34,8 @@ func build(ui, receipt: Dictionary, compact: bool=false, grid: bool=false) -> vo
 		label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		reveal_cards.append(card)
 	if rows.is_empty():
-		ui._label(list,"Rewards already collected",Rect2(0,0,size.x-116,46),14,ui.MUTED)
-	if not ui.reduced:
+		ui._label(list,"Rewards already collected",Rect2(0,0,size.x-116,46),14,ui.MUTED).custom_minimum_size=Vector2(size.x-116,46)
+	if not ui.reduced and not reveal_cards.is_empty():
 		animation=create_tween().set_parallel()
 		for i in range(reveal_cards.size()):
 			var card:=reveal_cards[i]; card.modulate.a=0

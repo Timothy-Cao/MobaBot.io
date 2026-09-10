@@ -7,6 +7,7 @@ var keyboard_target := 0
 var keyboard_return := "build"
 var class_choice := "ranged"
 var ascension_choice := 0
+var chapter_choice := 1
 var gear_slot := "helmet"
 var gear_item := "courier_helmet"
 var banked_camp := -1
@@ -42,7 +43,7 @@ func _ready() -> void:
 	if persistent_run(): apply_fullscreen()
 	if screen == "home": ui.show_home()
 	select_class(class_choice)
-	get_window().title="MobaBot.io · Expedition"
+	get_window().title="MobaBot.io · Chapter Operations"
 
 func select_class(id: String) -> void:
 	class_choice = id
@@ -60,6 +61,8 @@ func start_run(mode: String="salvage") -> void:
 func launch_expedition(resume: bool=false) -> void:
 	if collection.blocked:
 		ui.announce(collection.message,2); return
+	if not resume and collection is ForgeEquipment and (chapter_choice<1 or chapter_choice>collection.unlocked_chapter()):
+		ui.announce("Clear the preceding Chapter first",2); return
 	camera_offset=Vector2.ZERO; minimap_held=false
 	seed_value=int(collection.checkpoint.get("seed",2407)) if resume else int(Time.get_unix_time_from_system())%2147483647
 	super.start_run("salvage")
@@ -78,6 +81,7 @@ func launch_expedition(resume: bool=false) -> void:
 		expedition.enable_revision(model)
 		Vanguard.setup(model)
 		ReviewRules.enable(model)
+		if collection is ForgeEquipment: OperationRules.enable(model,chapter_choice)
 		collection.apply_to(model)
 		model.health=model.max_health(); model.kit.energy=model.kit.energy_max()
 		banked_camp=-1
@@ -90,8 +94,8 @@ func launch_expedition(resume: bool=false) -> void:
 func confirm_new_run() -> void:
 	if collection.checkpoint.is_empty(): launch_expedition(false); return
 	var dialog := ConfirmationDialog.new()
-	dialog.dialog_text = "Replace the saved expedition? Banked equipment stays."
-	dialog.title = "New expedition"
+	dialog.dialog_text = "Start a new Operation? Current abilities, mastery and field credits reset. Banked equipment and Salvage stay."
+	dialog.title = "New Operation"
 	dialog.confirmed.connect(func() -> void: launch_expedition(false); dialog.queue_free())
 	dialog.canceled.connect(dialog.queue_free)
 	add_child(dialog); dialog.popup_centered(Vector2i(440,140))
@@ -180,6 +184,12 @@ func gear_action(action: String, id: String) -> void:
 		collection.bank_camp(model,persistent_run())
 	ExpeditionView.gear(self)
 
+func buy_supply_crate() -> void:
+	if gear_return=="camp" or screen!="gear": return
+	var id: String=collection.buy_crate(persistent_run())
+	if id!="": gear_item=id; gear_slot=ForgeEquipment.ITEMS[id].slot
+	ForgeView.draw(self)
+
 func _open_build() -> void:
 	if ReviewRules.enabled(model) and model.state=="camp":
 		review_tab="Build"; screen="camp"; ReviewView.camp(self); return
@@ -205,7 +215,7 @@ func _bank_loot(completed_level: int) -> void:
 	if not persistent_run(): return
 	var before:=collection.snapshot()
 	collection.credits=mini(10000000,collection.credits+model.coins)
-	if model.state=="won": collection.unlocked_ascension=mini(5,maxi(collection.unlocked_ascension,model.exp.ascension+1))
+	if model.state=="won" and (not OperationRules.enabled(model) or model.exp.operation_chapter==OperationRules.CHAPTERS): collection.unlocked_ascension=mini(5,maxi(collection.unlocked_ascension,model.exp.ascension+1))
 	collection.checkpoint.clear()
 	if not collection.save(): collection.restore(before); collection.message="Could not save rewards. Last checkpoint preserved."
 

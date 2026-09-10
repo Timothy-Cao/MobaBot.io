@@ -1,6 +1,6 @@
 # Progression direction · 10 September 2026
 
-Status: researched recommendation, with independent 0.19.1 improvements implemented. Replacing the 22-round route with Chapter Operations is awaiting the owner's answer to the single directional question. The owner described that replacement, loot-box rewards, persistent mastery and potions as possibilities, not a settled specification. Do not report these as playable.
+Status: research and original recommendation. After the owner requested continued work, the recommended Chapter/Operation structure was implemented as a working review version. [OPERATIONS_20.md](OPERATIONS_20.md) is authoritative for shipped numbers and scope; the proposals below document reasoning, not exact current settings. Permanent mastery, random ability permissions and carried potions remain speculative.
 
 ## What the comparison supports
 
@@ -66,6 +66,6 @@ Do not put permanent mastery, ability permissions or consumable potions into the
 
 Implemented in 0.19: paused core picks, credit modules, combo combat, mobile/offensive bosses, practice-style obstacles, enemy roles, early orbit/mobility changes, peer tabs and reward grid. Implemented in 0.19.1: numerical card deltas, one-root/three-branch mastery, mid-tier regen, delayed EMP introduction, announced boss overload and interval progression evidence.
 
-Awaiting the single campaign-direction answer: numbered Chapter selection, Operation reset, short-route XP/HP budgets and persistent Salvage economy. Deliberately optional/deferred design suggestions: arena closure (open pursuit already exists), additional unique boss bodies, permanent mastery, random ability unlocks and carried potions. No claim that every brainstorm item was requested as a mandatory feature.
+Implemented subsequently as the explicitly stated working direction after the owner said to keep going: numbered Chapter selection, Operation reset, short-route XP/HP budgets and persistent Salvage economy. See OPERATIONS_20 for actual values. Deliberately optional/deferred design suggestions: arena closure (open pursuit already exists), additional unique boss bodies, permanent mastery, random ability unlocks and carried potions. No claim that every brainstorm item was requested as a mandatory feature.
 
 Next human validation priorities: (1) early pacing and three-choice decision burden, (2) aimed boss damage versus overload timing, (3) mastery clarity and reward payoff. Passing tests do not establish any of these experiences.

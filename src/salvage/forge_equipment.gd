@@ -9,6 +9,7 @@ const TIER_COLORS := [Color("b5c3cc"),Color("78c99a"),Color("69b8f0"),Color("be8
 const ITEM_NAMES := {"helmet":"Visor","chest":"Carapace","legs":"Greaves","boots":"Striders","charm":"Heartcore","ring":"Signet","flower":"Ironbloom","cape":"Mantle"}
 const AFFIXES := {"health": 2.0, "damage": 0.006, "regen": 0.15, "luck": 0.025, "resistance": 1.0}
 var credits := 150
+var chapter_cleared := 0
 var unlocked_ascension := 0
 var inventory: Dictionary = {}
 var equipped: Dictionary = {}
@@ -46,10 +47,27 @@ static func roll_item(random: RandomNumberGenerator, ascension: int) -> String:
 	return SETS[tier]+"_"+SLOTS[random.randi_range(0,7)]
 
 func snapshot() -> Dictionary:
-	return {"version": 3, "credits": credits, "ascension": unlocked_ascension, "inventory": inventory.duplicate(true), "equipped": equipped.duplicate(), "checkpoint": checkpoint.duplicate(true), "migration": migration.duplicate(true), "loadouts": loadouts.duplicate(true)}
+	return {"version": 3, "credits": credits, "chapter_cleared":chapter_cleared,"crate_rng":str(rng.state), "ascension": unlocked_ascension, "inventory": inventory.duplicate(true), "equipped": equipped.duplicate(), "checkpoint": checkpoint.duplicate(true), "migration": migration.duplicate(true), "loadouts": loadouts.duplicate(true)}
+
+func unlocked_chapter() -> int: return mini(OperationRules.CHAPTERS,chapter_cleared+1)
+
+func buy_crate(persist: bool=true) -> String:
+	if blocked: return ""
+	if credits<150: message="150 Salvage required"; return ""
+	var before:=snapshot()
+	var roll:=rng.randf()
+	var tier:=0 if roll<0.8 else 1 if roll<0.97 else 2 if roll<0.998 else 3
+	var id: String=SETS[tier]+"_"+SLOTS[rng.randi_range(0,7)]
+	if inventory[id].copies>=999: restore(before); message="Inventory full; nothing spent"; return ""
+	credits-=150; inventory[id].copies+=1
+	if persist and not save(): restore(before); message="Save failed. Nothing spent."; return ""
+	message="Recovered "+ITEMS[id].name
+	return id
 
 func valid(data: Variant) -> bool:
 	if not data is Dictionary or data.get("version") != 3: return false
+	if not integer(data.get("chapter_cleared",0),0,OperationRules.CHAPTERS): return false
+	if data.has("crate_rng") and (not data.crate_rng is String or not data.crate_rng.is_valid_int() or str(int(data.crate_rng))!=data.crate_rng): return false
 	for key in ["inventory", "equipped", "checkpoint", "migration"]:
 		if not data.get(key) is Dictionary: return false
 	for key in ["credits", "ascension"]:
@@ -78,6 +96,11 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 	if c.get("class","")!="shared" and not BotExpedition.CLASSES.has(c.get("class","")): return false
 	if not BotKeyboard.valid_config(c.loadout): return false
 	if c.loadout.has("review19") and (c.loadout.review19!=true or not c.loadout.get("vanguard",false)): return false
+	if c.loadout.has("operation20"):
+		if not c.loadout.get("review19",false) or not c.loadout.get("unified_mastery",false) or not integer(c.loadout.operation20,1,OperationRules.CHAPTERS): return false
+		if not integer(c.get("route"),0,2) or not c.loadout.get("operation_xp") is Array or c.loadout.operation_xp.size()!=3: return false
+		for i in range(3):
+			if not integer(c.loadout.operation_xp[i],0,OperationRules.SURVIVAL_XP[i]): return false
 	if c.loadout.has("unified_mastery"):
 		if c.loadout.unified_mastery!=true or not c.loadout.get("review19",false): return false
 		if not integer(c.get("level"),1,2147483647): return false
@@ -139,6 +162,8 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 
 func restore(data: Dictionary) -> void:
 	credits = int(data.credits); unlocked_ascension = int(data.ascension)
+	chapter_cleared=int(data.get("chapter_cleared",0))
+	if data.has("crate_rng"): rng.state=int(data.crate_rng)
 	inventory = data.inventory.duplicate(true); equipped = data.equipped.duplicate()
 	checkpoint = data.checkpoint.duplicate(true); migration = data.migration.duplicate(true)
 	loadouts = data.get("loadouts", {}).duplicate(true)
@@ -219,7 +244,7 @@ func item_text(id: String) -> String:
 	var lines: Array[String]=[]
 	for key in values(id):
 		var value: float=values(id)[key]
-		lines.append("+%s%s %s"%[str(snappedf(value*(100 if key=="speed" else 1),0.1)),"%" if key=="speed" else "",key])
+		lines.append("+%s%s %s"%[str(snappedf(value*(100 if key=="speed" else 1),0.01)),"%" if key=="speed" else "",{"regen":"energy / sec","health_regen":"health / sec"}.get(key,key)])
 	if ITEMS[id].tier>=4: lines.append("+1 learned ability rank (once across equipment)")
 	if ITEMS[id].tier>=5: lines.append("Gun companion (one, does not stack)")
 	return "\n".join(lines)
@@ -260,6 +285,8 @@ func bank_camp(run, persist: bool = true) -> bool:
 	run.exp.ensure_shop(run)
 	var before := snapshot()
 	credits = mini(10000000, credits + int(run.exp.carry_credits * (1 + run.exp.ascension * 0.1)))
+	if OperationRules.enabled(run) and run.exp.final_round() and run.exp.clear_clock==-2 and run.exp.operation_chapter>chapter_cleared:
+		chapter_cleared=run.exp.operation_chapter; credits=mini(10000000,credits+100)
 	for id in run.exp.pending_items: inventory[id].copies = mini(999, inventory[id].copies + 1)
 	checkpoint = pack_run(run)
 	checkpoint.items = []
@@ -275,6 +302,7 @@ func resume_into(run) -> bool:
 	expedition.start(run, c.class, int(c.ascension))
 	expedition.route_index = int(c.route); expedition.gear_stats = c.stats.duplicate(); expedition.set_counts = c.sets.duplicate()
 	run.kit.loadout = c.loadout.duplicate(true); run.kit.discovered = c.discovered.duplicate()
+	expedition.operation_chapter=int(c.loadout.get("operation20",0))
 	if c.has("bindings"): run.kit.bindings=c.bindings.duplicate()
 	run.kit.ranks = c.ranks.duplicate(); run.kit.tiers = c.tiers.duplicate(); run.upgrades = c.upgrades.duplicate()
 	run._sync_resource_ranks()

@@ -4,6 +4,12 @@ extends RefCounted
 static func draw(game) -> void:
 	var ui=game.ui; var collection: ForgeEquipment=game.collection
 	ExpeditionView.frame(ui,"Equipment",game.close_gear)
+	if game.gear_return!="camp":
+		ui._label(ui.overlay,"%d Salvage"%collection.credits,Rect2(48,87,420,26),17,ui.GOLD)
+		var crate: Button=ui._button("Supply crate · 150 Salvage",Rect2(625,85,267,30),game.buy_supply_crate,false)
+		crate.add_theme_font_size_override("font_size",13)
+		crate.disabled=collection.blocked or collection.credits<150
+		crate.tooltip_text="One equipment item. Tier odds: 1: 80%, 2: 17%, 3: 2.8%, 4: 0.2%, 5: 0%. Each slot equally likely. Forge 3 identical pieces for the next tier."
 	if ReviewRules.enabled(game.model) and game.model.state=="camp" and game.gear_return=="camp": ReviewView.tabs(game)
 	for i in range(8):
 		var slot: String=ForgeEquipment.SLOTS[i]
@@ -32,9 +38,9 @@ static func draw(game) -> void:
 		for i in range(values.size()):
 			var key: String=values.keys()[i]; var factor:=100 if key=="speed" else 1
 			var delta: float=(values[key]-old.get(key,0))*factor
-			ui._label(ui.overlay,key.capitalize(),Rect2(429,244+i*36,230,28),16,ui.MUTED)
-			ui._label(ui.overlay,"%s%s"%[snappedf(values[key]*factor,0.1),"%" if key=="speed" else ""],Rect2(658,244+i*36,130,28),18,ui.CREAM,true,HORIZONTAL_ALIGNMENT_RIGHT)
-			ui._label(ui.overlay,("%+.1f"%delta+("%" if key=="speed" else "")) if delta!=0 else "—",Rect2(806,244+i*36,86,28),14,ui.TEAL if delta>0 else ui.MUTED,false,HORIZONTAL_ALIGNMENT_RIGHT)
+			ui._label(ui.overlay,{"regen":"Energy / sec","health_regen":"Health / sec"}.get(key,key.capitalize()),Rect2(429,244+i*36,230,28),16,ui.MUTED)
+			ui._label(ui.overlay,"%s%s"%[UpgradePreview.number(values[key]*factor),"%" if key=="speed" else ""],Rect2(658,244+i*36,130,28),18,ui.CREAM,true,HORIZONTAL_ALIGNMENT_RIGHT)
+			ui._label(ui.overlay,(("+" if delta>0 else "")+UpgradePreview.number(delta)+("%" if key=="speed" else "")) if delta!=0 else "—",Rect2(806,244+i*36,86,28),14,ui.TEAL if delta>0 else ui.MUTED,false,HORIZONTAL_ALIGNMENT_RIGHT)
 		if data.tier>=4:
 			var bonus: Label=ui._label(ui.overlay,"+1 skill ranks"+(" · Gun companion" if data.tier==5 else ""),Rect2(429,361,470,28),15,ui.GOLD)
 			bonus.mouse_filter=Control.MOUSE_FILTER_STOP; bonus.tooltip_text=collection.item_text(selected)

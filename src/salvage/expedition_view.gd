@@ -8,6 +8,7 @@ static func frame(ui, title: String, back: Callable) -> void:
 	ui._button("Back",Rect2(811,43,102,34),back,false)
 
 static func prepare(game) -> void:
+	if game.collection is ForgeEquipment: OperationView.prepare(game); return
 	var ui = game.ui
 	frame(ui,"Expedition",game.show_home)
 	ui._ability_icon(ui.overlay,"bolt",Rect2(110,153,105,105))

@@ -564,7 +564,7 @@ func _drain_events() -> void:
 		elif event.kind == "demo_level":
 			ui.announce(model.exp.label() if model.exp != null else "Level %d / %s" % [model.stage, DemoCampaign.info(model).name])
 		elif event.kind == "demo_boss":
-			ui.announce(BotExpedition.BOSSES[BotExpedition.ROUTE[model.exp.route_index][0]-1] if model.exp != null and event.role == "foreman" else CombatReadability.NAMES[event.role], 2)
+			ui.announce(BotExpedition.BOSSES[model.exp.stage_number()-1] if model.exp != null and event.role == "foreman" else CombatReadability.NAMES[event.role], 2)
 		elif event.kind == "miniboss_down":
 			ui.announce("Warden defeated" if model.exp != null else "Warden defeated / %d of 2" % model.demo_minis_killed)
 		elif event.kind == "boss_phase":
@@ -731,7 +731,7 @@ func _save_result() -> void:
 	RunDiagnostics.annotate(record,model,auto_play or not capture_kind.is_empty() or not persist_settings)
 	record.equipment = gear.equipped.duplicate()
 	if model.exp != null:
-		record.campaign = {"round":model.exp.route_index+1,"stage":BotExpedition.ROUTE[model.exp.route_index][0],"ascension":model.exp.ascension,"class":model.exp.class_id,"chests":model.exp.chests_opened}
+		record.campaign = {"round":model.exp.route_index+1,"stage":model.exp.stage_number(),"ascension":model.exp.ascension,"class":model.exp.class_id,"chests":model.exp.chests_opened}
 		record.equipment = model.equipment_snapshot.duplicate(true)
 	record.wall_seconds = snappedf(run_wall_seconds, 0.01)
 	record.screen_seconds = screen_seconds.duplicate()

@@ -27,7 +27,7 @@ static func step(run, e: Dictionary, dt: float) -> void:
 			for ally in run.enemies:
 				if ally.dead or ally.get("dummy",false) or ally.has("role") or ally.get("gunner_kind","")=="mender" or ally.hp>=ally.max_hp: continue
 				if Vector2(ally.pos).distance_to(e.pos)>230: continue
-				ally.hp=minf(ally.max_hp,ally.hp+minf(ally.max_hp*0.08,12*BotExpedition.stage_health(run.exp.ROUTE[run.exp.route_index][0])))
+				ally.hp=minf(ally.max_hp,ally.hp+minf(ally.max_hp*0.08,12*(OperationRules.chapter_health(run.exp.operation_chapter) if OperationRules.enabled(run) else BotExpedition.stage_health(run.exp.stage_number()))))
 				e.links.append(Vector2(ally.pos))
 				if e.links.size()>=3: break
 			e.phase="repair"; e.clock=0.35

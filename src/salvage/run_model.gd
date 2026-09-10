@@ -992,7 +992,7 @@ func collect_pickup(pickup: Dictionary) -> void:
 	if value <= 0:
 		return
 	pickup.value = 0 # Claim before triggering damage/reward events.
-	xp_fraction += value * (1.0 + (float(exp.stats.get("xp", 0)) if exp != null else mastery.rank_of("learning") * 0.1)) / (9.0 if ReviewRules.enabled(self) else 3.0 if Vanguard.enabled(self) else 1.0)
+	xp_fraction += value * (1.0 + (float(exp.stats.get("xp", 0)) if exp != null else mastery.rank_of("learning") * 0.1)) / (OperationRules.pickup_divisor(exp.operation_chapter) if OperationRules.enabled(self) else 9.0 if ReviewRules.enabled(self) else 3.0 if Vanguard.enabled(self) else 1.0)
 	var gained := floori(xp_fraction + 0.000001)
 	total_xp += gained
 	xp_fraction = maxf(0, xp_fraction - gained)
@@ -1109,7 +1109,9 @@ func _collect_supply(supply: Dictionary) -> void:
 	match supply.kind:
 		"energy": kit.energy = minf(kit.energy_max(), kit.energy + supply.value)
 		"repair": heal(supply.value)
-		"coins": coins += supply.value
+		"coins":
+			if OperationRules.enabled(self): exp.field_credits+=supply.value
+			else: coins += supply.value
 		"speed": kit.boost_speed = 6.0
 		"reset":
 			for slot in (kit.active_slots() if kit.flexible() else ["q", "w", "e"]):

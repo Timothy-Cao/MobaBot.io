@@ -1,4 +1,10 @@
-# MobaBot.io — 0.19.1 Progression review
+# MobaBot.io — 0.20 Chapter Operations
+
+New attempts are **three-round Operations** in one of eight replayable Chapters. Abilities, mastery and field credits reset each attempt; equipment and **Salvage** persist. Survival lasts 90/105/120 seconds, with a final Operation boss. Buy modules between rounds; buy 150-Salvage equipment crates at Home → Equipment. Clear a Chapter to unlock the next, or replay earlier Chapters. Existing checkpoints keep their original route. [Current rules and verification](docs/design/OPERATIONS_20.md).
+
+Core progression targets near-completion at the final boss: three numerical card choices per level, 20 XP/level, cap 26. New run mastery has one root and three branches. Enemy density and XP are authored separately; Operation bosses have their own HP budget and a visible three-minute overload. These are a working version for human review, not a proven difficulty curve.
+
+## Earlier review history
 
 Latest follow-up: numerical upgrade-card deltas, a 13-node unified run mastery tree (one root, three branches), middle-tier helmet/chest regeneration, EMP introduction delayed until Stage 2, and visible five-minute boss overload with escalating physical attacks. The 22-round route remains while the owner considers replayable short Chapter Operations. [Research, exact completion targets and pending economy proposal](docs/design/PROGRESSION_RESEARCH_20.md). New result logs include bounded 15-second progression samples.
 

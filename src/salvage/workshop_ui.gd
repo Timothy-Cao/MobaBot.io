@@ -487,7 +487,7 @@ func update_hud(model: SalvageRun) -> void:
 			var phase_text := "EXPOSED" if enemy.phase == "recover" else ("OVERCLOCKED" if enemy.enraged else "")
 			boss_label.text = name_text
 			if ReviewRules.enabled(model) and enemy.has("exp_boss"):
-				var left:=maxi(0,ceili(ReviewRules.BOSS_ENRAGE_SECONDS-(model.stage_time-model.exp.round_seconds())))
+				var left:=maxi(0,ceili(ReviewRules.boss_deadline(model)-(model.stage_time-model.exp.round_seconds())))
 				boss_label.text+=" · OVERLOAD" if left==0 else " · Overload in %d:%02d"%[left/60,left%60]
 			if not phase_text.is_empty(): boss_label.text += " / " + phase_text
 			boss_bar.max_value = enemy.max_hp
@@ -571,7 +571,7 @@ func show_result(model: SalvageRun, saved: bool = false) -> void:
 	notice_time = 0
 	_dim()
 	_panel(Rect2(188, 126, 584, 353))
-	_label(overlay, ("Expedition complete" if model.exp != null else ("Demo complete" if model.demo_mode else "Shift complete")) if model.state == "won" else "Destroyed", Rect2(222, 151, 516, 52), 33, CREAM, true)
+	_label(overlay, ("Operation complete" if OperationRules.enabled(model) else "Expedition complete" if model.exp != null else ("Demo complete" if model.demo_mode else "Shift complete")) if model.state == "won" else "Destroyed", Rect2(222, 151, 516, 52), 33, CREAM, true)
 	_label(overlay, "%d\nKills" % model.kills, Rect2(230, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
 	_label(overlay, "%d\nRounds" % (model.exp.route_index+(1 if model.state=="won" else 0)) if model.exp != null else "%d\nCredits" % model.coins, Rect2(405, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
 	_label(overlay, "%ds\nSurvived" % int(model.time), Rect2(580, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)

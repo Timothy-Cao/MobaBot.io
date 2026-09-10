@@ -11,7 +11,7 @@ static func spawn(run, type: String, point: Vector2 = Vector2.INF, bypass_cap: b
 	run.spawn_enemy(pos,3)
 	var enemy: Dictionary=run.enemies.back()
 	enemy["gunner_kind"]=type; enemy["title"]=NAMES[type]
-	enemy.radius=23.0; enemy.hp=38.0*(1+0.2*(int(BotExpedition.ROUTE[run.exp.route_index][0])-1)); enemy.max_hp=enemy.hp
+	enemy.radius=23.0; enemy.hp=38.0*(1+0.2*(run.exp.stage_number()-1)); enemy.max_hp=enemy.hp
 	enemy.clock=1.0; enemy.phase="seek"; enemy["burst"]=0; enemy["beam_end"]=pos
 	if type in ["breacher","mender","scatter"]:
 		enemy.hp={"breacher":55.0,"mender":32.0,"scatter":45.0}[type]; enemy.max_hp=enemy.hp

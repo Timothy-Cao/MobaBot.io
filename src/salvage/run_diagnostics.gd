@@ -28,6 +28,7 @@ static func annotate(record: Dictionary, run, automated: bool) -> void:
 	record.build=BUILD if Vanguard.enabled(run) else "slice-16-keyboard-forge" if run.exp!=null else "slice-13-mobabot"
 	if ReviewRules.enabled(run): record.build=REVIEW_BUILD
 	if ReviewRules.enabled(run): record.progression_samples=run.exp.progression_samples.duplicate(true)
+	if OperationRules.enabled(run): record.build="vanguard-20-chapter-operations"; record.chapter=run.exp.operation_chapter; record.operation_rounds=run.exp.route().size()
 	record.practice=run.exp!=null and run.exp.practice
 	record.automated=automated
 	if Vanguard.enabled(run):

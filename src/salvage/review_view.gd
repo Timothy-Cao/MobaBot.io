@@ -95,7 +95,7 @@ static func camp(game) -> void:
 		var title: String="Orbit" if slot=="p1" else MobaKit.ABILITIES[Vanguard.TOOLS[slot]].name
 		ui._label(card,title,Rect2(62,7,140,26),15,ui.CREAM,true)
 		ui._label(card,"Max rank" if rank_value>=10 else "%s · %d"%["Buy" if rank_value==0 else "Rank %d"%(rank_value+1),price],Rect2(62,38,140,25),14,ui.GOLD)
-		card.tooltip_text=VanguardHud.detail(run,slot)+"\nRun-only purchase. Resets next expedition."
+		card.tooltip_text=VanguardHud.detail(run,slot)+"\nRun-only purchase. Resets next Operation."
 	if exp.is_shop(true):
 		for i in range(exp.shop_stock.size()):
 			var id: String=exp.shop_stock[i]
@@ -104,6 +104,6 @@ static func camp(game) -> void:
 			card.add_theme_font_size_override("font_size",12)
 			card.disabled=id=="" or game.collection.blocked or exp.field_credits<(100+ForgeEquipment.ITEMS[id].tier*100 if id!="" else 0)
 			card.tooltip_text="Permanent equipment · "+(game.collection.item_text(id) if id!="" else "Sold")
-	ui._button("Finish" if exp.route_index==21 else "Next round",Rect2(688,458,224,40),game.continue_expedition).grab_focus()
-	ui._label(ui.overlay,"Module purchases last this expedition",Rect2(48,460,610,22),13,ui.MUTED)
+	ui._button("Finish Operation" if OperationRules.enabled(run) and exp.final_round() else "Finish" if exp.final_round() else "Next round",Rect2(688,458,224,40),game.continue_expedition).grab_focus()
+	ui._label(ui.overlay,"%d Salvage banked · Modules reset next Operation"%game.collection.credits if OperationRules.enabled(run) else "Module purchases last this expedition",Rect2(48,460,610,22),13,ui.MUTED)
 	if not game.collection.message.is_empty(): ui._label(ui.overlay,game.collection.message,Rect2(48,490,850,22),12,ui.CORAL)

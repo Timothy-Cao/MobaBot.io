@@ -7,7 +7,10 @@ const BOSS_ENRAGE_SECONDS := 300.0
 
 static func boss_overtime(run) -> float:
 	if not enabled(run) or run.exp.practice or not run.boss_spawned or run.boss_defeated: return 0.0
-	return maxf(0,run.stage_time-run.exp.round_seconds()-BOSS_ENRAGE_SECONDS)
+	return maxf(0,run.stage_time-run.exp.round_seconds()-boss_deadline(run))
+
+static func boss_deadline(run) -> float:
+	return OperationRules.ENRAGE_SECONDS if OperationRules.enabled(run) else BOSS_ENRAGE_SECONDS
 
 static func specialist_roster(round_index: int) -> Array:
 	# Teach pursuit and aimed shots first; add support/area denial next, EMP in Stage 2.
@@ -129,6 +132,7 @@ static func scale_role(run, enemy: Dictionary) -> void:
 	enemy.review_scaled=true
 	if enemy.has("exp_boss"): return
 	var budget:=reference_w(run.exp.route_index)
+	if OperationRules.enabled(run): budget=91.2*Vanguard.power(OperationRules.reference_rank(run.exp.route_index))*OperationRules.chapter_health(run.exp.operation_chapter)
 	var factor: float=1.0+run.exp.ascension*0.06
 	if enemy.has("gunner_kind"):
 		var tank: bool=enemy.gunner_kind in ["lancer","volley","emp"]
