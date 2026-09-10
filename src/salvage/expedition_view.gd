@@ -12,7 +12,7 @@ static func prepare(game) -> void:
 	frame(ui,"Expedition",game.show_home)
 	ui._ability_icon(ui.overlay,"bolt",Rect2(110,153,105,105))
 	ui._ability_icon(ui.overlay,"rocket",Rect2(236,153,105,105))
-	ui._label(ui.overlay,"One bot. Your build.",Rect2(404,169,454,40),29,ui.CREAM,true)
+	ui._label(ui.overlay,"Vanguard",Rect2(404,169,454,40),29,ui.CREAM,true)
 	ui._label(ui.overlay,"3 minutes. Survive, then defeat the guardian.",Rect2(404,218,454,40),16,ui.MUTED).autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	ui._label(ui.overlay,"Ascension",Rect2(48,355,170,28),17,ui.MUTED)
 	for i in range(6):

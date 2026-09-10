@@ -116,6 +116,7 @@ static func hud(ui, run) -> void:
 
 static func overview(ui, run) -> void:
 	var arrange: Button=ui._button("Arrange skills",Rect2(49,110,340,35),func() -> void: ui.keyboard_requested.emit(),false)
+	if Vanguard.enabled(run): arrange.visible=false
 	arrange.disabled=run.exp.revised and run.state!="camp" and not run.exp.practice
 	arrange.tooltip_text="Available between rounds" if arrange.disabled else "Swap bindings or fit stored skills. Learned tools keep their ranks."
 	for i in range((BotKeyboard.GENERAL+BotKeyboard.MOVEMENT).size()):

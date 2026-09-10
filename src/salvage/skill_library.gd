@@ -28,6 +28,7 @@ static func remember(kit, id: String, rank: int=0, tier: int=0) -> void:
 	kit.loadout.library[id]={"rank":rank,"tier":tier}
 
 static func equip(run, id: String, key: int) -> bool:
+	if Vanguard.enabled(run): return false
 	if run.exp==null or (run.state!="camp" and not run.exp.practice): return false
 	if not stored(run.kit,id) or not BotKeyboard.allowed(id,key): return false
 	var kit=run.kit

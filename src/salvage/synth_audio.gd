@@ -40,6 +40,11 @@ func _ready() -> void:
 	sounds.unlock = sounds.upgrade
 	sounds.supply = sounds.loot
 	sounds.blink = _tone(700, 160, 0.12, 0.08)
+	sounds.v_blink = _tone(1100,120,0.18,0.16)
+	sounds.v_drive = _tone(150,600,0.24,0.12)
+	sounds.v_slam = _tone(380,100,0.16,0.25)
+	sounds.v_impact = _tone(85,30,0.27,0.35)
+	sounds.v_hammer = _tone(130,38,0.19,0.32)
 	sounds.beam = _tone(120, 45, 0.35, 0.2)
 	sounds.demo_boss = sounds.boss
 	sounds.boss_phase = _tone(140, 340, 0.5, 0.1)

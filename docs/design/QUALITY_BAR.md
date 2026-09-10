@@ -4,6 +4,10 @@ Version 1 · 8 September 2026 · baseline: 0.15. This is an editable review cont
 
 ## North star
 
+### 0.18 integrated rewrite · 9 September 2026
+
+Owner authorized a larger integrated build before the next review. Implemented Vanguard's fixed kit, non-modal learn/upgrade queue and isolated dock/placement Practice workflow. Verification is recorded in QA_18 separately from human experience. **All historical numeric ratings below remain unchanged.** No new human review or listening session has occurred. The highest-priority questions are hammer exposure versus reward, D's held lockout, blink corner outcomes, noticing pending upgrades without distraction, and learning modules without a modal explanation. Current native effects establish timing and geometry but are not an artist-polished animation pack; Practice obstacles remain deliberately greybox. Marshal/Racer/economy work cannot inflate the delivered scope.
+
 **Turn a small salvage robot into an outrageous machine through choices you can feel, while movement, aiming and danger remain readable.**
 
 The desired rhythm is approach → aim or reposition → mechanical payoff → collect → choose an improvement → feel the difference. Automatic fire supplies continuity; it must not make positioning and active skills irrelevant. Low-execution builds should work, but intentional play should buy a visible advantage. Spectacle is earned by impact and growth, not by filling the screen with particles.

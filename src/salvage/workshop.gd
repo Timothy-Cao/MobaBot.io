@@ -544,9 +544,11 @@ func _drain_events() -> void:
 			ui.announce("Scrap cache  +8")
 			sound.receive({"kind": "equipped"})
 		elif event.kind == "equipped":
+			if Vanguard.enabled(model): continue
 			var id: String = event.id
 			if not BotMastery.NODES.has(id): ui.announce(model.upgrade_data(id).name if id != "repair" else "Repaired")
 		elif event.kind == "milestone":
+			if Vanguard.enabled(model): continue
 			ui.announce("%s / Rank %d milestone" % [model.upgrade_data(event.id).name, event.rank], 1)
 		elif event.kind == "utility":
 			ui.announce("Magnet +1")

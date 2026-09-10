@@ -40,7 +40,7 @@ static func draw(ui: CanvasLayer) -> void:
 	if ui.expedition_ui: _nav(ui,"Practice",Rect2(54,326,267,36),func(): ui.host.launch_practice())
 	_nav(ui, "Settings", Rect2(54, 383 if ui.expedition_ui else 377, 122, 30), func() -> void: ui.settings_requested.emit())
 	_nav(ui, "Quit", Rect2(188, 383 if ui.expedition_ui else 377, 132, 30), func() -> void: ui.quit_requested.emit())
-	ui._label(ui.overlay, "0.17" if ui.expedition_ui else "0.13", Rect2(55, 492, 249, 20), 11, ui.MUTED, true)
+	ui._label(ui.overlay, "0.18" if ui.expedition_ui else "0.13", Rect2(55, 492, 249, 20), 11, ui.MUTED, true)
 	play.grab_focus()
 
 static func _nav(ui, text: String, rect: Rect2, action: Callable, primary: bool = false) -> Button:

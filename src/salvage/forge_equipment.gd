@@ -73,6 +73,17 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 	if not c.loadout.get("flexible",false): return ExpeditionGear.valid_checkpoint(c)
 	if c.get("class","")!="shared" and not BotExpedition.CLASSES.has(c.get("class","")): return false
 	if not BotKeyboard.valid_config(c.loadout): return false
+	if c.loadout.has("vanguard"):
+		if not c.get("bindings") is Dictionary: return false
+		if c.loadout.vanguard!=true or not c.loadout.get("rewards18") is Array or c.loadout.rewards18.size()>256: return false
+		if not integer(c.loadout.get("reward_turn18"),0,1000000): return false
+		for reward in c.loadout.rewards18:
+			if reward not in ["learn","upgrade"]: return false
+		for slot in Vanguard.TOOLS:
+			if slot=="p1":
+				if c.loadout.passives[0]!="orbit": return false
+			elif c.loadout.get(slot)!=Vanguard.TOOLS[slot]: return false
+			if c.get("bindings",{}).get(slot)!=Vanguard.KEYS[slot]: return false
 	for key in ["ranks","tiers","upgrades","stats","bindings"]:
 		if not c.get(key) is Dictionary: return false
 	if not c.get("discovered") is Array or c.discovered.size()>11: return false
@@ -94,6 +105,13 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 		if id in ids: return false
 	for slot in BotKeyboard.ACTIVE_BANKS:
 		if not integer(c.ranks.get(slot),0,10) or not integer(c.tiers.get(slot),0,2) or c.upgrades.get("skill_"+slot)!=c.ranks[slot]: return false
+	if c.loadout.get("vanguard",false):
+		if not c.loadout.get("library",{}).is_empty() or c.get("sniper",false): return false
+		for slot in c.discovered:
+			if slot not in Vanguard.KEYS: return false
+		for slot in Vanguard.KEYS:
+			var rank_value: int=int(c.upgrades.get("grinder",0)) if slot=="p1" else int(c.ranks[slot])
+			if (slot in c.discovered)!=(rank_value>0): return false
 	for key in ["ability_rank","forge_pet"]:
 		if not integer(c.stats.get(key,0),0,1): return false
 	var old: Dictionary=c.duplicate(true)

@@ -29,6 +29,7 @@ var velocity := Vector2.ZERO
 var aim := Vector2.RIGHT
 var health := 5.0
 var exp: RefCounted
+var vanguard := Vanguard.new()
 var mastery := BotMastery.new()
 var attacks := BotAttackOrders.new()
 var xp_fraction := 0.0
@@ -378,10 +379,11 @@ func step(delta: float, input_direction: Vector2) -> void:
 	slow_left = maxf(0, slow_left - delta)
 	if kit != null:
 		kit.step(self, delta)
+		if Vanguard.enabled(self): vanguard.tick(self,delta)
 		attacks.prepare(self, delta)
 		if kit.dash_left > 0:
 			kit.move_dash(self, delta)
-		elif kit.laser_left > 0 or kit.extra.rooted():
+		elif kit.laser_left > 0 or kit.extra.rooted() or (Vanguard.enabled(self) and (vanguard.slam_left>0 or vanguard.hammer>=0)):
 			stop_movement()
 		elif moving:
 			var offset := kit.extra.route(player, move_target, 16) - player
@@ -580,6 +582,8 @@ func _staged_spawns(delta: float) -> void:
 		_spawn_pack(1 if recovering else 2 + stage)
 
 func _enemy_step(delta: float) -> void:
+	if exp!=null and exp.practice and vanguard.freeze_ai: return
+	var drawn:=0
 	for enemy in enemies:
 		if enemy.dead:
 			continue
@@ -601,6 +605,11 @@ func _enemy_step(delta: float) -> void:
 			if state != "running": break
 			continue
 		var tracked_player: Vector2 = kit.extra.decoy_position if kit != null and kit.extra.decoy_left > 0 else player
+		var lure: Dictionary={}
+		if Vanguard.enabled(self) and drawn<4:
+			for unit in vanguard.constructs:
+				if unit.id=="guard_bot" and unit.hp>0 and Vector2(enemy.pos).distance_to(unit.pos)<280:
+					lure=unit; tracked_player=unit.pos; drawn+=1; break
 		var target_point: Vector2 = kit.extra.route(enemy.pos, tracked_player, enemy.radius) if kit != null else player
 		var direction := (target_point - Vector2(enemy.pos)).normalized()
 		var speed := 40.0 + minf(time * 0.28, 22.0)
@@ -641,15 +650,22 @@ func _enemy_step(delta: float) -> void:
 		enemy.pos += (direction * speed + Vector2(enemy.knock)) * delta
 		if kit != null: enemy.pos = kit.extra.solid_point(previous_pos, enemy.pos, enemy.radius)
 		enemy.knock = Vector2(enemy.knock).move_toward(Vector2.ZERO, delta * 500.0)
+		if not lure.is_empty() and Vector2(enemy.pos).distance_to(lure.pos)<enemy.radius+22:
+			if lure.hurt_clock<=0: lure.hp-=12; lure.hurt_clock=0.25
+			continue
 		if Vector2(enemy.pos).distance_to(player) < float(enemy.radius) + 12.0:
 			if demo_mode and enemy.kind == 3: apply_slow(1.2)
 			hurt_player(enemy.pos, CombatReadability.enemy_name(enemy) + (" charge" if enemy.phase == "dash" else " contact"), 2 if demo_mode and (enemy.kind in [1, 3] or enemy.get("elite", false)) else 1)
 			if state != "running":
 				break
 
-func hurt_player(source: Vector2, cause: String = "Collision", amount: int = 1) -> void:
+func hurt_player(source: Vector2, cause: String = "Collision", amount: int = 1, damage_type: String = "touch") -> void:
+	if Vanguard.enabled(self):
+		var touch: bool=damage_type=="touch"
+		if vanguard.shield>0 or (touch and (vanguard.touch_guard>0 or vanguard.touch_grace>0)): return
+		if touch: vanguard.touch_grace=0.65
 	if exp != null and exp.practice and exp.god_mode: return
-	if invincible > 0 or state != "running":
+	if (invincible > 0 and not Vanguard.enabled(self)) or state != "running":
 		return
 	if kit != null and kit.shield > 0:
 		kit.shield_hits -= 1
@@ -750,13 +766,13 @@ func _projectile_step(delta: float) -> void:
 		var blocked := false
 		if kit != null:
 			for wall in kit.extra.walls:
-				if Geometry2D.segment_intersects_segment(bullet.prev, bullet.pos, wall.a, wall.b) != null: bullet.life = 0; blocked = true; break
+				if kit.extra.path_blocked(bullet.prev,bullet.pos,wall,6) if wall.has("width") else Geometry2D.segment_intersects_segment(bullet.prev, bullet.pos, wall.a, wall.b) != null: bullet.life = 0; blocked = true; break
 		if blocked: continue
 		if bullet.kind == "hostile":
 			var near := Geometry2D.get_closest_point_to_segment(player, bullet.prev, bullet.pos)
 			if near.distance_to(player) < 17:
 				if bullet.get("slow", false): apply_slow(1.2)
-				hurt_player(bullet.pos, "Hostile projectile", int(bullet.damage))
+				hurt_player(bullet.pos, "Hostile projectile", int(bullet.damage),"projectile")
 				bullet.life = 0.0
 			continue
 		var start: Vector2 = bullet.prev
@@ -816,6 +832,9 @@ func hit_enemy(enemy: Dictionary, damage: float, source: String, knock: Vector2 
 		enemy.dead = true
 		if exp != null: exp.enemy_killed(self, enemy)
 		kills += 1
+		if exp!=null and exp.practice:
+			emit_event("kill",enemy.pos,{"enemy_kind":enemy.kind})
+			return
 		if kit != null and kit.onboarding:
 			if loot_rng.randf() < minf(0.20, (1.0 + drop_bonus) / 25.0):
 				_drop_supply(enemy.pos, "coins", 25)
@@ -849,6 +868,7 @@ func hit_enemy(enemy: Dictionary, damage: float, source: String, knock: Vector2 
 
 func orbit_position(index: int) -> Vector2:
 	var angle := time * 2.6 + float(orbit[index].slot) * TAU / float(capacity())
+	if Vanguard.enabled(self): angle=time*(1.6 if kit.orbit_far else 3.4)+float(orbit[index].slot)*TAU/maxi(1,orbit.size())
 	return player + Vector2.from_angle(angle) * orbit_radius()
 
 func _orbit_step(delta: float) -> void:

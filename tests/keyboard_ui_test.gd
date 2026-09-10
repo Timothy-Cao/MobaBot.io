@@ -25,7 +25,10 @@ func _run() -> void:
 	game.set_physics_process(false); game.sound.set_muted(true); game.music_player.shutdown()
 	game.collection=ForgeEquipment.new(); game.ui.reduced=false
 	game.show_home(); await capture(game,"home")
-	game.launch_expedition(); game.ui.update_hud(game.model); await capture(game,"combat")
+	# This fixture owns the retained 0.17 keyboard/replacement UI. Vanguard's fixed
+	# controls and non-modal choices have separate coverage in vanguard_test.
+	game.launch_practice(true); game.model.exp.practice=false; game.close_practice()
+	game.ui.update_hud(game.model); await capture(game,"combat")
 	game.model.exp.pending_chests=1; game.open_discovery()
 	game.model.exp.chest_choices.assign([{"id":"nuke","slot":"","tier":1},{"id":"lightning","slot":"","tier":0},{"id":"laser","slot":"","tier":2}])
 	ExpeditionView.chest(game); await capture(game,"reward")

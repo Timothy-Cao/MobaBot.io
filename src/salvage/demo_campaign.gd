@@ -172,7 +172,7 @@ static func hazards_step(run, delta: float) -> void:
 			hazard.spent = true
 			run.emit_event("hostile_blast", hazard.pos, {"radius": hazard.radius})
 			if Vector2(hazard.pos).distance_to(run.player) <= hazard.radius + 12:
-				run.hurt_player(hazard.pos, "Artillery blast", 2)
+				run.hurt_player(hazard.pos, "Artillery blast", 2,"ground")
 	run.hazards = run.hazards.filter(func(h: Dictionary) -> bool: return not h.spent)
 
 static func test_direction(run) -> Vector2:

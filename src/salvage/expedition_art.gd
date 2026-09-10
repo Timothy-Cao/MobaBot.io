@@ -45,6 +45,14 @@ static func draw(c, run) -> void:
 			if not c.reduced_effects: ring(c,p,22+sin(run.time*3)*2,Color(c.GOLD,0.2),1)
 
 static func barrier(c, wall: Dictionary) -> void:
+	if wall.has("width"):
+		var width: float=wall.width
+		c.draw_line(wall.a,wall.b,c.INK,width*2+2,true)
+		c.draw_circle(wall.a,width+1,c.INK); c.draw_circle(wall.b,width+1,c.INK)
+		c.draw_line(wall.a,wall.b,Color("32434a"),width*2-4,true)
+		c.draw_circle(wall.a,width-2,Color("32434a")); c.draw_circle(wall.b,width-2,Color("32434a"))
+		c.draw_line(wall.a-Vector2(0,width*0.55),wall.b-Vector2(0,width*0.55),Color("50626a"),7,true)
+		return
 	var a: Vector2=wall.a
 	var b: Vector2=wall.b
 	var along: Vector2=(b-a).normalized()

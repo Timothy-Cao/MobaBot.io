@@ -314,6 +314,7 @@ func _ability_hud(model: SalvageRun) -> void:
 	ability_bar.visible = model.kit != null
 	if model.kit == null:
 		return
+	if Vanguard.enabled(model): VanguardHud.draw(self,model); return
 	if model.kit.flexible(): KeyboardView.hud(self,model); return
 	var kit := model.kit
 	var signature := JSON.stringify([kit.loadout, kit.bindings, kit.tiers, kit.ranks])

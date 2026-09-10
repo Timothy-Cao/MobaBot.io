@@ -101,6 +101,7 @@ func ui_test() -> void:
 	var saved:=JSON.stringify(game.collection.snapshot())
 	game.launch_practice()
 	check(game.screen=="practice" and not game.persistent_run(),"Practice isolated")
+	game.practice_page="Player"; PracticeSandbox.draw(game)
 	await process_frame
 	var toggle: Button=game.ui.overlay.find_child("god_mode",true,false)
 	var click:=InputEventMouseButton.new(); click.button_index=MOUSE_BUTTON_LEFT; click.position=root.get_final_transform()*toggle.get_global_rect().get_center(); click.global_position=click.position; click.pressed=true
@@ -108,6 +109,7 @@ func ui_test() -> void:
 	click=click.duplicate(); click.pressed=false; Input.parse_input_event(click); await process_frame
 	check(not game.model.exp.god_mode,"Practice controls receive real mouse events")
 	game.model.exp.god_mode=true
+	game.model.kit.loadout.erase("vanguard") # Explicit legacy laboratory regression.
 	game.practice_skill="laser"; game.practice_key=KEY_Q; game.practice_rank=5; game.practice_fit()
 	check(BotKeyboard.id_at(game.model.kit,BotKeyboard.slot_at(game.model.kit,KEY_Q))=="laser","Practice fits chosen loadout")
 	game.practice_enemy="volley"; game.practice_count=5; game.practice_spawn()

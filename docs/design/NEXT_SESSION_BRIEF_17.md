@@ -2,6 +2,8 @@
 
 Status: **start here for the latest owner direction.** This is the concise routing and priority document for the next development session. It does not claim that future designs are already implemented.
 
+**Subsequent owner override:** the owner requested a larger integrated rewrite before the next playtest, explicitly superseding the per-phase human stop gates for this pass. See [QA_18.md](QA_18.md) for what was actually delivered: Vanguard, queued progression and Practice. The unimplemented class/economy proposals below remain future work, not released features.
+
 Suggested kickoff prompt:
 
 > Pull `main`, read `docs/design/NEXT_SESSION_BRIEF_17.md`, and begin Phase 0. Work in small verified milestones and stop for owner playtesting at each gate.

@@ -145,6 +145,7 @@ static func difficulty_text(value: int) -> String:
 	return "\n".join(rules)
 
 func enter(run) -> void:
+	if Vanguard.enabled(run): run.vanguard.clear()
 	run.stage = mini(3, int(ROUTE[route_index][0])) # Legacy renderer sectors, not campaign ownership.
 	run.stage_time = 0; run.boss_spawned = false; run.boss_defeated = false
 	run.stage_clear_wait = -1; run.spawn_clock = 0.8; run.demo_minis_killed = 0
@@ -230,6 +231,7 @@ func finish_step(run, delta: float) -> void:
 				run.kit.charges[slot] = MobaKit.ABILITIES[run.kit.loadout[slot]].max
 				run.kit.recharge[slot] = 0.0
 		return
+	if Vanguard.enabled(run): Vanguard.progression(run)
 	courier_clock = maxf(0, courier_clock - delta)
 	dynamo_clock = maxf(0, dynamo_clock - delta)
 	bastion_clock = maxf(0, bastion_clock - delta)
@@ -270,8 +272,10 @@ func finish_step(run, delta: float) -> void:
 			run.health = minf(max_health(run), run.health + max_health(run) * 0.2)
 			run.kit.energy = run.kit.energy_max()
 			run.state = "camp"
+			if Vanguard.enabled(run): Vanguard.progression(run)
 			return
 		if revised: return # Collection is uninterrupted; choices wait for camp.
+	if Vanguard.enabled(run): return
 	if run.total_xp >= run.next_level:
 		run._make_offers(); run.state = "upgrade"; run.emit_event("upgrade", run.player)
 	elif pending_chests > 0:

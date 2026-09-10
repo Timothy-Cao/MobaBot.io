@@ -1,0 +1,315 @@
+class_name Vanguard
+extends RefCounted
+## Fixed-kit rules. Durable choices live in loadout; transient combat never does.
+const KEYS := {"q":KEY_Q,"w":KEY_W,"e":KEY_E,"r":KEY_R,"d":KEY_D,"f":KEY_F,"p1":KEY_1,"x1":KEY_2,"x2":KEY_3,"x3":KEY_4}
+const TOOLS := {"q":"rocket","w":"strike","e":"body_slam","r":"reactor_drop","d":"sprint","f":"blink","p1":"orbit","x1":"guard_bot","x2":"reserve_totem","x3":"recovery_totem"}
+var ghost := false
+var pending: Dictionary = {}
+var hammer := -1.0
+var hammer_direction := Vector2.RIGHT
+var hammer_cooldown := 0.0
+var slam_left := 0.0
+var slam_direction := Vector2.RIGHT
+var touch_guard := 0.0
+var touch_grace := 0.0
+var shield := 0.0
+var constructs: Array[Dictionary] = []
+var impacts: Array[Dictionary] = []
+var ghosts: Array[Dictionary] = []
+var ghost_clock := 0.0
+var freeze_ai := false
+var time_scale := 1.0
+
+static func abilities() -> Dictionary:
+	return {
+		"body_slam":{"name":"Body slam","category":"active","icon":"thrust","glyph":"dash","cd":8.0,"max":1,"range":210.0,"aim":"line","cost":14,"text":"Collide, blast and push. Touch protection only. Rank 5: stun. Rank 10: full shield through impact + 1s."},
+		"reactor_drop":{"name":"Reactor drop","category":"ultimate","icon":"nuke","glyph":"target","cd":28.0,"max":1,"range":620.0,"aim":"ground","cost":32,"text":"Delayed wide reactor impact. Rank 5: standing inside grants a shield. Rank 10: second impact and stun."},
+		"guard_bot":{"name":"Bulwark","category":"summon","icon":"pulse_sentry","glyph":"turret","cd":16.0,"max":1,"range":340.0,"aim":"ground","cost":20,"text":"A durable decoy with a weak gun and pulse. Draws up to four ordinary enemies. Redeploy replaces it."},
+		"reserve_totem":{"name":"Reserve","category":"summon","icon":"medic_sentry","glyph":"cross","cd":10.0,"max":1,"range":340.0,"aim":"ground","cost":16,"text":"Banks repair while you are away. Return to convert reserve into hull, then energy, then a shock wave. Redeploy clears reserve."},
+		"recovery_totem":{"name":"Overclock well","category":"summon","icon":"pylon","glyph":"sun","cd":15.0,"max":1,"range":340.0,"aim":"ground","cost":20,"text":"5-second aura: double recharge and free ability energy inside. Cooldown starts when it expires."}}
+
+static func enabled(run) -> bool:
+	return run != null and run.kit != null and run.kit.loadout.get("vanguard",false)
+
+static func setup(run, rank_value: int = 0) -> void:
+	BotKeyboard.enable(run)
+	var kit: MobaKit = run.kit
+	kit.loadout["vanguard"] = true
+	kit.loadout["rewards18"] = []
+	kit.loadout["reward_turn18"] = 0
+	kit.loadout["library"] = {}
+	kit.discovered.clear()
+	kit.loadout.passives = ["orbit","","","","","","","",""]
+	kit.toggles.assign([true,false,false,false,false,false,false,false,false])
+	for slot in kit.bindings: kit.bindings[slot] = 0
+	for slot in KEYS:
+		kit.bindings[slot] = KEYS[slot]
+		if slot != "p1":
+			kit.loadout[slot] = TOOLS[slot]
+			kit.ranks[slot] = maxi(1,rank_value) if rank_value > 0 or slot in ["q","d","f"] else 0
+			run.upgrades["skill_"+slot] = kit.ranks[slot]
+			kit.charges[slot] = MobaKit.ABILITIES[TOOLS[slot]].max
+			if slot=="w" and rank_value<5: kit.charges[slot]=1
+			kit.recharge[slot] = 0.0
+		if rank_value > 0 or slot in ["q","d","f"]: kit.discovered.append(slot)
+	run.upgrades.grinder = rank_value
+	run.upgrades.power = maxi(0,rank_value-1)
+	kit.gun_sniper = false
+	run.vanguard = Vanguard.new()
+	run._sync_resource_ranks()
+
+static func rank_of(run, slot: String) -> int:
+	if slot == "gun": return mini(10,1+int(run.upgrades.power))
+	if slot == "p1": return int(run.upgrades.grinder) if run.kit.unlocked(slot) else 0
+	return int(run.kit.ranks.get(slot,0))
+
+static func candidates(run, kind: String) -> Array:
+	var result: Array = []
+	for slot in KEYS.keys()+["gun"]:
+		var rank_value := rank_of(run,slot)
+		if (kind == "learn" and rank_value == 0) or (kind == "upgrade" and rank_value > 0 and rank_value < 10): result.append(slot)
+	return result
+
+static func reward_kind(run) -> String:
+	var queue: Array = run.kit.loadout.get("rewards18",[])
+	if queue.is_empty(): return ""
+	var kind: String = queue[0]
+	if candidates(run,kind).is_empty(): kind = "upgrade" if kind == "learn" else "learn"
+	return kind if not candidates(run,kind).is_empty() else ""
+
+static func earn(run) -> void:
+	var turn: int = run.kit.loadout.reward_turn18
+	run.kit.loadout.rewards18.append("upgrade" if turn%2 == 0 else "learn")
+	run.kit.loadout.reward_turn18 = turn+1
+	if run.kit.loadout.rewards18.size()>256: run.kit.loadout.rewards18.pop_back()
+
+static func spend(run, slot: String) -> bool:
+	if not enabled(run) or slot not in candidates(run,reward_kind(run)) or reward_kind(run)=="": return false
+	if slot == "gun": run.upgrades.power += 1
+	elif slot == "p1":
+		run.upgrades.grinder += 1
+		if slot not in run.kit.discovered: run.kit.discovered.append(slot)
+		while run.orbit.size()<mini(run.capacity(),2+int(run.upgrades.grinder)/2): run.orbit.append({"slot":run.orbit.size(),"hits":3,"cooldown":0.0})
+	else:
+		run.kit.rank_up(slot); run.upgrades["skill_"+slot] = run.kit.ranks[slot]
+		if slot not in run.kit.discovered: run.kit.discovered.append(slot)
+	run.kit.loadout.rewards18.pop_front()
+	run._sync_resource_ranks()
+	run.emit_event("equipped",run.player,{"id":TOOLS.get(slot,"power")})
+	if rank_of(run,slot) in [5,10]: run.emit_event("milestone",run.player,{"id":TOOLS.get(slot,"power"),"rank":rank_of(run,slot)})
+	return true
+
+static func progression(run) -> void:
+	while run.total_xp >= run.next_level:
+		run.level += 1
+		run.next_level += ceili((12+run.level*8)*BotExpedition.xp_factor(run.level))
+		earn(run)
+		if (run.level-1)%3==0: run.grant_utility()
+		run.emit_event("equipped",run.player,{"id":"power"})
+	# Chests remain tangible world loot; opening no longer stops the fight.
+	while run.exp.pending_chests>0:
+		run.exp.pending_chests -= 1; run.exp.chests_opened += 1
+		earn(run); run.exp.field_credits += 20
+		if run.loot_rng.randf()<0.18: run.exp.pending_items.append(ForgeEquipment.roll_item(run.loot_rng,run.exp.ascension))
+	if reward_kind(run)=="" and not run.kit.loadout.rewards18.is_empty():
+		run.exp.field_credits += 20*run.kit.loadout.rewards18.size(); run.kit.loadout.rewards18.clear()
+
+func clear() -> void:
+	ghost=false; pending.clear(); hammer=-1; slam_left=0; touch_guard=0; shield=0
+	constructs.clear(); impacts.clear(); ghosts.clear()
+	hammer_cooldown=0; touch_grace=0; ghost_clock=0
+
+func powered(run) -> bool:
+	for unit in constructs:
+		if unit.id=="recovery_totem" and run.player.distance_to(unit.pos)<=unit.radius: return true
+	return false
+
+func cast(run, slot: String, cursor: Vector2) -> bool:
+	var kit: MobaKit=run.kit
+	kit.last_failure="Not ready"
+	if run.state!="running" or slot not in KEYS or not kit.unlocked(slot): return false
+	if slot=="d":
+		if ghost: return true
+		if kit.energy<2 or not pending.is_empty() or slam_left>0: return false
+		ghost=true; hammer=-1; run.attacks.stop(run)
+		run.emit_event("v_drive",run.player); return true
+	if ghost: kit.last_failure="Release D"; return false
+	if slot=="p1": kit.orbit_far=not kit.orbit_far; kit.toggles[0]=true; return true
+	if slam_left>0 or (not pending.is_empty() and slot!="f"): return false
+	if kit.charges[slot]<=0: return false
+	var id: String=kit.loadout[slot]
+	var cost: float=kit.ability_cost(id)
+	if not powered(run) and kit.energy<cost: kit.last_failure="Low energy"; return false
+	var target: Vector2=kit.target_point(run,slot,cursor)
+	if slot=="f": target=blink_target(run,target)
+	if slot in ["f","e"] and target.distance_to(run.player)<1: return false
+	if slot in ["x1","x2","x3"] and not valid_point(run,target,22): kit.last_failure="Blocked"; return false
+	if not powered(run): kit.energy-=cost; kit.energy_spent+=cost
+	kit.charges[slot]-=1
+	if kit.recharge[slot]<=0: kit.recharge[slot]=kit.cooldown(slot)
+	kit.cast_counts[id]=int(kit.cast_counts.get(id,0))+1
+	if slot=="f":
+		poof(run.player); poof(target)
+		run.player=target; run.stop_movement()
+		run.emit_event("v_blink",target)
+		return true
+	if slot=="e":
+		slam_direction=(cursor-run.player).normalized(); slam_left=0.22
+		touch_guard=0.4; hammer=-1; run.attacks.stop(run)
+		if kit.effective_rank(slot)>=10: shield=0.45
+		run.emit_event("v_slam",run.player); return true
+	if slot in ["x1","x2","x3"]:
+		constructs=constructs.filter(func(u): return u.id!=id)
+		constructs.append({"id":id,"pos":target,"life":5.0 if slot=="x3" else 35.0,"clock":0.3,"bank":0.0,"radius":125.0+kit.milestone(slot)*20,"hp":120.0+kit.effective_rank(slot)*15,"max_hp":120.0+kit.effective_rank(slot)*15,"slot":slot,"pulse":2.0,"hurt_clock":0.0})
+		poof(target); return true
+	# 80ms anticipation: F can move the unreleased origin; world aim stays fixed.
+	pending={"slot":slot,"target":cursor,"left":0.08}
+	run.emit_event("cast",run.player,{"ability":id,"target":target,"milestone":kit.milestone(slot)})
+	kit.last_failure=""
+	return true
+
+func swing(run, cursor: Vector2) -> bool:
+	if run.state!="running" or ghost or slam_left>0 or hammer_cooldown>0 or hammer>=0 or not pending.is_empty(): return false
+	hammer=0.20; hammer_direction=(cursor-run.player).normalized()
+	if hammer_direction==Vector2.ZERO: hammer_direction=Vector2.RIGHT
+	hammer_cooldown=1.05/(1+run.kit.attack_speed_bonus)
+	run.stop_movement(); run.aim=hammer_direction
+	return true
+
+func poof(point: Vector2) -> void:
+	impacts.append({"kind":"poof","pos":point,"life":0.3,"duration":0.3,"radius":30.0})
+
+func release(run) -> void:
+	var slot: String=pending.slot
+	var cursor: Vector2=pending.target
+	var direction: Vector2=(cursor-run.player).normalized()
+	var kit: MobaKit=run.kit
+	var scale_value: float=kit.damage_scale(slot)
+	if direction==Vector2.ZERO: direction=run.aim
+	if slot=="q":
+		var before: int=run.projectiles.size()
+		run._add_projectile(run.player,direction*790,15*scale_value,"rocket",0)
+		if run.projectiles.size()>before:
+			var bullet: Dictionary=run.projectiles.back()
+			bullet.life=kit.cast_range(slot)/790; bullet.blast=8*scale_value; bullet.radius=62*kit.area_scale(slot); bullet.milestone=kit.milestone(slot)
+	else:
+		var p: Vector2=kit.target_point(run,slot,cursor)
+		impacts.append({"kind":"strike" if slot=="w" else "reactor","pos":p,"life":0.55 if slot=="w" else 0.75,"duration":0.55 if slot=="w" else 0.75,"radius":100.0*kit.area_scale(slot) if slot=="w" else 170.0*kit.area_scale(slot),"slot":slot,"damage":38.0*scale_value if slot=="w" else 135.0*scale_value,"rank":kit.effective_rank(slot)})
+	pending.clear()
+
+func tick(run, delta: float) -> void:
+	if run.kit.passive_active("orbit"):
+		while run.orbit.size()<mini(run.capacity(),3+int(run.rank_of("grinder"))/2):
+			run.orbit.append({"slot":run.orbit.size(),"hits":9999,"cooldown":0.0})
+	touch_guard=maxf(0,touch_guard-delta); touch_grace=maxf(0,touch_grace-delta); shield=maxf(0,shield-delta)
+	hammer_cooldown=maxf(0,hammer_cooldown-delta)
+	for trace in ghosts: trace.life-=delta
+	ghosts=ghosts.filter(func(g): return g.life>0)
+	if ghost:
+		var upkeep: float=10-maxi(0,run.kit.effective_rank("d")-1)*0.3
+		if run.kit.energy<delta*upkeep: ghost=false; run.kit.sprint=0
+		else:
+			run.kit.energy-=delta*upkeep; run.kit.energy_spent+=delta*upkeep
+			run.kit.sprint=0.1
+			ghost_clock-=delta
+			if ghost_clock<=0:
+				ghost_clock=0.08; ghosts.append({"pos":run.player,"life":0.32})
+	if not pending.is_empty():
+		pending.left-=delta
+		if pending.left<=0: release(run)
+	if hammer>=0:
+		hammer-=delta; run.stop_movement()
+		if hammer<=0:
+			var reach: float=run.attacks.attack_range(run)
+			for enemy in run.enemies:
+				var offset: Vector2=enemy.pos-run.player
+				if run.attacks.valid(enemy) and offset.length()<=reach+enemy.radius and absf(hammer_direction.angle_to(offset))<=PI/4:
+					var head: bool=offset.length()>=reach*0.512
+					run.hit_enemy(enemy,(38 if head else 9)*(1+run.kit.attack_damage_bonus),"hammer",offset.normalized()*190 if head and not enemy.has("role") else Vector2.ZERO)
+					if head and not enemy.has("role"): enemy.stun=0.25
+			impacts.append({"kind":"hammer","pos":run.player,"direction":hammer_direction,"life":0.24,"duration":0.24,"radius":reach})
+			run.emit_event("v_hammer",run.player); hammer=-1
+	if slam_left>0:
+		var before: Vector2=run.player
+		var desired: Vector2=before+slam_direction*minf(delta,slam_left)*950
+		run.player=run.kit.extra.solid_point(before,desired,16)
+		slam_left=maxf(0,slam_left-delta)
+		for enemy in run.enemies:
+			if not run.attacks.valid(enemy): continue
+			if Geometry2D.get_closest_point_to_segment(enemy.pos,before,run.player).distance_to(enemy.pos)<=enemy.radius+24:
+				slam_left=0
+				var radius: float=95*run.kit.area_scale("e")
+				blast(run,run.player,radius,32*run.kit.damage_scale("e"),"body_slam",0.6 if run.kit.effective_rank("e")>=5 else 0,240)
+				if run.kit.effective_rank("e")>=10: shield=1.0
+				run.emit_event("v_impact",run.player); break
+		if run.player.distance_to(desired)>1: slam_left=0
+		run.stop_movement()
+	for unit in constructs.duplicate():
+		unit.life-=delta; unit.clock-=delta; unit.pulse-=delta; unit.hurt_clock=maxf(0,unit.hurt_clock-delta)
+		var inside: bool=run.player.distance_to(unit.pos)<=unit.radius
+		var rank_value: int=run.kit.effective_rank(unit.slot)
+		if unit.id=="guard_bot":
+			if unit.clock<=0:
+				unit.clock=0.8
+				var enemy: Dictionary=run.nearest_enemy(unit.pos)
+				if not enemy.is_empty() and Vector2(enemy.pos).distance_to(unit.pos)<320: run._add_projectile(unit.pos,(Vector2(enemy.pos)-Vector2(unit.pos)).normalized()*550,3+rank_value*0.4,"sentry",0)
+			if unit.pulse<=0: unit.pulse=2.4; blast(run,unit.pos,unit.radius,5+rank_value,"bulwark",0,40)
+		elif unit.id=="reserve_totem":
+			if not inside: unit.bank=minf(80+rank_value*6,unit.bank+delta*(5+rank_value))
+			elif unit.bank>0:
+				var amount: float=minf(unit.bank,delta*45)
+				unit.bank-=amount
+				var heal: float=minf(amount,run.max_health()-run.health); run.health+=heal; amount-=heal
+				var energy: float=minf(amount,run.kit.energy_max()-run.kit.energy); run.kit.energy+=energy; amount-=energy
+				if amount>0 and unit.pulse<=0: unit.pulse=1; blast(run,unit.pos,unit.radius,12+rank_value,"reserve",0,80)
+		elif unit.id=="recovery_totem":
+			run.kit.charges[unit.slot]=0; run.kit.recharge[unit.slot]=run.kit.cooldown(unit.slot)
+			if inside:
+				for slot in KEYS:
+					if slot!="p1" and slot!=unit.slot and run.kit.recharge[slot]>0: run.kit.recharge[slot]-=delta
+		if unit.life<=0 or unit.hp<=0: constructs.erase(unit)
+	for effect in impacts.duplicate():
+		effect.life-=delta
+		if effect.life>0: continue
+		impacts.erase(effect)
+		if effect.kind not in ["strike","reactor"]: continue
+		for enemy in run.enemies:
+			if not run.attacks.valid(enemy) or Vector2(enemy.pos).distance_to(effect.pos)>effect.radius+enemy.radius: continue
+			var multiplier:=2.0 if effect.kind=="strike" and Vector2(enemy.pos).distance_to(effect.pos)<=effect.radius*0.4 else 1.0
+			run.hit_enemy(enemy,effect.damage*multiplier,effect.kind)
+			if effect.rank>=10 and not enemy.has("role"): enemy.stun=0.75
+		if effect.kind=="reactor" and effect.rank>=5 and run.player.distance_to(effect.pos)<=effect.radius: shield=maxf(shield,1.5)
+		if effect.kind=="reactor" and effect.rank>=10 and not effect.get("second",false):
+			var second: Dictionary=effect.duplicate(); second.life=0.4; second.duration=0.4; second.second=true; impacts.append(second)
+		run.emit_event("nuke_impact",effect.pos,{"radius":effect.radius})
+		impacts.append({"kind":"blast","pos":effect.pos,"radius":effect.radius,"life":0.35,"duration":0.35})
+
+func blast(run, point: Vector2, radius: float, damage: float, source: String, stun: float, knock: float) -> void:
+	for enemy in run.enemies:
+		if not run.attacks.valid(enemy) or Vector2(enemy.pos).distance_to(point)>radius+enemy.radius: continue
+		var ordinary: bool=not enemy.has("role") and enemy.kind!=2
+		run.hit_enemy(enemy,damage,source,(Vector2(enemy.pos)-point).normalized()*knock if ordinary else Vector2.ZERO)
+		if ordinary and stun>0: enemy.stun=stun
+	impacts.append({"kind":"blast","pos":point,"radius":radius,"life":0.3,"duration":0.3})
+
+static func valid_point(run, point: Vector2, radius: float) -> bool:
+	if not run.ARENA.grow(-radius).has_point(point): return false
+	for wall in run.kit.extra.walls:
+		if Geometry2D.get_closest_point_to_segment(point,wall.a,wall.b).distance_to(point)<radius+float(wall.get("width",6)): return false
+	return true
+
+static func blink_target(run, requested: Vector2) -> Vector2:
+	if valid_point(run,requested,16): return requested
+	var start: Vector2=run.player
+	var direction: Vector2=(requested-start).normalized()
+	if direction==Vector2.ZERO: return start
+	# Find only the connected obstruction containing the requested endpoint.
+	var near_point:=requested; var far_point:=requested
+	for i in range(450):
+		near_point-=direction*2
+		if valid_point(run,near_point,16): break
+	for i in range(450):
+		far_point+=direction*2
+		if valid_point(run,far_point,16): break
+	var pick: Vector2=far_point if requested.distance_to(far_point)<requested.distance_to(near_point) else near_point
+	return pick if valid_point(run,pick,16) and pick.distance_to(requested)<=900 else start

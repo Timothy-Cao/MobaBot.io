@@ -58,6 +58,7 @@ var attack_range_bonus := 0.0
 static func _all_abilities() -> Dictionary:
 	var data := LEGACY_ABILITIES.duplicate(true)
 	data.merge(BotSkillCatalog.actives())
+	data.merge(Vanguard.abilities())
 	return data
 
 static func _all_passives() -> Dictionary:
@@ -175,6 +176,7 @@ func area_scale(slot: String) -> float:
 	return (1.0 + milestone(slot) * 0.25) * (1.15 if loadout.get("rules17",false) and loadout.get(slot,"") in ["flame","reap","sweep","thrust","repulsor","tractor"] else 1.0)
 
 func cast_range(slot: String) -> float:
+	if loadout.get("vanguard",false) and slot=="w": return 650.0
 	var id: String = loadout[slot]
 	return float(ABILITIES[id].range) * (area_scale(slot) if id in ["nova", "overdrive", "blink", "dash", "lunge", "tumble", "echo_dash", "veil_dash", "hop", "vault", "pursuit", "landing"] else 1.0)
 
@@ -200,6 +202,7 @@ func drain_rate() -> float:
 	return rate
 
 func passive_active(id: String) -> bool:
+	if loadout.get("vanguard",false) and id=="bolt": return true
 	if id=="": return false
 	var index: int = loadout.passives.find(id)
 	if index < 0 or not toggles[index] or not unlocked("p%d" % (index + 1)):
@@ -342,7 +345,9 @@ func has_passive(id: String) -> bool:
 	return id!="" and id in loadout.passives
 
 func speed() -> float:
-	return 205.0 * (1.0 + gear_speed + (0.4 if boost_speed > 0 else 0.0) + (0.65 if sprint > 0 else 0.0) + (0.25 if overdrive > 0 else 0.0))
+	var drive:=0.65
+	if loadout.get("vanguard",false): drive+=maxi(0,effective_rank("d")-1)*0.035
+	return 205.0 * (1.0 + gear_speed + (0.4 if boost_speed > 0 else 0.0) + (drive if sprint > 0 else 0.0) + (0.25 if overdrive > 0 else 0.0))
 
 func target_point(run, slot: String, cursor: Vector2) -> Vector2:
 	var offset: Vector2 = cursor - run.player
@@ -352,6 +357,13 @@ func target_point(run, slot: String, cursor: Vector2) -> Vector2:
 	return point.clamp(run.ARENA.position + Vector2.ONE * 16, run.ARENA.end - Vector2.ONE * 16)
 
 func preview_ready(run, slot: String, cursor: Vector2) -> bool:
+	if Vanguard.enabled(run):
+		if run.vanguard.ghost or slot not in Vanguard.KEYS or not unlocked(slot) or run.vanguard.slam_left>0: return false
+		if slot=="p1": return true
+		if charges[slot]<=0 or (energy<ability_cost(loadout[slot]) and not run.vanguard.powered(run)): return false
+		var target:=target_point(run,slot,cursor)
+		if slot=="f": return Vanguard.blink_target(run,target).distance_to(run.player)>1
+		return Vanguard.valid_point(run,target,22) if slot in ["x1","x2","x3"] else true
 	if extra.recasts.has(slot): return true
 	if laser_left > 0 and slot not in ["d", "f"]: return false
 	if slot not in active_slots() or charges[slot] <= 0 or not unlocked(slot): return false
@@ -367,6 +379,7 @@ func preview_ready(run, slot: String, cursor: Vector2) -> bool:
 	return ABILITIES[id].aim != "line" or (cursor - run.player).normalized() != Vector2.ZERO
 
 func cast(run, slot: String, cursor: Vector2) -> bool:
+	if Vanguard.enabled(run): return run.vanguard.cast(run,slot,cursor)
 	last_failure = "Not ready"
 	if run.state != "running": return false
 	if extra.recast(run, slot, target_point(run, slot, cursor)): return true
@@ -515,12 +528,14 @@ func step(run, delta: float) -> void:
 	sprint = maxf(0, sprint - delta)
 	for slot in active_slots():
 		var data: Dictionary = ABILITIES[loadout[slot]]
-		if charges[slot] < data.max:
+		var maximum: int=1 if loadout.get("vanguard",false) and slot=="w" and effective_rank(slot)<5 else int(data.max)
+		charges[slot]=mini(charges[slot],maximum)
+		if charges[slot] < maximum:
 			recharge[slot] -= delta
-			while recharge[slot] <= 0 and charges[slot] < data.max:
+			while recharge[slot] <= 0 and charges[slot] < maximum:
 				charges[slot] += 1
 				recharge[slot] += cooldown(slot)
-			if charges[slot] == data.max:
+			if charges[slot] == maximum:
 				recharge[slot] = 0.0
 	for salvo in salvos:
 		salvo.clock -= delta

@@ -1,5 +1,9 @@
 # MobaBot.io — art style schema 2.0
 
+## v0.18 Vanguard override
+
+Reuse the Painted/Base icons; no new bitmap assets or provenance claims. Fixed HUD mappings use existing hammer-adjacent/thrust, reactor, pulse-sentry, medic and converter silhouettes. World motion remains native: a steel-head/teal hammer anticipation and 90° stroke, body-slam compression trails and impact ring, abrupt blink endpoints with no travel streak, Ghost afterimages, descending W/R cores, and grounded support tripods. Reserve uses mint, recovery uses blue, and impact uses restrained brass. Reduced effects drops afterimages/secondary rays but retains hit areas, shield, totem ranges and timers. Practice terrain uses solid low-contrast capsule greyboxes whose thickness matches collision; this is not a finished environment-art pass.
+
 ## v0.17 motion override
 
 The title illustration is now two generated layers from our own v1 artwork: stationary empty foundry plus transparent robot, with small native hover and jet motion. Reduced effects freezes both variations. Exact prompts, source IDs and hashes are in `assets/menu/LAYERS_PROVENANCE.md`; originals remain. This supersedes the static-title rule below only. Do not claim a rigged or generated animation set.

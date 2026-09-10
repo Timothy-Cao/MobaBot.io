@@ -17,6 +17,7 @@ func revised(run) -> bool:
 	return run.exp != null and run.exp.revised
 
 func attack_range(run) -> float:
+	if Vanguard.enabled(run): return 125.0+run.kit.attack_range_bonus
 	if revised(run): return 530.0 + run.kit.attack_range_bonus
 	return (105.0 if run.exp != null and run.exp.class_id == "melee" else 310.0) + run.kit.attack_range_bonus
 
@@ -48,7 +49,7 @@ func target(run) -> Dictionary:
 func line_of_fire(run, point: Vector2) -> bool:
 	if not revised(run): return true
 	for wall in run.kit.extra.walls:
-		if Geometry2D.segment_intersects_segment(run.player,point,wall.a,wall.b)!=null: return false
+		if run.kit.extra.path_blocked(run.player,point,wall,6): return false
 	return true
 
 func closest(run, point: Vector2, in_range: bool = false, under_cursor: bool = false) -> Dictionary:
@@ -97,6 +98,7 @@ func prepare(run, delta: float) -> void:
 	if not enabled: return
 	cooldown = maxf(-delta, cooldown - delta)
 	auto_cooldown = maxf(-delta, auto_cooldown - delta)
+	if Vanguard.enabled(run) and run.vanguard.ghost: return
 	if windup >= 0: windup = maxf(0, windup-delta)
 	if run.kit.laser_left > 0 or run.kit.dash_left > 0:
 		windup=-1; return
@@ -130,6 +132,11 @@ func prepare(run, delta: float) -> void:
 func fire(run) -> void:
 	if not enabled: return
 	_fire_auto(run)
+	if Vanguard.enabled(run):
+		if not suppressed and not run.vanguard.ghost:
+			var victim := target(run)
+			if valid(victim) and run.player.distance_to(victim.pos)<=attack_range(run)+victim.radius: run.vanguard.swing(run,victim.pos)
+		return
 	if suppressed or cooldown > 0: return
 	if run.kit.laser_left > 0 or run.kit.dash_left > 0: return
 	var enemy := target(run)

@@ -16,6 +16,13 @@ static func spawn(run, type: String, point: Vector2 = Vector2.INF, bypass_cap: b
 static func beam_end(run, point: Vector2, direction: Vector2) -> Vector2:
 	var end:=point+direction*740
 	for wall in run.kit.extra.walls:
+		if wall.has("width"):
+			# March only the visual/damage ray to the same capsule used by movement.
+			for i in range(1,ceili(point.distance_to(end)/4)+1):
+				var probe: Vector2=point+direction*minf(i*4,point.distance_to(end))
+				if Geometry2D.get_closest_point_to_segment(probe,wall.a,wall.b).distance_to(probe)<=float(wall.width):
+					end=probe; break
+			continue
 		var hit: Variant=Geometry2D.segment_intersects_segment(point,end,wall.a,wall.b)
 		if hit!=null: end=hit
 	return end
@@ -44,7 +51,7 @@ static func step(run, e: Dictionary, delta: float) -> void:
 			if e.gunner_kind=="lancer":
 				e.beam_end=beam_end(run,e.pos,e.dir)
 				if Geometry2D.get_closest_point_to_segment(run.player,e.pos,e.beam_end).distance_to(run.player)<=24:
-					run.hurt_player(e.pos,"Arc lance",2)
+					run.hurt_player(e.pos,"Arc lance",2,"ground")
 				e.phase="beam"; e.clock=0.22
 			elif e.gunner_kind=="volley": e.phase="burst"; e.burst=0; e.clock=0
 			else: e.phase="recover"; e.clock=3.4

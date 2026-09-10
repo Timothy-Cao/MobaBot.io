@@ -46,6 +46,7 @@ static func can_place(kit, id: String, key: int) -> bool:
 	return true
 
 static func place(run, id: String, key: int, tier: int=0) -> bool:
+	if Vanguard.enabled(run): return false
 	var kit: MobaKit=run.kit
 	if not kit.flexible() or not can_place(kit,id,key): return false
 	var existing:=learned(kit,id)
@@ -85,6 +86,7 @@ static func place(run, id: String, key: int, tier: int=0) -> bool:
 	return true
 
 static func swap(kit, key_a: int, key_b: int) -> bool:
+	if kit.loadout.get("vanguard",false): return false
 	if key_a==key_b or (key_a in MOVEMENT)!=(key_b in MOVEMENT): return false
 	if key_a not in GENERAL+MOVEMENT or key_b not in GENERAL+MOVEMENT: return false
 	var a:=slot_at(kit,key_a); var b:=slot_at(kit,key_b)

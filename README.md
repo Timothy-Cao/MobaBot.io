@@ -1,8 +1,20 @@
-# MobaBot.io — 0.17 Field Test
+# MobaBot.io — 0.18 Vanguard
 
 A Windows-first, single-player survivor-like with MOBA mouse controls. Build a salvage robot through an eight-stage expedition: independent automatic fire, commanded attacks, aimed skills and deployed machines.
 
-One shared skill pool, 22 rounds, 34 active choices, 15 powered passives, a 48-node run mastery tree, eight equipment slots × five tiers, shops, Ascensions 0–5 and cleared-round checkpoints. Practice mode supports isolated loadout and enemy testing. The old three-round scene remains a regression fixture.
+New expeditions use the fixed **Vanguard** kit and non-modal skill progression. The 22-round route, 48-node run mastery tree, eight equipment slots × five tiers, shops, Ascensions 0–5 and cleared-round checkpoints remain. Existing 0.17 checkpoints retain their shared-pool rules rather than losing learned skills. Legacy abilities remain in Practice. Marshal, Racer and offline progression are not implemented.
+
+[0.18 changes, verification and known limits](docs/design/QA_18.md) supersedes the older shared-pool controls and progression below for **new runs**.
+
+## Current Vanguard controls
+
+Right click moves or approaches a target for hammer attacks. Left click swings the hammer; A provides attack-move. S stops movement and commanded attacks, never the permanent automatic gun. Q is Impact bolt, W Core strike, E Body slam, R Reactor drop. Hold D for Ghost drive; release it before casting. F blinks. Modules: 1 orbit near/far, 2 Bulwark, 3 Reserve, 4 Overclock well. T has no Vanguard ability.
+
+Start with gun/Q/D/F. Level and chest rewards queue alternating **upgrade / learn** opportunities. Click a small HUD **+**, or Ctrl + the skill key. The gun has its own clickable upgrade control. Choices do not pause combat; no ability replacement or binding swaps in this fixed kit. Tab toggles Build, Esc opens Settings, wheel zooms, L toggles camera lock and Space recenters.
+
+Practice uses a collapsible left dock. Choose a kit rank or individual rank, set player modifiers, and place enemy Point/Line/Ring/Cluster formations with a paused preview. Left click commits; Shift repeats; right click/Esc cancels. Tab resumes/configures. The Legacy laboratory preserves the older fitting tool. Practice grants no loot and cannot write campaign progress.
+
+The sections below retain 0.17 compatibility details; where controls/skills/progression differ, this section and QA_18 take precedence. Equipment, route and save locations are unchanged.
 
 [Next development brief](docs/design/NEXT_SESSION_BRIEF_17.md) · [Documentation index](docs/README.md) · [Current changes and audit](docs/design/QA_17.md) · [Visual ability review](docs/review/abilities.html) · [Prior damage study](docs/design/BALANCE_16.md) · [Quality bar](docs/design/QUALITY_BAR.md) · [Art schema](docs/design/ART_STYLE_SCHEMA.md)
 

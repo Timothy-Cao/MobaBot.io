@@ -16,6 +16,10 @@ var practice_enemy := "bumper"
 var practice_count := 10
 var practice_key := KEY_Q
 var practice_rank := 0
+var practice_page := "Build"
+var practice_formation := "Cluster"
+var practice_placing := false
+var practice_slot := "q"
 
 func _ready() -> void:
 	collection.load_profile()
@@ -56,6 +60,7 @@ func launch_expedition(resume: bool=false) -> void:
 		expedition.start(model,class_choice,ascension_choice)
 		BotKeyboard.enable(model)
 		expedition.enable_revision(model)
+		Vanguard.setup(model)
 		collection.apply_to(model)
 		model.health=model.max_health(); model.kit.energy=model.kit.energy_max()
 		banked_camp=-1
@@ -76,6 +81,12 @@ func confirm_new_run() -> void:
 
 func _physics_process(delta: float) -> void:
 	if model!=null and model.kit!=null: model.kit.extra.cursor=get_global_mouse_position()
+	if model!=null and model.exp!=null and model.exp.practice: delta*=model.vanguard.time_scale
+	if model!=null and Vanguard.enabled(model) and screen!="running": model.vanguard.ghost=false
+	art.placement_points.clear()
+	if practice_placing: art.placement_points.assign(PracticeSandbox.points(self,get_global_mouse_position()))
+	art.placement_radius=65 if practice_enemy=="foreman" else 36 if practice_enemy in ["rammer","artillery"] else 25
+	art.placement_valid=PracticeSandbox.placement_valid(self,art.placement_points) if practice_placing else false
 	super._physics_process(delta)
 	if model==null or model.exp==null: return
 	if screen=="result" and collection.message.begins_with("Could not save") and not ui.overlay.has_node("ExpeditionSaveError"):
@@ -90,6 +101,8 @@ func _physics_process(delta: float) -> void:
 		ExpeditionView.camp(self)
 
 func open_discovery() -> void:
+	if Vanguard.enabled(model):
+		Vanguard.progression(model); ui.update_hud(model); return
 	if model.exp.pending_chests<=0: return
 	model.exp.make_chest(model); model.state="chest"; screen="chest"
 	ExpeditionView.chest(self)
@@ -178,6 +191,24 @@ func _input(event: InputEvent) -> void:
 			elif event.keycode==ui.system_keys.settings: close_keyboard()
 		get_viewport().set_input_as_handled(); return
 	event=system_event(event)
+	if screen=="placement":
+		if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:
+			practice_placing=false; open_practice()
+		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_RIGHT:
+			practice_placing=false; open_practice()
+		return
+	if Vanguard.enabled(model) and event is InputEventKey:
+		if event.keycode==KEY_D and not event.pressed:
+			model.vanguard.ghost=false; model.kit.sprint=0
+			get_viewport().set_input_as_handled(); return
+		if screen=="running" and event.pressed and not event.echo:
+			for slot in Vanguard.KEYS:
+				if event.keycode!=Vanguard.KEYS[slot]: continue
+				if event.ctrl_pressed: Vanguard.spend(model,slot)
+				elif slot=="r" and not r_quickcast and not model.vanguard.ghost and model.kit.unlocked(slot): pending_cast_slot=slot
+				elif event.shift_pressed and slot in ["q","w","e","f","x1","x2","x3"] and not model.vanguard.ghost: pending_cast_slot=slot
+				else: model.vanguard.cast(model,slot,get_global_mouse_position())
+				get_viewport().set_input_as_handled(); return
 	if event is InputEventKey and event.keycode==KEY_TAB:
 		if event.pressed and not event.echo:
 			if screen=="practice": close_practice()
@@ -203,8 +234,23 @@ func _input(event: InputEvent) -> void:
 			_open_build(); get_viewport().set_input_as_handled(); return
 	super._input(event)
 
+func _unhandled_input(event: InputEvent) -> void:
+	if screen=="running" and Vanguard.enabled(model) and model.vanguard.ghost and event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_RIGHT:
+		pending_attack=false; pending_cast_slot=""; mouse_moving=true
+		model.command_move(get_global_mouse_position())
+		get_viewport().set_input_as_handled(); return
+	if screen=="placement" and event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:
+		if PracticeSandbox.place(self,get_global_mouse_position()) and not event.shift_pressed:
+			practice_placing=false; open_practice()
+		get_viewport().set_input_as_handled(); return
+	if screen=="running" and Vanguard.enabled(model) and event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT and pending_cast_slot=="" and not pending_attack:
+		model.vanguard.swing(model,get_global_mouse_position()); mouse_moving=false
+		get_viewport().set_input_as_handled(); return
+	super._unhandled_input(event)
+
 
 func open_keyboard() -> void:
+	if Vanguard.enabled(model): ui.announce("Fixed Vanguard kit",1); return
 	if model.exp!=null and model.exp.revised and model.state!="camp" and not model.exp.practice:
 		ui.announce("Arrange at camp",1.5); return
 	library_choice=""
@@ -286,24 +332,33 @@ func confirm_leave() -> void:
 	dialog.canceled.connect(dialog.queue_free)
 	add_child(dialog); dialog.popup_centered(Vector2i(440,140))
 
-func launch_practice() -> void:
+func launch_practice(legacy: bool=false) -> void:
 	seed_value=17017
 	super.start_run("salvage")
 	var expedition:=BotExpedition.new()
 	expedition.start(model,"ranged",0)
 	BotKeyboard.enable(model); expedition.enable_revision(model)
 	expedition.practice=true
+	if not legacy: Vanguard.setup(model,1)
+	PracticeSandbox.terrain(model)
 	model.health=model.max_health(); model.kit.energy=model.kit.energy_max()
 	model.events.clear(); ui.notice_time=0
 	free_center=model.player; _update_camera()
 	open_practice()
+	if legacy: PracticeView.draw(self)
 
 func open_practice() -> void:
 	_clear_held_movement(); pending_cast_slot=""; pending_attack=false
-	screen="practice"; PracticeView.draw(self)
+	model.vanguard.ghost=false
+	screen="practice"; PracticeSandbox.draw(self)
 
 func close_practice() -> void:
+	practice_placing=false
 	screen="running"; model.state="running"; ui.show_running()
+
+func _clear_held_movement() -> void:
+	super._clear_held_movement()
+	if Vanguard.enabled(model): model.vanguard.ghost=false; model.kit.sprint=0
 
 func practice_fit() -> void:
 	var existing:=BotKeyboard.learned(model.kit,practice_skill)
@@ -339,4 +394,8 @@ func practice_clear() -> void:
 	model.enemies.clear(); model.projectiles.clear(); model.hazards.clear(); model.pickups.clear(); model.supply_drops.clear()
 	model.kit.extra.fields.clear(); model.kit.extra.summons.clear(); model.kit.extra.blades.clear()
 	model.health=model.max_health(); model.kit.energy=model.kit.energy_max()
-	PracticeView.draw(self)
+	model.kit.salvos.clear(); model.kit.zones.clear(); model.kit.poison_trail.clear(); model.kit.summon.clear()
+	model.kit.cancel_laser(); model.kit.flame_left=0; model.kit.dash_left=0
+	model.vanguard.clear(); model.attacks.stop(model); model.events.clear(); art.effects.clear()
+	model.orbit.clear(); model.kit.extra.clear_combat(); PracticeSandbox.terrain(model)
+	PracticeSandbox.draw(self)

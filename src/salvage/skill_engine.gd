@@ -264,6 +264,7 @@ func route(point: Vector2, target: Vector2, radius: float) -> Vector2:
 	return target
 
 func path_blocked(point: Vector2, target: Vector2, wall: Dictionary, clearance: float) -> bool:
+	clearance+=maxf(0,float(wall.get("width",6))-6)
 	if not Rect2(point,target-point).abs().grow(clearance).intersects(Rect2(wall.a,wall.b-wall.a).abs().grow(1)): return false
 	if Geometry2D.segment_intersects_segment(point,target,wall.a,wall.b)!=null: return true
 	for endpoint in [wall.a,wall.b]:
@@ -281,10 +282,11 @@ func terrain_route(point: Vector2, target: Vector2, radius: float) -> Vector2:
 	if nearest.is_empty(): return target
 	var along: Vector2=(nearest.b-nearest.a).normalized()
 	var normal:=along.orthogonal()
+	var padding: float=radius+22+maxf(0,float(nearest.get("width",6))-6)
 	var best:=point; var cost:=INF
-	for end in [nearest.a-along*(radius+22),nearest.b+along*(radius+22)]:
+	for end in [nearest.a-along*padding,nearest.b+along*padding]:
 		for offset in [-1,0,1]:
-			var waypoint: Vector2=end+normal*offset*(radius+22)
+			var waypoint: Vector2=end+normal*offset*padding
 			if point.distance_to(waypoint)<4: continue
 			if path_blocked(point,waypoint,nearest,radius+6): continue
 			var score: float=point.distance_to(waypoint)+waypoint.distance_to(target)+(radius*4+100 if path_blocked(waypoint,target,nearest,radius+7) else 0)
@@ -295,10 +297,11 @@ func solid_point(before: Vector2, after: Vector2, radius: float) -> Vector2:
 	for wall in walls:
 		var closest: Vector2 = Geometry2D.get_closest_point_to_segment(after, wall.a, wall.b)
 		if Geometry2D.segment_intersects_segment(before, after, wall.a, wall.b) != null: return before
-		if after.distance_to(closest) < radius + 6:
+		var thickness: float=wall.get("width",6)
+		if after.distance_to(closest) < radius + thickness:
 			var normal := (before - closest).normalized()
 			if normal == Vector2.ZERO: normal = (wall.b - wall.a).orthogonal().normalized()
-			after = closest + normal * (radius + 7)
+			after = closest + normal * (radius + thickness + 1)
 	return after
 
 func step(run, delta: float) -> void:

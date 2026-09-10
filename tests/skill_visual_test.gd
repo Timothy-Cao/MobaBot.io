@@ -16,7 +16,7 @@ func check(value: bool, label: String) -> void:
 
 func snapshot(run: SalvageRun) -> int:
 	var engine: BotSkillEngine=run.kit.extra
-	return hash([run.player,run.health,run.kit.energy,run.spawn_rng.state,run.offer_rng.state,run.loot_rng.state,run.enemies,run.projectiles,engine.fields,engine.blades,engine.walls,engine.summons,engine.plates,engine.recasts])
+	return hash([run.player,run.health,run.kit.energy,run.spawn_rng.state,run.offer_rng.state,run.loot_rng.state,run.enemies,run.projectiles,engine.fields,engine.blades,engine.walls,engine.summons,engine.plates,engine.recasts,run.vanguard.constructs,run.vanguard.impacts,run.vanguard.ghosts])
 
 func fixture(id: String, rank_value: int) -> SalvageRun:
 	var run:=SalvageRun.new(715)
@@ -88,6 +88,22 @@ func review() -> void:
 					check(art.effects.size()<=(65 if reduced else 180),"Visual event pool stays bounded")
 					if showcase and rendered:
 						root.get_texture().get_image().save_png(folder+"/frame-%04d.png"%frame_number); frame_number+=1
+	for rank_value in [1,5,10]:
+		for reduced in [false,true]:
+			for slot in Vanguard.KEYS:
+				var run:=fixture("rocket",0)
+				BotKeyboard.enable(run); run.exp.enable_revision(run); Vanguard.setup(run,rank_value)
+				run.projectiles.clear(); run.kit.extra.walls.clear()
+				art.model=run; art.effects.clear(); art.reduced_effects=reduced
+				check(run.vanguard.cast(run,slot,run.player+Vector2(160,0)),"Vanguard visual cast")
+				for tick in range(30):
+					run.vanguard.tick(run,1.0/30)
+					if tick not in [0,6,15,29]: continue
+					var state:=snapshot(run)
+					art.queue_redraw(); await process_frame
+					if rendered: await RenderingServer.frame_post_draw
+					check(snapshot(run)==state,"Vanguard renderer stays read-only")
+					check(run.vanguard.impacts.size()<32,"Vanguard effects bounded")
 	for reduced in [false,true]:
 		art.reduced_effects=reduced; art.effects.clear()
 		var limit: int=65 if reduced else 180

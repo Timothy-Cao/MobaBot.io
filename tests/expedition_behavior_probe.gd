@@ -9,13 +9,22 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 	run.kit.onboarding=true; run.kit.starting_gun=true; run.attacks.enabled=true
 	BotExpedition.new().start(run,class_id,difficulty)
 	BotKeyboard.enable(run)
-	if "--revised" in OS.get_cmdline_user_args(): run.exp.enable_revision(run)
+	if "--revised" in OS.get_cmdline_user_args() or "--vanguard" in OS.get_cmdline_user_args(): run.exp.enable_revision(run)
+	if "--vanguard" in OS.get_cmdline_user_args(): Vanguard.setup(run)
 	ForgeEquipment.new().apply_to(run)
 	run.health=run.max_health()
 	var peak:=0
 	var max_us:=0
 	var samples: Array[int]=[]
-	for frame in range(240000 if "--revised" in OS.get_cmdline_user_args() else 120000):
+	for frame in range(240000 if run.exp.revised else 120000):
+		if Vanguard.enabled(run):
+			run.vanguard.ghost=false
+			var choices:=Vanguard.candidates(run,Vanguard.reward_kind(run))
+			if not choices.is_empty() and Vanguard.reward_kind(run)!="":
+				var preferred: String=choices[0]
+				for slot in ["q","w","p1","e","x1","x2","r","x3","gun","f","d"]:
+					if slot in choices: preferred=slot; break
+				Vanguard.spend(run,preferred)
 		if run.state in ["won","lost"]: break
 		if run.state=="upgrade":
 			var index:=0
@@ -64,6 +73,6 @@ func _run() -> void:
 		print("EXPEDITION_SOAK ",JSON.stringify(result))
 		quit(0 if result.state=="won" else 1)
 	else:
-		for id in (["ranged"] if "--revised" in OS.get_cmdline_user_args() else BotExpedition.CLASSES.keys()):
-			for policy in (["idle","active","basics"] if "--revised" in OS.get_cmdline_user_args() else ["idle","active"]): print("EXPEDITION_PROBE ",JSON.stringify(simulate(id,policy)))
+		for id in (["ranged"] if "--revised" in OS.get_cmdline_user_args() or "--vanguard" in OS.get_cmdline_user_args() else BotExpedition.CLASSES.keys()):
+			for policy in (["idle","active","basics"] if "--revised" in OS.get_cmdline_user_args() or "--vanguard" in OS.get_cmdline_user_args() else ["idle","active"]): print("EXPEDITION_PROBE ",JSON.stringify(simulate(id,policy)))
 		quit()

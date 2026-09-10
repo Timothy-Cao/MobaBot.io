@@ -23,6 +23,9 @@ var preview_slot := ""
 var preview_attack := false
 var cursor_world := Vector2.ZERO
 var cast_pose := 0.0
+var placement_points: Array[Vector2] = []
+var placement_valid := false
+var placement_radius := 25.0
 
 func impact_bank() -> float:
 	return 0.0 if reduced_effects else sin(visual_time * 38) * minf(shake, 5.0) * 0.008
@@ -91,6 +94,10 @@ func _draw() -> void:
 		_draw_caches()
 		_moba_ground()
 		ExpeditionArt.draw(self, model)
+		if Vanguard.enabled(model): VanguardArt.draw(self,model)
+		for point in placement_points:
+			draw_circle(point,placement_radius,Color(TEAL if placement_valid else CORAL,0.18))
+			draw_arc(point,placement_radius,0,TAU,32,TEAL if placement_valid else CORAL,2,true)
 		for patch in model.kit.poison_trail:
 			var opacity := minf(1.0, patch.life) * 0.28
 			draw_circle(patch.pos, 26, Color("77b9a5") * Color(1, 1, 1, opacity))
@@ -513,6 +520,7 @@ func _moba_ground() -> void:
 		var data: Dictionary = MobaKit.ABILITIES[kit.loadout[preview_slot]]
 		var radius := kit.cast_range(preview_slot)
 		var end := kit.target_point(model, preview_slot, cursor_world)
+		if Vanguard.enabled(model) and preview_slot=="f": end=Vanguard.blink_target(model,end)
 		var color := TEAL if kit.preview_ready(model, preview_slot, cursor_world) else CORAL
 		draw_arc(model.player, radius if radius > 0 else 38, 0, TAU, 80, Color(color, 0.3), 1.5, true)
 		if kit.loadout[preview_slot] in ["flame","sweep","tractor","repulsor"]:
@@ -529,7 +537,8 @@ func _moba_ground() -> void:
 				line_end = model.player + (cursor_world-model.player).normalized() * (440 if kit.extra.combo==2 else 230) * kit.area_scale(preview_slot)
 			if data.glyph in ["beam", "rail"]:
 				line_end = (model.player + (cursor_world - model.player).normalized() * radius).clamp(SalvageRun.ARENA.position + Vector2.ONE * 16, SalvageRun.ARENA.end - Vector2.ONE * 16)
-			var width: float = {"thrust":40,"returner":24}.get(kit.loadout[preview_slot],56 if data.glyph == "beam" else 8) * kit.area_scale(preview_slot)
+			var width: float = {"thrust":40,"body_slam":48,"returner":24}.get(kit.loadout[preview_slot],56 if data.glyph == "beam" else 8) * kit.area_scale(preview_slot)
+			if Vanguard.enabled(model) and preview_slot=="e": width=48
 			_line(model.player, line_end, Color(color, 0.20), width)
 			_line(model.player, line_end, color, 2)
 			if kit.loadout[preview_slot] == "rocket": draw_arc(line_end, 62 * kit.area_scale(preview_slot), 0, TAU, 40, Color(color, 0.5), 1, true)
@@ -539,8 +548,10 @@ func _moba_ground() -> void:
 				var side: Vector2=(end-model.player).normalized().orthogonal()*95*kit.area_scale(preview_slot)
 				_line(end-side,end+side,color,11)
 			var actual_radius: float = {"gravity":115,"strike":110,"artillery":110,"hop":90,"landing":150,"echo_dash":85}.get(kit.loadout[preview_slot],(135 if kit.loadout[preview_slot] == "nuke" else 90) if data.glyph == "target" else 22)
+			if Vanguard.enabled(model): actual_radius={"w":100,"r":170,"x1":125,"x2":125,"x3":125}.get(preview_slot,22)
+			if Vanguard.enabled(model) and preview_slot in ["x1","x2","x3"]: actual_radius=(125.0+kit.milestone(preview_slot)*20)/kit.area_scale(preview_slot)
 			draw_arc(end, actual_radius * kit.area_scale(preview_slot), 0, TAU, 48, color, 2, true)
-			if kit.loadout[preview_slot] == "strike": draw_arc(end,actual_radius*0.35*kit.area_scale(preview_slot),0,TAU,32,color,1,true)
+			if kit.loadout[preview_slot] == "strike": draw_arc(end,actual_radius*(0.4 if Vanguard.enabled(model) else 0.35)*kit.area_scale(preview_slot),0,TAU,32,color,1,true)
 			if kit.extra.recasts.has(preview_slot) and kit.extra.recasts[preview_slot].id == "crosswire": _line(kit.extra.recasts[preview_slot].pos,end,color,2)
 			_line(end - Vector2(8, 0), end + Vector2(8, 0), color, 2)
 			_line(end - Vector2(0, 8), end + Vector2(0, 8), color, 2)
