@@ -52,9 +52,11 @@ func refund(run) -> bool:
 	run.exp.sync_stats(run)
 	return true
 
-static func text(id: String) -> String:
+static func text(id: String, vanguard: bool=false) -> String:
 	var node: Dictionary = TREE[id]
 	var stat: String = node.stat
+	if vanguard and stat=="luck": return "+%d%% relative special-drop chance per rank. Shared cap: 5× base chance."%roundi(node.value*400)
+	if vanguard and stat=="magnet": return "+%d pickup radius per rank. Maximum: %d."%[node.value,Vanguard.TURRET_RANGE]
 	if stat == "shock": return "Impact bolt and Arc coil stun ordinary enemies for 0.35s."
 	if stat == "aftershock": return "Impact bolt releases a wider 12-damage aftershock."
 	var percent := stat in ["attack", "damage", "haste", "speed", "cooldown", "tenacity", "xp", "luck", "summon_damage", "duration"]

@@ -1,5 +1,13 @@
 # 0.16 — Focused design and damage pass
 
+## Rare supplies / bounded magnet · 10 September 2026
+
+Vanguard-only random special drops now use 10% of the preceding baseline. Energy rolls independently at 10% on previously eligible kills (instead of guaranteed); repair independently rolls at 10% on its existing eligible kills. Random credit caches: 1/250; speed/reset combined: 1/150. Amounts, XP showers, chest discovery and guaranteed 75-credit boss rewards are unchanged. Practice still grants no permanent loot; legacy drop rules are unchanged.
+
+Luck contributes four times its stat value to the relative special-drop bonus, capped at +400% (5× the new baseline). Formula: `old_baseline * .1 * (1 + min(4, max(0, luck)*4))`. One Lucky find rank (+.12 Luck) gives +48% relative chance: energy 10%→14.8%. At cap: energy/eligible repair 50%, random credits 2%, temporary boost 3.33%. Updated Vanguard mastery hover/inspection states the actual conversion and cap. Fixed seed 48052 over 1,200 eligible kills: baseline energy/repair 118/107; capped Luck 599/580. These verify kill wiring, not human reward feel. Behavior-probe seed remains unchanged.
+
+Magnet acquisition starts at 65 and retains ordinary utility/mastery growth, but cannot exceed Bulwark's normal 320-unit gun range. The upgraded 520-range special bullet does not expand this cap. Vanguard's legacy periodic global vacuum is explicitly disabled even if onboarding changes. Already-attracted pickups may finish flying; special supplies retain their tighter 48-unit onboarding reach. End-of-round cleanup remains deliberate and is not magnet reach.
+
 ## Stage pressure follow-up · 9 September 2026
 
 Owner reports Stage 1 is very fun but Stage 2 abruptly becomes easy, and main bosses lack durability/threat. Preserve Stage-1 waves/guardians and the current one-third Vanguard XP gain. Found a real scaling gap: only ordinary timed packs received the old +22%/stage HP adjustment; surge packs and ranged spawns bypassed it. Incoming damage had ascension/resistance modifiers but no stage growth.

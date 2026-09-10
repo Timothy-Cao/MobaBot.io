@@ -136,6 +136,7 @@ func execute() -> void:
 	rank_milestones()
 	new_milestones()
 	stage_and_gear()
+	rare_drops_and_magnet()
 	machine_gun_milestones()
 	await ui_checks()
 	print("VANGUARD: %d checks, %d failures"%[checks,failures]); quit(1 if failures else 0)
@@ -194,6 +195,40 @@ func machine_gun_milestones() -> void:
 	check(turret.shots==5 and run.vanguard.gun_shots==0,"Turret has independent firing counter")
 	check(is_equal_approx(run.projectiles.back().damage,3.4*Vanguard.GUN_POWER[10]*2),"Turret inherits MG damage")
 	check(is_equal_approx(turret.clock,0.5),"Turret inherits MG cadence")
+
+func rare_drops_and_magnet() -> void:
+	var run:=fresh(1)
+	run.drop_bonus=0
+	check(is_equal_approx(run.special_drop_chance(1),0.1),"Energy/repair eligible chance is ten percent")
+	check(is_equal_approx(run.special_drop_chance(1.0/25),0.004),"Credit cache baseline is 0.4 percent")
+	check(is_equal_approx(run.special_drop_chance(1.0/15),1.0/150),"Temporary boost baseline is one in 150")
+	run.drop_bonus=0.12
+	check(is_equal_approx(run.special_drop_chance(1),0.148),"One Lucky find rank raises chance relatively by 48 percent")
+	run.drop_bonus=100
+	check(is_equal_approx(run.special_drop_chance(1),0.5),"Mastery chance capped at five times baseline")
+	run.upgrades.magnet=0; run.exp.stats.magnet=0
+	check(run.magnet_radius()==65,"Starting pickup radius remains short")
+	run.upgrades.magnet=10; run.exp.stats.magnet=10000
+	check(run.magnet_radius()==Vanguard.TURRET_RANGE,"Even excessive mastery cannot exceed normal turret range")
+	run.kit.onboarding=false; run.vacuum_clock=0
+	run._drop(run.player+Vector2(321,0),1); run._pickup_step(0.1)
+	check(not run.pickups[0].pull,"No global vacuum or attraction beyond cap")
+	run._drop(run.player+Vector2(319,0),1); run._pickup_step(0.01)
+	check(run.pickups[1].pull,"Pickup inside cap attracts")
+	# Exercise kill wiring with a fixed seed, independent of the behavior-probe seed.
+	for bonus in [0.0,1.0]:
+		run=fresh(1); run.exp.practice=false; run.drop_bonus=bonus; run.loot_rng.seed=48052
+		var energy_count:=0; var repair_count:=0
+		for i in range(1200):
+			run.spawn_enemy(run.player+Vector2(500,0),2)
+			run.hit_enemy(run.enemies.back(),100000,"test")
+			for supply in run.supply_drops:
+				if supply.kind=="energy": energy_count+=1
+				if supply.kind=="repair": repair_count+=1
+			run.enemies.clear(); run.pickups.clear(); run.supply_drops.clear(); run.events.clear()
+		check(energy_count>(75 if bonus==0 else 500) and energy_count<(170 if bonus==0 else 700),"Energy kill-drop rate tracks tuned probability")
+		check(repair_count>(75 if bonus==0 else 500) and repair_count<(170 if bonus==0 else 700),"Repair roll independent of energy success")
+		print("SPECIAL_DROPS luck=%.1f eligible=1200 energy=%d repair=%d"%[bonus,energy_count,repair_count])
 
 func stage_and_gear() -> void:
 	var names: Array=[]

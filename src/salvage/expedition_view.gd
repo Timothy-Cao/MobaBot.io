@@ -159,8 +159,8 @@ static func mastery(ui,run) -> void:
 		ui._ability_icon(button,icon,Rect2(4,3,43,43))
 		ui._label(button,"%d/%d" % [run.mastery.rank_of(id),node.max],Rect2(12,38,36,15),10,ui.GOLD,true)
 		button.add_theme_stylebox_override("normal",ui._style(ui.PANEL,0,ui.GOLD if run.mastery.can_buy(id,run.level) else ui.EDGE,2))
-		button.tooltip_text=node.name+"\n"+ExpeditionTree.text(id)+("\nRequires "+ExpeditionTree.TREE[node.parent].name if node.parent!="" else "")
-		var inspect := func() -> void: detail.text=node.name+" · "+ExpeditionTree.text(id)
+		button.tooltip_text=node.name+"\n"+ExpeditionTree.text(id,Vanguard.enabled(run))+("\nRequires "+ExpeditionTree.TREE[node.parent].name if node.parent!="" else "")
+		var inspect := func() -> void: detail.text=node.name+" · "+ExpeditionTree.text(id,Vanguard.enabled(run))
 		button.mouse_entered.connect(inspect); button.focus_entered.connect(inspect)
 	if run.state=="camp":
 		ui._button("Reset points",Rect2(718,472,190,30),func() -> void:

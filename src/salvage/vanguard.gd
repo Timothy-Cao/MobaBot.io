@@ -6,6 +6,7 @@ const TOOLS := {"q":"rocket","w":"strike","e":"body_slam","r":"reactor_drop","d"
 const POWER := [1.0,1.0,1.08,1.16,1.24,1.60,1.77,1.94,2.11,2.28,3.30]
 const GUN_POWER := [1.0,1.0,1.07,1.14,1.21,1.50,1.64,1.78,1.92,2.06,2.40]
 const GUN_INTERVAL := [0.24,0.24,0.232,0.224,0.216,0.20,0.19,0.18,0.17,0.16,0.15]
+const TURRET_RANGE := 320.0
 
 static func gun_rank(run) -> int:
 	return mini(10,rank_of(run,"gun")+run.kit.rank_bonus)
@@ -313,7 +314,7 @@ func tick(run, delta: float) -> void:
 		if unit.id=="guard_bot":
 			if unit.clock<=0:
 				var enemy: Dictionary=run.nearest_enemy(unit.pos)
-				var reach: float=520 if gun_special(run,unit.shots) else 320
+				var reach: float=520 if gun_special(run,unit.shots) else TURRET_RANGE
 				if not enemy.is_empty() and Vector2(enemy.pos).distance_to(unit.pos)<reach:
 					var direction: Vector2=(Vector2(enemy.pos)-Vector2(unit.pos)).normalized()
 					if gun_bullet(run,unit.pos,direction,3.4*GUN_POWER[gun_rank(run)],reach,unit.shots,"sentry"):

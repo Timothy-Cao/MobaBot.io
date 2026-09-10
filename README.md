@@ -10,6 +10,8 @@ New expeditions use the fixed **Vanguard** kit and non-modal skill progression. 
 
 ## Current Vanguard controls
 
+Random special supplies are now one-tenth as frequent by default. Luck mastery provides stronger improvements, capped at 5× that new baseline. Magnet starts at 65 units and caps at 320 (the turret's normal range). Guaranteed boss rewards and end-of-round collection remain unchanged.
+
 Latest pressure pass: Stage-1 waves/guardians preserved; later enemy health/damage scale consistently, including surges and ranged units. Main bosses have 50× previous HP and main-boss encounters deal 25% more damage before stage scaling. XP remains at one-third. Equipment tiers now have distinctive names and silver/green/blue/violet/gold glow frames with tier pips; saved items/stats are unchanged. See BALANCE_16 for the tuning curve and boss-duration caution.
 
 Latest milestone pass: universal skill points learn **or** upgrade any eligible tool. All twelve tools (including MG/hammer) must have earned rank 5 before any rank 6+ purchase. Existing higher ranks are preserved; Practice presets bypass the gate. Future Vanguard XP gain is one-third of the preceding build; current XP/ranks are retained.

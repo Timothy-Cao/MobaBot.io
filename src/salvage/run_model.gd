@@ -353,7 +353,9 @@ func orbit_radius() -> float:
 	return 49.0 + rank_of("grinder") * 7.0
 
 func magnet_radius() -> float:
-	if exp != null: return 65 + rank_of("magnet") * 23 + exp.stats.get("magnet", 0)
+	if exp != null:
+		var reach: float=65+rank_of("magnet")*23+exp.stats.get("magnet",0)
+		return minf(Vanguard.TURRET_RANGE,reach) if Vanguard.enabled(self) else reach
 	if kit != null and kit.onboarding:
 		return 65.0 + rank_of("magnet") * 23.0 + mastery.rank_of("reach") * 35.0
 	if staged:
@@ -849,9 +851,9 @@ func hit_enemy(enemy: Dictionary, damage: float, source: String, knock: Vector2 
 			emit_event("kill",enemy.pos,{"enemy_kind":enemy.kind})
 			return
 		if kit != null and kit.onboarding:
-			if loot_rng.randf() < minf(0.20, (1.0 + drop_bonus) / 25.0):
+			if loot_rng.randf() < (special_drop_chance(1.0/25) if Vanguard.enabled(self) else minf(0.20, (1.0 + drop_bonus) / 25.0)):
 				_drop_supply(enemy.pos, "coins", 25)
-			if loot_rng.randf() < minf(0.25, (1.0 + drop_bonus) / 15.0):
+			if loot_rng.randf() < (special_drop_chance(1.0/15) if Vanguard.enabled(self) else minf(0.25, (1.0 + drop_bonus) / 15.0)):
 				_drop_supply(Vector2(enemy.pos) + Vector2(-20, 0), "speed" if loot_rng.randf() < 0.5 else "reset", 1)
 			if enemy.has("role"): _drop_supply(Vector2(enemy.pos) + Vector2(0, 24), "coins", 75)
 		if kit != null:
@@ -860,9 +862,11 @@ func hit_enemy(enemy: Dictionary, damage: float, source: String, knock: Vector2 
 			if staged and enemy.get("elite", false): count += 5
 			loot_shower(enemy.pos, count)
 			if staged and enemy.kind != 0:
-				_drop_supply(enemy.pos, "energy", 18 if enemy.kind != 2 else 50)
+				if not Vanguard.enabled(self) or loot_rng.randf()<special_drop_chance(1.0):
+					_drop_supply(enemy.pos, "energy", 18 if enemy.kind != 2 else 50)
 				if enemy.kind == 2 or (enemy.kind == 3 and kills % 3 == 0):
-					_drop_supply(Vector2(enemy.pos) + Vector2(22, 0), "repair", 1)
+					if not Vanguard.enabled(self) or loot_rng.randf()<special_drop_chance(1.0):
+						_drop_supply(Vector2(enemy.pos) + Vector2(22, 0), "repair", 1)
 		else:
 			_drop(enemy.pos, 12 if enemy.kind == 2 else (3 if enemy.kind == 1 else 1))
 		emit_event("kill", enemy.pos, {"enemy_kind": enemy.kind})
@@ -941,7 +945,7 @@ func _pickup_step(delta: float) -> void:
 		if pickup_merge_clock<=0:
 			pickup_merge_clock=0.5
 			if pickups.size()>=80: compact_pickups()
-	if staged and rank_of("magnet") >= 5 and not (kit != null and kit.onboarding):
+	if staged and rank_of("magnet") >= 5 and not (kit != null and kit.onboarding) and not Vanguard.enabled(self):
 		vacuum_clock -= delta
 		if vacuum_clock <= 0:
 			vacuum_clock += 15
@@ -1080,6 +1084,10 @@ func choose_upgrade(index: int) -> bool:
 	if staged and rank_of(id) > 0 and rank_of(id) % 5 == 0:
 		emit_event("milestone", player, {"id": id, "rank": rank_of(id)})
 	return true
+
+func special_drop_chance(old_baseline: float) -> float:
+	# Luck is primarily run mastery; its contribution is amplified, not its floor.
+	return clampf(old_baseline*0.1*(1.0+minf(4.0,maxf(0,drop_bonus)*4.0)),0,1)
 
 func _drop_supply(point: Vector2, kind: String, value: int) -> void:
 	# Separate bounded pool: supply rewards cannot consume XP or be converted to it.
