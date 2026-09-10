@@ -24,7 +24,7 @@ var time_scale := 1.0
 
 static func abilities() -> Dictionary:
 	return {
-		"body_slam":{"name":"Body slam","category":"active","icon":"thrust","glyph":"dash","cd":8.0,"max":1,"range":210.0,"aim":"line","cost":14,"text":"Collide, blast and push. Touch protection only. Rank 5: stun. Rank 10: full shield through impact + 1s."},
+		"body_slam":{"name":"Body slam","category":"active","icon":"thrust","glyph":"dash","cd":8.0,"max":2,"range":210.0,"aim":"line","cost":14,"text":"Two charges. Collide, blast and push. Touch protection only. Rank 5: stun. Rank 10: full shield through impact + 1s."},
 		"reactor_drop":{"name":"Reactor drop","category":"ultimate","icon":"nuke","glyph":"target","cd":28.0,"max":1,"range":620.0,"aim":"ground","cost":32,"text":"Delayed wide reactor impact. Rank 5: standing inside grants a shield. Rank 10: second impact and stun."},
 		"guard_bot":{"name":"Bulwark","category":"summon","icon":"pulse_sentry","glyph":"turret","cd":16.0,"max":1,"range":340.0,"aim":"ground","cost":20,"text":"A durable decoy with a weak gun and pulse. Draws up to four ordinary enemies. Redeploy replaces it."},
 		"reserve_totem":{"name":"Reserve","category":"summon","icon":"medic_sentry","glyph":"cross","cd":10.0,"max":1,"range":340.0,"aim":"ground","cost":16,"text":"Banks repair while you are away. Return to convert reserve into hull, then energy, then a shock wave. Redeploy clears reserve."},
@@ -51,7 +51,7 @@ static func setup(run, rank_value: int = 0) -> void:
 			kit.ranks[slot] = maxi(1,rank_value) if rank_value > 0 or slot in ["q","d","f"] else 0
 			run.upgrades["skill_"+slot] = kit.ranks[slot]
 			kit.charges[slot] = MobaKit.ABILITIES[TOOLS[slot]].max
-			if slot in ["q","w"]: kit.charges[slot]=2
+			if slot in ["q","w","e"]: kit.charges[slot]=2
 			kit.recharge[slot] = 0.0
 		if rank_value > 0 or slot in ["q","d","f"]: kit.discovered.append(slot)
 	run.upgrades.grinder = rank_value

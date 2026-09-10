@@ -2,6 +2,8 @@
 
 ## 0.18 second-playtest addendum (9 September 2026)
 
+Third-playtest follow-up: E stores two charges at its existing recharge/damage/energy cost. This increases available burst/escape storage, not sustained charge generation. Walls no longer absorb friendly or enemy shots in current rules; cover-based survivability changes even though no enemy damage values changed. Re-evaluate ranged pressure in human playtests.
+
 Owner-requested Vanguard tuning supersedes older values only for Vanguard: Q rank-one sequential recharge 4.0s, with two-charge storage (storage was already two). Its prior unmodified rank-one recharge was 2.7s, so sustained generation is 67.5% of the previous value; individual hit damage is unchanged. W storage increases from one to two at ranks 1–4; its recharge and damage are unchanged, so burst availability rises but steady-state generation does not. Existing rarity/mastery/rank reductions still apply.
 
 Close orbit rotates at 10.2 rather than 3.4 rad/s, and the per-blade hit lockout is 0.14 rather than 0.28s. Far mode stays 1.6 rad/s / 0.28s. Neither ratio is a reliable DPS multiplier: blade count, target size, orbit distance, movement and contact windows matter. Dummy meters are the intended owner comparison tool. Enemy stats, E/R damage and energy costs are unchanged in this pass.

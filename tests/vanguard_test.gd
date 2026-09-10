@@ -107,7 +107,15 @@ func execute() -> void:
 func playtest_refinements() -> void:
 	var run:=fresh(1)
 	run.exp.fast_cooldowns=false
-	check(run.kit.charges.q==2 and run.kit.charges.w==2,"Q/W start with two charges")
+	check(run.kit.charges.q==2 and run.kit.charges.w==2 and run.kit.charges.e==2,"Q/W/E start with two charges")
+	run.kit.charges.e=0; run.kit.recharge.e=run.kit.cooldown("e")
+	run.kit.step(run,run.kit.cooldown("e")+0.01)
+	check(run.kit.charges.e==1,"E refills one charge at a time")
+	run.kit.step(run,run.kit.cooldown("e"))
+	check(run.kit.charges.e==2,"E caps at two charges")
+	run.kit.charges.e=0; run.exp.fast_cooldowns=true; run.exp.finish_step(run,0.01)
+	check(run.kit.charges.e==2,"Practice instant recharge restores both E charges")
+	run.exp.fast_cooldowns=false
 	check(is_equal_approx(run.kit.cooldown("q"),4.0),"Rank-one Q recharges in four seconds")
 	run.kit.charges.q=0; run.kit.recharge.q=4
 	run.kit.step(run,3.9); check(run.kit.charges.q==0,"Q charge cannot refill early")
@@ -128,6 +136,19 @@ func playtest_refinements() -> void:
 		check(run.player.distance_to(target)<1 and not run.moving,"Projected wall destination reached without oscillation")
 	run.player=Vector2(480,300); run.attacks.attack_move(run,Vector2(700,300))
 	check(run.attacks.destination==Vector2(617,300) and run.attacks.cursor_point==Vector2(700,300),"Attack-move projects walking while preserving target acquisition point")
+	run=fresh(1); run.vanguard.gun_on=false
+	run.kit.extra.walls=[{"uid":-99,"a":Vector2(600,200),"b":Vector2(600,400),"width":65.0,"life":9999.0,"terrain":true}]
+	run.spawn_enemy(Vector2(750,300),3); var target: Dictionary=run.enemies.back(); target.warmup=0; target["dummy"]=true
+	run._add_projectile(run.player,Vector2(600,0),10,"bolt",0)
+	for i in range(40): run._projectile_step(1.0/60)
+	check(run.damage_dealt.get("bolt",0)==10,"Friendly projectile hits through thick wall")
+	check(run.attacks.line_of_fire(run,target.pos),"Attack acquisition ignores shot cover")
+	check(RangedThreats.beam_end(run,run.player,Vector2.RIGHT)==run.player+Vector2(740,0),"Enemy laser geometry ignores wall")
+	run._add_projectile(Vector2(750,300),Vector2(-600,0),1,"hostile",0)
+	var health_before: float=run.health
+	for i in range(40): run._projectile_step(1.0/60)
+	check(run.health<health_before,"Hostile projectile also passes through wall")
+	check(run.kit.extra.solid_point(Vector2(510,300),Vector2(620,300),16).x<535,"Bodies still collide with wall")
 	run=fresh(5)
 	run.vanguard.tick(run,0.1)
 	check(is_equal_approx(run.vanguard.orbit_angle,1.02),"Close orbit spins three times faster")

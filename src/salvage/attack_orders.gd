@@ -47,6 +47,7 @@ func target(run) -> Dictionary:
 	return {}
 
 func line_of_fire(run, point: Vector2) -> bool:
+	if run.kit!=null and run.kit.loadout.get("rules17",false): return true
 	if not revised(run): return true
 	for wall in run.kit.extra.walls:
 		if run.kit.extra.path_blocked(run.player,point,wall,6): return false

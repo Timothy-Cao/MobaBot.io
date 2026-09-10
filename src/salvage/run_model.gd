@@ -768,7 +768,7 @@ func _projectile_step(delta: float) -> void:
 		bullet.pos += Vector2(bullet.vel) * (minf(delta, maxf(0, bullet.life)) if bullet.kind in ["rail", "rocket"] or bullet.get("basic_attack", false) else delta)
 		bullet.life -= delta
 		var blocked := false
-		if kit != null:
+		if kit != null and not kit.loadout.get("rules17",false):
 			for wall in kit.extra.walls:
 				if kit.extra.path_blocked(bullet.prev,bullet.pos,wall,6) if wall.has("width") else Geometry2D.segment_intersects_segment(bullet.prev, bullet.pos, wall.a, wall.b) != null: bullet.life = 0; blocked = true; break
 		if blocked: continue

@@ -690,7 +690,7 @@ func _effect(effect: Dictionary) -> void:
 func _local_resources() -> void:
 	# Fixed logical-pixel size even at wide zoom; no numeric clutter over the actor.
 	var scale_value: float=1.0/maxf(0.35, get_viewport_transform().get_scale().x)
-	var origin: Vector2=model.player+Vector2(-23,-38)*scale_value
+	var origin: Vector2=model.player+Vector2(0,28)+Vector2(-23,5)*scale_value
 	draw_rect(Rect2(origin-Vector2.ONE*scale_value,Vector2(48,11)*scale_value),Color("0c1720bf"))
 	draw_rect(Rect2(origin,Vector2(46,4)*scale_value),Color("30404aaf"))
 	draw_rect(Rect2(origin,Vector2(46*clampf(model.health/model.max_health(),0,1),4)*scale_value),Color("94cfb9dc"))

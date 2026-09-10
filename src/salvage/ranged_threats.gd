@@ -15,6 +15,7 @@ static func spawn(run, type: String, point: Vector2 = Vector2.INF, bypass_cap: b
 
 static func beam_end(run, point: Vector2, direction: Vector2) -> Vector2:
 	var end:=point+direction*740
+	if run.kit.loadout.get("rules17",false): return end
 	for wall in run.kit.extra.walls:
 		if wall.has("width"):
 			# March only the visual/damage ray to the same capsule used by movement.

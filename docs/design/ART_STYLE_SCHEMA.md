@@ -2,6 +2,8 @@
 
 ## v0.18 Vanguard override
 
+Third playtest: keep the paired hull/energy strips below the player's feet (fixed screen-size bars with a body-space offset), not above the magnet. Walls remain physical movement obstacles but no longer visually clip current-rule projectiles or laser rays; tells and damaging ray endpoints must agree.
+
 Second playtest animation pass: Body slam carries a steel/brass leading shoulder arc and an expanding contact burst; W/R use finned canisters with bright cores and accelerating vertical descent. R's larger reactor detonates into a short central star, expanding paired rings and separated blast petals; secondary shards are reduced-effects optional. Preserve actual simulation radii, ground centers and threat layering. No generated animation pack or new bitmap dependency.
 
 Post-playtest HUD refinement: three compact translucent top readouts instead of a full-width slab, and an open-upper-edge ability dock with a shallow backing strip. Preserve skill icon sizes and horizontal key positions. Practice damage readouts use outlined cream totals, quiet steel DPS and brass floating hits; same semantics in Reduced effects. Do not add particles or screen shake to measurement feedback.

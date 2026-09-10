@@ -529,7 +529,7 @@ func step(run, delta: float) -> void:
 	sprint = maxf(0, sprint - delta)
 	for slot in active_slots():
 		var data: Dictionary = ABILITIES[loadout[slot]]
-		var maximum: int=2 if loadout.get("vanguard",false) and slot in ["q","w"] else int(data.max)
+		var maximum: int=2 if loadout.get("vanguard",false) and slot in ["q","w","e"] else int(data.max)
 		charges[slot]=mini(charges[slot],maximum)
 		if charges[slot] < maximum:
 			recharge[slot] -= delta

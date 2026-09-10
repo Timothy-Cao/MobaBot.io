@@ -404,6 +404,7 @@ func step(run, delta: float) -> void:
 		b.pos = Vector2(b.pos).move_toward(target, 650 * delta)
 		var blocked := false
 		for wall in walls:
+			if run.kit.loadout.get("rules17",false): break
 			if Geometry2D.segment_intersects_segment(before,b.pos,wall.a,wall.b) != null: blocked = true; break
 		if blocked: b.life = 0; continue
 		for enemy in run.enemies:

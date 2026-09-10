@@ -12,6 +12,8 @@ Right click moves or approaches a target for hammer attacks. Left click swings t
 
 Backtick (`) toggles the gun; MG shows OFF while disabled. Q/W each store two charges, with charge pips on the HUD; Q recharges in 4s at rank one before bonuses. Close orbit spins three times faster than before and hits more frequently. Camera lock defaults to L and can be rebound in Settings → Controls to keyboard or mouse (a mouse binding replaces that button's gameplay action).
 
+E also stores two charges. Walls stop movement, including E, but no longer stop friendly/enemy shots or enemy laser beams in the current expedition and Practice. Character hull/energy bars sit below the feet.
+
 Start with gun/Q/D/F. Level and chest rewards queue alternating **upgrade / learn** opportunities. Click a small HUD **+**, or Ctrl + the skill key. The gun has its own clickable upgrade control. Choices do not pause combat; no ability replacement or binding swaps in this fixed kit. Tab toggles Build, Esc opens Settings, wheel zooms, L toggles camera lock and Space recenters.
 
 Practice uses a collapsible left dock. Choose a kit rank or individual rank, set player modifiers, and place enemies in clusters with a paused preview (default: one target dummy). Left click commits; Shift repeats; right click/Esc cancels. Tab resumes/configures. The Legacy laboratory preserves the older fitting tool. Practice grants no loot and cannot write campaign progress.
