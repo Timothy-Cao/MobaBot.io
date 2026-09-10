@@ -2,6 +2,8 @@
 
 ## v0.18 Vanguard override
 
+Cursor family: original 40×40 SVGs in assets/cursors. Menu uses a cream/steel arrow with teal inset/brass tail; combat uses open steel/teal brackets around a precise center dot; armed aim/Practice placement uses a brass diamond. Native hardware cursor, no trails, bobbing or zoom scaling. Menu pointer returns over interactive controls; native text/resize cursors remain. Hotspots and actual-size light/dark contrast are verified by cursor_test.gd. No generated bitmap assets.
+
 Third playtest: keep the paired hull/energy strips below the player's feet (fixed screen-size bars with a body-space offset), not above the magnet. Walls remain physical movement obstacles but no longer visually clip current-rule projectiles or laser rays; tells and damaging ray endpoints must agree.
 
 Second playtest animation pass: Body slam carries a steel/brass leading shoulder arc and an expanding contact burst; W/R use finned canisters with bright cores and accelerating vertical descent. R's larger reactor detonates into a short central star, expanding paired rings and separated blast petals; secondary shards are reduced-effects optional. Preserve actual simulation radii, ground centers and threat layering. No generated animation pack or new bitmap dependency.

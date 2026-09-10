@@ -14,6 +14,8 @@ Backtick (`) toggles the gun; MG shows OFF while disabled. Q/W each store two ch
 
 E also stores two charges. Walls stop movement, including E, but no longer stop friendly/enemy shots or enemy laser beams in the current expedition and Practice. Character hull/energy bars sit below the feet.
 
+Custom native cursors: cream/teal menu pointer, open combat crosshair, brass diamond while aiming or placing Practice enemies. Interactive UI restores the menu pointer; click positions and camera controls are unchanged.
+
 Start with gun/Q/D/F. Level and chest rewards queue alternating **upgrade / learn** opportunities. Click a small HUD **+**, or Ctrl + the skill key. The gun has its own clickable upgrade control. Choices do not pause combat; no ability replacement or binding swaps in this fixed kit. Tab toggles Build, Esc opens Settings, wheel zooms, L toggles camera lock and Space recenters.
 
 Practice uses a collapsible left dock. Choose a kit rank or individual rank, set player modifiers, and place enemies in clusters with a paused preview (default: one target dummy). Left click commits; Shift repeats; right click/Esc cancels. Tab resumes/configures. The Legacy laboratory preserves the older fitting tool. Practice grants no loot and cannot write campaign progress.

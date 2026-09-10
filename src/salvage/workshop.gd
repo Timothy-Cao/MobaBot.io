@@ -48,6 +48,9 @@ var gear_return := "home"
 func _ready() -> void:
 	get_window().title = "MobaBot.io - 0.13 Minimal UI"
 	get_tree().auto_accept_quit = false
+	var cursor_theme:=BotCursor.new()
+	cursor_theme.host=self
+	add_child(cursor_theme)
 	add_child(camera)
 	camera.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
 	camera.enabled = false
