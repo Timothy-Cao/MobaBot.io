@@ -1,5 +1,19 @@
 # 0.16 — Focused design and damage pass
 
+## MG follow-up · 9 September 2026 (supersedes MG numbers below)
+
+| MG metric | Rank 1 | Rank 5 | Rank 10 |
+|---|---:|---:|---:|
+| Ordinary damage | 1.20 | 1.80 | 2.88 |
+| Shots/sec | 4.17 | 5.00 | 6.67 |
+| Average single-target DPS | 5.00 | 9.00 | 23.04 |
+| Bulwark gun average DPS | 4.25 | 7.65 | 19.58 |
+| Fire during E/D | No | Yes | Yes |
+
+Rank-ten averages include 4 ordinary + 1 double-damage round per five actual shots. Damage multipliers: 1/1.07/1.14/1.21/1.50/1.64/1.78/1.92/2.06/2.40. Shot intervals: .240/.232/.224/.216/.200/.190/.180/.170/.160/.150 seconds. Rank 5 buys 1.8× baseline sustained damage plus dash uptime; rank 10 buys 2.56× rank-five single-target DPS plus 450-range, four-target piercing shots. Normal range stays 265; Bulwark uses 320/520. No target means no shot/counter progress. Piercing density, misses, overkill, dash uptime and energy affect real output.
+
+Bulwark gun power and cadence now follow MG ranks instead of independently multiplying its own damage rank. Bulwark's own HP/pulse growth remains. Rank-one MG is intentionally slower than the preceding 7.5-DPS build (now 5 DPS); preserve active-skill/enemy numbers until owner review. The diagnostic `VANGUARD_POWER gun_dps` column reports ordinary-shot DPS (19.2 at rank ten), not the fifth-shot cycle average shown here.
+
 ## Vanguard rank-power pass · 9 September 2026
 
 Current Vanguard only; historical shared-pool formulas below remain regression references. Damage multipliers by earned rank 1–10: **1 / 1.08 / 1.16 / 1.24 / 1.60 / 1.77 / 1.94 / 2.11 / 2.28 / 3.30**. Gear's learned-rank bonus remains capped at 10.

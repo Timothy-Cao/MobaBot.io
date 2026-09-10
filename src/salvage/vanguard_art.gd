@@ -51,7 +51,11 @@ static func draw(c, run) -> void:
 			var spoke:=Vector2.from_angle(run.time*(0.7+grade*0.3)+i*TAU/(grade+1))
 			c.draw_line(p+spoke*18,p+spoke*23,c.GOLD,3,true)
 		if unit.id=="guard_bot":
-			c.draw_line(p,p+Vector2(24-5*clampf(unit.clock/0.8,0,1),0),c.PALE,9,true)
+			var barrel: Vector2=unit.get("aim",Vector2.RIGHT)
+			var cadence: float=0.8*Vanguard.GUN_INTERVAL[Vanguard.gun_rank(run)]/0.24
+			c.draw_line(p,p+barrel*(24-5*clampf(unit.clock/cadence,0,1)),c.PALE,9,true)
+			if Vanguard.gun_rank(run)>=10 and unit.get("shots",0)>0 and int(unit.shots)%5==0 and unit.clock>cadence-0.08:
+				c.draw_circle(p+barrel*25,4,c.GOLD)
 			c.draw_rect(Rect2(p+Vector2(-20,27),Vector2(40,4)),c.INK)
 			c.draw_rect(Rect2(p+Vector2(-20,27),Vector2(40*clampf(unit.hp/unit.max_hp,0,1),4)),tint)
 		elif unit.id=="reserve_totem":

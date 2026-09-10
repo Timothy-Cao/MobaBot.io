@@ -14,6 +14,8 @@ Right click moves or approaches a target for hammer attacks. Left click swings t
 
 Backtick (`) toggles the gun; MG shows OFF while disabled. Q/W each store two charges, with charge pips on the HUD; Q recharges in 4s at rank one before bonuses. Close orbit spins three times faster than before and hits more frequently. Camera lock defaults to L and can be rebound in Settings → Controls to keyboard or mouse (a mouse binding replaces that button's gameplay action).
 
+MG ranks 1–10 increase damage and fire rate. Before rank 5, E/body slam and held D/Ghost drive suspend its fire; rank 5 removes that restriction. Walking and S never disable it. At rank 10 every fifth successful shot deals double damage, reaches 450 (normally 265), and pierces up to four targets. Bulwark's gun shares MG damage/rate/milestones with its own shot counter and 320/520 range; its own skill ranks improve hull and pulse. Rank-10 MG tile shows the next shot in its five-shot cycle.
+
 E also stores two charges. Walls stop movement, including E, but no longer stop friendly/enemy shots or enemy laser beams in the current expedition and Practice. Character hull/energy bars sit below the feet.
 
 Custom native cursors: cream/teal menu pointer, open combat crosshair, brass diamond while aiming or placing Practice enemies. Interactive UI restores the menu pointer; click positions and camera controls are unchanged.

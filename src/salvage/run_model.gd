@@ -363,6 +363,7 @@ func orbit_hits() -> int:
 	return 1 + (milestone("grinder") if staged else rank_of("grinder"))
 
 func bolt_pierces() -> int:
+	if Vanguard.enabled(self): return 0 # Piercing belongs to the rank-ten fifth shot.
 	return milestone("power") if staged else rank_of("power")
 
 func shard_bounces() -> int:

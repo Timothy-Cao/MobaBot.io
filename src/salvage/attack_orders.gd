@@ -32,14 +32,15 @@ func damage(run) -> float:
 	return (7.0 if run.exp != null and run.exp.class_id == "melee" else 2.0) * SalvageProgression.multiplier(run.rank_of("power")) * (1 + run.kit.attack_damage_bonus) * (1.75 if run.kit.extra.empowered else 1.0)
 
 func auto_range(run) -> float:
+	if Vanguard.enabled(run): return 265
 	return 470.0 if run.kit.gun_sniper else 265.0
 
 func auto_interval(run) -> float:
-	if Vanguard.enabled(run): return 0.16*(1-0.1*int(mini(10,Vanguard.rank_of(run,"gun")+run.kit.rank_bonus)/5))/SalvageProgression.multiplier(run.rank_of("rapid"))/(1+run.kit.attack_speed_bonus)
+	if Vanguard.enabled(run): return Vanguard.GUN_INTERVAL[Vanguard.gun_rank(run)]/SalvageProgression.multiplier(run.rank_of("rapid"))/(1+run.kit.attack_speed_bonus)
 	return (0.8 if run.kit.gun_sniper else 0.16) / SalvageProgression.multiplier(run.rank_of("rapid")) / (1 + run.kit.attack_speed_bonus)
 
 func auto_damage(run) -> float:
-	if Vanguard.enabled(run): return 1.2*Vanguard.power(mini(10,Vanguard.rank_of(run,"gun")+run.kit.rank_bonus))*(1+run.kit.attack_damage_bonus)
+	if Vanguard.enabled(run): return 1.2*Vanguard.GUN_POWER[Vanguard.gun_rank(run)]*(1+run.kit.attack_damage_bonus)
 	return (7.0 if run.kit.gun_sniper else 1.5) * (0.8 if revised(run) else 1.0) * SalvageProgression.multiplier(run.rank_of("power")) * (1 + run.kit.attack_damage_bonus)
 
 func valid(enemy: Dictionary) -> bool:
@@ -173,20 +174,27 @@ func fire(run) -> void:
 	run.emit_event("heavy_shot" if revised(run) else "shot", run.player)
 
 func _fire_auto(run) -> void:
-	# Powered autonomous weapon ignores movement, attack orders, S and channels.
+	# Walking and S are independent; Vanguard needs rank five to fire during dashes.
 	if auto_cooldown > 0 or not run.passive_enabled("bolt") or run.projectiles.size() >= run.MAX_PROJECTILES: return
+	if Vanguard.enabled(run) and Vanguard.gun_paused(run): return
 	var enemy := closest(run, run.player)
-	if enemy.is_empty() or run.player.distance_to(enemy.pos) > auto_range(run) + enemy.radius: return
+	var reach: float=450 if Vanguard.enabled(run) and Vanguard.gun_special(run,run.vanguard.gun_shots) else auto_range(run)
+	if enemy.is_empty() or run.player.distance_to(enemy.pos) > reach + enemy.radius: return
 	var direction: Vector2 = (Vector2(enemy.pos) - run.player).normalized()
 	if direction == Vector2.ZERO: direction = Vector2.RIGHT
 	if run.kit.laser_left <= 0 and windup < 0: run.aim = direction
+	if Vanguard.enabled(run):
+		if not Vanguard.gun_special(run,run.vanguard.gun_shots): direction=direction.rotated(deg_to_rad([-2.5,0.0,2.5,-1.0,1.0][run.vanguard.gun_shots%5]))
+		if Vanguard.gun_bullet(run,run.player,direction,auto_damage(run),reach,run.vanguard.gun_shots,"bolt",run.bolt_pierces()):
+			run.vanguard.gun_shots+=1; auto_shots+=1; auto_cooldown=auto_interval(run)
+			run.emit_event("auto_shot",run.player)
+		return
 	if not run.kit.gun_sniper: direction = direction.rotated(deg_to_rad([-2.5, 0.0, 2.5, -1.0, 1.0][auto_shots % 5]))
 	var speed := 900.0 if run.kit.gun_sniper else 700.0
 	run._add_projectile(run.player + direction * 20, direction * speed, auto_damage(run), "bolt", run.bolt_pierces())
 	run.projectiles.back().life = (auto_range(run) - 20.0) / speed
 	run.projectiles.back().basic_attack = true
 	run.projectiles.back().autonomous = true
-	if Vanguard.enabled(run): run.projectiles.back().visual_rank=mini(10,Vanguard.rank_of(run,"gun")+run.kit.rank_bonus)
 	run.projectiles.back().sniper = run.kit.gun_sniper
 	auto_cooldown += auto_interval(run)
 	auto_shots += 1

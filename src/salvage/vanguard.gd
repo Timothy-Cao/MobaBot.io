@@ -4,6 +4,27 @@ extends RefCounted
 const KEYS := {"q":KEY_Q,"w":KEY_W,"e":KEY_E,"r":KEY_R,"d":KEY_D,"f":KEY_F,"p1":KEY_1,"x1":KEY_2,"x2":KEY_3,"x3":KEY_4}
 const TOOLS := {"q":"rocket","w":"strike","e":"body_slam","r":"reactor_drop","d":"sprint","f":"blink","p1":"orbit","x1":"guard_bot","x2":"reserve_totem","x3":"recovery_totem"}
 const POWER := [1.0,1.0,1.08,1.16,1.24,1.60,1.77,1.94,2.11,2.28,3.30]
+const GUN_POWER := [1.0,1.0,1.07,1.14,1.21,1.50,1.64,1.78,1.92,2.06,2.40]
+const GUN_INTERVAL := [0.24,0.24,0.232,0.224,0.216,0.20,0.19,0.18,0.17,0.16,0.15]
+
+static func gun_rank(run) -> int:
+	return mini(10,rank_of(run,"gun")+run.kit.rank_bonus)
+
+static func gun_special(run, fired: int) -> bool:
+	return gun_rank(run)>=10 and (fired+1)%5==0
+
+static func gun_paused(run) -> bool:
+	return gun_rank(run)<5 and (run.vanguard.ghost or run.vanguard.slam_left>0 or run.kit.dash_left>0)
+
+static func gun_bullet(run, origin: Vector2, direction: Vector2, damage: float, reach: float, fired: int, kind: String, pierce: int=0) -> bool:
+	if run.projectiles.size()>=run.MAX_PROJECTILES: return false
+	var special:=gun_special(run,fired)
+	var speed: float=950 if special else 700
+	run._add_projectile(origin+direction*20,direction*speed,damage*(2 if special else 1),kind,maxi(pierce,3) if special else pierce)
+	var bullet: Dictionary=run.projectiles.back()
+	bullet.life=(reach-20)/speed; bullet.basic_attack=true
+	bullet.autonomous=true; bullet.visual_rank=gun_rank(run); bullet.gun_special=special
+	return true
 
 static func power(rank_value: int) -> float:
 	return POWER[clampi(rank_value,1,10)]
@@ -18,6 +39,7 @@ static func hammer_roots(run) -> bool:
 	return hammer_rank(run)<10
 var ghost := false
 var gun_on := true
+var gun_shots := 0
 var orbit_angle := 0.0
 var pending: Dictionary = {}
 var hammer := -1.0
@@ -178,7 +200,7 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 		run.emit_event("v_slam",run.player); return true
 	if slot in ["x1","x2","x3"]:
 		constructs=constructs.filter(func(u): return u.id!=id)
-		constructs.append({"id":id,"pos":target,"life":5.0 if slot=="x3" else 35.0,"clock":0.3,"bank":0.0,"radius":125.0+kit.milestone(slot)*20,"hp":135.0*power(kit.effective_rank(slot)),"max_hp":135.0*power(kit.effective_rank(slot)),"slot":slot,"pulse":2.0,"hurt_clock":0.0})
+		constructs.append({"id":id,"pos":target,"life":5.0 if slot=="x3" else 35.0,"clock":0.3,"shots":0,"bank":0.0,"radius":125.0+kit.milestone(slot)*20,"hp":135.0*power(kit.effective_rank(slot)),"max_hp":135.0*power(kit.effective_rank(slot)),"slot":slot,"pulse":2.0,"hurt_clock":0.0})
 		poof(target,kit.effective_rank(slot)); return true
 	# 80ms anticipation: F can move the unreleased origin; world aim stays fixed.
 	pending={"slot":slot,"target":cursor,"left":0.08}
@@ -272,9 +294,12 @@ func tick(run, delta: float) -> void:
 		var rank_value: int=run.kit.effective_rank(unit.slot)
 		if unit.id=="guard_bot":
 			if unit.clock<=0:
-				unit.clock=0.8
 				var enemy: Dictionary=run.nearest_enemy(unit.pos)
-				if not enemy.is_empty() and Vector2(enemy.pos).distance_to(unit.pos)<320: run._add_projectile(unit.pos,(Vector2(enemy.pos)-Vector2(unit.pos)).normalized()*550,3.4*power(rank_value),"sentry",0)
+				var reach: float=520 if gun_special(run,unit.shots) else 320
+				if not enemy.is_empty() and Vector2(enemy.pos).distance_to(unit.pos)<reach:
+					var direction: Vector2=(Vector2(enemy.pos)-Vector2(unit.pos)).normalized()
+					if gun_bullet(run,unit.pos,direction,3.4*GUN_POWER[gun_rank(run)],reach,unit.shots,"sentry"):
+						unit.shots+=1; unit.clock=0.8*GUN_INTERVAL[gun_rank(run)]/0.24; unit["aim"]=direction
 			if unit.pulse<=0: unit.pulse=2.4; blast(run,unit.pos,unit.radius,6*power(rank_value),"bulwark",0,40)
 		elif unit.id=="reserve_totem":
 			if not inside: unit.bank=minf(86*power(rank_value),unit.bank+delta*6*power(rank_value))

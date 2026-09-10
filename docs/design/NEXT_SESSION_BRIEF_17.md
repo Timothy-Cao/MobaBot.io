@@ -6,14 +6,14 @@ Status: **start here for the latest owner direction.** This is the concise routi
 
 Suggested kickoff prompt:
 
-> Pull `main`, read `docs/design/NEXT_SESSION_BRIEF_17.md`, and begin Phase 0. Work in small verified milestones and stop for owner playtesting at each gate.
+> Inspect git status before syncing `main`; preserve local edits and player saves. Read AGENTS.md, README.md, QA_18.md and the latest BALANCE_16.md addenda. Continue from the owner's latest playtest feedback, not the historical Phase 0 roadmap below. Current Vanguard has separate hammer/MG rank tracks, rank-five dash firing for MG, and rank-ten fifth-shot piercing shared by Bulwark's gun. Run relevant tests and scripts/check.ps1 before coherent commits and authorized pushes. Keep simulation evidence separate from human feel. If a session switch becomes necessary, prepare a current-state handoff and tell the owner before asking them to open the new session.
 
 ## Read order and precedence
 
 Use this order when documents appear to disagree:
 
 1. **Safety/workflow:** [`AGENTS.md`](../../AGENTS.md).
-2. **What exists now:** root [`README.md`](../../README.md) and [`QA_17.md`](QA_17.md).
+2. **What exists now:** root [`README.md`](../../README.md) and [`QA_18.md`](QA_18.md); QA_17 remains the shared-pool regression reference.
 3. **What the owner wants next:** this brief.
 4. **Focused current specifications:** the task-specific documents routed below.
 5. **Detailed owner record:** [`OWNER_PLAYTEST_REQUEST_17.md`](OWNER_PLAYTEST_REQUEST_17.md).

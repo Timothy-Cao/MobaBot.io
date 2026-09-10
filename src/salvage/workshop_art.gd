@@ -162,7 +162,11 @@ func _draw() -> void:
 				_line(Vector2(-15,-4+i*8),Vector2(-26-4*sin(model.time*35),-4+i*8),CREAM,2)
 			draw_set_transform(Vector2.ZERO)
 		elif bullet.get("basic_attack", false):
-			if bullet.kind=="basic" and model.exp!=null and model.exp.revised:
+			if bullet.get("gun_special",false):
+				_line(bullet.pos-direction*40,bullet.pos,Color(TEAL,0.4),7)
+				_line(bullet.pos-direction*27,bullet.pos,GOLD,4)
+				_line(bullet.pos-direction*18,bullet.pos,CREAM,2)
+			elif bullet.kind=="basic" and model.exp!=null and model.exp.revised:
 				_line(bullet.pos-direction*35,bullet.pos,Color(GOLD,0.35),8)
 				_line(bullet.pos-direction*17,bullet.pos,GOLD,6)
 				_line(bullet.pos-direction*11,bullet.pos,CREAM,2)

@@ -102,8 +102,64 @@ func execute() -> void:
 	check(ForgeEquipment.valid_checkpoint(gear.pack_run(run)),"End-round save validates")
 	playtest_refinements()
 	rank_milestones()
+	machine_gun_milestones()
 	await ui_checks()
 	print("VANGUARD: %d checks, %d failures"%[checks,failures]); quit(1 if failures else 0)
+
+func machine_gun_milestones() -> void:
+	for rank_value in [1,4,5,9,10]:
+		for movement in ["ghost","slam","dash"]:
+			var run:=fresh(rank_value)
+			run.spawn_enemy(run.player+Vector2(90,0),3); run.enemies[0].warmup=0
+			if movement=="ghost": run.vanguard.ghost=true
+			elif movement=="slam": run.vanguard.slam_left=0.2
+			else: run.kit.dash_left=0.2
+			run.attacks.stop(run); run.attacks.fire(run)
+			check((run.attacks.auto_shots==1)==(rank_value>=5),"MG rank-five movement gate "+movement)
+			run.vanguard.ghost=false; run.vanguard.slam_left=0; run.kit.dash_left=0
+			run.attacks.auto_cooldown=0; run.attacks.fire(run)
+			check(run.attacks.auto_shots>0,"MG resumes automatically after dash")
+	var run:=fresh(10)
+	run.spawn_enemy(run.player+Vector2(100,0),3); run.enemies[0].warmup=0
+	for shot in range(1,11):
+		run.attacks.auto_cooldown=0; run.attacks.fire(run)
+		var bullet: Dictionary=run.projectiles.back()
+		check(bullet.gun_special==(shot%5==0),"Exactly every fifth successful shot is empowered")
+		check(bullet.pierce==(3 if shot%5==0 else 0),"Only empowered MG shots pierce")
+		check(is_equal_approx(bullet.damage,run.attacks.auto_damage(run)*(2 if shot%5==0 else 1)),"Empowered damage budget")
+	run.vanguard.gun_shots=4; run.projectiles.clear(); run.attacks.auto_cooldown=0
+	run.enemies[0].pos=run.player+Vector2(400,0)
+	run.attacks.fire(run)
+	check(run.projectiles.size()==1 and run.projectiles[0].gun_special,"Fifth shot acquires targets beyond ordinary range")
+	check(is_equal_approx(run.projectiles[0].life*Vector2(run.projectiles[0].vel).length()+20,450),"Empowered range is finite and exact")
+	run.enemies.clear(); run.projectiles.clear()
+	for distance in [70,130,190,250,310]:
+		run.spawn_enemy(run.player+Vector2(distance,0),3)
+		run.enemies.back().warmup=0; run.enemies.back().hp=10000; run.enemies.back().max_hp=10000
+	Vanguard.gun_bullet(run,run.player,Vector2.RIGHT,10,450,4,"bolt")
+	run._projectile_step(0.5)
+	check(run.enemies.filter(func(e): return e.hp<10000).size()==4,"Piercing shot hits four enemies then stops")
+	check(run.enemies[0].hp==9980,"Piercing hit applies double damage once")
+	run.projectiles.clear(); run.vanguard.gun_shots=4; run.vanguard.gun_on=false; run.attacks.auto_cooldown=0
+	run.attacks.fire(run); check(run.vanguard.gun_shots==4,"Toggle off preserves fifth-shot counter")
+	run.vanguard.gun_on=true
+	for i in range(run.MAX_PROJECTILES): run._add_projectile(run.player,Vector2.RIGHT,0,"bolt",0)
+	run.attacks.fire(run); check(run.vanguard.gun_shots==4,"Full projectile pool cannot consume fifth shot")
+	var previous_damage:=0.0; var previous_interval:=1.0
+	for rank_value in range(1,11):
+		run=fresh(rank_value)
+		check(run.attacks.auto_damage(run)>previous_damage and run.attacks.auto_interval(run)<previous_interval,"MG grows damage and speed every rank")
+		previous_damage=run.attacks.auto_damage(run); previous_interval=run.attacks.auto_interval(run)
+	run=fresh(1); run.upgrades.power=9
+	run.vanguard.cast(run,"x1",run.player+Vector2(40,0))
+	var turret: Dictionary=run.vanguard.constructs[0]
+	run.spawn_enemy(turret.pos+Vector2(100,0),3); run.enemies[0].warmup=0
+	for shot in range(1,6):
+		turret.clock=0; run.vanguard.tick(run,0.001)
+		check(run.projectiles.back().gun_special==(shot==5),"Rank-one turret inherits rank-ten MG milestone")
+	check(turret.shots==5 and run.vanguard.gun_shots==0,"Turret has independent firing counter")
+	check(is_equal_approx(run.projectiles.back().damage,3.4*Vanguard.GUN_POWER[10]*2),"Turret inherits MG damage")
+	check(is_equal_approx(turret.clock,0.5),"Turret inherits MG cadence")
 
 func rank_milestones() -> void:
 	var run:=fresh(1)
@@ -285,6 +341,16 @@ func ui_checks() -> void:
 		await process_frame; await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://output/vanguard/practice.png")
 		game.close_practice(); game.model.kit.extra.walls.clear()
+		for reduced in [false,true]:
+			game.art.reduced_effects=reduced; game.art.effects.clear()
+			game.model.enemies.clear(); game.model.projectiles.clear(); game.model.orbit.clear()
+			Vanguard.setup(game.model,10); game.model.player=Vector2(480,300)
+			game.model.vanguard.gun_shots=4
+			Vanguard.gun_bullet(game.model,game.model.player+Vector2(90,0),Vector2.RIGHT,game.model.attacks.auto_damage(game.model),450,4,"bolt")
+			Vanguard.gun_bullet(game.model,game.model.player+Vector2(90,45),Vector2.RIGHT,game.model.attacks.auto_damage(game.model),265,0,"bolt")
+			game._update_camera(); game.ui.update_hud(game.model)
+			await process_frame; await RenderingServer.frame_post_draw
+			root.get_texture().get_image().save_png("res://output/vanguard/gun-%s.png"%("reduced" if reduced else "normal"))
 		for rank_value in [1,5,10]:
 			for reduced in [false,true]:
 				game.art.reduced_effects=reduced; game.art.effects.clear()
