@@ -1,6 +1,8 @@
 # Demo charter — Survivor.io progression × League-like champion control
 
-Updated September 8, 2026. This is the current product brief. Stage 1, Levels 1–3 are the entire MVP. Older iteration notes are history where they conflict with this charter. Do not design a wider campaign, grind economy or additional hero roster before this demo is playtested.
+> **Historical v0.9 charter.** It is preserved for early design provenance, not current scope. For the implemented 0.17 contract use [QA_17.md](QA_17.md); for latest future direction use [NEXT_SESSION_BRIEF_17.md](NEXT_SESSION_BRIEF_17.md).
+
+Updated September 8, 2026. At v0.9 this was the current product brief: Stage 1, Levels 1–3 were the entire MVP. The constraints below describe that milestone and do not override the later eight-stage expedition or current class direction.
 
 ## The feeling
 

@@ -1,6 +1,8 @@
 # Workshop Salvager implementation
 
-## Latest — v0.8 demo / motion, shake and visual QA
+> **Historical record through v0.9.** For the current v0.17 implementation and handoff, see [QA_17.md](QA_17.md) and the [documentation index](../README.md).
+
+## v0.8 snapshot — demo / motion, shake and visual QA
 
 September 8, 2026. Reproductions, fixes, limitations and handoff: `QA_08.md`.
 
@@ -125,6 +127,6 @@ One arena; auto bolt gun; two common enemy behaviors and optional late boss; col
 - Controller left-stick movement exists; complete controller-only operation is not physically tested. Keyboard/mouse is the supported first-play path.
 - Reduced effects is an option, not a comprehensive accessibility certification. Working title is not legally cleared as a commercial brand.
 - No user decisions, credentials or paid assets block the playable. Next input: one combined reaction after a run about appealing art, satisfying interactions and confusing/annoying moments.
-# Current: MobaBot.io 0.9
+# v0.9 snapshot
 
-The latest user request supersedes earlier scope exclusions for equipment and free-camera controls. See README.md and QA_09.md for the authoritative implemented behavior, test evidence and remaining human decisions. Historical entries below describe previous builds, not current defaults.
+At v0.9, the then-latest user request superseded earlier scope exclusions for equipment and free-camera controls. `QA_09.md` is authoritative only for that historical milestone; use `QA_17.md` for current implemented behavior. Historical entries below describe previous builds, not current defaults.

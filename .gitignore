@@ -4,6 +4,10 @@
 # Local portable editor (downloaded by setup.ps1)
 .tools/
 
+# Local verification dependencies
+node_modules/
+.venv/
+
 # Builds
 builds/
 exports/

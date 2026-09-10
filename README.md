@@ -4,7 +4,7 @@ A Windows-first, single-player survivor-like with MOBA mouse controls. Build a s
 
 One shared skill pool, 22 rounds, 34 active choices, 15 powered passives, a 48-node run mastery tree, eight equipment slots × five tiers, shops, Ascensions 0–5 and cleared-round checkpoints. Practice mode supports isolated loadout and enemy testing. The old three-round scene remains a regression fixture.
 
-[Current changes and audit](docs/design/QA_17.md) · [Visual ability review](docs/review/abilities.html) · [Prior damage study](docs/design/BALANCE_16.md) · [Quality bar](docs/design/QUALITY_BAR.md) · [Art schema](docs/design/ART_STYLE_SCHEMA.md)
+[Next development brief](docs/design/NEXT_SESSION_BRIEF_17.md) · [Documentation index](docs/README.md) · [Current changes and audit](docs/design/QA_17.md) · [Visual ability review](docs/review/abilities.html) · [Prior damage study](docs/design/BALANCE_16.md) · [Quality bar](docs/design/QUALITY_BAR.md) · [Art schema](docs/design/ART_STYLE_SCHEMA.md)
 
 ## Play
 
