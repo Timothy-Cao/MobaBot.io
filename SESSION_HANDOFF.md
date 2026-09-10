@@ -6,6 +6,8 @@ Updated 10 September 2026. Stable entry point: update this file instead of inven
 
 The owner wants to play while the next session learns the game, then compare logs with their impressions. Follow [PLAYTEST_PROTOCOL](docs/design/PLAYTEST_PROTOCOL.md). Freeze code/assets during the test. Do not restart the game, pull over the tested checkout, reset saves or tune numbers mid-run. No outstanding blocker prevents testing.
 
+The owner's current experience north star is now recorded in [GAMEPLAY_VISION_18](docs/design/GAMEPLAY_VISION_18.md): difficult combat should reward situational full-kit use, contextual alternatives and changing action order; power growth should create more good decisions rather than a universal rotation. It also preserves Reserve while marking Bulwark and Overclock as module concepts to reconsider after the frozen Vanguard test, not immediate implementation instructions.
+
 Latest gameplay milestone: `c358496` (pressure/audio). The handoff-only follow-up adds documentation and result metadata, not balance changes. Use `git log -1 --oneline` and `git status --short` to record the actual checkout. New result build tag: `vanguard-18-pressure-audio`, schema 2. This tag identifies the gameplay family, not an exact commit.
 
 ## What is actually playable
@@ -19,7 +21,7 @@ Latest gameplay milestone: `c358496` (pressure/audio). The handoff-only follow-u
 ## Read order and navigation
 
 1. `AGENTS.md`, this file, [playtest protocol](docs/design/PLAYTEST_PROTOCOL.md).
-2. [README](README.md), newest sections of [QA_18](docs/design/QA_18.md), [QUALITY_BAR](docs/design/QUALITY_BAR.md).
+2. [Gameplay vision](docs/design/GAMEPLAY_VISION_18.md), [README](README.md), newest sections of [QA_18](docs/design/QA_18.md), [QUALITY_BAR](docs/design/QUALITY_BAR.md).
 3. [Pressure/audio](docs/design/PRESSURE_AUDIO_18.md), [reward reveal](docs/design/REWARD_REVEAL_18.md), latest [balance addenda](docs/design/BALANCE_16.md).
 4. Read targeted source/tests while the owner plays. `run_model.gd` + `vanguard.gd`: combat; `expedition.gd`: route; `field_enemies.gd` + `ranged_threats.gd`: specialists; `workshop.gd`: orchestration/results; `synth_audio.gd` + `combat_feedback.gd`: feedback; `forge_equipment.gd`: save ownership. Files are under `src/salvage/`.
 5. QA_17 and numbered research are compatibility/history. Do **not** restart the old Phase 0 roadmap. Follow focused references when relevant, not every historical proposal.

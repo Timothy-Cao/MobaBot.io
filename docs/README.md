@@ -6,6 +6,7 @@ The current playable version is **0.18 Vanguard**, with two-minute survival roun
 
 - [Project README](../README.md) — setup, controls, game scope, progression, saves and verification commands.
 - [Current session handoff](../SESSION_HANDOFF.md) — first read: actual build, next action, verification and risks.
+- [Gameplay vision](design/GAMEPLAY_VISION_18.md) — current owner north star for full-kit decisions, contextual power, progression, variance and Vanguard module reconsideration.
 - [Playtest protocol](design/PLAYTEST_PROTOCOL.md) — frozen-build testing, read-only logs, targeted questions and reusable review notes.
 - [0.18 QA](design/QA_18.md) and [pressure/audio audit](design/PRESSURE_AUDIO_18.md) — current implementation evidence and limits.
 - [0.17 QA](design/QA_17.md) and [archived brief](design/NEXT_SESSION_BRIEF_17.md) — compatibility behavior and earlier planning context.
