@@ -42,21 +42,19 @@ Equal usage is not the goal. Situational purpose, understandable tradeoffs and m
 
 ## Current playtest feedback and combat hypotheses
 
-These are the owner's latest observations and ideas. The hull-bar issue is direct presentation feedback; guided Q and restored projectile cover are proposals to evaluate together rather than implemented behavior.
+These are the owner's latest observations and ideas. The hull-bar issue is direct presentation feedback; restored projectile cover is a proposal rather than implemented behavior. A briefly proposed guided hold-Q has been withdrawn: normal-mode Impact Bolt should remain simple and straight.
 
 ### Make the player hull bar substantially easier to read
 
 The world-space hull bar over/below the player is currently too small. Increase its width, height, contrast and depleted-background clarity enough to read health peripherally at normal combat zoom and maximum zoom-out. Low-health state changes should remain visible without relying only on color, but the bar must not obscure the robot, aim direction or nearby collision. Check actual gameplay size, HUD scaling and Reduced effects rather than approving a magnified fixture.
 
-### Explore tap-versus-hold Impact Bolt
+### Keep normal-mode Impact Bolt simple
 
-Preserve tap Q as the immediate, reliable straight Impact Bolt. Candidate hold behavior: launch on press, then let the player hold Q to keep the missile alive for up to roughly twice its normal flight time and gradually steer it toward the mouse direction. Use a capped turn rate rather than snapping, perfect homing or automatic pathfinding. The intended payoff is deliberate long-range routing—especially bending around cover—not a guaranteed hit.
-
-Guidance needs an opportunity cost so holding is not strictly better than tapping. A leading option is to keep movement and passive systems active while guidance occupies the hammer and other main active casts; releasing Q commits the current trajectory and ends guidance. Decide whether D/F cancel or coexist, whether the camera needs a bounded look-ahead/offscreen marker, and whether long-distance damage stays unchanged before implementation. Test tap responsiveness, tight/large turns, missing a moving enemy, two simultaneous Q charges, wall contact, screen edges and loss of the projectile.
+The owner withdraws the guided hold-Q proposal. Preserve the immediate straight rocket as Vanguard's normal Q rather than adding manual flight control. Long-range and alternate-fire complexity belongs in the temporary turret form described below.
 
 ### Reconsider permeable projectile cover
 
-The owner now leans toward making projectiles collide with walls again. Treat this as the latest desired direction for a future prototype; the current build still allows shots through walls. A first coherent rule should make discrete friendly and hostile projectiles respect thick cover symmetrically. Impact Bolt should explode on wall contact unless the player guides it around the obstruction, giving held Q a distinct purpose.
+The owner now leans toward making projectiles collide with walls again. Treat this as the latest desired direction for a future prototype; the current build still allows shots through walls. A first coherent rule should make discrete friendly and hostile projectiles respect thick cover symmetrically. Normal Impact Bolt should explode on wall contact.
 
 Define ground-targeted W/R, continuous beams, enemy targeting, turret acquisition and boss attacks separately instead of calling every effect a projectile. Enemies should not repeatedly fire ordinary shots through known blocking cover, previews must communicate legal paths, and collision must use the same wall thickness the player sees. Restored cover should create lane, flank and safety decisions without enabling effortless permanent hiding or making fights stall.
 
@@ -80,28 +78,50 @@ Vision pressure should change positioning and target priority, not create unavoi
 
 These are owner hypotheses for the next design discussion, not locked replacements and not approval to change the current playtest build before feedback.
 
+The latest candidate 1–4 layout is: 1 Orbit unchanged; 2 energy-regeneration totem; 3 stored-repair Reserve; 4 temporary turret/siege form. This removes Bulwark's autonomous firing body from Vanguard and keeps independent turret damage as a stronger fit for Marshal.
+
 ### Reserve — preserve the distinct idea
 
-The stored-repair module is promising because it asks the player to leave its area, let it accumulate value and deliberately return. Preserve that leave-and-return identity. Test whether the stored amount, readiness and hull → energy → overflow conversion are understandable and whether returning creates a real route/positioning decision.
+The stored-repair module is promising because it asks the player to leave its area, let it accumulate value and deliberately return. Preserve that leave-and-return identity. Its presentation must clearly communicate three states:
 
-### Bulwark — question the free value
+- **Charging while away:** a visible meter/fill motion grows and energy flows into the totem.
+- **Draining while occupied:** stored value visibly transfers toward the player and the meter falls.
+- **Empty while occupied:** the housing becomes visibly dormant and uses a slow, restrained cue that teaches the player to step away before it can charge again.
 
-The turret currently appears strictly beneficial once deployed. Reconsider it if placement does not create a meaningful cost, risk or timing choice. Possible directions include a more conditional defensive tool, a deployable with a real commitment, or a different module entirely. Do not remove it solely from description-level feedback; first measure whether target selection, placement and aggro actually create enough decisions in play.
+Test whether stored amount and readiness can be understood without a tooltip. Moving/replacing still clears its store. Reactivating the deployed totem should instead detonate and remove it, trading its remaining support value for damage; exact damage scaling, trigger confirmation and cooldown timing remain open.
 
-### Overclock — explore a committed burst stance instead of a free aura
+### Replace Bulwark with an energy-regeneration totem
 
-Candidate concept: replace the deployable well with a toggle or activation that anchors the player for roughly two seconds. During that committed window, the player receives dramatically faster cooldown recovery (initial thought: about 75% reduction), rapid/full energy recovery and roughly half energy costs. Afterward, impose a temporary active-ability lockout while preserving escape dashes, creating a burst-now/recover-later choice.
+Remove the autonomous shooting/aggro turret from Vanguard's candidate kit. In slot 2, explore a totem that supplies very fast energy regeneration inside a clearly visible area but does not modify cooldowns. This supports a sustained casting position without supplying free remote damage.
 
-The exact interpretation and values remain open. Before prototyping, decide:
+Like Reserve, pressing its key again while deployed should detonate and remove it for damage. Detonation must sacrifice meaningful remaining support time or stored value so it is a choice rather than a free expiry explosion. Define lifetime, aura size, whether it is targetable, recharge timing, detonation scaling and whether repositioning is allowed before implementation. Follow the existing ownership rule unless deliberately changed: a non-aggro support construct is untargetable and expires rather than drawing attacks.
 
-- whether the player may cast while rooted or the root is a preparation channel;
-- which abilities—including R, D, F and modules—receive the benefit;
-- the post-window lockout duration and whether it blocks the hammer;
-- whether taking damage interrupts it and whether it grants any protection;
-- whether early cancellation is allowed and what cost it retains;
-- how to prevent a solved, mandatory rotation while keeping the burst satisfying.
+Do not let the two detonations become interchangeable damage buttons. Their output or secondary behavior should reflect what is being sacrificed—for example, remaining energy-support time versus stored Reserve charge—and each should have a situation where retaining the field is preferable.
 
-The intended identity is **voluntary commitment for exceptional output followed by vulnerability**, not a universally correct cooldown button.
+### Replace Overclock well with a temporary turret form
+
+Slot 4 becomes a high-damage siege decision rather than a deployable cooldown aura. Activation takes about one second and visibly transforms Vanguard into a planted turret. The player cannot move under their own control while transformed. Leaving takes about 0.5 seconds; the mode ends automatically after at most ten seconds. A second slot-4 press should begin the early exit unless later input testing finds a clearer command.
+
+Turret form temporarily replaces Q/W/E/R:
+
+| Input | Turret-form action | Intended decision |
+| --- | --- | --- |
+| Q | Rapid, high-spread stream of small explosive missiles at roughly the permanent machine gun's cadence. The normal passive machine gun is disabled during the form. | Sustained damage and distributed crowd pressure when the player has found a safe firing position. |
+| W | Much longer-range bombardment with roughly a two-second recharge. | Reach priority targets or distant packs while immobile. Exact projectile/ground-target and wall rules remain open. |
+| E | Channeled self-repair; no other action can be performed during the channel. | Sacrifice the siege damage window to recover when remaining planted is safer than exiting. |
+| R | Large high-damage local EMP/pulse on roughly a 30-second cooldown. | Emergency answer when a swarm reaches the immobile player; not a routine part of every form. |
+
+Q's initial damage target is approximately 1.5 times the combined normal-Q plus permanent-gun single-target output over the same comparison window. Balance this as a time-window budget, not “each miniature missile deals 1.5×”: individual missiles should be substantially smaller and weaker. Measure splash separately and use small radius, falloff or another cap so a modest single-target increase does not become an uncontrolled crowd multiplier.
+
+The owner is open to reducing some normal-form damage because siege form may become a major damage source. Do this only after measuring achievable siege uptime and damage in representative encounters; entering an unsafe form should not be required merely to recover power removed from the dependable normal kit.
+
+The transformation should show chassis anchoring, weapon deployment and a clear completion frame without delaying control beyond the real one-second rule. The action bar should visibly change to the turret Q/W/E/R set, and the turret should track mouse aim without implying it can move. Existing passives may continue unless a specific interaction proves degenerate; the permanent gun explicitly does not. D/F, hammer, other modules, interruption by damage, protection during transformation, W targeting and cooldown persistence across form changes all require decisions before implementation. R's 30-second cooldown should not reset by leaving and re-entering.
+
+The intended test is whether the player recognizes a genuinely safe damage opportunity, commits, then chooses among sustained Q, distant W, defensive E, emergency R or early exit. If the correct answer is always to enter on cooldown and hold Q for ten seconds, the form has failed the gameplay vision.
+
+### Conveyor belts as terrain synergy
+
+Explore clearly directional conveyor belts in selected maps or Practice. A planted turret cannot walk, but a belt may carry its world position, creating planned firing routes, forced exits and unusual siege angles. Conveyors may also affect enemies if that produces predictable positioning play. Their direction, speed, start/end and collision consequences must be obvious before commitment; they must not drag the player into an unavoidable hazard or softlock them against terrain. Test ordinary movement, E/body slam, F, constructs, pickups and enemy routing separately rather than assuming every object rides the belt.
 
 ## Evidence needed from future tests
 
