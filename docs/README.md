@@ -1,18 +1,20 @@
 # MobaBot.io documentation
 
-The current playable version is **0.17 Field Test**. `QA_17.md` supersedes earlier class, pacing, skill-replacement and hold-Tab rules. Older iteration documents remain useful as implementation history and regression context, but are not the current game contract unless a current document carries a decision forward.
+The current playable version is **0.18 Vanguard**, with two-minute survival rounds. Root SESSION_HANDOFF.md routes current work; QA_18 and its latest pressure/audio addenda supersede the 0.17 shared-pool build. Older iteration documents are history/regression context, not instructions to implement every proposal.
 
 ## Start here
 
 - [Project README](../README.md) — setup, controls, game scope, progression, saves and verification commands.
-- [Next session brief](design/NEXT_SESSION_BRIEF_17.md) — **first read for new work:** latest decisions, current-versus-target distinctions, precedence, phased work order, stop gates and task routing.
-- [0.17 QA and handoff](design/QA_17.md) — authoritative current behavior, measurements, verification evidence and open limits.
+- [Current session handoff](../SESSION_HANDOFF.md) — first read: actual build, next action, verification and risks.
+- [Playtest protocol](design/PLAYTEST_PROTOCOL.md) — frozen-build testing, read-only logs, targeted questions and reusable review notes.
+- [0.18 QA](design/QA_18.md) and [pressure/audio audit](design/PRESSURE_AUDIO_18.md) — current implementation evidence and limits.
+- [0.17 QA](design/QA_17.md) and [archived brief](design/NEXT_SESSION_BRIEF_17.md) — compatibility behavior and earlier planning context.
 - [Quality bar](design/QUALITY_BAR.md) — editable acceptance contract, dated owner feedback and human-review gates.
 - [Ability review](review/abilities.html) — interactive catalog for the 49 current ability icons.
 
-The shortest safe instruction for another session is: **“Pull `main`, read `docs/design/NEXT_SESSION_BRIEF_17.md`, and begin Phase 0.”**
+The shortest safe instruction for another session is: **“Read SESSION_HANDOFF.md and follow the playtest protocol. Inspect Git status; don't change the build while I test.”**
 
-## Focused specifications for upcoming work
+## Focused proposals and historical direction (not automatic next tasks)
 
 - [Practice sandbox redesign research](design/PRACTICE_SANDBOX_RESEARCH_17.md) — owner-requested cleanup direction informed by League Practice Tool, BTD6 Sandbox and Warframe Simulacrum: a persistent left dock, complete build/stat controls, mouse enemy placement, a small substantial-rock greybox, measurement and strict save isolation.
 - [Vanguard and ability direction](design/ABILITY_FEEDBACK_17.md) — locked Vanguard slots, non-modal fixed-kit progression, permanent gun, hammer, D/F, body-slam E, rank milestones and current 1–4 module rules. Earlier alternatives are retained and labeled.
@@ -32,7 +34,7 @@ The shortest safe instruction for another session is: **“Pull `main`, read `do
 
 ## Current supporting specifications
 
-- [Balance study](design/BALANCE_16.md) — damage model and measurement limits carried into the current pass where `QA_17.md` does not override them.
+- [Balance study](design/BALANCE_16.md) — damage model, latest tuning addenda and measurement limits; current QA_18/pressure notes override older baselines.
 - [Expedition design research](design/EXPEDITION_RESEARCH_14.md) — systems intent, progression boundaries and source-backed design reasoning.
 - [Art style schema](design/ART_STYLE_SCHEMA.md) — current visual language, gameplay-readability requirements and asset acceptance rules.
 - [Godot workflow](GODOT_WORKFLOW.md) — project-development and engine workflow.
@@ -44,7 +46,7 @@ The shortest safe instruction for another session is: **“Pull `main`, read `do
 - [0.15 skill presentation and quality baseline](design/QA_15.md)
 - [0.14 expedition implementation](design/QA_14.md)
 
-These documents explain how current systems arrived, but `QA_17.md`, the root README and [`AGENTS.md`](../AGENTS.md) win if descriptions conflict.
+These documents explain how systems arrived; the [current handoff](../SESSION_HANDOFF.md), latest QA_18 sections, root README and AGENTS.md establish today's scope.
 
 ## Historical material
 

@@ -1,5 +1,7 @@
 # Next Session Brief · 9 September 2026
 
+**Archived kickoff, superseded 10 September:** start with [SESSION_HANDOFF.md](../../SESSION_HANDOFF.md) and the [playtest protocol](PLAYTEST_PROTOCOL.md). The next action is owner testing of current Vanguard, not Phase 0 or implementing every proposal below. Retained directions remain historical context unless carried forward explicitly.
+
 Status: **start here for the latest owner direction.** This is the concise routing and priority document for the next development session. It does not claim that future designs are already implemented.
 
 **Subsequent owner override:** the owner requested a larger integrated rewrite before the next playtest, explicitly superseding the per-phase human stop gates for this pass. See [QA_18.md](QA_18.md) for what was actually delivered: Vanguard, queued progression and Practice. The unimplemented class/economy proposals below remain future work, not released features.

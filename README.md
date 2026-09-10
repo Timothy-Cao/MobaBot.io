@@ -1,5 +1,7 @@
 # MobaBot.io — 0.18 Vanguard
 
+New session: [current handoff](SESSION_HANDOFF.md). Human testing: [playtest protocol](docs/design/PLAYTEST_PROTOCOL.md), with a read-only result summary via `scripts/read_playtest.ps1`. Freeze the build while testing; results finalize on victory/defeat, not continuously.
+
 A Windows-first, single-player survivor-like with MOBA mouse controls. Build a salvage robot through an eight-stage expedition: independent automatic fire, commanded attacks, aimed skills and deployed machines.
 
 New expeditions use the fixed **Vanguard** kit and non-modal skill progression. The 22-round route, 48-node run mastery tree, eight equipment slots × five tiers, shops, Ascensions 0–5 and cleared-round checkpoints remain. Existing 0.17 checkpoints retain their shared-pool rules rather than losing learned skills. Legacy abilities remain in Practice. Marshal, Racer and offline progression are not implemented.

@@ -726,7 +726,7 @@ func _save_result() -> void:
 	if not measured.is_empty():
 		record.render_timing = {"frames": measured.size(), "median_ms": measured[measured.size() / 2],
 			"p95_ms": measured[int(measured.size() * 0.95)], "peak_enemies": peak_enemies}
-	record.build = "slice-16-keyboard-forge" if model.exp != null else "slice-13-mobabot"
+	RunDiagnostics.annotate(record,model,auto_play or not capture_kind.is_empty() or not persist_settings)
 	record.equipment = gear.equipped.duplicate()
 	if model.exp != null:
 		record.campaign = {"round":model.exp.route_index+1,"stage":BotExpedition.ROUTE[model.exp.route_index][0],"ascension":model.exp.ascension,"class":model.exp.class_id,"chests":model.exp.chests_opened}
