@@ -2,6 +2,7 @@ class_name BotTooltip
 extends RefCounted
 
 static func make(text: String) -> Control:
+	if text.strip_edges().is_empty(): return null
 	var panel := PanelContainer.new()
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color("14242c")

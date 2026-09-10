@@ -10,6 +10,12 @@ New expeditions use the fixed **Vanguard** kit and non-modal skill progression. 
 
 ## Current Vanguard controls
 
+Interface follow-up: Painted icons are always used; QWER has a new painterly MOBA set imported at 128×128. Settings has sound (0=mute, 100%=full mix), camera-speed and in-game mouse-speed sliders; no icon-skin selector. Empty buttons no longer create blank tooltips.
+
+Camera lock **on** confines the pointer during focused gameplay and enables edge-panning as a following-camera offset. Space clears the offset; lock off releases the cursor and disables edge-panning. Hold left-click/drag on the minimap to inspect: releasing returns to the player when locked, otherwise keeps that location. Menus and Alt-Tab release the cursor. Mouse speed applies only during confined gameplay, not to the desktop or menus.
+
+Practice: Build has one shared **1 / 5 / 10** choice for all tools, hammer and MG. Player retains the four test modifiers plus Damage numbers. Enemies selects type/count for cluster placement. No Session tab, per-skill rank selectors or Clear button. **B** arms a single target dummy; **C** clears enemies without opening a menu (an explicit system-key rebind has priority). Reset remains and resets combat at the selected kit rank. This supersedes older Practice descriptions below.
+
 Vanguard 1 always spins at the fast (10.2 rad/s) speed. Its toggle changes near/far radius, not rotation speed.
 
 The commanded hammer upgrades from rank 1–10 through the HUD's LMB tile. Rank 5 expands its reach and sweep; rank 10 allows swings while moving, including attack-move. Practice's Build rank selector includes Hammer and Gun separately. Vanguard damage has pronounced rank-5/10 spikes; see `docs/design/BALANCE_16.md` for the measured curve.

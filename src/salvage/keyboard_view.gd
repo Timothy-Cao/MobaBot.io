@@ -124,7 +124,7 @@ static func overview(ui, run) -> void:
 		var slot:=BotKeyboard.slot_at(run.kit,key)
 		var tile=ui._surface(ui.overlay,Rect2(49+(i%4)*84,164+(i/4)*76,65,61),ui.PANEL,1)
 		if slot!="":
-			ui._ability_icon(tile,BotKeyboard.id_at(run.kit,slot),Rect2(9,5,48,48))
+			ui._ability_icon(tile,VanguardHud.icon(slot) if Vanguard.enabled(run) else BotKeyboard.id_at(run.kit,slot),Rect2(9,5,48,48))
 			tile.mouse_filter=Control.MOUSE_FILTER_STOP; tile.tooltip_text=description(run.kit,slot)
 		ui._label(tile,OS.get_keycode_string(key),Rect2(2,0,30,20),11,ui.CREAM,true)
 	for i in range(run.equipment_snapshot.size()):
@@ -156,14 +156,32 @@ static func settings(ui) -> void:
 		ui._label(ui.overlay,"`: machine gun     5 / 6: consumables",Rect2(165,446,680,28),14,ui.MUTED)
 	else:
 		var game=ui.host
+		ui._label(ui.overlay,"Sound",Rect2(165,124,270,28),18,ui.CREAM)
+		slider(ui,"sound",Rect2(470,119,315,32),0,100,1,0 if ui.muted else game.volume_setting*100,func(v): game.set_volume(v/100.0),"%d%%")
+		ui._label(ui.overlay,"Camera speed",Rect2(165,174,270,28),18,ui.CREAM)
+		slider(ui,"camera_speed",Rect2(470,169,315,32),40,220,5,game.camera_speed/6.2,func(v): game.camera_speed=v*6.2; game._save_settings(),"%d%%")
+		ui._label(ui.overlay,"Mouse speed",Rect2(165,224,270,28),18,ui.CREAM)
+		slider(ui,"mouse_speed",Rect2(470,219,315,32),0.5,2,0.05,game.mouse_speed,func(v): game.mouse_speed=v; game._save_settings(),"%.2f×")
+		ui._rule(Vector2(165,267),620)
 		var rows: Array=[
-			["Sound","Off" if ui.muted else "On",func() -> void: ui.mute_changed.emit(not ui.muted)],
 			["Reduced effects","On" if ui.reduced else "Off",func() -> void: ui.effects_changed.emit(not ui.reduced)],
 			["Camera lock","On" if ui.camera_locked else "Off",func() -> void: ui.camera_lock_changed.emit(not ui.camera_locked)],
 			["Area quick cast","On" if ui.r_quickcast else "Off",func() -> void: ui.quickcast_changed.emit(not ui.r_quickcast)],
-			["Fullscreen","On" if game.fullscreen_setting else "Off",game.toggle_fullscreen],
-			["Icon skin","Painted" if PaintedIcons.enabled else "Base",game.toggle_skin]]
+			["Fullscreen","On" if game.fullscreen_setting else "Off",game.toggle_fullscreen]]
 		for i in range(rows.size()):
-			ui._label(ui.overlay,rows[i][0],Rect2(165,130+i*52,350,30),19,ui.CREAM)
-			ui._button(rows[i][1],Rect2(615,126+i*52,170,36),rows[i][2],false)
+			ui._label(ui.overlay,rows[i][0],Rect2(165,284+i*42,350,28),18,ui.CREAM)
+			ui._button(rows[i][1],Rect2(675,280+i*42,110,32),rows[i][2],false)
 	if ui.settings_in_run: ui._button("Main menu",Rect2(725,468,186,33),func() -> void: ui.host.confirm_leave(),false)
+
+static func slider(ui, id: String, rect: Rect2, low: float, high: float, step_value: float, current: float, action: Callable, format_value: String) -> HSlider:
+	var control:=HSlider.new()
+	control.name=id; control.position=rect.position; control.size=rect.size-Vector2(66,0)
+	control.min_value=low; control.max_value=high; control.step=step_value; control.value=current
+	for entry in [["slider",ui.EDGE],["grabber_area",ui.TEAL],["grabber_area_highlight",ui.GOLD]]:
+		var track: StyleBoxFlat=ui._style(entry[1],2,entry[1],0)
+		track.content_margin_top=2; track.content_margin_bottom=2
+		control.add_theme_stylebox_override(entry[0],track)
+	ui.overlay.add_child(control)
+	var amount: Label=ui._label(ui.overlay,format_value%current,Rect2(rect.position+Vector2(rect.size.x-60,2),Vector2(60,28)),14,ui.MUTED,false,HORIZONTAL_ALIGNMENT_RIGHT)
+	control.value_changed.connect(func(v): amount.text=format_value%v; action.call(v))
+	return control

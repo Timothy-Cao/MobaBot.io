@@ -60,6 +60,9 @@ func review() -> void:
 	var showcase: bool="--showcase" in OS.get_cmdline_user_args()
 	var vanguard_showcase: bool="--vanguard-showcase" in OS.get_cmdline_user_args()
 	var rendered: bool=DisplayServer.get_name()!="headless"
+	for slot in ["q","w","e","r"]:
+		var texture:=PaintedIcons.texture(VanguardHud.icon(slot))
+		check(texture!=null and texture.get_width()==128 and texture.get_height()==128,"Vanguard icon runtime budget")
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--folder="): folder=arg.trim_prefix("--folder=")
 	if (showcase or vanguard_showcase) and rendered: DirAccess.make_dir_recursive_absolute(folder)
@@ -131,9 +134,28 @@ func review() -> void:
 		art._process(2)
 		check(art.effects.is_empty(),"Effects expire without residual trails")
 	if rendered and showcase: await icon_sheet()
+	if rendered and "--icons" in OS.get_cmdline_user_args(): await vanguard_icon_sheet()
 	art.queue_free(); title.queue_free(); await process_frame
 	print("SKILL VISUAL TEST: %d checks; %d failures; %d captured frames" % [checks,failures,frame_number])
 	quit(1 if failures else 0)
+
+func vanguard_icon_sheet() -> void:
+	DirAccess.make_dir_recursive_absolute(folder)
+	art.hide(); title.text="Vanguard · 54 / 40 / 32 px"
+	var icons: Array=[]
+	for i in range(4):
+		for j in range(3):
+			var icon=load("res://src/salvage/ability_icon.gd").new()
+			icon.ability=VanguardHud.icon(["q","w","e","r"][i])
+			icon.position=Vector2(35+i*225+j*66,110)
+			icon.size=Vector2.ONE*[54,40,32][j]
+			root.add_child(icon); icons.append(icon)
+	for reduced in [false,true]:
+		art.reduced_effects=reduced
+		title.text="Vanguard · 54 / 40 / 32 px"+(" · Reduced" if reduced else "")
+		await process_frame; await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png(folder+"/vanguard-icons-%s.png"%str(reduced))
+	for icon in icons: icon.queue_free()
 
 func icon_sheet() -> void:
 	art.hide(); title.text="Ability icons · 64 / 32 px"

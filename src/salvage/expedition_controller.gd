@@ -15,11 +15,17 @@ var practice_skill := "rocket"
 var practice_enemy := "dummy"
 var practice_count := 1
 var practice_key := KEY_Q
-var practice_rank := 0
+var practice_rank := 1
 var practice_page := "Build"
 var practice_formation := "Cluster"
 var practice_placing := false
 var practice_slot := "q"
+var volume_setting := 1.0
+var camera_speed := 620.0
+var mouse_speed := 1.0
+var camera_offset := Vector2.ZERO
+var minimap_held := false
+var pointer_warp := Vector2(-9999,-9999)
 
 func _ready() -> void:
 	collection.load_profile()
@@ -48,6 +54,7 @@ func start_run(mode: String="salvage") -> void:
 func launch_expedition(resume: bool=false) -> void:
 	if collection.blocked:
 		ui.announce(collection.message,2); return
+	camera_offset=Vector2.ZERO; minimap_held=false
 	seed_value=int(collection.checkpoint.get("seed",2407)) if resume else int(Time.get_unix_time_from_system())%2147483647
 	super.start_run("salvage")
 	if resume:
@@ -80,6 +87,7 @@ func confirm_new_run() -> void:
 	add_child(dialog); dialog.popup_centered(Vector2i(440,140))
 
 func _physics_process(delta: float) -> void:
+	_update_pointer_mode()
 	if model!=null and model.kit!=null: model.kit.extra.cursor=get_global_mouse_position()
 	if model!=null and model.exp!=null and model.exp.practice: delta*=model.vanguard.time_scale
 	if model!=null and Vanguard.enabled(model) and screen!="running": model.vanguard.ghost=false
@@ -125,7 +133,7 @@ func continue_expedition() -> void:
 	model.exp.shop_stock.clear()
 	model.exp.advance(model)
 	screen="running"; ui.show_running()
-	free_center=model.player; _update_camera()
+	camera_offset=Vector2.ZERO; free_center=model.player; _update_camera()
 
 func buy_item(index: int) -> void:
 	var exp: BotExpedition=model.exp
@@ -185,6 +193,18 @@ func _input(event: InputEvent) -> void:
 			ui.system_keys=candidate; ui.rebind_system=""; _save_settings(); ui.show_settings()
 		else: ui.announce("Reserved or already assigned",1.5)
 		get_viewport().set_input_as_handled(); return
+	if _camera_input(event):
+		get_viewport().set_input_as_handled(); return
+	if model!=null and model.exp!=null and model.exp.practice and screen in ["running","practice","placement"] and event is InputEventKey and event.pressed and not event.echo:
+		# Respect an explicitly rebound system action before Practice shortcuts.
+		if event.keycode not in ui.system_keys.values():
+			if event.keycode==KEY_C:
+				model.enemies.clear(); model.hazards.clear(); model.practice_meter.clear()
+				get_viewport().set_input_as_handled(); return
+			if event.keycode==KEY_B:
+				practice_enemy="dummy"; practice_count=1; practice_formation="Cluster"
+				begin_practice_placement()
+				get_viewport().set_input_as_handled(); return
 	if screen=="keyboard" and event is InputEventKey:
 		if event.pressed and not event.echo:
 			if event.keycode in BotKeyboard.GENERAL+BotKeyboard.MOVEMENT: keyboard_key(event.keycode)
@@ -305,10 +325,15 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func _load_settings() -> void:
 	super._load_settings()
+	PaintedIcons.enabled=true
 	var config:=ConfigFile.new()
 	if config.load("user://salvage_settings.cfg")!=OK: return
 	fullscreen_setting=bool(config.get_value("visual","fullscreen",true))
-	PaintedIcons.enabled=config.get_value("visual","icon_skin","painted")!="base"
+	PaintedIcons.enabled=true
+	volume_setting=clampf(float(config.get_value("audio","volume",1.0)),0,1)
+	camera_speed=clampf(float(config.get_value("camera","speed",620.0)),200,1400)
+	mouse_speed=clampf(float(config.get_value("camera","mouse_speed",1.0)),0.5,2.0)
+	_apply_volume()
 	var keys: Variant=config.get_value("keyboard","system",BotKeyboard.SYSTEM_DEFAULTS)
 	if keys is Dictionary and BotKeyboard.valid_system(keys):
 		ui.system_keys=BotKeyboard.SYSTEM_DEFAULTS.duplicate(); ui.system_keys.merge(keys,true)
@@ -318,7 +343,10 @@ func _save_settings() -> void:
 	if not persist_settings: return
 	var config:=ConfigFile.new(); config.load("user://salvage_settings.cfg")
 	config.set_value("visual","fullscreen",fullscreen_setting)
-	config.set_value("visual","icon_skin","painted" if PaintedIcons.enabled else "base")
+	config.set_value("visual","icon_skin","painted")
+	config.set_value("audio","volume",volume_setting)
+	config.set_value("camera","speed",camera_speed)
+	config.set_value("camera","mouse_speed",mouse_speed)
 	config.set_value("keyboard","system",ui.system_keys)
 	if config.save("user://salvage_settings.cfg")!=OK: ui.announce("Could not save settings",2)
 
@@ -329,9 +357,104 @@ func apply_fullscreen() -> void:
 func toggle_fullscreen() -> void:
 	fullscreen_setting=not fullscreen_setting; apply_fullscreen(); _save_settings(); ui.show_settings()
 
-func toggle_skin() -> void:
-	PaintedIcons.enabled=not PaintedIcons.enabled
-	ui.bar_signature=""; _save_settings(); ui.show_settings()
+func _apply_volume() -> void:
+	AudioServer.set_bus_volume_db(0,linear_to_db(maxf(volume_setting,0.0001)))
+	AudioServer.set_bus_mute(0,mute_setting or volume_setting<=0)
+
+func set_volume(value: float) -> void:
+	volume_setting=clampf(value,0,1); mute_setting=volume_setting<=0
+	sound.set_muted(mute_setting); ui.muted=mute_setting
+	_apply_volume(); _save_settings()
+
+func _set_mute(value: bool) -> void:
+	if not value and volume_setting<=0: volume_setting=1.0
+	super._set_mute(value)
+	_apply_volume()
+
+func _update_pointer_mode() -> void:
+	if DisplayServer.get_name()=="headless": return
+	var confined: bool=screen=="running" and camera_locked and get_window().has_focus()
+	var desired: int=Input.MOUSE_MODE_CONFINED if confined else Input.MOUSE_MODE_VISIBLE
+	if Input.mouse_mode!=desired: Input.mouse_mode=desired; pointer_warp=Vector2(-9999,-9999)
+	if screen!="running": minimap_held=false
+
+func _camera_input(event: InputEvent) -> bool:
+	if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT and not event.pressed and minimap_held:
+		minimap_held=false
+		if camera_locked: camera_offset=Vector2.ZERO
+		_update_camera()
+		return true
+	if screen!="running": return false
+	if event is InputEventMouseButton and ui.system_keys.get("lock",KEY_L)==-int(event.button_index): return false
+	if minimap_held and not event is InputEventMouseMotion and not (event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT):
+		# Inspection owns the pointer; never cast or order units into a map click.
+		if event is InputEventMouseButton: return true
+	var map_rect: Rect2=ui.mini_map.get_global_rect()
+	if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT and event.pressed and map_rect.has_point(event.position):
+		minimap_held=true; pending_attack=false; pending_cast_slot=""; mouse_moving=false
+		_minimap_point(event.position)
+		return true
+	if event is InputEventMouseMotion:
+		if camera_locked and Input.mouse_mode==Input.MOUSE_MODE_CONFINED and not is_equal_approx(mouse_speed,1.0):
+			if event.position.distance_to(pointer_warp)<1.0:
+				pointer_warp=Vector2(-9999,-9999)
+			else:
+				var adjusted: Vector2=_scaled_pointer(event.position,event.relative)
+				pointer_warp=adjusted; get_viewport().warp_mouse(adjusted); event.position=adjusted
+		if minimap_held:
+			_minimap_point(event.position)
+			return true
+	return false
+
+func _minimap_point(point: Vector2) -> void:
+	var local_point: Vector2=point-ui.mini_map.global_position-Vector2(7,7)
+	var fraction: Vector2=(local_point/(ui.mini_map.size-Vector2(14,14))).clamp(Vector2.ZERO,Vector2.ONE)
+	free_center=SalvageRun.ARENA.position+fraction*SalvageRun.ARENA.size
+	_update_camera()
+
+func _pan_camera(delta: float) -> void:
+	if DisplayServer.get_name()!="headless" and not get_window().has_focus(): return
+	_edge_pan(get_viewport().get_mouse_position(),delta)
+
+func _scaled_pointer(point: Vector2, motion: Vector2) -> Vector2:
+	return (point+motion*(mouse_speed-1.0)).clamp(Vector2.ZERO,get_viewport_rect().size-Vector2.ONE)
+
+func _edge_pan(cursor: Vector2, delta: float) -> void:
+	if not camera_locked or recenter_held or minimap_held: return
+	if not get_viewport_rect().has_point(cursor): return
+	var extent:=get_viewport_rect().size
+	var pan:=Vector2(float(cursor.x>extent.x-12)-float(cursor.x<12),float(cursor.y>extent.y-12)-float(cursor.y<12))
+	camera_offset+=pan.normalized()*camera_speed/zoom_value*delta
+
+func _set_camera_lock(value: bool) -> void:
+	camera_offset=Vector2.ZERO
+	super._set_camera_lock(value)
+	_update_pointer_mode()
+
+func _update_camera() -> void:
+	if not camera.enabled or model==null: return
+	camera.zoom=Vector2.ONE*zoom_value
+	model.view_size=Vector2(960,540)/zoom_value
+	var follow: Vector2=model.follow_origin()+model.view_size/2
+	if recenter_held and not minimap_held:
+		camera_offset=Vector2.ZERO; free_center=follow
+	elif camera_locked and not minimap_held:
+		free_center=follow+camera_offset
+	free_center=free_center.clamp(SalvageRun.ARENA.position+model.view_size/2-Vector2(48,96)/zoom_value,SalvageRun.ARENA.end-model.view_size/2+Vector2(48,200)/zoom_value)
+	if camera_locked and not minimap_held: camera_offset=free_center-follow
+	model.detached_camera=minimap_held or (not recenter_held and (not camera_locked or not camera_offset.is_zero_approx()))
+	model.detached_origin=free_center-model.view_size/2
+	camera.position=free_center; camera.force_update_scroll()
+
+func _notification(what: int) -> void:
+	if what==MainLoop.NOTIFICATION_APPLICATION_FOCUS_OUT:
+		minimap_held=false; camera_offset=Vector2.ZERO
+		if DisplayServer.get_name()!="headless": Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
+	super._notification(what)
+
+func _exit_tree() -> void:
+	if DisplayServer.get_name()!="headless": Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
+	AudioServer.set_bus_mute(0,false); AudioServer.set_bus_volume_db(0,0)
 
 func confirm_leave() -> void:
 	var dialog:=ConfirmationDialog.new(); dialog.title="Leave run?"
@@ -341,6 +464,7 @@ func confirm_leave() -> void:
 	add_child(dialog); dialog.popup_centered(Vector2i(440,140))
 
 func launch_practice(legacy: bool=false) -> void:
+	practice_rank=1; practice_page="Build"; camera_offset=Vector2.ZERO
 	seed_value=17017
 	super.start_run("salvage")
 	var expedition:=BotExpedition.new()
@@ -363,6 +487,17 @@ func open_practice() -> void:
 func close_practice() -> void:
 	practice_placing=false
 	screen="running"; model.state="running"; ui.show_running()
+
+func begin_practice_placement() -> void:
+	_clear_held_movement(); pending_attack=false; pending_cast_slot=""
+	practice_placing=true; screen="placement"; ui.clear_overlay(); ui.hud.visible=true
+	ui._button("Cancel placement",Rect2(26,25,180,34),func(): practice_placing=false; open_practice(),false)
+
+func practice_reset() -> void:
+	practice_clear(); model.player=Vector2(480,300); PracticeSandbox.terrain(model)
+	Vanguard.setup(model,practice_rank)
+	model.damage_dealt.clear(); model.time=0; camera_offset=Vector2.ZERO
+	free_center=model.player; _update_camera(); PracticeSandbox.draw(self)
 
 func _clear_held_movement() -> void:
 	super._clear_held_movement()

@@ -49,71 +49,49 @@ static func place(game, center: Vector2) -> bool:
 static func draw(game) -> void:
 	var ui=game.ui
 	ui.clear_overlay(); ui.hud.visible=true
+	ui.update_hud(game.model)
 	var panel=ui._surface(ui.overlay,Rect2(12,12,310,406),Color("14242cf5"),0,ui.EDGE)
 	panel.mouse_filter=Control.MOUSE_FILTER_STOP
 	ui._label(ui.overlay,"Practice",Rect2(26,23,200,30),22,ui.CREAM,true)
 	ui._button("×",Rect2(276,20,32,29),game.close_practice,false)
-	ui._button("Resume",Rect2(26,67,87,31),game.close_practice)
-	ui._button("Clear",Rect2(120,67,86,31),game.practice_clear,false)
-	ui._button("Reset",Rect2(213,67,94,31),func():
-		game.practice_clear(); game.model.player=Vector2(480,300); terrain(game.model)
-		game.model.vanguard=Vanguard.new(); game.model.damage_dealt.clear(); game.model.time=0; game.free_center=game.model.player; game._update_camera(); draw(game),false)
-	var modified: bool=game.model.exp.god_mode or game.model.exp.free_energy or game.model.exp.fast_cooldowns or game.model.vanguard.freeze_ai or game.model.vanguard.time_scale!=1
+	ui._button("Resume",Rect2(26,67,178,31),game.close_practice)
+	ui._button("Reset",Rect2(213,67,94,31),game.practice_reset,false)
+	var modified: bool=game.model.exp.god_mode or game.model.exp.free_energy or game.model.exp.fast_cooldowns or game.model.vanguard.freeze_ai
 	ui._label(ui.overlay,"MODIFIED TEST" if modified else "NORMAL",Rect2(26,104,270,20),10,ui.GOLD if modified else ui.TEAL,true)
-	var pages: Array=["Build","Player","Enemies","Session"]
+	var pages: Array=["Build","Player","Enemies"]
+	if game.practice_page not in pages: game.practice_page="Build"
 	for i in range(pages.size()):
 		var page: String=pages[i]
-		ui._tab(page,Rect2(22+i*73,128,72,31),func(): game.practice_page=page; draw(game),game.practice_page==page)
+		ui._tab(page,Rect2(22+i*96,128,94,31),func(): game.practice_page=page; draw(game),game.practice_page==page)
 	match game.practice_page:
 		"Build":
-			PracticeView.select(ui,["Vanguard","Legacy laboratory"],0 if Vanguard.enabled(game.model) else 1,Rect2(26,174,278,32),func(i):
-				if i==0: Vanguard.setup(game.model,maxi(1,game.practice_rank)); draw(game)
-				else: game.launch_practice(true))
-			ui._label(ui.overlay,"Kit rank",Rect2(26,220,100,23),15,ui.MUTED)
-			PracticeView.select(ui,["Starter","1","5","10"],[0,1,5,10].find(game.practice_rank),Rect2(152,213,152,33),func(i):
-				game.practice_rank=[0,1,5,10][i]; Vanguard.setup(game.model,game.practice_rank); draw(game))
+			ui._label(ui.overlay,"All abilities",Rect2(26,181,180,23),16,ui.CREAM)
+			for i in range(3):
+				var rank_value: int=[1,5,10][i]
+				ui._button(str(rank_value),Rect2(26+i*95,218,88,35),func():
+					game.practice_rank=rank_value
+					Vanguard.setup(game.model,rank_value)
+					draw(game),game.practice_rank==rank_value)
 			for i in range(Vanguard.KEYS.size()):
 				var slot: String=Vanguard.KEYS.keys()[i]
-				var point:=Vector2(28+(i%5)*55,270+(i/5)*57)
+				var point:=Vector2(28+(i%5)*55,280+(i/5)*57)
 				ui._ability_icon(ui.overlay,VanguardHud.icon(slot),Rect2(point,Vector2(40,40)))
 				ui._label(ui.overlay,OS.get_keycode_string(Vanguard.KEYS[slot]),Rect2(point,Vector2(20,16)),10,ui.GOLD,true)
-			var slots: Array=Vanguard.KEYS.keys()+["hammer","gun"]
-			PracticeView.select(ui,slots.map(func(s): return s.capitalize() if s in ["hammer","gun"] else OS.get_keycode_string(Vanguard.KEYS[s])),slots.find(game.practice_slot),Rect2(26,374,88,29),func(i): game.practice_slot=slots[i]; draw(game))
-			PracticeView.select(ui,["Locked","Rank 1","Rank 2","Rank 3","Rank 4","Rank 5","Rank 6","Rank 7","Rank 8","Rank 9","Rank 10"],Vanguard.rank_of(game.model,game.practice_slot),Rect2(124,374,180,29),func(i):
-				var slot: String=game.practice_slot
-				if slot in ["hammer","gun"]:
-					if slot=="hammer": game.model.kit.loadout.hammer_rank=maxi(1,i)
-					else: game.model.upgrades.power=maxi(0,i-1)
-					draw(game)
-					return
-				if slot=="p1": game.model.upgrades.grinder=i; game.model.orbit.clear()
-				else: game.model.kit.ranks[slot]=i; game.model.upgrades["skill_"+slot]=i
-				if i==0: game.model.kit.discovered.erase(slot)
-				elif slot not in game.model.kit.discovered: game.model.kit.discovered.append(slot)
-				draw(game))
 		"Player":
-			for i in range(4):
-				var field: String=["god_mode","free_energy","fast_cooldowns","freeze_ai"][i]
-				var owner=game.model.exp if i<3 else game.model.vanguard
-				ui._label(ui.overlay,["God mode","Free energy","Instant recharge","Freeze enemies"][i],Rect2(26,180+i*45,194,27),15,ui.CREAM)
-				var toggle: Button=ui._button("On" if owner.get(field) else "Off",Rect2(232,174+i*45,72,32),func(): owner.set(field,not owner.get(field)); draw(game),false)
+			for i in range(5):
+				var field: String=["god_mode","free_energy","fast_cooldowns","freeze_ai","numbers"][i]
+				var owner=game.model.exp if i<3 else game.model.vanguard if i==3 else game.model.practice_meter
+				ui._label(ui.overlay,["God mode","Free energy","Instant recharge","Freeze enemies","Damage numbers"][i],Rect2(26,180+i*43,194,27),15,ui.CREAM)
+				var toggle: Button=ui._button("On" if owner.get(field) else "Off",Rect2(232,174+i*43,72,32),func():
+					owner.set(field,not owner.get(field))
+					if field=="numbers": game.model.practice_meter.hits.clear()
+					draw(game),false)
 				toggle.name=field
 		"Enemies":
 			var types: Array=["dummy","bumper","charger","tank","lancer","volley","bomber","rammer","artillery","foreman"]
 			PracticeView.select(ui,["Target dummy","Bumper","Charger","Tank","Arc lancer","Burst battery","Bomb carrier","Rammer","Artillery","Boss"],types.find(game.practice_enemy),Rect2(26,173,278,33),func(i): game.practice_enemy=types[i])
 			PracticeView.select(ui,[1,5,10,25,50],[1,5,10,25,50].find(game.practice_count),Rect2(26,218,96,33),func(i): game.practice_count=[1,5,10,25,50][i])
 			game.practice_formation="Cluster"
-			ui._button("Place",Rect2(26,270,278,37),func():
-				game.practice_placing=true; game.screen="placement"; ui.clear_overlay(); ui.hud.visible=true
-				ui._button("Cancel placement",Rect2(26,25,180,34),func(): game.practice_placing=false; game.open_practice(),false))
-			ui._label(ui.overlay,"Click to place · Shift repeats",Rect2(26,324,278,22),12,ui.MUTED)
-		"Session":
-			ui._label(ui.overlay,"Damage numbers",Rect2(26,358,194,27),15,ui.CREAM)
-			ui._button("On" if game.model.practice_meter.numbers else "Off",Rect2(232,353,72,32),func():
-				game.model.practice_meter.numbers=not game.model.practice_meter.numbers; game.model.practice_meter.hits.clear(); draw(game),false)
-			PracticeView.select(ui,["0.5× speed","1× speed","2× speed"],[0.5,1.0,2.0].find(game.model.vanguard.time_scale),Rect2(26,177,278,34),func(i): game.model.vanguard.time_scale=[0.5,1.0,2.0][i]; draw(game))
-			var total:=0.0
-			for value in game.model.damage_dealt.values(): total+=float(value)
-			ui._label(ui.overlay,"%.0f damage · %.1f / sec"%[total,total/maxf(1,game.model.time)],Rect2(26,232,278,28),16,ui.CREAM)
-			ui._label(ui.overlay,"%.1fs · %d enemies"%[game.model.time,game.model.enemies.size()],Rect2(26,264,278,25),14,ui.MUTED)
-			ui._button("Reset measurement",Rect2(26,308,278,35),func(): game.model.damage_dealt.clear(); game.model.practice_meter.clear(); game.model.time=0; draw(game),false)
+			ui._button("Place",Rect2(26,270,278,37),game.begin_practice_placement)
+			ui._label(ui.overlay,"B: dummy   ·   C: clear enemies",Rect2(26,324,278,22),12,ui.MUTED)
+			ui._label(ui.overlay,"Click to place · Shift repeats",Rect2(26,349,278,22),12,ui.MUTED)

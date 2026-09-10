@@ -9,6 +9,7 @@ static func slot_rect(slot: String) -> Rect2:
 	return Rect2(SLOT_X[slot],470 if core else 476,width,width)
 
 static func icon(slot: String) -> String:
+	if slot in ["q","w","e","r"]: return "vanguard_"+slot
 	if slot=="hammer": return "hammer"
 	return {"gun":"bolt","p1":"orbit","e":"thrust","r":"nuke","x1":"pulse_sentry","x2":"medic_sentry","x3":"converter"}.get(slot,Vanguard.TOOLS.get(slot,"bolt"))
 

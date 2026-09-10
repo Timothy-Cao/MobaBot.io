@@ -130,6 +130,8 @@ The numbers below are our proposed project targets, **not industry benchmarks or
 
 ## Per-skill art and animation checklist
 
+9 September, interface follow-up: the owner chooses Painted-only, requests painterly MOBA-inspired Vanguard QWER icons and prefers 128px or smaller runtime assets. Four generated paintings replace Vanguard's UI mappings; imports are 128px, with source provenance and actual-size normal/reduced HUD captures. Q/W have the clearest directional separation; E/R are denser and remain pending owner review. Settings/Practice are further pruned and minimap/locked-edge camera controls are tested independently. These are implementation/inspection observations, **not a new human quality score**. Physical mouse sensitivity/confinement across different DPI and monitors still needs hands-on testing.
+
 Review at actual HUD size (32/48/64 px), default combat zoom and maximum zoom-out, then with overlapping enemies and Reduced effects. A magnified screenshot is not acceptance. A shared style does not mean the same drawing with a new color.
 
 1. **Identity:** one recognizable function silhouette; distinguish closest neighbors before adding detail.

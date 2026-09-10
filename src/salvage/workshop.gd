@@ -443,11 +443,7 @@ func _physics_process(delta: float) -> void:
 	elif screen == "running":
 		if model.kit.laser_left > 0 and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
 			model.kit.steer_laser(model, get_global_mouse_position())
-		if not camera_locked and not recenter_held:
-			var cursor := get_viewport().get_mouse_position()
-			if Rect2(0, 0, 960, 540).has_point(cursor):
-				var pan := Vector2(float(cursor.x > 948) - float(cursor.x < 12), float(cursor.y > 528) - float(cursor.y < 12))
-				free_center += pan.normalized() * 620.0 / zoom_value * delta
+		_pan_camera(delta)
 		if model.kit.flame_left > 0:
 			var facing := (get_global_mouse_position() - model.player).normalized()
 			if auto_play:
@@ -634,6 +630,13 @@ func _pause_toggle() -> void:
 	elif screen == "paused":
 		screen = "running"
 		ui.show_running()
+
+func _pan_camera(delta: float) -> void:
+	if not camera_locked and not recenter_held:
+		var cursor := get_viewport().get_mouse_position()
+		if Rect2(0, 0, 960, 540).has_point(cursor):
+			var pan := Vector2(float(cursor.x > 948) - float(cursor.x < 12), float(cursor.y > 528) - float(cursor.y < 12))
+			free_center += pan.normalized() * 620.0 / zoom_value * delta
 
 func _clear_held_movement() -> void:
 	pending_attack = false

@@ -41,6 +41,7 @@ func _draw() -> void:
 		draw_texture_rect(painted,Rect2(0,0,64,64),false)
 		return
 	var icon_id: String=MobaKit.PASSIVES[ability].icon if MobaKit.PASSIVES.has(ability) and ability not in ["poison","lightning","pulse"] else ability
+	icon_id={"vanguard_q":"rocket","vanguard_w":"strike","vanguard_e":"thrust","vanguard_r":"nuke"}.get(icon_id,icon_id)
 	draw_rect(Rect2(0, 0, 64, 64), INK)
 	draw_rect(Rect2(3, 3, 58, 58), Color("223c46"))
 	draw_colored_polygon(PackedVector2Array([Vector2(3, 3), Vector2(61, 3), Vector2(61, 15), Vector2(3, 44)]), Color("294b54"))
