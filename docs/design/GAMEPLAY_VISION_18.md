@@ -40,6 +40,22 @@ Equal usage is not the goal. Situational purpose, understandable tradeoffs and m
 - Reward partial progress proportionally. Persistent gains should make another attempt feel worthwhile without making grinding mandatory for a learnable baseline difficulty.
 - Low-input farming should be safest on content the player has already demonstrated they can clear. Level-pushing builds should retain a meaningful advantage from active execution.
 
+## Encounter and drop ideas to consider
+
+These are owner ideas for later prototypes, not implemented rules.
+
+### Rare monster health drops
+
+Ordinary or selected enemies may rarely drop a clearly recognizable hull-repair pickup. This could create clutch recovery, a reason to enter danger to collect it and occasional relief during a difficult round. Keep the chance low enough that baseline encounters remain winnable without receiving one and do not tune incoming damage around lucky healing. Decide whether elites have a higher chance, whether the drop expires, whether missing hull affects its probability and how magnet/AFK builds interact with it. A suitable test asks whether the pickup creates a meaningful route decision rather than merely erasing the last mistake.
+
+### Enemies that interfere with vision
+
+Explore a readable specialist that temporarily limits the visible world to a circle roughly comparable to Impact Bolt's range. The source, warning, affected boundary, duration and way to end the effect must be understandable; possible counterplay includes killing the jammer, leaving its area, breaking line of sight or using a future cleanse/sensor response.
+
+A second “hacked” variation could interfere with perception in a different way—such as controlled signal noise, false contacts or unreliable peripheral information—without simply making the entire screen illegible. Preserve the player, HUD, terrain immediately around the player, critical damage tells and valid aim/collision information. Avoid rapid flashing, camera shake, forced blur and color-only communication; Reduced effects and accessibility settings must retain the mechanic while reducing discomfort.
+
+Vision pressure should change positioning and target priority, not create unavoidable damage from attacks the game made impossible to read. Prototype one mild version in Practice before combining it with other specialists, and test it at different resolutions, zoom levels and effect settings.
+
 ## Vanguard modules to reconsider
 
 These are owner hypotheses for the next design discussion, not locked replacements and not approval to change the current playtest build before feedback.
