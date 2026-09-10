@@ -1,5 +1,11 @@
 # MobaBot.io quality bar
 
+## Benchmark direction · 10 September 2026 · after 5ab5355
+
+Owner requests a 60-second ideal boss kill with 90–120 seconds for practical dodging/misses; balanced offense/defense progression should maintain comparable relative pressure, while specialization leaves weaknesses. Mechanical challenge should develop with movement, and occasional loot breaks, difficult encounters, double bosses and map challenges should vary the experience. Owner authorizes judgment on the direction.
+
+Implemented offline benchmark grid and documented acceptance bands in BALANCE_BENCHMARKS_21. Separate kill effort, mistake cost, movement demand and decision load; compare fixed reference builds rather than dynamically cancelling player investment. A 30-second salvage sprint and alternating twin-guardian design are specified for a later content milestone, not claimed as shipped. Initial analytical results flag short early-boss contact time and falling late-round tank/W durability. Await actual resource-legal combat measurements and human review before claiming the targets are met. No fun/quality score changed.
+
 ## Human review · 10 September 2026 · commit 02ac283
 
 Follow-through: owner approved the proposed chest/gate policy, every-round run-only module shop and D/F/1234 EMP scope. The resulting 0.19 pass is technically verified (QA_18, REVIEW_COMBAT_19) and awaits another owner review. No fun ratings increased. In particular, early ordinary bots still lose quickly and the long artificial-health soak remains incomplete; fresh human pacing/mobility judgment is essential. Broad mastery branching and new equipment regeneration remain explicitly deferred.
