@@ -24,6 +24,7 @@ The shortest safe instruction for another session is: **“Pull `main`, read `do
 
 ## Detailed record and research background
 
+- [Design gaps research](design/DESIGN_GAPS_RESEARCH_17.md) — **current cross-game study of the six underexplored areas:** encounter grammar/pacing, progression and offline economy, onboarding, accessibility/camera, art-animation production and a repeatable playtest method. Includes prototype order, measurements and stop gates; it is not implemented behavior.
 - [Owner implementation and playtest record](design/OWNER_PLAYTEST_REQUEST_17.md) — detailed consolidated owner directions and test scripts. Use the next-session brief for order and this file when implementation needs the fuller wording.
 - [Ability taxonomy and roster research](design/ABILITY_TAXONOMY_RESEARCH_17.md) — multi-axis taxonomy and audit of abilities 12–49. Its initial 1–4 recommendation is superseded by Vanguard's locked modules but remains useful for old alternatives.
 - [Swarm design research](design/SWARM_DESIGN_RESEARCH_17.md) — source-backed transferable principles and explicit non-copying boundaries.

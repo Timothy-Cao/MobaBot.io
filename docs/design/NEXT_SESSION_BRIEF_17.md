@@ -191,4 +191,5 @@ Ask these only when the relevant phase is close. The owner explicitly wants to p
 | Player-facing language/art direction | [`TERMINOLOGY_PRESENTATION_17.md`](TERMINOLOGY_PRESENTATION_17.md), [`ART_STYLE_SCHEMA.md`](ART_STYLE_SCHEMA.md) |
 | Unreviewed old abilities | [`ABILITY_TAXONOMY_RESEARCH_17.md`](ABILITY_TAXONOMY_RESEARCH_17.md), [`docs/review/abilities.html`](../review/abilities.html) |
 | Swarm-derived hypotheses | [`SWARM_DESIGN_RESEARCH_17.md`](SWARM_DESIGN_RESEARCH_17.md) |
+| Encounters, economy, onboarding, accessibility, art/animation or playtest method | [`DESIGN_GAPS_RESEARCH_17.md`](DESIGN_GAPS_RESEARCH_17.md) |
 | Full dated owner/research trail | [`OWNER_PLAYTEST_REQUEST_17.md`](OWNER_PLAYTEST_REQUEST_17.md), [`KIT_DESIGN_BRAINSTORM_17.md`](KIT_DESIGN_BRAINSTORM_17.md) |
