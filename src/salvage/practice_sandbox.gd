@@ -104,9 +104,12 @@ static func draw(game) -> void:
 				ui._button("Cancel placement",Rect2(26,25,180,34),func(): game.practice_placing=false; game.open_practice(),false))
 			ui._label(ui.overlay,"Click to place · Shift repeats",Rect2(26,324,278,22),12,ui.MUTED)
 		"Session":
+			ui._label(ui.overlay,"Damage numbers",Rect2(26,358,194,27),15,ui.CREAM)
+			ui._button("On" if game.model.practice_meter.numbers else "Off",Rect2(232,353,72,32),func():
+				game.model.practice_meter.numbers=not game.model.practice_meter.numbers; game.model.practice_meter.hits.clear(); draw(game),false)
 			PracticeView.select(ui,["0.5× speed","1× speed","2× speed"],[0.5,1.0,2.0].find(game.model.vanguard.time_scale),Rect2(26,177,278,34),func(i): game.model.vanguard.time_scale=[0.5,1.0,2.0][i]; draw(game))
 			var total:=0.0
 			for value in game.model.damage_dealt.values(): total+=float(value)
 			ui._label(ui.overlay,"%.0f damage · %.1f / sec"%[total,total/maxf(1,game.model.time)],Rect2(26,232,278,28),16,ui.CREAM)
 			ui._label(ui.overlay,"%.1fs · %d enemies"%[game.model.time,game.model.enemies.size()],Rect2(26,264,278,25),14,ui.MUTED)
-			ui._button("Reset measurement",Rect2(26,308,278,35),func(): game.model.damage_dealt.clear(); game.model.time=0; draw(game),false)
+			ui._button("Reset measurement",Rect2(26,308,278,35),func(): game.model.damage_dealt.clear(); game.model.practice_meter.clear(); game.model.time=0; draw(game),false)

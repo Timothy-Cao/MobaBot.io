@@ -129,6 +129,12 @@ func ui_checks() -> void:
 		await process_frame; await process_frame
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://output/vanguard/hud.png")
+		game.model.spawn_enemy(game.model.player+Vector2(190,0),3)
+		var dummy: Dictionary=game.model.enemies.back(); dummy["dummy"]=true
+		game.model.hit_enemy(dummy,38,"q"); game.model.practice_meter.tick(1); game.model.hit_enemy(dummy,76,"w")
+		await process_frame; await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png("res://output/vanguard/dummy.png")
+		game.model.enemies.clear(); game.model.practice_meter.clear()
 		game.open_practice(); game.practice_page="Enemies"; PracticeSandbox.draw(game)
 		await process_frame; await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://output/vanguard/practice.png")

@@ -186,6 +186,7 @@ func _draw() -> void:
 		if bullet.kind == "hostile":
 			draw_arc(bullet.pos, 8, 0, TAU, 16, CREAM, 1.3, true)
 	if model.demo_mode: _demo_tells()
+	if model.exp!=null and model.exp.practice: model.practice_meter.draw(self,model)
 	for enemy in model.enemies:
 		if not enemy.dead and enemy.has("gunner_kind"): RangedThreats.tell(self,enemy)
 	# A steady directional arc remains legible even with shake/flashes disabled.

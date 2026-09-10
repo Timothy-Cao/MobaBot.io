@@ -391,6 +391,7 @@ func practice_spawn() -> void:
 	close_practice()
 
 func practice_clear() -> void:
+	model.practice_meter.clear()
 	model.enemies.clear(); model.projectiles.clear(); model.hazards.clear(); model.pickups.clear(); model.supply_drops.clear()
 	model.kit.extra.fields.clear(); model.kit.extra.summons.clear(); model.kit.extra.blades.clear()
 	model.health=model.max_health(); model.kit.energy=model.kit.energy_max()

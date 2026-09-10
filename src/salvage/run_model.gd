@@ -30,6 +30,7 @@ var aim := Vector2.RIGHT
 var health := 5.0
 var exp: RefCounted
 var vanguard := Vanguard.new()
+var practice_meter := PracticeMeter.new()
 var mastery := BotMastery.new()
 var attacks := BotAttackOrders.new()
 var xp_fraction := 0.0
@@ -373,6 +374,7 @@ func step(delta: float, input_direction: Vector2) -> void:
 	if state != "running":
 		return
 	time += delta
+	if exp!=null and exp.practice: practice_meter.tick(delta)
 	if staged:
 		stage_time += delta
 	invincible = maxf(0.0, invincible - delta)
@@ -823,8 +825,11 @@ func hit_enemy(enemy: Dictionary, damage: float, source: String, knock: Vector2 
 	if enemy.dead:
 		return
 	if demo_mode and enemy.has("role") and enemy.phase == "recover": damage *= 1.5
-	damage_dealt[source] = float(damage_dealt.get(source, 0.0)) + minf(damage, enemy.hp)
-	enemy.hp -= damage
+	var dummy: bool=exp!=null and exp.practice and enemy.get("dummy",false)
+	var dealt:=maxf(0,damage) if dummy else minf(maxf(0,damage),enemy.hp)
+	damage_dealt[source] = float(damage_dealt.get(source, 0.0)) + dealt
+	if exp!=null and exp.practice: practice_meter.record(enemy,dealt)
+	if not dummy: enemy.hp -= damage
 	enemy.flash = 0.085
 	enemy.knock = knock
 	emit_event("hit", enemy.pos, {"heavy":source in ["basic","sweep","reap","thrust"] and exp!=null and exp.revised})
