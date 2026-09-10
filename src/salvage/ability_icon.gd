@@ -34,6 +34,17 @@ func bolt(p: Vector2, scale_value: float = 1.0) -> void:
 	line(p + Vector2(-8, 8) * scale_value, p + Vector2(6, -6) * scale_value, CREAM, 2)
 	draw_circle(p + Vector2(-6, 6) * scale_value, 3 * scale_value, GOLD)
 
+func _draw_gear_tier() -> void:
+	if not ability.begins_with("gear_"): return
+	var id:=ability.trim_prefix("gear_")
+	if not ForgeEquipment.ITEMS.has(id): return
+	var tier: int=ForgeEquipment.ITEMS[id].tier
+	var tint: Color=ForgeEquipment.TIER_COLORS[tier-1]
+	for inset in [2,4,6]:
+		draw_rect(Rect2(inset,inset,64-inset*2,64-inset*2),Color(tint,0.28 if inset==2 else 0.12),false,2)
+	draw_rect(Rect2(2,2,60,60),Color(tint,0.9),false,1)
+	for i in range(tier): draw_rect(Rect2(32-tier*3+i*6,57,4,3),tint)
+
 func _draw() -> void:
 	if ability.begins_with("vanguard_") and not base_only and PaintedIcons.enabled:
 		if pixel_material==null:
@@ -46,6 +57,7 @@ func _draw() -> void:
 	var painted: Texture2D=null if base_only else PaintedIcons.texture(ability)
 	if painted!=null:
 		draw_texture_rect(painted,Rect2(0,0,64,64),false)
+		_draw_gear_tier()
 		return
 	var icon_id: String=MobaKit.PASSIVES[ability].icon if MobaKit.PASSIVES.has(ability) and ability not in ["poison","lightning","pulse"] else ability
 	icon_id={"vanguard_q":"rocket","vanguard_w":"strike","vanguard_e":"thrust","vanguard_r":"nuke","vanguard_d":"sprint","vanguard_f":"blink","vanguard_p1":"orbit","vanguard_x1":"pulse_sentry","vanguard_x2":"medic_sentry","vanguard_x3":"converter","vanguard_hammer":"hammer","vanguard_gun":"bolt"}.get(icon_id,icon_id)
@@ -56,7 +68,9 @@ func _draw() -> void:
 	line(Vector2(5, 5), Vector2(5, 59), Color("557976"), 1)
 	line(Vector2(59, 5), Vector2(59, 59), Color("10232c"), 2)
 	line(Vector2(5, 59), Vector2(59, 59), Color("10232c"), 2)
-	if ExpeditionIcon.draw(self, icon_id): return
+	if ExpeditionIcon.draw(self, icon_id):
+		_draw_gear_tier()
+		return
 	match icon_id:
 		"hammer":
 			line(Vector2(17,52),Vector2(40,24),INK,11)

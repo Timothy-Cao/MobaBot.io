@@ -596,6 +596,7 @@ func _enemy_step(delta: float) -> void:
 	for enemy in enemies:
 		if enemy.dead:
 			continue
+		if exp!=null: exp.scale_enemy(self,enemy)
 		if enemy.get("dummy",false):
 			enemy.warmup=0; enemy.flash=maxf(0,enemy.flash-delta); enemy.knock=Vector2.ZERO
 			continue

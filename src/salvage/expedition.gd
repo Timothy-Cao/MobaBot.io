@@ -116,9 +116,31 @@ func sync_stats(run) -> void:
 
 func incoming(run, hull_units: float) -> float:
 	var value := hull_units * 20 * (1 + ascension * 0.12) * 100 / (100 + resistance)
+	if Vanguard.enabled(run) and not practice:
+		value*=stage_damage(ROUTE[route_index][0])
+		if encounter_spawned and ROUTE[route_index][1] in ["boss","final"]: value*=1.25
 	if run.kit.extra.roll_left > 0: value *= 0.65
 	if run.kit.extra.flywheel >= 1: value *= 0.85
 	return value
+
+static func stage_health(number: int) -> float:
+	var depth:=clampi(number,1,8)-1
+	return 1.0+1.2*depth+0.35*depth*depth
+
+static func stage_damage(number: int) -> float:
+	return 1.0+0.12*(clampi(number,1,8)-1)
+
+func scale_enemy(run, enemy: Dictionary) -> void:
+	if not Vanguard.enabled(run) or practice or enemy.get("stage_scaled",false) or enemy.get("dummy",false): return
+	enemy.stage_scaled=true
+	# Boss HP is set explicitly after spawn; every other spawn path shares this rule.
+	if enemy.has("exp_boss"): return
+	var number: int=ROUTE[route_index][0]
+	var factor:=stage_health(number)
+	if enemy.has("role"):
+		if number>1: factor*=3.0
+	else: factor*=1.2 if ascension>=2 else 1.0
+	enemy.hp*=factor; enemy.max_hp*=factor
 
 func enemy_speed() -> float:
 	return 1 + (0.08 if ascension >= 1 else 0) + (0.07 if ascension >= 4 else 0)
@@ -182,6 +204,7 @@ func spawns(run, delta: float) -> void:
 			boss["exp_boss"] = stage_number
 			boss["title"] = BOSSES[stage_number - 1]
 			boss.hp = (350 + stage_number * 150) * (1.2 if ascension >= 2 else 1) * (1.7 if kind == "final" else 1)
+			if Vanguard.enabled(run): boss.hp*=50.0
 			boss.max_hp = boss.hp
 			boss["patterns"] = [["charge","fan"],["shells","charge"],["ring","shells"],["fan","charge","fan"],["ring","fan"],["shells","ring","charge"],["charge","shells","fan"],["ring","shells","charge","fan"]][stage_number - 1]
 		return
@@ -197,7 +220,7 @@ func spawns(run, delta: float) -> void:
 		run._spawn_pack(2 + stage_number / 2 + (1 if kind == "loot" else 0), int(run.stage_time) % 15 > 11)
 		for i in range(before, run.enemies.size()):
 			var enemy: Dictionary = run.enemies[i]
-			enemy.hp *= (1 + (stage_number - 1) * 0.22) * (1.2 if ascension >= 2 else 1)
+			if not Vanguard.enabled(run): enemy.hp *= (1 + (stage_number - 1) * 0.22) * (1.2 if ascension >= 2 else 1)
 			enemy.max_hp = enemy.hp
 	var wave := int(run.stage_time / 17)
 	if wave > last_wave:

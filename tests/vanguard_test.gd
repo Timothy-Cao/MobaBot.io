@@ -135,6 +135,7 @@ func execute() -> void:
 	playtest_refinements()
 	rank_milestones()
 	new_milestones()
+	stage_and_gear()
 	machine_gun_milestones()
 	await ui_checks()
 	print("VANGUARD: %d checks, %d failures"%[checks,failures]); quit(1 if failures else 0)
@@ -193,6 +194,38 @@ func machine_gun_milestones() -> void:
 	check(turret.shots==5 and run.vanguard.gun_shots==0,"Turret has independent firing counter")
 	check(is_equal_approx(run.projectiles.back().damage,3.4*Vanguard.GUN_POWER[10]*2),"Turret inherits MG damage")
 	check(is_equal_approx(turret.clock,0.5),"Turret inherits MG cadence")
+
+func stage_and_gear() -> void:
+	var names: Array=[]
+	for id in ForgeEquipment.ITEMS:
+		var item: Dictionary=ForgeEquipment.ITEMS[id]
+		check(item.name not in names,"Equipment names unique")
+		names.append(item.name)
+		check(item.name.begins_with(ForgeEquipment.TIER_NAMES[item.tier-1]),"Name carries tier identity")
+	check(ForgeEquipment.TIER_COLORS.size()==5,"Five rarity glow colors")
+	for number in range(1,9):
+		var run:=fresh(1); run.exp.practice=false
+		for index in range(BotExpedition.ROUTE.size()):
+			if BotExpedition.ROUTE[index][0]==number: run.exp.route_index=index; break
+		run._spawn_pack(3,true); RangedThreats.spawn(run,"lancer")
+		var health: Array=[]
+		for enemy in run.enemies: health.append(enemy.hp)
+		run._enemy_step(0)
+		for i in range(run.enemies.size()):
+			check(is_equal_approx(run.enemies[i].hp,health[i]*BotExpedition.stage_health(number)),"Surge and ranged enemies share stage health")
+		var scaled: float=run.enemies[0].hp
+		run._enemy_step(0)
+		check(run.enemies[0].hp==scaled,"Stage scaling applied exactly once")
+		check(is_equal_approx(run.exp.incoming(run,1),20*BotExpedition.stage_damage(number)*100/(100+run.exp.resistance)),"Stage damage curve applies before resistance")
+	var run:=fresh(1); run.exp.practice=false; run.exp.route_index=2; run.stage_time=180
+	run.exp.encounter_spawned=false; run.exp.spawns(run,0)
+	var boss: Dictionary=run.enemies.back()
+	check(boss.get("exp_boss",0)==1 and boss.hp==25000,"Stage-one main boss has 50x health")
+	run._enemy_step(0); check(boss.hp==25000,"Boss does not double-scale")
+	check(is_equal_approx(run.exp.incoming(run,1),25*100/(100+run.exp.resistance)),"Boss encounter damage increases 25 percent")
+	run=fresh(1); run.exp.practice=false; run.exp.route_index=0; run.stage_time=180
+	run.exp.encounter_spawned=false; run.exp.spawns(run,0); run._enemy_step(0)
+	check(run.enemies.back().hp==130,"Stage-one guardian health preserved")
 
 func new_milestones() -> void:
 	for rank_value in [1,5,10]:

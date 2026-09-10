@@ -1,5 +1,13 @@
 # 0.16 — Focused design and damage pass
 
+## Stage pressure follow-up · 9 September 2026
+
+Owner reports Stage 1 is very fun but Stage 2 abruptly becomes easy, and main bosses lack durability/threat. Preserve Stage-1 waves/guardians and the current one-third Vanguard XP gain. Found a real scaling gap: only ordinary timed packs received the old +22%/stage HP adjustment; surge packs and ranged spawns bypassed it. Incoming damage had ascension/resistance modifiers but no stage growth.
+
+Vanguard campaign now applies HP scaling once per enemy before its AI/combat, covering timed packs, surges, ranged threats and boss adds: `1 + 1.2*(stage-1) + 0.35*(stage-1)^2` (1 / 2.55 / 4.8 / 7.75 / 11.4 / 15.75 / 20.8 / 26.55). Existing ascension HP modifier applies once. Guardians after Stage 1 also get ×3 durability; Stage-1 guardian remains 130 HP at A0. Stage damage is `1 + .12*(stage-1)` before resistance. During main boss encounters (including their adds/projectiles), incoming damage also gets ×1.25. Practice and legacy rules remain unchanged.
+
+Main bosses use ×50 prior HP, without an additional ordinary-enemy HP multiplier: Stage-1 boss 500→25,000; Stage-2 boss 650→32,500 at A0. Final/ascension modifiers remain. No additional speed/telegraph changes. This is the owner's requested aggressive durability experiment, not a verified balanced boss duration: at 100 realized DPS, 25k HP takes 250 seconds, excluding downtime. The next human check must distinguish threatening sustained play from a repetitive damage sponge. XP and point earning were not nerfed again in this pass.
+
 ## Vanguard milestone / pacing follow-up · 9 September 2026
 
 Supersedes earlier mobility/tower/pacing numbers for Vanguard only. E reach: 209 / 292.6 / 397.1 at ranks 1 / 5 / 10 (1 / 1.4 / 1.9×); same movement speed, damage, two charges and one 2×-remaining wall rebound. D upkeep starts at 12/sec, tapers to 11.4 at rank 4, then 7 at rank 5 and 6 at rank 10; rank 10 removes the drive casting/hammer restriction. D is held upkeep, not a cooldown skill. F unmodified recharge is 10.8 / 6.4 / 5.4 seconds at ranks 1 / 5 / 10, costs 20 below 5 and 12 thereafter; rank 10 arrival blast has 110 radius and 30×damage_scale(f) damage (118.8 without gear/mastery/rarity). One arrival hit, not departure damage.

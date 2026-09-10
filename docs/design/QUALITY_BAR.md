@@ -4,6 +4,8 @@ Version 1 · 8 September 2026 · baseline: 0.15. This is an editable review cont
 
 ## North star
 
+9 September 2026, owner playtest: Stage 1 is reported as very fun; Stage 2 suddenly too easy and bosses too weak. Build played was not independently confirmed. Preserve this positive human observation rather than treating earlier naive bot losses as a verdict on fun. New stage-scaling coverage and a requested ×50 boss-health experiment need human review for pressure versus excessive fight length. Equipment gains clearer names and tier glow/pips. No numeric ratings inferred from this feedback or from passing tests.
+
 9 September 2026, tower/progression follow-up: owner requests visible and functional 5/10 milestones, freer point spending, slower XP and broad rank-five progression before specialization. Native tower hardware and mobility/support milestones are implemented and technically checked. One-third XP plus the gate causes a severe regression in the simple fixed-seed Vanguard bot's early survival; retain this warning for the next human test rather than increasing a balance/fun score. Pickup coalescing has a synthetic CPU benefit; no rendered FPS improvement is yet established.
 
 9 September 2026, owner feedback: painted icons currently feel too detailed/high-quality relative to the game world. Trial 32px pixel sampling with gently muted color, without deleting originals. Also requests smaller adjustable HUD and activity cues instead of module status text. Implementation and rendered checks are complete; owner judgment of the new style and readability is pending. Existing numeric ratings remain unchanged.

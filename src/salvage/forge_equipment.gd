@@ -4,6 +4,9 @@ extends RefCounted
 const PATH := "user://mobabot_forge.json"
 const SLOTS := ["helmet", "chest", "legs", "boots", "charm", "ring", "flower", "cape"]
 const SETS := ["courier", "bastion", "dynamo", "relay", "reclaimer"]
+const TIER_NAMES := ["Salvaged","Tempered","Stormforged","Astral","Sovereign"]
+const TIER_COLORS := [Color("b5c3cc"),Color("78c99a"),Color("69b8f0"),Color("be8aee"),Color("f2bd64")]
+const ITEM_NAMES := {"helmet":"Visor","chest":"Carapace","legs":"Greaves","boots":"Striders","charm":"Heartcore","ring":"Signet","flower":"Ironbloom","cape":"Mantle"}
 const AFFIXES := {"health": 2.0, "damage": 0.006, "regen": 0.15, "luck": 0.025, "resistance": 1.0}
 var credits := 150
 var unlocked_ascension := 0
@@ -23,7 +26,7 @@ static func make_items() -> Dictionary:
 	for i in range(5):
 		for slot in SLOTS:
 			var id: String=SETS[i]+"_"+slot
-			items[id]={"name":slot.capitalize()+" "+str(i+1),"slot":slot,"tier":i+1,"icon":"gear_"+id}
+			items[id]={"name":TIER_NAMES[i]+" "+ITEM_NAMES[slot],"slot":slot,"tier":i+1,"icon":"gear_"+id}
 	return items
 
 func _init() -> void:

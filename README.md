@@ -10,6 +10,8 @@ New expeditions use the fixed **Vanguard** kit and non-modal skill progression. 
 
 ## Current Vanguard controls
 
+Latest pressure pass: Stage-1 waves/guardians preserved; later enemy health/damage scale consistently, including surges and ranged units. Main bosses have 50× previous HP and main-boss encounters deal 25% more damage before stage scaling. XP remains at one-third. Equipment tiers now have distinctive names and silver/green/blue/violet/gold glow frames with tier pips; saved items/stats are unchanged. See BALANCE_16 for the tuning curve and boss-duration caution.
+
 Latest milestone pass: universal skill points learn **or** upgrade any eligible tool. All twelve tools (including MG/hammer) must have earned rank 5 before any rank 6+ purchase. Existing higher ranks are preserved; Practice presets bypass the gate. Future Vanguard XP gain is one-third of the preceding build; current XP/ranks are retained.
 
 D rank 5 reduces upkeep; rank 10 permits casting while driving. F rank 5 reduces energy/recharge, rank 10 adds a landing blast. E travels 209 / 292.6 / 397.1 units at ranks 1 / 5 / 10. Towers gain visible hardware and stronger milestone effects. Settled nearby XP drops coalesce under load without losing value; fresh loot showers and flying pickups remain separate.
