@@ -100,7 +100,7 @@ Do not let the two detonations become interchangeable damage buttons. Their outp
 
 ### Replace Overclock well with a temporary turret form
 
-Slot 4 becomes a high-damage siege decision rather than a deployable cooldown aura. Activation takes about one second and visibly transforms Vanguard into a planted turret. The player cannot move under their own control while transformed. Leaving takes about 0.5 seconds; the mode ends automatically after at most ten seconds. A second slot-4 press should begin the early exit unless later input testing finds a clearer command.
+Slot 4 becomes a high-damage siege decision rather than a deployable cooldown aura. Activation takes about one second and visibly transforms Vanguard into a planted turret. The player cannot move under their own control while transformed. D and F are disabled; neither Ghost Drive nor Phase Hop can escape the commitment. Leaving takes about 0.5 seconds; the mode ends automatically after at most ten seconds. A second slot-4 press should begin the early exit unless later input testing finds a clearer command.
 
 Turret form temporarily replaces Q/W/E/R:
 
@@ -115,7 +115,7 @@ Q's initial damage target is approximately 1.5 times the combined normal-Q plus 
 
 The owner is open to reducing some normal-form damage because siege form may become a major damage source. Do this only after measuring achievable siege uptime and damage in representative encounters; entering an unsafe form should not be required merely to recover power removed from the dependable normal kit.
 
-The transformation should show chassis anchoring, weapon deployment and a clear completion frame without delaying control beyond the real one-second rule. The action bar should visibly change to the turret Q/W/E/R set, and the turret should track mouse aim without implying it can move. Existing passives may continue unless a specific interaction proves degenerate; the permanent gun explicitly does not. D/F, hammer, other modules, interruption by damage, protection during transformation, W targeting and cooldown persistence across form changes all require decisions before implementation. R's 30-second cooldown should not reset by leaving and re-entering.
+The transformation should show chassis anchoring, weapon deployment and a clear completion frame without delaying control beyond the real one-second rule. The action bar should visibly change to the turret Q/W/E/R set, and the turret should track mouse aim without implying it can move. Existing passives may continue unless a specific interaction proves degenerate; the permanent gun explicitly does not. D/F remain unavailable from entry commitment through completed exit. Hammer, other modules, interruption by damage, protection during transformation, W targeting and cooldown persistence across form changes still require decisions before implementation. R's 30-second cooldown should not reset by leaving and re-entering.
 
 The intended test is whether the player recognizes a genuinely safe damage opportunity, commits, then chooses among sustained Q, distant W, defensive E, emergency R or early exit. If the correct answer is always to enter on cooldown and hold Q for ten seconds, the form has failed the gameplay vision.
 
