@@ -12,6 +12,9 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 	if "--revised" in OS.get_cmdline_user_args() or "--vanguard" in OS.get_cmdline_user_args(): run.exp.enable_revision(run)
 	if "--vanguard" in OS.get_cmdline_user_args(): Vanguard.setup(run)
 	ForgeEquipment.new().apply_to(run)
+	# Reliability only: a normal-HP refill can still die to several hits in one
+	# frame. Inflate maximum health too, preserving all AI/damage/collision paths.
+	if policy=="soak": run.exp.gear_stats.health=100000.0; run.exp.sync_stats(run)
 	run.health=run.max_health()
 	var peak:=0
 	var max_us:=0
@@ -65,7 +68,7 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 			max_us=maxi(max_us,elapsed); peak=maxi(peak,run.enemies.size())
 			run.events.clear()
 	samples.sort()
-	return {"class":class_id,"policy":policy,"ascension":difficulty,"state":run.state,"round":run.exp.route_index+1,"seconds":snappedf(run.time,0.1),"level":run.level,"kills":run.kills,"peak_enemies":peak,"p95_step_us":samples[int(samples.size()*0.95)] if not samples.is_empty() else 0,"max_step_us":max_us,"casts":run.kit.cast_counts}
+	return {"class":class_id,"policy":policy,"artificial_health":policy=="soak","ascension":difficulty,"state":run.state,"round":run.exp.route_index+1,"seconds":snappedf(run.time,0.1),"level":run.level,"kills":run.kills,"peak_enemies":peak,"p95_step_us":samples[int(samples.size()*0.95)] if not samples.is_empty() else 0,"max_step_us":max_us,"casts":run.kit.cast_counts}
 
 func _run() -> void:
 	if "--soak" in OS.get_cmdline_user_args():

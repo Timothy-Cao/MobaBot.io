@@ -1,5 +1,7 @@
 # MobaBot.io development
 
+10 September pressure/audio override: revised survival is 120 seconds, not 180. Vanguard uses stage plus round HP/damage growth, bounded speed/cadence growth, and Breacher/Mender/Scattergun specialists. See docs/design/PRESSURE_AUDIO_18.md. Include pressure_feedback_test.gd. The expedition --soak explicitly inflates test-only maximum health as well as refilling it, to survive overlapping same-frame hits; never interpret it as human balance or write its rewards to a collection.
+
 Third-playtest override: rules17 walls block bodies but not friendly/enemy projectiles, returning blades, shot acquisition or laser rays. Vanguard E also stores two charges. Character resource bars are below the feet. Older pre-rules17 regression cover behavior remains historical.
 
 Latest 0.18 playtest overrides: camera lock defaults to L but is rebindable (including mouse buttons); backtick toggles Vanguard's independent gun. Q/W store two charges, Q rank-one recharge is 4s before bonuses. Primary Practice Enemies is single-dummy/Cluster by default with no formation selector. See QA_18's second-playtest section before relying on older compatibility controls.

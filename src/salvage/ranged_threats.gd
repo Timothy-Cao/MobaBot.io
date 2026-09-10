@@ -1,16 +1,21 @@
 class_name RangedThreats
 extends RefCounted
-const NAMES := {"lancer":"Arc lancer", "volley":"Burst battery", "bomber":"Bomb carrier"}
+const NAMES := {"lancer":"Arc lancer", "volley":"Burst battery", "bomber":"Bomb carrier", "breacher":"Breacher", "mender":"Mender", "scatter":"Scattergun"}
 
 static func spawn(run, type: String, point: Vector2 = Vector2.INF, bypass_cap: bool = false) -> Dictionary:
 	if not NAMES.has(type) or run.enemies.size()>=run.MAX_ENEMIES: return {}
-	if not bypass_cap and run.enemies.filter(func(e): return not e.dead and e.has("gunner_kind")).size()>=3: return {}
+	var cap:=mini(5,3+int(run.exp.route_index)/7) if Vanguard.enabled(run) else 3
+	if not bypass_cap and run.enemies.filter(func(e): return not e.dead and e.has("gunner_kind")).size()>=cap: return {}
+	if type=="mender" and not bypass_cap and run.enemies.any(func(e): return not e.dead and e.get("gunner_kind","")=="mender"): return {}
 	var pos: Vector2 = run._offscreen_point() if point == Vector2.INF else point
 	run.spawn_enemy(pos,3)
 	var enemy: Dictionary=run.enemies.back()
 	enemy["gunner_kind"]=type; enemy["title"]=NAMES[type]
 	enemy.radius=23.0; enemy.hp=38.0*(1+0.2*(int(BotExpedition.ROUTE[run.exp.route_index][0])-1)); enemy.max_hp=enemy.hp
 	enemy.clock=1.0; enemy.phase="seek"; enemy["burst"]=0; enemy["beam_end"]=pos
+	if type in ["breacher","mender","scatter"]:
+		enemy.hp={"breacher":55.0,"mender":32.0,"scatter":45.0}[type]; enemy.max_hp=enemy.hp
+		enemy["links"]=[]; enemy["hit_player"]=false
 	return enemy
 
 static func beam_end(run, point: Vector2, direction: Vector2) -> Vector2:
@@ -29,6 +34,7 @@ static func beam_end(run, point: Vector2, direction: Vector2) -> Vector2:
 	return end
 
 static func step(run, e: Dictionary, delta: float) -> void:
+	if e.gunner_kind in ["breacher","mender","scatter"]: FieldEnemies.step(run,e,delta); return
 	e.clock-=delta
 	var offset: Vector2=run.player-e.pos
 	if e.phase=="seek":
@@ -41,6 +47,7 @@ static func step(run, e: Dictionary, delta: float) -> void:
 		var visible_area := Rect2(run.follow_origin(), run.view_size)
 		if e.clock<=0 and offset.length()<560 and visible_area.grow(-25).has_point(e.pos):
 			e.phase="aim"; e.clock=0.8 if e.gunner_kind=="lancer" else 0.65
+			run.emit_event("enemy_windup",e.pos)
 			e.dir=offset.normalized(); e.beam_end=beam_end(run,e.pos,e.dir)
 			if e.gunner_kind=="bomber":
 				var predicted: Vector2=run.player+run.velocity.limit_length(160)*0.3
@@ -70,6 +77,7 @@ static func step(run, e: Dictionary, delta: float) -> void:
 	e.pos=Vector2(e.pos).clamp(run.ARENA.position+Vector2.ONE*30,run.ARENA.end-Vector2.ONE*30)
 
 static func draw(art, e: Dictionary) -> void:
+	if e.gunner_kind in ["breacher","mender","scatter"]: FieldEnemies.draw(art,e); return
 	var p: Vector2=e.pos+art.frame_offset
 	art.draw_set_transform(p)
 	art.draw_circle(Vector2(0,12),26,Color(art.INK,0.55))
@@ -93,6 +101,7 @@ static func draw(art, e: Dictionary) -> void:
 	art.draw_set_transform(Vector2.ZERO)
 
 static func tell(art, e: Dictionary) -> void:
+	if e.gunner_kind in ["breacher","mender","scatter"]: FieldEnemies.tell(art,e); return
 	if e.gunner_kind=="lancer" and e.phase in ["aim","beam"]:
 		art._line(e.pos,e.beam_end,Color(art.CORAL,0.7 if e.phase=="aim" else 1),2 if e.phase=="aim" else 24)
 		if e.phase=="beam": art._line(e.pos,e.beam_end,art.CREAM,4)

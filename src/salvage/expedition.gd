@@ -118,7 +118,7 @@ func sync_stats(run) -> void:
 func incoming(run, hull_units: float) -> float:
 	var value := hull_units * 20 * (1 + ascension * 0.12) * 100 / (100 + resistance)
 	if Vanguard.enabled(run) and not practice:
-		value*=stage_damage(ROUTE[route_index][0])
+		value*=stage_damage(ROUTE[route_index][0])*round_damage()
 		if encounter_spawned and ROUTE[route_index][1] in ["boss","final"]: value*=1.25
 	if run.kit.extra.roll_left > 0: value *= 0.65
 	if run.kit.extra.flywheel >= 1: value *= 0.85
@@ -131,23 +131,29 @@ static func stage_health(number: int) -> float:
 static func stage_damage(number: int) -> float:
 	return 1.0+0.12*(clampi(number,1,8)-1)
 
+func round_health() -> float:
+	return 1.10*(1.0+0.06*route_index)
+
+func round_damage() -> float:
+	return 1.05*(1.0+0.02*route_index)
+
 func scale_enemy(run, enemy: Dictionary) -> void:
 	if not Vanguard.enabled(run) or practice or enemy.get("stage_scaled",false) or enemy.get("dummy",false): return
 	enemy.stage_scaled=true
 	# Boss HP is set explicitly after spawn; every other spawn path shares this rule.
 	if enemy.has("exp_boss"): return
 	var number: int=ROUTE[route_index][0]
-	var factor:=stage_health(number)
+	var factor:=stage_health(number)*round_health()
 	if enemy.has("role"):
 		if number>1: factor*=3.0
 	else: factor*=1.2 if ascension>=2 else 1.0
 	enemy.hp*=factor; enemy.max_hp*=factor
 
-func enemy_speed() -> float:
-	return 1 + (0.08 if ascension >= 1 else 0) + (0.07 if ascension >= 4 else 0)
+func enemy_speed(run=null) -> float:
+	return 1 + (0.08 if ascension >= 1 else 0) + (0.07 if ascension >= 4 else 0) + (minf(0.18,route_index*0.008) if run!=null and Vanguard.enabled(run) and not practice else 0.0)
 
 func round_seconds() -> float:
-	if revised: return 180.0
+	if revised: return 120.0
 	return 35.0 if ROUTE[route_index][1] in ["boss", "final"] else (40.0 if ROUTE[route_index][1] == "loot" else 50.0)
 
 func label() -> String:
@@ -211,13 +217,17 @@ func spawns(run, delta: float) -> void:
 			boss["patterns"] = [["charge","fan"],["shells","charge"],["ring","shells"],["fan","charge","fan"],["ring","fan"],["shells","ring","charge"],["charge","shells","fan"],["ring","shells","charge","fan"]][stage_number - 1]
 		return
 	if revised:
-		var threat_index := int(run.stage_time / 26)
+		var threat_index := int(run.stage_time / (maxf(15,23-route_index*0.4) if Vanguard.enabled(run) else 26))
 		if threat_index > threat_wave:
 			threat_wave = threat_index
-			RangedThreats.spawn(run, ["lancer", "volley", "bomber"][(threat_index+route_index-1)%3])
+			var roster: Array=["lancer","volley","bomber"]
+			if Vanguard.enabled(run):
+				roster=["breacher","volley","lancer","scatter"] if route_index==0 else ["breacher","mender","scatter","lancer","volley","bomber"]
+			RangedThreats.spawn(run,roster[(threat_index+route_index-1)%roster.size()])
 	run.spawn_clock -= delta
 	if run.spawn_clock <= 0:
 		run.spawn_clock = maxf(0.45, 1.5 - stage_number * 0.11)
+		if Vanguard.enabled(run): run.spawn_clock/=1.0+0.012*route_index+0.15*clampf(run.stage_time/round_seconds(),0,1)
 		var before: int = run.enemies.size()
 		run._spawn_pack(2 + stage_number / 2 + (1 if kind == "loot" else 0), int(run.stage_time) % 15 > 11)
 		for i in range(before, run.enemies.size()):
@@ -228,7 +238,7 @@ func spawns(run, delta: float) -> void:
 	if wave > last_wave:
 		last_wave = wave
 		if wave > 0:
-			run._spawn_pack(7 + stage_number + (3 if ascension >= 2 else 0), true)
+			run._spawn_pack(7 + stage_number + (3 if ascension >= 2 else 0) + (mini(5,route_index/4) if Vanguard.enabled(run) else 0), true)
 			run.emit_event("surge", run.player)
 	if not revised and not encounter_spawned and kind == "neutral" and (route_index > 0 or run.stage_time >= 28):
 		if run.stage_time >= 28:
@@ -300,6 +310,7 @@ func finish_step(run, delta: float) -> void:
 			run.health = minf(max_health(run), run.health + max_health(run) * 0.2)
 			run.kit.energy = run.kit.energy_max()
 			run.state = "camp"
+			run.emit_event("stage_clear",run.player)
 			if Vanguard.enabled(run): Vanguard.progression(run)
 			return
 		if revised: return # Collection is uninterrupted; choices wait for camp.

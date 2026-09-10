@@ -7,7 +7,7 @@ var sounds: Dictionary = {}
 var cooldowns: Dictionary = {}
 var cursor := 0
 var important_cursor := 0
-const IMPORTANT := ["hurt", "lost", "win", "demo_boss", "boss_phase", "boss_windup", "boss_down", "stage_clear", "milestone"]
+const IMPORTANT := ["hurt", "hurt_low", "hurt_critical", "energy_empty", "lost", "win", "demo_boss", "boss_phase", "boss_windup", "boss_down", "stage_clear", "milestone", "enemy_windup"]
 var sound_rng := RandomNumberGenerator.new()
 var pickup_chain := 0
 var pickup_gap := 0.0
@@ -26,7 +26,22 @@ func _ready() -> void:
 	sounds.hit = _tone(180, 80, 0.055, 0.35)
 	sounds.kill = _tone(260, 65, 0.14, 0.45)
 	sounds.pickup = _tone(760, 1200, 0.075, 0.0)
+	sounds.pickup_big = _sequence([760,1140],[1050,1500],0.055,0.0)
 	sounds.hurt = _tone(140, 55, 0.3, 0.25)
+	sounds.hurt_low = _sequence([155,85],[85,45],0.13,0.30)
+	sounds.hurt_critical = _sequence([180,65,110],[55,40,45],0.12,0.38)
+	sounds.energy_empty = _sequence([420,240],[240,140],0.10,0.03)
+	sounds.cast_unready = _tone(240,210,0.065,0.0)
+	sounds.mode_switch = _tone(580,830,0.085,0.02)
+	sounds.repair_pickup = _sequence([520,780],[700,960],0.085,0.0)
+	sounds.energy_pickup = _tone(1050,1550,0.17,0.07)
+	sounds.credit_pickup = _sequence([950,1250],[1150,1450],0.06,0.08)
+	sounds.boost_pickup = _sequence([400,650,900],[600,850,1200],0.07,0.0)
+	sounds.chest_contents = _sequence([170,680,1020],[70,900,1400],0.12,0.06)
+	sounds.enemy_windup = _tone(310,690,0.20,0.06)
+	sounds.enemy_shot = _tone(150,60,0.16,0.36)
+	sounds.enemy_repair = _tone(400,600,0.20,0.05)
+	sounds.deploy = _sequence([160,450],[70,600],0.09,0.15)
 	sounds.upgrade = _tone(500, 1050, 0.4, 0.0)
 	sounds.equipped = _tone(720, 380, 0.16, 0.05)
 	sounds.pulse = _tone(95, 40, 0.4, 0.15)
@@ -69,13 +84,30 @@ func _process(delta: float) -> void:
 	for key in cooldowns:
 		cooldowns[key] = maxf(0, float(cooldowns[key]) - delta)
 
-func receive(event: Dictionary) -> void:
+func cue_for(event: Dictionary) -> String:
 	var kind: String = event.kind
+	if kind=="hurt":
+		var ratio: float=event.get("health_fraction",1.0)
+		return "hurt_critical" if ratio<0.25 else "hurt_low" if ratio<0.5 else "hurt"
+	if kind=="supply": return {"repair":"repair_pickup","energy":"energy_pickup","coins":"credit_pickup","speed":"boost_pickup","reset":"boost_pickup"}.get(event.get("supply",""),"supply")
+	if kind=="pickup" and event.get("value",0)>=8: return "pickup_big"
+	if kind=="cast" and event.get("ability","") in ["guard_bot","reserve_totem","medic_sentry","recovery_totem"]: return "deploy"
+	if kind=="miniboss_down": return "boss_down"
+	if kind=="surge": return "enemy_windup"
 	if kind=="skill_cut": kind="pulse" if event.get("style","")=="reap" else "beam"
 	if kind == "cast" and event.get("ability", "") == "rocket": kind = "rocket"
+	return kind
+
+func receive(event: Dictionary) -> void:
+	if event.get("silent_audio",false): return
+	var kind:=cue_for(event)
 	if muted or not sounds.has(kind) or cooldowns.get(kind, 0.0) > 0 or players.is_empty():
 		return
-	cooldowns[kind] = 0.065 if kind in ["pickup", "hit", "kill"] else 0.03
+	cooldowns[kind] = 0.065 if kind in ["pickup", "pickup_big", "hit", "kill"] else 0.03
+	if kind in ["hurt","hurt_low","hurt_critical"]: cooldowns[kind]=0.18
+	if kind=="energy_empty": cooldowns[kind]=0.65
+	if kind=="cast_unready": cooldowns[kind]=0.35
+	if kind in ["enemy_windup","enemy_shot","enemy_repair"]: cooldowns[kind]=0.45
 	# Crowd hits/pickups cannot cut off threat, damage or milestone cues.
 	var player: AudioStreamPlayer
 	if kind in IMPORTANT:
@@ -86,14 +118,24 @@ func receive(event: Dictionary) -> void:
 		cursor = (cursor + 1) % 9
 	player.stream = sounds[kind]
 	player.pitch_scale = sound_rng.randf_range(0.94, 1.06) if kind in ["shot", "pickup", "kill"] else 1.0
-	if kind == "pickup":
+	if kind in ["pickup","pickup_big"]:
 		player.pitch_scale = pow(2.0, mini(pickup_chain, 12) / 24.0)
 		pickup_chain += 1
 		pickup_gap = 0.5
 	player.volume_db = -26 if kind.begins_with("ui_") else (-22 if kind in ["shot", "hit"] else -14)
 	if kind=="auto_shot": player.volume_db=-27
 	elif kind=="heavy_shot": player.volume_db=-18
+	elif kind in ["hurt","hurt_low","hurt_critical"]: player.volume_db=-9 if kind=="hurt_critical" else -11
+	elif kind in ["energy_empty","chest_contents"]: player.volume_db=-12
+	elif kind=="cast_unready" or kind.begins_with("enemy_"): player.volume_db=-20
 	player.play()
+
+func _sequence(starts: Array, ends: Array, seconds: float, noise: float) -> AudioStreamWAV:
+	var stream:=AudioStreamWAV.new(); stream.format=AudioStreamWAV.FORMAT_16_BITS; stream.mix_rate=22050
+	var pcm:=PackedByteArray()
+	for i in range(starts.size()): pcm.append_array(_tone(starts[i],ends[i],seconds,noise).data)
+	stream.data=pcm
+	return stream
 
 func set_muted(value: bool) -> void:
 	muted = value

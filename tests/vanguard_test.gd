@@ -247,20 +247,20 @@ func stage_and_gear() -> void:
 		for enemy in run.enemies: health.append(enemy.hp)
 		run._enemy_step(0)
 		for i in range(run.enemies.size()):
-			check(is_equal_approx(run.enemies[i].hp,health[i]*BotExpedition.stage_health(number)),"Surge and ranged enemies share stage health")
+			check(is_equal_approx(run.enemies[i].hp,health[i]*BotExpedition.stage_health(number)*run.exp.round_health()),"Surge and ranged enemies share stage and round health")
 		var scaled: float=run.enemies[0].hp
 		run._enemy_step(0)
 		check(run.enemies[0].hp==scaled,"Stage scaling applied exactly once")
-		check(is_equal_approx(run.exp.incoming(run,1),20*BotExpedition.stage_damage(number)*100/(100+run.exp.resistance)),"Stage damage curve applies before resistance")
+		check(is_equal_approx(run.exp.incoming(run,1),20*BotExpedition.stage_damage(number)*run.exp.round_damage()*100/(100+run.exp.resistance)),"Stage/round damage curve applies before resistance")
 	var run:=fresh(1); run.exp.practice=false; run.exp.route_index=2; run.stage_time=180
 	run.exp.encounter_spawned=false; run.exp.spawns(run,0)
 	var boss: Dictionary=run.enemies.back()
 	check(boss.get("exp_boss",0)==1 and boss.hp==25000,"Stage-one main boss has 50x health")
 	run._enemy_step(0); check(boss.hp==25000,"Boss does not double-scale")
-	check(is_equal_approx(run.exp.incoming(run,1),25*100/(100+run.exp.resistance)),"Boss encounter damage increases 25 percent")
+	check(is_equal_approx(run.exp.incoming(run,1),25*run.exp.round_damage()*100/(100+run.exp.resistance)),"Boss encounter damage increases 25 percent after round scaling")
 	run=fresh(1); run.exp.practice=false; run.exp.route_index=0; run.stage_time=180
 	run.exp.encounter_spawned=false; run.exp.spawns(run,0); run._enemy_step(0)
-	check(run.enemies.back().hp==130,"Stage-one guardian health preserved")
+	check(is_equal_approx(run.enemies.back().hp,143),"Stage-one guardian receives 10 percent pressure increase")
 
 func new_milestones() -> void:
 	for rank_value in [1,5,10]:

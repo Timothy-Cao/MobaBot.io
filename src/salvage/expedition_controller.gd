@@ -28,10 +28,13 @@ var cast_quick := {"q":true,"w":true,"e":true,"r":false,"p1":true,"x1":false,"x2
 var camera_offset := Vector2.ZERO
 var minimap_held := false
 var pointer_warp := Vector2(-9999,-9999)
+var combat_feedback: CombatFeedback
 
 func _ready() -> void:
 	collection.load_profile()
 	super._ready()
+	combat_feedback=CombatFeedback.new(); combat_feedback.name="CombatFeedback"; ui.root.add_child(combat_feedback)
+	combat_feedback.visible=false
 	ui.expedition_ui = true
 	ui.host=self
 	ui.keyboard_requested.connect(open_keyboard)
@@ -92,6 +95,8 @@ func confirm_new_run() -> void:
 	add_child(dialog); dialog.popup_centered(Vector2i(440,140))
 
 func _physics_process(delta: float) -> void:
+	if combat_feedback!=null and model!=null:
+		combat_feedback.sync(model.health/maxf(1,model.max_health()),screen=="running" and model.state=="running",ui.reduced)
 	_update_pointer_mode()
 	_apply_hud_scale()
 	if model!=null and model.kit!=null: model.kit.extra.cursor=get_global_mouse_position()
@@ -219,6 +224,7 @@ func _input(event: InputEvent) -> void:
 	event=system_event(event)
 	if screen=="running" and Vanguard.enabled(model) and event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_QUOTELEFT:
 		model.vanguard.gun_on=not model.vanguard.gun_on
+		model.emit_event("mode_switch",model.player)
 		get_viewport().set_input_as_handled(); return
 	if screen=="placement":
 		if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:
@@ -333,6 +339,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func _drain_events() -> void:
 	for event in model.events:
+		if combat_feedback!=null: combat_feedback.receive(event)
 		if event.kind!="chest_contents" or screen!="running": continue
 		var old=ui.hud.get_node_or_null("ChestReceipt")
 		if old!=null: ui.hud.remove_child(old); old.queue_free()
@@ -341,7 +348,6 @@ func _drain_events() -> void:
 		ui.hud.add_child(receipt); receipt.build(ui,event.receipt,true)
 		var tween:=receipt.create_tween()
 		tween.tween_interval(5.0); tween.tween_property(receipt,"modulate:a",0.0,0.25); tween.tween_callback(receipt.queue_free)
-		sound.receive({"kind":"equipped"})
 	super._drain_events()
 
 func _load_settings() -> void:

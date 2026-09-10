@@ -13,7 +13,7 @@ func fresh() -> SalvageRun:
 func _initialize() -> void: _run.call_deferred()
 func _run() -> void:
 	var run:=fresh()
-	check(run.exp.class_id=="shared" and run.exp.round_seconds()==180,"Shared pool and three-minute round")
+	check(run.exp.class_id=="shared" and run.exp.round_seconds()==120,"Shared pool and two-minute round")
 	check(run.next_level==10,"Initial XP +25%")
 	var previous:=1.25
 	for level in range(1,101):
@@ -34,10 +34,10 @@ func _run() -> void:
 		check(point.distance_to(target)<3,"Cross-map terrain route %d"%index)
 	for wall in run.kit.extra.walls:
 		check(Geometry2D.get_closest_point_to_segment(run.player,wall.a,wall.b).distance_to(run.player)>100,"Safe player start")
-	run.exp.spawns(run,0.1); run.stage_time=179.9; run.exp.spawns(run,0.1)
+	run.exp.spawns(run,0.1); run.stage_time=119.9; run.exp.spawns(run,0.1)
 	check(not run.exp.encounter_spawned,"No early mini-boss")
-	run.stage_time=180; run.exp.spawns(run,0.1)
-	check(run.exp.encounter_spawned and run.enemies.any(func(e):return e.has("role")),"Miniboss at 180 seconds")
+	run.stage_time=120; run.exp.spawns(run,0.1)
+	check(run.exp.encounter_spawned and run.enemies.any(func(e):return e.has("role")),"Miniboss at 120 seconds")
 	for e in run.enemies: e.dead=true
 	run.exp.finish_step(run,0.1)
 	check(run.state=="running" and run.exp.clear_clock>11,"Collection starts without a modal")

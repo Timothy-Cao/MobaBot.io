@@ -1,5 +1,15 @@
 # 0.16 — Focused design and damage pass
 
+## Two-minute rounds / round pressure · 10 September 2026
+
+Revised survival 180→120 seconds. No compensating XP multiplier: shorter survival grants fewer farming opportunities, though a modest within-round spawn acceleration offsets part of that. Guardian/boss and 12-second collection remain additional time. Current full-route survival budget is 44 minutes.
+
+For Vanguard campaign only, with zero-based route index `r`: non-main-boss HP gains `1.10 × (1 + .06r)` on top of the existing stage HP curve; damage gains `1.05 × (1 + .02r)` on top of stage damage, resistance/ascension and the existing main-boss encounter ×1.25. Main-boss HP is not multiplied again. Later guardian ×3 remains. Thus Stage-1 regular/guardian HP is +10%, base incoming damage +5%; progression increases each subsequent round. Ordinary pursuit speed adds `min(.18, .008r)` to existing ascension speed. New specialists use that pursuit modifier; Breacher's committed dash stays 480 units/sec to preserve its tell. Existing ranged approach speeds remain unchanged.
+
+Regular spawn interval divides by `1 + .012r + .15 × survival_progress`. Existing 17-second surges remain, with up to five additional bodies (`min(5, floor(r/4))`). Specialist cadence is `max(15, 23 - .4r)` seconds; total specialist cap grows from three to five. At most one live campaign Mender. First round introduces Breacher/Burst battery/Arc lancer/Scattergun; subsequent rounds rotate all six specialists. Their drops use the ordinary existing rules; no new chest farming loop.
+
+Ordinary A0 fixed-seed Vanguard policies in this pass: idle loses at 13.3s, active at 32.3s, basics at 21.9s. These limited bots do not represent owner skill or establish suitable balance. An initial A5 normal-HP-refill soak died at round 6 from overlapping damage. The reliability-only soak now explicitly sets maximum health +100,000 and refills it, leaving AI/attack/collision/resource paths active. Its JSON reports `artificial_health`; use it only for route/performance checks. All normal policies and loot seeds remain unchanged. Human review must especially check early Breacher pressure, later health growth and the already-large boss HP budget.
+
 ## Reward visibility / stage shops · 10 September 2026
 
 Vanguard opens a three-offer equipment shop after each of eight stages; old shared-pool runs retain stages 2/5/7. Prices and tier-roll probabilities are unchanged: `100 + 100 × tier`. Field credits remain run-only. Banked/purchased equipment persists. This increases buying opportunities and therefore may accelerate permanent collection growth; it is not proven economy balance. Stage 1 guarantees 3 × 80 clear credits and at least 3 × 20 chest credits = 300 field credits, before any bonus chests. Thus at least one tier-1 (200) or tier-2 (300) offer is affordable if present, not a guarantee that every rolled offer is affordable.

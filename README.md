@@ -10,11 +10,13 @@ New expeditions use the fixed **Vanguard** kit and non-modal skill progression. 
 
 ## Current Vanguard controls
 
+Survival rounds are now **two minutes**, followed by the guardian/boss and 12-second collection. Vanguard adds Breacher charges, Mender repair support and Scattergun fans; all three are available in Practice. Enemy HP/damage rise each round as well as each stage, with capped movement/specialist-count growth. Hits below 50% hull have amber edge feedback; below 25%, stronger red edges and a heavier sound. Empty-energy casts, special supplies, big XP pickups, mode changes and construct deployment have distinct cues. [Pressure and sound audit](docs/design/PRESSURE_AUDIO_18.md).
+
 Chests now show their actual contents: a brief combat notification plus a saved round-clear receipt with item icons and quantities. The opening reveal is skippable; Reduced effects shows results immediately. Field credits buy equipment at the end of **every stage**, including Stage 1 (not after each individual round). Field credits reset on a new expedition; banked equipment persists. [Reward presentation and economy notes](docs/design/REWARD_REVEAL_18.md).
 
 Random special supplies are now one-tenth as frequent by default. Luck mastery provides stronger improvements, capped at 5× that new baseline. Magnet starts at 65 units and caps at 320 (the turret's normal range). Guaranteed boss rewards and end-of-round collection remain unchanged.
 
-Latest pressure pass: Stage-1 waves/guardians preserved; later enemy health/damage scale consistently, including surges and ranged units. Main bosses have 50× previous HP and main-boss encounters deal 25% more damage before stage scaling. XP remains at one-third. Equipment tiers now have distinctive names and silver/green/blue/violet/gold glow frames with tier pips; saved items/stats are unchanged. See BALANCE_16 for the tuning curve and boss-duration caution.
+Stage pressure: enemy health/damage scale consistently, including surges and ranged units, with the additional per-round growth described above. Main bosses retain 50× their earlier HP and main-boss encounters add 25% incoming damage before stage/round scaling. XP remains at one-third. Equipment tiers have distinctive names and silver/green/blue/violet/gold glow frames with tier pips; saved items/stats are unchanged. See BALANCE_16 for the tuning curve and boss-duration caution.
 
 Latest milestone pass: universal skill points learn **or** upgrade any eligible tool. All twelve tools (including MG/hammer) must have earned rank 5 before any rank 6+ purchase. Existing higher ranks are preserved; Practice presets bypass the gate. Future Vanguard XP gain is one-third of the preceding build; current XP/ranks are retained.
 
@@ -126,7 +128,7 @@ Magnet is free utility, not a skill slot. Automatic ranks improve pickup reach a
 | 7 | Loot, neutral, boss | Shop |
 | 8 | Boss, final boss | Finish |
 
-Every round has 180 seconds of survival, then a miniboss for neutral/loot rounds or a boss for boss rounds. The timer changes to ELITE/BOSS. Defeating it starts 12 seconds of safe collection, with a LOOT countdown; remaining rewards are collected at camp. Choices pause combat, but do not interrupt this collection period. Clearing repairs 20% hull and refills energy. Finish pending chests before advancing. The full 22-round route has a 66-minute minimum survival budget, excluding bosses and menus; checkpoints make it resumable.
+Every revised round has 120 seconds of survival, then a miniboss for neutral/loot rounds or a boss for boss rounds. The timer changes to ELITE/BOSS. Defeating it starts 12 seconds of safe collection, with a LOOT countdown; remaining rewards are collected at camp. Legacy choices pause combat but do not interrupt collection; Vanguard skill points remain non-modal. Clearing repairs 20% hull and refills energy. The full 22-round route has a 44-minute survival budget, excluding bosses and menus; checkpoints make it resumable.
 
 XP requirements rise smoothly from +25% through level 5, to +50% at 20 and +75% at 35 (hard cap). This means more XP per level, not a 75% reduction in XP gain.
 

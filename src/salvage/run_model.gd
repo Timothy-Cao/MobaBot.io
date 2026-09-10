@@ -657,7 +657,7 @@ func _enemy_step(delta: float) -> void:
 			elif enemy.phase == "seek": speed = 105.0
 		if demo_mode:
 			speed *= 1.2 if enemy.kind != 1 or enemy.phase == "seek" else 1.0
-		if exp != null: speed *= exp.enemy_speed()
+		if exp != null: speed *= exp.enemy_speed(self)
 		var previous_pos: Vector2 = enemy.pos
 		enemy.pos += (direction * speed + Vector2(enemy.knock)) * delta
 		if kit != null: enemy.pos = kit.extra.solid_point(previous_pos, enemy.pos, enemy.radius)
@@ -700,7 +700,7 @@ func hurt_player(source: Vector2, cause: String = "Collision", amount: int = 1, 
 		invincible += 0.65 * kit.passive_scale("plating")
 	if health > 0 and kit != null and kit.passive_active("thorns"):
 		MobaKit.area(self, player, 100, 6 * kit.passive_scale("thorns"), "active", 180)
-	emit_event("hurt", player)
+	emit_event("hurt", player,{"health_fraction":health/maxf(1,max_health()),"damage":actual})
 	for enemy in enemies:
 		if Vector2(enemy.pos).distance_to(player) < 85.0:
 			enemy.knock = (Vector2(enemy.pos) - player).normalized() * 240.0
@@ -741,7 +741,7 @@ func _weapon_step(delta: float) -> void:
 	_add_projectile(player + direction * 22.0, direction * 540.0, bolt_damage(), "bolt", bolt_pierces())
 	emit_event("shot", player)
 
-func _add_projectile(point: Vector2, motion: Vector2, damage: float, kind: String, pierce: int) -> void:
+func _add_projectile(point: Vector2, motion: Vector2, damage: float, kind: String, pierce: int, lifetime: float=2.7) -> void:
 	if projectiles.size() >= MAX_PROJECTILES:
 		if kind != "hostile": return
 		# A promised boss attack cannot vanish because friendly spectacle filled the pool.
@@ -753,7 +753,7 @@ func _add_projectile(point: Vector2, motion: Vector2, damage: float, kind: Strin
 		if replacement < 0: return
 		projectiles.remove_at(replacement)
 	projectiles.append({"pos": point, "prev": point, "vel": motion, "damage": damage,
-		"kind": kind, "life": 620.0 / 850.0 if kind == "rail" else 2.7, "pierce": pierce, "hits": []})
+		"kind": kind, "life": 620.0 / 850.0 if kind == "rail" else lifetime, "pierce": pierce, "hits": []})
 
 func _projectile_step(delta: float) -> void:
 	# Rebuild a small spatial index once per tick instead of testing every bullet
@@ -1113,7 +1113,7 @@ func _collect_supply(supply: Dictionary) -> void:
 				kit.recharge[slot] = 0
 	emit_event("supply", player, {"supply": supply.kind})
 	supply.value = 0
-	emit_event("equipped", player, {"id": "repair"})
+	emit_event("equipped", player, {"id": "repair","silent_audio":true})
 
 func _supply_step(delta: float) -> void:
 	if not staged: return

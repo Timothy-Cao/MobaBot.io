@@ -195,16 +195,19 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	if run.state!="running" or slot not in KEYS or not kit.unlocked(slot): return false
 	if slot=="d":
 		if ghost: return true
-		if kit.energy<2 or not pending.is_empty() or slam_left>0: return false
+		if kit.energy<2:
+			kit.last_failure="Low energy"; run.emit_event("energy_empty",run.player); return false
+		if not pending.is_empty() or slam_left>0: return false
 		ghost=true; hammer=-1; run.attacks.stop(run)
 		run.emit_event("v_drive",run.player); return true
 	if drive_blocks(run): kit.last_failure="Release D"; return false
-	if slot=="p1": kit.orbit_far=not kit.orbit_far; kit.toggles[0]=true; return true
+	if slot=="p1": kit.orbit_far=not kit.orbit_far; kit.toggles[0]=true; run.emit_event("mode_switch",run.player); return true
 	if slam_left>0 or (not pending.is_empty() and slot!="f"): return false
-	if kit.charges[slot]<=0: return false
+	if kit.charges[slot]<=0: run.emit_event("cast_unready",run.player); return false
 	var id: String=kit.loadout[slot]
 	var cost: float=kit.ability_cost(id)
-	if not powered(run) and kit.energy<cost: kit.last_failure="Low energy"; return false
+	if not powered(run) and kit.energy<cost:
+		kit.last_failure="Low energy"; run.emit_event("energy_empty",run.player); return false
 	var target: Vector2=kit.target_point(run,slot,cursor)
 	if slot=="f": target=blink_target(run,target)
 	if slot in ["f","e"] and target.distance_to(run.player)<1: return false

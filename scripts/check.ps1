@@ -19,7 +19,7 @@ foreach ($testName in @(
     'smoke_test', 'salvage_test', 'moba_test', 'iteration04_test', 'iteration05_test',
     'demo_test', 'readability_test', 'motion_qa_test', 'mobabot09_test', 'layout_audit',
     'mobabot10_test', 'mobabot11_test', 'mobabot12_test', 'mobabot13_test',
-    'expedition_test', 'expedition_ui_test', 'skill_visual_test', 'keyboard_forge_test', 'keyboard_ui_test', 'painted_art_test', 'refinement_test', 'vanguard_test', 'practice_meter_test', 'cursor_test', 'interface_polish_test', 'loot_receipt_test'
+    'expedition_test', 'expedition_ui_test', 'skill_visual_test', 'keyboard_forge_test', 'keyboard_ui_test', 'painted_art_test', 'refinement_test', 'vanguard_test', 'practice_meter_test', 'cursor_test', 'interface_polish_test', 'loot_receipt_test', 'pressure_feedback_test'
 )) {
     Invoke-GodotCheck -EngineArguments @('--script', "res://tests/$testName.gd")
 }
