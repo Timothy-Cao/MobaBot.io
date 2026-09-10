@@ -17,6 +17,12 @@ static func draw(c, run) -> void:
 		c.draw_arc(run.player,25,v.slam_direction.angle()-1.0,v.slam_direction.angle()+1.0,20,c.PALE,3,true)
 	if v.slam_left>0:
 		var d: Vector2=v.slam_direction
+		# A steel shoulder/plow leads the chassis: this reads as a body attack,
+		# not a second blink. This rim is cosmetic, not extra collision reach.
+		var front: Vector2=run.player+d*7
+		c.draw_arc(front,29,d.angle()-1.05,d.angle()+1.05,24,c.INK,11,true)
+		c.draw_arc(front,29,d.angle()-1.05,d.angle()+1.05,24,c.PALE,7,true)
+		c.draw_arc(front,32,d.angle()-0.7,d.angle()+0.7,20,c.GOLD,3,true)
 		for i in range(2 if c.reduced_effects else 4):
 			var side: Vector2=d.orthogonal()*(12+i*3)
 			c.draw_line(run.player-d*(15+i*9)+side,run.player-d*(40+i*10)+side,Color(c.PALE,0.65-i*0.12),2,true)
@@ -54,10 +60,43 @@ static func draw(c, run) -> void:
 			c.draw_arc(p,radius,0,TAU,64,c.PALE,1.5,true)
 			c.draw_arc(p,radius,-PI/2,-PI/2+TAU*progress,64,c.GOLD,3,true)
 			if effect.kind=="strike": c.draw_arc(p,radius*0.4,0,TAU,40,c.GOLD,1,true)
-			var h: float=(1-progress)*95
-			c.draw_rect(Rect2(p+Vector2(-8,-h-15),Vector2(16,25)),c.INK)
-			c.draw_rect(Rect2(p+Vector2(-5,-h-13),Vector2(10,20)),c.PALE)
-			c.draw_line(p+Vector2(0,-h-21),p+Vector2(0,-h-40),c.GOLD,4,true)
+			var reactor: bool=effect.kind=="reactor"
+			var h: float=(1-progress*progress)*(165 if reactor else 95)
+			var scale: float=1.8 if reactor else 1.0
+			c.draw_set_transform(p+Vector2(0,-h),0,Vector2.ONE*scale)
+			c.draw_rect(Rect2(-11,-19,22,34),c.INK)
+			c.draw_rect(Rect2(-8,-16,16,28),c.TEAL)
+			c.draw_rect(Rect2(-11,-10,5,21),c.PALE)
+			c.draw_rect(Rect2(6,-10,5,21),c.PALE)
+			c.draw_rect(Rect2(-5,-8,10,13),c.GOLD)
+			c.draw_line(Vector2(0,-21),Vector2(0,-40-progress*20),c.GOLD,5,true)
+			c.draw_line(Vector2(0,-21),Vector2(0,-34),c.CREAM,2,true)
+			c.draw_set_transform(Vector2.ZERO)
+		elif effect.kind in ["detonation","slam_hit"]:
+			var radius: float=effect.radius
+			var expansion: float=1-pow(1-progress,3)
+			var opacity: float=1-progress
+			if effect.kind=="detonation":
+				var flare:=PackedVector2Array()
+				for i in range(16):
+					var reach: float=radius*(0.48 if i%2==0 else 0.18)*(1-progress)
+					flare.append(p+Vector2.from_angle(i*TAU/16)*reach)
+				c.draw_colored_polygon(flare,Color(c.GOLD,opacity*0.5))
+				c.draw_circle(p,radius*0.12*(1-progress),Color(c.CREAM,opacity*0.8))
+			c.draw_arc(p,radius*expansion,0,TAU,64,Color(c.GOLD,opacity),5 if effect.kind=="detonation" else 4,true)
+			c.draw_arc(p,radius*expansion*0.82,0,TAU,48,Color(c.CREAM,opacity*0.85),2,true)
+			# Brief, separated blast petals leave incoming threats visible.
+			for i in range(6 if c.reduced_effects else 10):
+				var d:=Vector2.from_angle(i*TAU/(6 if c.reduced_effects else 10))
+				var center: Vector2=p+d*radius*expansion*0.55
+				var bloom: float=radius*0.16*sin(progress*PI)
+				c.draw_arc(center,bloom,0,TAU,16,Color(c.PALE,opacity*0.55),2,true)
+				c.draw_line(p+d*radius*expansion*0.65,p+d*radius*expansion*0.9,Color(c.GOLD,opacity),3,true)
+			if not c.reduced_effects:
+				for i in range(8):
+					var d:=Vector2.from_angle(i*TAU/8+0.25)
+					var shard: Vector2=p+d*radius*progress*0.8
+					c.draw_line(shard,shard+d*7,Color(c.PALE,opacity),3,true)
 		elif effect.kind=="hammer":
 			var direction: Vector2=effect.direction
 			c.draw_arc(p,effect.radius,direction.angle()-PI/4,direction.angle()+PI/4,30,Color(c.GOLD,1-progress),5,true)

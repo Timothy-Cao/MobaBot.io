@@ -4,7 +4,7 @@ extends RefCounted
 const GENERAL := [KEY_1,KEY_2,KEY_3,KEY_4,KEY_Q,KEY_W,KEY_E,KEY_R,KEY_T]
 const MOVEMENT := [KEY_D,KEY_F]
 const ACTIVE_BANKS := ["q","w","e","r","d","f","t","x1","x2","x3","x4"]
-const SYSTEM_DEFAULTS := {"attack":KEY_A,"center":KEY_SPACE,"build":KEY_TAB,"settings":KEY_ESCAPE}
+const SYSTEM_DEFAULTS := {"attack":KEY_A,"center":KEY_SPACE,"build":KEY_TAB,"settings":KEY_ESCAPE,"lock":KEY_L}
 
 static func enable(run) -> void:
 	var kit: MobaKit=run.kit
@@ -98,11 +98,17 @@ static func swap(kit, key_a: int, key_b: int) -> bool:
 static func valid_system(keys: Dictionary) -> bool:
 	var used: Array=[]
 	for action in SYSTEM_DEFAULTS:
-		var key: Variant=keys.get(action)
-		if not key is int or key<=0 or key in GENERAL+MOVEMENT+[KEY_S,KEY_L,KEY_M,KEY_5,KEY_6,KEY_F2] or key in used: return false
+		var key: Variant=keys.get(action,SYSTEM_DEFAULTS[action])
+		if action=="lock" and key is int and key>=-9 and key<=-1:
+			used.append(key); continue
+		if not key is int or key<=0 or key in GENERAL+MOVEMENT+[KEY_S,KEY_M,KEY_5,KEY_6,KEY_F2,KEY_QUOTELEFT] or key in used: return false
 		if not ((key>=KEY_A and key<=KEY_Z) or (key>=KEY_0 and key<=KEY_9) or key in [KEY_SPACE,KEY_TAB,KEY_ESCAPE,KEY_BACKSPACE,KEY_HOME,KEY_END,KEY_INSERT,KEY_DELETE,KEY_F1,KEY_F3,KEY_F4,KEY_F5,KEY_F6,KEY_F7,KEY_F8,KEY_F9,KEY_F10,KEY_F11,KEY_F12]): return false
 		used.append(key)
 	return true
+
+static func binding_name(key: int) -> String:
+	if key<0: return {1:"Mouse left",2:"Mouse right",3:"Mouse middle",4:"Wheel up",5:"Wheel down",6:"Wheel left",7:"Wheel right",8:"Mouse side 1",9:"Mouse side 2"}.get(-key,"Mouse")
+	return OS.get_keycode_string(key)
 
 static func valid_config(config: Dictionary) -> bool:
 	if not SkillLibrary.valid(config): return false

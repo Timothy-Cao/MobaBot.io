@@ -97,8 +97,7 @@ static func draw(game) -> void:
 			var types: Array=["dummy","bumper","charger","tank","lancer","volley","bomber","rammer","artillery","foreman"]
 			PracticeView.select(ui,["Target dummy","Bumper","Charger","Tank","Arc lancer","Burst battery","Bomb carrier","Rammer","Artillery","Boss"],types.find(game.practice_enemy),Rect2(26,173,278,33),func(i): game.practice_enemy=types[i])
 			PracticeView.select(ui,[1,5,10,25,50],[1,5,10,25,50].find(game.practice_count),Rect2(26,218,96,33),func(i): game.practice_count=[1,5,10,25,50][i])
-			var forms: Array=["Point","Line","Ring","Cluster"]
-			PracticeView.select(ui,forms,forms.find(game.practice_formation),Rect2(135,218,169,33),func(i): game.practice_formation=forms[i])
+			game.practice_formation="Cluster"
 			ui._button("Place",Rect2(26,270,278,37),func():
 				game.practice_placing=true; game.screen="placement"; ui.clear_overlay(); ui.hud.visible=true
 				ui._button("Cancel placement",Rect2(26,25,180,34),func(): game.practice_placing=false; game.open_practice(),false))

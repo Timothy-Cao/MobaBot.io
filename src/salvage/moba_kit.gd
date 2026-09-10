@@ -250,7 +250,8 @@ func cooldown(slot: String) -> float:
 
 func cooldown_at(slot: String, rank_value: int, tier_value: int = -1) -> float:
 	var tier := int(tiers.get(slot, 0)) if tier_value < 0 else tier_value
-	return float(ABILITIES[loadout[slot]].cd) * (1.0 - tier * 0.08) * (1.0 - SalvageProgression.bonus(mini(10,rank_value+(rank_bonus if unlocked(slot) else 0))) * 0.5) / (1.0 + cooldown_bonus)
+	var base: float=4.0/0.9 if loadout.get("vanguard",false) and slot=="q" else float(ABILITIES[loadout[slot]].cd)
+	return base * (1.0 - tier * 0.08) * (1.0 - SalvageProgression.bonus(mini(10,rank_value+(rank_bonus if unlocked(slot) else 0))) * 0.5) / (1.0 + cooldown_bonus)
 
 func damage_scale(slot: String) -> float:
 	return damage_scale_at(slot, int(ranks.get(slot, 0)))
@@ -528,7 +529,7 @@ func step(run, delta: float) -> void:
 	sprint = maxf(0, sprint - delta)
 	for slot in active_slots():
 		var data: Dictionary = ABILITIES[loadout[slot]]
-		var maximum: int=1 if loadout.get("vanguard",false) and slot=="w" and effective_rank(slot)<5 else int(data.max)
+		var maximum: int=2 if loadout.get("vanguard",false) and slot in ["q","w"] else int(data.max)
 		charges[slot]=mini(charges[slot],maximum)
 		if charges[slot] < maximum:
 			recharge[slot] -= delta

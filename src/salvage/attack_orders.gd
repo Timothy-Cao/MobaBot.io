@@ -92,6 +92,7 @@ func attack_move(run, point: Vector2) -> void:
 	order = "attack_move"
 	target_id = -1
 	destination = point.clamp(run.ARENA.position + Vector2.ONE * 16, run.ARENA.end - Vector2.ONE * 16)
+	if run.kit!=null: destination=run.kit.extra.walk_target(run.player,destination,16)
 	cursor_point = point
 
 func prepare(run, delta: float) -> void:

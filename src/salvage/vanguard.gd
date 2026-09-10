@@ -4,6 +4,8 @@ extends RefCounted
 const KEYS := {"q":KEY_Q,"w":KEY_W,"e":KEY_E,"r":KEY_R,"d":KEY_D,"f":KEY_F,"p1":KEY_1,"x1":KEY_2,"x2":KEY_3,"x3":KEY_4}
 const TOOLS := {"q":"rocket","w":"strike","e":"body_slam","r":"reactor_drop","d":"sprint","f":"blink","p1":"orbit","x1":"guard_bot","x2":"reserve_totem","x3":"recovery_totem"}
 var ghost := false
+var gun_on := true
+var orbit_angle := 0.0
 var pending: Dictionary = {}
 var hammer := -1.0
 var hammer_direction := Vector2.RIGHT
@@ -49,7 +51,7 @@ static func setup(run, rank_value: int = 0) -> void:
 			kit.ranks[slot] = maxi(1,rank_value) if rank_value > 0 or slot in ["q","d","f"] else 0
 			run.upgrades["skill_"+slot] = kit.ranks[slot]
 			kit.charges[slot] = MobaKit.ABILITIES[TOOLS[slot]].max
-			if slot=="w" and rank_value<5: kit.charges[slot]=1
+			if slot in ["q","w"]: kit.charges[slot]=2
 			kit.recharge[slot] = 0.0
 		if rank_value > 0 or slot in ["q","d","f"]: kit.discovered.append(slot)
 	run.upgrades.grinder = rank_value
@@ -198,6 +200,7 @@ func release(run) -> void:
 	pending.clear()
 
 func tick(run, delta: float) -> void:
+	orbit_angle=fposmod(orbit_angle+delta*(1.6 if run.kit.orbit_far else 10.2),TAU)
 	if run.kit.passive_active("orbit"):
 		while run.orbit.size()<mini(run.capacity(),3+int(run.rank_of("grinder"))/2):
 			run.orbit.append({"slot":run.orbit.size(),"hits":9999,"cooldown":0.0})
@@ -282,7 +285,8 @@ func tick(run, delta: float) -> void:
 		if effect.kind=="reactor" and effect.rank>=10 and not effect.get("second",false):
 			var second: Dictionary=effect.duplicate(); second.life=0.4; second.duration=0.4; second.second=true; impacts.append(second)
 		run.emit_event("nuke_impact",effect.pos,{"radius":effect.radius})
-		impacts.append({"kind":"blast","pos":effect.pos,"radius":effect.radius,"life":0.35,"duration":0.35})
+		var duration: float=0.65 if effect.kind=="reactor" else 0.4
+		impacts.append({"kind":"detonation" if effect.kind=="reactor" else "blast","pos":effect.pos,"radius":effect.radius,"life":duration,"duration":duration})
 
 func blast(run, point: Vector2, radius: float, damage: float, source: String, stun: float, knock: float) -> void:
 	for enemy in run.enemies:
@@ -290,7 +294,7 @@ func blast(run, point: Vector2, radius: float, damage: float, source: String, st
 		var ordinary: bool=not enemy.has("role") and enemy.kind!=2
 		run.hit_enemy(enemy,damage,source,(Vector2(enemy.pos)-point).normalized()*knock if ordinary else Vector2.ZERO)
 		if ordinary and stun>0: enemy.stun=stun
-	impacts.append({"kind":"blast","pos":point,"radius":radius,"life":0.3,"duration":0.3})
+	impacts.append({"kind":"slam_hit" if source=="body_slam" else "blast","pos":point,"radius":radius,"direction":slam_direction,"life":0.4,"duration":0.4})
 
 static func valid_point(run, point: Vector2, radius: float) -> bool:
 	if not run.ARENA.grow(-radius).has_point(point): return false

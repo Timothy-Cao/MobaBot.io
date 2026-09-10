@@ -221,6 +221,7 @@ func command_move(point: Vector2) -> void:
 	if kit != null and kit.laser_left > 0: return
 	if attacks.enabled: attacks.move(point)
 	move_target = point.clamp(ARENA.position + Vector2.ONE * 16, ARENA.end - Vector2.ONE * 16)
+	if kit!=null: move_target=kit.extra.walk_target(player,move_target,16)
 	moving = true
 
 func stop_movement() -> void:
@@ -229,6 +230,7 @@ func stop_movement() -> void:
 	velocity = Vector2.ZERO
 
 func passive_enabled(id: String) -> bool:
+	if id=="bolt" and Vanguard.enabled(self): return vanguard.gun_on
 	return kit == null or kit.passive_active(id)
 
 func upgrade_available(id: String) -> bool:
@@ -873,7 +875,7 @@ func hit_enemy(enemy: Dictionary, damage: float, source: String, knock: Vector2 
 
 func orbit_position(index: int) -> Vector2:
 	var angle := time * 2.6 + float(orbit[index].slot) * TAU / float(capacity())
-	if Vanguard.enabled(self): angle=time*(1.6 if kit.orbit_far else 3.4)+float(orbit[index].slot)*TAU/maxi(1,orbit.size())
+	if Vanguard.enabled(self): angle=vanguard.orbit_angle+float(orbit[index].slot)*TAU/maxi(1,orbit.size())
 	return player + Vector2.from_angle(angle) * orbit_radius()
 
 func _orbit_step(delta: float) -> void:
@@ -892,7 +894,7 @@ func _orbit_step(delta: float) -> void:
 				continue
 			hit_enemy(enemy, orbit_damage(), "orbit", (Vector2(enemy.pos) - player).normalized() * 110)
 			piece.hits -= 1
-			piece.cooldown = 0.28
+			piece.cooldown = 0.14 if Vanguard.enabled(self) and not kit.orbit_far else 0.28
 			if piece.hits <= 0:
 				emit_event("spent", point)
 				if shard_damage() > 0:

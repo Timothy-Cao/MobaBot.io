@@ -5,10 +5,11 @@ static func icon(slot: String) -> String:
 	return {"gun":"bolt","p1":"orbit","e":"thrust","r":"nuke","x1":"pulse_sentry","x2":"medic_sentry","x3":"converter"}.get(slot,Vanguard.TOOLS.get(slot,"bolt"))
 
 static func detail(run, slot: String) -> String:
-	if slot=="gun": return "Permanent machine gun\nIndependent of movement, S and D.\n%.1f damage · %.2f shots/sec\nUpgrade here during an upgrade opportunity."%[run.attacks.auto_damage(run),1/run.attacks.auto_interval(run)]
+	if slot=="gun": return "Permanent machine gun\n`: toggle on/off. Independent of movement, S and D.\n%.1f damage · %.2f shots/sec"%[run.attacks.auto_damage(run),1/run.attacks.auto_interval(run)]
 	if slot=="p1": return "Orbit tools\n1: close / fast or far / slow. 2 energy/sec.\nPermanent blades. Rank increases damage and blade count."
 	if slot=="d": return "Ghost drive\nHold D: +%.0f%% speed, %.1f energy/sec. Release to cast.\nNo invulnerability. The gun and deployed machines continue."%[65+maxi(0,run.kit.effective_rank("d")-1)*3.5,10-maxi(0,run.kit.effective_rank("d")-1)*0.3]
-	if slot=="w": return "Core strike\n38 base edge damage / 76 center. 100 radius; 40 center.\nRank 5: stores two charges. Rank 10: brief stun.\n%.1fs recharge · 18 energy"%run.kit.cooldown("w")
+	if slot=="w": return "Core strike · 2 charges\n38 base edge damage / 76 center. 100 radius; 40 center.\nRank 5: wider impact. Rank 10: brief stun.\n%.1fs per charge · 18 energy"%run.kit.cooldown("w")
+	if slot=="q": return "Impact bolt · 2 charges\nStraight rocket with contact/range explosion.\n%.1fs per charge"%run.kit.cooldown("q")
 	if slot=="f": return "Phase hop\nInstant blink. 80ms unreleased casts follow your new origin.\nPast the midpoint of thick cover: land on the far side."
 	var data: Dictionary=MobaKit.ABILITIES[Vanguard.TOOLS[slot]]
 	return data.name+"\n"+data.text+"\n%.1fs recharge · %d energy"%[run.kit.cooldown(slot),run.kit.ability_cost(Vanguard.TOOLS[slot])]
@@ -39,6 +40,7 @@ static func draw(ui, run) -> void:
 			ui._label(tile,"MG" if slot=="gun" else OS.get_keycode_string(Vanguard.KEYS[slot]),Rect2(2,0,width,17),11,ui.CREAM,true)
 			ui._label(tile,str(Vanguard.rank_of(run,slot)),Rect2(width-17,width-16,15,15),10,ui.GOLD,true)
 			ui.ability_labels[slot]=ui._label(tile,"",Rect2(0,width*0.38,width,20),12,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
+			if slot in ["q","w"]: ui.ability_recharge[slot]=ui._label(tile,"",Rect2(4,width-16,30,14),9,ui.GOLD,true)
 			if slot in Vanguard.candidates(run,kind) and kind!="":
 				var button: Button=ui._button("+",Rect2(x+width-18,y-9,20,20),func(): Vanguard.spend(run,slot),true)
 				button.reparent(ui.ability_bar,false)
@@ -62,3 +64,8 @@ static func draw(ui, run) -> void:
 		ui.ability_shades[slot].visible=locked or empty
 		ui.ability_labels[slot].text="—" if locked else (str(ceili(cd)) if empty else ("FAR" if run.kit.orbit_far else "NEAR") if slot=="p1" else "")
 		if slot=="d": ui.ability_labels[slot].text="ON" if run.vanguard.ghost else ""
+		if slot=="gun":
+			ui.ability_labels[slot].text="" if run.vanguard.gun_on else "OFF"
+			ui.ability_shades[slot].visible=not run.vanguard.gun_on
+		if slot in ["q","w"]:
+			ui.ability_recharge[slot].text="" if locked else ["○○","●○","●●"][clampi(run.kit.charges[slot],0,2)]

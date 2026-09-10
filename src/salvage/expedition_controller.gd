@@ -12,8 +12,8 @@ var gear_item := "courier_helmet"
 var banked_camp := -1
 var library_choice := ""
 var practice_skill := "rocket"
-var practice_enemy := "bumper"
-var practice_count := 10
+var practice_enemy := "dummy"
+var practice_count := 1
 var practice_key := KEY_Q
 var practice_rank := 0
 var practice_page := "Build"
@@ -178,9 +178,9 @@ func _bank_loot(completed_level: int) -> void:
 	if not collection.save(): collection.restore(before); collection.message="Could not save rewards. Last checkpoint preserved."
 
 func _input(event: InputEvent) -> void:
-	if screen=="settings" and ui.rebind_system!="" and event is InputEventKey and event.pressed and not event.echo:
+	if screen=="settings" and ui.rebind_system!="" and ((event is InputEventKey and event.pressed and not event.echo) or (event is InputEventMouseButton and event.pressed and ui.rebind_system=="lock")):
 		var candidate: Dictionary=ui.system_keys.duplicate()
-		candidate[ui.rebind_system]=event.keycode
+		candidate[ui.rebind_system]=event.keycode if event is InputEventKey else -int(event.button_index)
 		if BotKeyboard.valid_system(candidate):
 			ui.system_keys=candidate; ui.rebind_system=""; _save_settings(); ui.show_settings()
 		else: ui.announce("Reserved or already assigned",1.5)
@@ -191,6 +191,9 @@ func _input(event: InputEvent) -> void:
 			elif event.keycode==ui.system_keys.settings: close_keyboard()
 		get_viewport().set_input_as_handled(); return
 	event=system_event(event)
+	if screen=="running" and Vanguard.enabled(model) and event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_QUOTELEFT:
+		model.vanguard.gun_on=not model.vanguard.gun_on
+		get_viewport().set_input_as_handled(); return
 	if screen=="placement":
 		if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:
 			practice_placing=false; open_practice()
@@ -284,10 +287,13 @@ func place_discovery() -> void:
 	pending_discovery=-1; keyboard_target=0; finish_discovery()
 
 func system_event(event: InputEvent) -> InputEvent:
+	if event is InputEventMouseButton and screen=="running" and ui.system_keys.get("lock",KEY_L)==-int(event.button_index):
+		var key:=InputEventKey.new(); key.keycode=KEY_L; key.pressed=event.pressed
+		return key
 	if not event is InputEventKey: return event
 	var mapped: InputEventKey=event.duplicate()
 	for action in BotKeyboard.SYSTEM_DEFAULTS:
-		if event.keycode==ui.system_keys[action]:
+		if event.keycode==ui.system_keys.get(action,BotKeyboard.SYSTEM_DEFAULTS[action]):
 			mapped.keycode=BotKeyboard.SYSTEM_DEFAULTS[action]; return mapped
 	if event.keycode in BotKeyboard.SYSTEM_DEFAULTS.values(): mapped.keycode=0
 	return mapped
@@ -303,7 +309,8 @@ func _load_settings() -> void:
 	fullscreen_setting=bool(config.get_value("visual","fullscreen",true))
 	PaintedIcons.enabled=config.get_value("visual","icon_skin","painted")!="base"
 	var keys: Variant=config.get_value("keyboard","system",BotKeyboard.SYSTEM_DEFAULTS)
-	if keys is Dictionary and BotKeyboard.valid_system(keys): ui.system_keys=keys.duplicate()
+	if keys is Dictionary and BotKeyboard.valid_system(keys):
+		ui.system_keys=BotKeyboard.SYSTEM_DEFAULTS.duplicate(); ui.system_keys.merge(keys,true)
 
 func _save_settings() -> void:
 	super._save_settings()

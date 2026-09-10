@@ -10,9 +10,11 @@ New expeditions use the fixed **Vanguard** kit and non-modal skill progression. 
 
 Right click moves or approaches a target for hammer attacks. Left click swings the hammer; A provides attack-move. S stops movement and commanded attacks, never the permanent automatic gun. Q is Impact bolt, W Core strike, E Body slam, R Reactor drop. Hold D for Ghost drive; release it before casting. F blinks. Modules: 1 orbit near/far, 2 Bulwark, 3 Reserve, 4 Overclock well. T has no Vanguard ability.
 
+Backtick (`) toggles the gun; MG shows OFF while disabled. Q/W each store two charges, with charge pips on the HUD; Q recharges in 4s at rank one before bonuses. Close orbit spins three times faster than before and hits more frequently. Camera lock defaults to L and can be rebound in Settings → Controls to keyboard or mouse (a mouse binding replaces that button's gameplay action).
+
 Start with gun/Q/D/F. Level and chest rewards queue alternating **upgrade / learn** opportunities. Click a small HUD **+**, or Ctrl + the skill key. The gun has its own clickable upgrade control. Choices do not pause combat; no ability replacement or binding swaps in this fixed kit. Tab toggles Build, Esc opens Settings, wheel zooms, L toggles camera lock and Space recenters.
 
-Practice uses a collapsible left dock. Choose a kit rank or individual rank, set player modifiers, and place enemy Point/Line/Ring/Cluster formations with a paused preview. Left click commits; Shift repeats; right click/Esc cancels. Tab resumes/configures. The Legacy laboratory preserves the older fitting tool. Practice grants no loot and cannot write campaign progress.
+Practice uses a collapsible left dock. Choose a kit rank or individual rank, set player modifiers, and place enemies in clusters with a paused preview (default: one target dummy). Left click commits; Shift repeats; right click/Esc cancels. Tab resumes/configures. The Legacy laboratory preserves the older fitting tool. Practice grants no loot and cannot write campaign progress.
 
 Practice → Enemies → Target dummy provides an immortal target with per-target burst damage/DPS. Three seconds without damage resets its readout. DPS uses first-to-latest-hit simulation time, excluding the idle grace; one instantaneous hit shows no DPS. Session → Damage numbers toggles floating hit values (on by default); Reset measurement clears meters. Automatic gun hits count, so leave its range to end a burst.
 

@@ -252,6 +252,27 @@ func vault_wall(run, point: Vector2) -> Dictionary:
 		if Geometry2D.get_closest_point_to_segment(run.player, wall.a, wall.b).distance_to(run.player) < 95 and Geometry2D.segment_intersects_segment(run.player, point, wall.a, wall.b) != null: return wall
 	return {}
 
+func walk_target(origin: Vector2, target: Vector2, radius: float) -> Vector2:
+	# Project clicks out of capsule interiors, with body clearance. Unlike
+	# solid_point this is a destination query, not a swept movement query.
+	var result:=target
+	for attempt in range(16):
+		var changed:=false
+		for wall in walls:
+			var closest: Vector2=Geometry2D.get_closest_point_to_segment(result,wall.a,wall.b)
+			var clearance: float=radius+float(wall.get("width",6))+2
+			if result.distance_to(closest)>=clearance-0.01: continue
+			var normal: Vector2=(result-closest).normalized()
+			if normal.length_squared()<0.001:
+				normal=(Vector2(wall.b)-Vector2(wall.a)).orthogonal().normalized()
+				if normal==Vector2.ZERO: normal=Vector2.RIGHT
+				if normal.dot(origin-closest)<0: normal=-normal
+			result=closest+normal*clearance
+			changed=true
+		if not changed: return result.clamp(SalvageRun.ARENA.position+Vector2.ONE*radius,SalvageRun.ARENA.end-Vector2.ONE*radius)
+	# Overlapping pathological fixtures should stop, never chase an interior.
+	return origin
+
 func route(point: Vector2, target: Vector2, radius: float) -> Vector2:
 	if walls.any(func(w):return w.get("terrain",false)):
 		return terrain_route(point,target,radius)

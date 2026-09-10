@@ -1,5 +1,7 @@
 # MobaBot.io development
 
+Latest 0.18 playtest overrides: camera lock defaults to L but is rebindable (including mouse buttons); backtick toggles Vanguard's independent gun. Q/W store two charges, Q rank-one recharge is 4s before bonuses. Primary Practice Enemies is single-dummy/Cluster by default with no formation selector. See QA_18's second-playtest section before relying on older compatibility controls.
+
 **0.18 override:** Read docs/design/QA_18.md after QA_17. The owner subsequently authorized one integrated rewrite instead of the per-phase human stop gates. New runs now use fixed Vanguard + non-modal queued progression; old checkpoints retain 0.17 rules. Practice defaults to a fixed-kit dock, with explicit Legacy laboratory. The shared-pool/keyboard rules below remain compatibility rules, not the new-run contract. Do not expose Marshal/Racer/offline rewards as implemented. Include vanguard_test.gd and expedition_behavior_probe.gd -- --vanguard (plus --soak for reliability) in relevant verification.
 
 Read README.md, docs/design/QA_17.md, docs/design/BALANCE_16.md and docs/design/EXPEDITION_RESEARCH_14.md for current controls, systems scope and handoff. QA_17 supersedes older classes, pacing and replacement rules.

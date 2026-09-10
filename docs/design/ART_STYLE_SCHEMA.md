@@ -2,6 +2,8 @@
 
 ## v0.18 Vanguard override
 
+Second playtest animation pass: Body slam carries a steel/brass leading shoulder arc and an expanding contact burst; W/R use finned canisters with bright cores and accelerating vertical descent. R's larger reactor detonates into a short central star, expanding paired rings and separated blast petals; secondary shards are reduced-effects optional. Preserve actual simulation radii, ground centers and threat layering. No generated animation pack or new bitmap dependency.
+
 Post-playtest HUD refinement: three compact translucent top readouts instead of a full-width slab, and an open-upper-edge ability dock with a shallow backing strip. Preserve skill icon sizes and horizontal key positions. Practice damage readouts use outlined cream totals, quiet steel DPS and brass floating hits; same semantics in Reduced effects. Do not add particles or screen shake to measurement feedback.
 
 Reuse the Painted/Base icons; no new bitmap assets or provenance claims. Fixed HUD mappings use existing hammer-adjacent/thrust, reactor, pulse-sentry, medic and converter silhouettes. World motion remains native: a steel-head/teal hammer anticipation and 90° stroke, body-slam compression trails and impact ring, abrupt blink endpoints with no travel streak, Ghost afterimages, descending W/R cores, and grounded support tripods. Reserve uses mint, recovery uses blue, and impact uses restrained brass. Reduced effects drops afterimages/secondary rays but retains hit areas, shield, totem ranges and timers. Practice terrain uses solid low-contrast capsule greyboxes whose thickness matches collision; this is not a finished environment-art pass.

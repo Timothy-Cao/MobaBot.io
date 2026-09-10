@@ -100,8 +100,45 @@ func execute() -> void:
 	run.exp.finish_step(run,12)
 	check(run.state=="camp" and run.exp.pending_chests==0 and run.kit.loadout.rewards18.size()>0,"Camp rewards queued without popup")
 	check(ForgeEquipment.valid_checkpoint(gear.pack_run(run)),"End-round save validates")
+	playtest_refinements()
 	await ui_checks()
 	print("VANGUARD: %d checks, %d failures"%[checks,failures]); quit(1 if failures else 0)
+
+func playtest_refinements() -> void:
+	var run:=fresh(1)
+	run.exp.fast_cooldowns=false
+	check(run.kit.charges.q==2 and run.kit.charges.w==2,"Q/W start with two charges")
+	check(is_equal_approx(run.kit.cooldown("q"),4.0),"Rank-one Q recharges in four seconds")
+	run.kit.charges.q=0; run.kit.recharge.q=4
+	run.kit.step(run,3.9); check(run.kit.charges.q==0,"Q charge cannot refill early")
+	run.kit.step(run,0.11); check(run.kit.charges.q==1,"Q refills one charge at a time")
+	run.kit.step(run,4); check(run.kit.charges.q==2 and run.kit.recharge.q==0,"Q caps at two")
+	run.vanguard.gun_on=false; run.spawn_enemy(run.player+Vector2(90,0),3)
+	run.enemies.back().warmup=0
+	run.attacks.auto_cooldown=0; run.attacks.fire(run)
+	check(run.attacks.auto_shots==0,"Gun toggle actually suppresses automatic fire")
+	run.vanguard.gun_on=true; run.attacks.stop(run); run.attacks.fire(run)
+	check(run.attacks.auto_shots==1,"S leaves reenabled gun firing")
+	run.kit.extra.walls=[{"uid":-50,"a":Vector2(700,200),"b":Vector2(700,400),"width":65.0,"life":9999.0,"terrain":true}]
+	for cursor in [Vector2(700,300),Vector2(710,300),Vector2(700,195)]:
+		run.player=Vector2(480,300); run.enemies.clear(); run.command_move(cursor)
+		var target: Vector2=run.move_target
+		check(Geometry2D.get_closest_point_to_segment(target,Vector2(700,200),Vector2(700,400)).distance_to(target)>=82.9,"Wall click projects outside body clearance")
+		for i in range(1200): run.step(1.0/60,Vector2.ZERO); run.events.clear()
+		check(run.player.distance_to(target)<1 and not run.moving,"Projected wall destination reached without oscillation")
+	run.player=Vector2(480,300); run.attacks.attack_move(run,Vector2(700,300))
+	check(run.attacks.destination==Vector2(617,300) and run.attacks.cursor_point==Vector2(700,300),"Attack-move projects walking while preserving target acquisition point")
+	run=fresh(5)
+	run.vanguard.tick(run,0.1)
+	check(is_equal_approx(run.vanguard.orbit_angle,1.02),"Close orbit spins three times faster")
+	var angle: float=run.vanguard.orbit_angle
+	run.vanguard.cast(run,"p1",run.player); run.vanguard.tick(run,0.1)
+	check(is_equal_approx(run.vanguard.orbit_angle-angle,0.16),"Far orbit retains speed and continuous angle")
+	var keys: Dictionary=BotKeyboard.SYSTEM_DEFAULTS.duplicate()
+	keys.lock=-8; check(BotKeyboard.valid_system(keys),"Mouse side camera binding valid")
+	keys.lock=KEY_G; check(BotKeyboard.valid_system(keys),"Unused camera key valid")
+	keys.lock=KEY_Q; check(not BotKeyboard.valid_system(keys),"Camera cannot steal a skill key")
+	keys.lock=KEY_QUOTELEFT; check(not BotKeyboard.valid_system(keys),"Gun toggle key protected")
 
 func ui_checks() -> void:
 	var game=load("res://src/salvage/expedition.tscn").instantiate()
@@ -110,6 +147,7 @@ func ui_checks() -> void:
 	var before:=JSON.stringify(game.collection.snapshot())
 	game.launch_practice(); await process_frame
 	check(game.screen=="practice" and Vanguard.enabled(game.model),"Practice fixed-kit default")
+	check(game.practice_enemy=="dummy" and game.practice_count==1 and game.practice_formation=="Cluster","Single clustered dummy is default")
 	game.practice_page="Enemies"; PracticeSandbox.draw(game); await process_frame
 	game.practice_enemy="bumper"; game.practice_count=10; game.practice_formation="Cluster"
 	var point: Vector2=game.model.player+Vector2(600,0)
@@ -119,6 +157,16 @@ func ui_checks() -> void:
 	check(JSON.stringify(game.collection.snapshot())==before,"Practice collection unchanged")
 	Vanguard.setup(game.model,5); game.close_practice()
 	Vanguard.earn(game.model); game.ui.update_hud(game.model)
+	var gun_key:=InputEventKey.new(); gun_key.keycode=KEY_QUOTELEFT; gun_key.pressed=true
+	game._input(gun_key); check(not game.model.vanguard.gun_on,"Backtick toggles gun off")
+	game._input(gun_key); check(game.model.vanguard.gun_on,"Backtick toggles gun back on")
+	game.ui.system_keys.lock=-8
+	var mouse:=InputEventMouseButton.new(); mouse.button_index=MOUSE_BUTTON_XBUTTON1; mouse.pressed=true
+	var camera_before: bool=game.camera_locked
+	game._input(mouse); check(game.camera_locked!=camera_before,"Mouse camera lock input works")
+	var old_key:=InputEventKey.new(); old_key.keycode=KEY_L; old_key.pressed=true
+	game._input(old_key); check(game.camera_locked!=camera_before,"Old camera key disabled after rebind")
+	game.ui.system_keys.lock=KEY_L
 	var event:=InputEventKey.new(); event.keycode=KEY_D; event.pressed=true
 	game._input(event); check(game.model.vanguard.ghost,"D key down starts drive")
 	event.pressed=false; game._input(event); check(not game.model.vanguard.ghost,"D key up stops drive")
@@ -143,6 +191,20 @@ func ui_checks() -> void:
 		await process_frame; await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://output/vanguard/practice.png")
 		game.close_practice(); game.model.kit.extra.walls.clear()
+		for reduced in [false,true]:
+			for phase in ["slam-travel","slam-impact","reactor-impact"]:
+				game.art.reduced_effects=reduced; game.model.enemies.clear(); game.art.effects.clear()
+				game.model.player=Vector2(480,300); Vanguard.setup(game.model,5); game.model.kit.energy=100
+				game.model.spawn_enemy(game.model.player+Vector2(130,0),3)
+				game.model.enemies.back()["dummy"]=true; game.model.enemies.back().warmup=0
+				game.model.vanguard.cast(game.model,"r" if phase=="reactor-impact" else "e",game.model.player+Vector2(130,0))
+				if phase=="slam-travel": game.model.vanguard.tick(game.model,0.03)
+				elif phase=="slam-impact": game.model.vanguard.tick(game.model,0.10)
+				else: game.model.vanguard.tick(game.model,0.09); game.model.vanguard.tick(game.model,0.7)
+				game.model.vanguard.tick(game.model,0.08 if phase!="slam-travel" else 0)
+				game._update_camera(); game.ui.update_hud(game.model)
+				await process_frame; await RenderingServer.frame_post_draw
+				root.get_texture().get_image().save_png("res://output/vanguard/%s-%s.png"%[phase,"reduced" if reduced else "normal"])
 		for reduced in [false,true]:
 			game.art.reduced_effects=reduced
 			for slot in ["q","w","e","r","x1","x2","x3"]:

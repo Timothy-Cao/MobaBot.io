@@ -1,5 +1,11 @@
 # 0.16 — Focused design and damage pass
 
+## 0.18 second-playtest addendum (9 September 2026)
+
+Owner-requested Vanguard tuning supersedes older values only for Vanguard: Q rank-one sequential recharge 4.0s, with two-charge storage (storage was already two). Its prior unmodified rank-one recharge was 2.7s, so sustained generation is 67.5% of the previous value; individual hit damage is unchanged. W storage increases from one to two at ranks 1–4; its recharge and damage are unchanged, so burst availability rises but steady-state generation does not. Existing rarity/mastery/rank reductions still apply.
+
+Close orbit rotates at 10.2 rather than 3.4 rad/s, and the per-blade hit lockout is 0.14 rather than 0.28s. Far mode stays 1.6 rad/s / 0.28s. Neither ratio is a reliable DPS multiplier: blade count, target size, orbit distance, movement and contact windows matter. Dummy meters are the intended owner comparison tool. Enemy stats, E/R damage and energy costs are unchanged in this pass.
+
 ## Decision
 
 Preserve enemy difficulty. Owner feedback after the previous build was positive; this is not evidence that eight stages or all builds are balanced. Make one small ability adjustment: Welding torch total damage **24 → 26** (+8.3%), still eight ticks across two seconds, same range/cost/recharge. Mirrored torch damage follows the new value.

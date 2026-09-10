@@ -145,14 +145,15 @@ static func settings(ui) -> void:
 		ui._tab(page.capitalize(),Rect2(490+i*153,43,140,34),func() -> void:
 			ui.settings_page=page; ui.rebind_system=""; ui.show_settings(),ui.settings_page==page)
 	if ui.settings_page=="controls":
-		var names: Dictionary={"attack":"Attack move","center":"Recenter camera","build":"Build","settings":"Settings"}
+		var names: Dictionary={"attack":"Attack move","center":"Recenter camera","build":"Build","settings":"Settings","lock":"Toggle camera lock"}
 		for i in range(names.size()):
 			var action: String=names.keys()[i]
-			ui._label(ui.overlay,names[action],Rect2(165,145+i*65,370,30),19,ui.CREAM)
-			ui._button("Press key…" if ui.rebind_system==action else OS.get_keycode_string(ui.system_keys[action]),Rect2(579,140+i*65,206,37),func() -> void:
+			ui._label(ui.overlay,names[action],Rect2(165,125+i*53,370,30),19,ui.CREAM)
+			var bind: Button=ui._button(("Key or mouse…" if action=="lock" else "Press key…") if ui.rebind_system==action else BotKeyboard.binding_name(ui.system_keys.get(action,BotKeyboard.SYSTEM_DEFAULTS[action])),Rect2(579,120+i*53,206,37),func() -> void:
 				ui.rebind_system=action; ui.show_settings(),false)
+			if action=="lock": bind.tooltip_text="Accepts mouse buttons, including wheel directions. Replaces that button's gameplay action."
 		ui._label(ui.overlay,"Right-click: move / target     S: stop     Wheel: zoom",Rect2(165,415,680,28),14,ui.MUTED)
-		ui._label(ui.overlay,"L: camera lock     5 / 6: consumables",Rect2(165,446,680,28),14,ui.MUTED)
+		ui._label(ui.overlay,"`: machine gun     5 / 6: consumables",Rect2(165,446,680,28),14,ui.MUTED)
 	else:
 		var game=ui.host
 		var rows: Array=[

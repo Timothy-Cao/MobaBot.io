@@ -264,6 +264,7 @@ func resume_into(run) -> bool:
 	run.kit.arc_focused = c.arc_focused; run.kit.extra.converter_mode = int(c.converter)
 	for slot in run.kit.active_slots():
 		run.kit.charges[slot] = int(MobaKit.ABILITIES[run.kit.loadout[slot]].max)
+		if Vanguard.enabled(run) and slot in ["q","w"]: run.kit.charges[slot]=2
 		run.kit.recharge[slot] = 0.0
 	run.mastery.ranks = c.tree.duplicate(); run.mastery.spent = int(c.spent)
 	run.level = int(c.level); run.total_xp = int(c.xp); run.next_level = int(c.next)
