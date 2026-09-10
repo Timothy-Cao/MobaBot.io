@@ -1,5 +1,11 @@
 # 0.16 — Focused design and damage pass
 
+## Reward visibility / stage shops · 10 September 2026
+
+Vanguard opens a three-offer equipment shop after each of eight stages; old shared-pool runs retain stages 2/5/7. Prices and tier-roll probabilities are unchanged: `100 + 100 × tier`. Field credits remain run-only. Banked/purchased equipment persists. This increases buying opportunities and therefore may accelerate permanent collection growth; it is not proven economy balance. Stage 1 guarantees 3 × 80 clear credits and at least 3 × 20 chest credits = 300 field credits, before any bonus chests. Thus at least one tier-1 (200) or tier-2 (300) offer is affordable if present, not a guarantee that every rolled offer is affordable.
+
+An ordinary Vanguard chest retains one skill point, 20 field credits, and an independent 18% equipment roll. When all tools are capped or the 256-point queue is full, the unstoreable point becomes another 20 credits; the receipt explicitly shows 40 credits and no point. Round receipts also include clear credits and guaranteed loot-round equipment, but exclude incidental XP/supplies and shop purchases. No special-drop probabilities, magnet reach, enemy pressure, XP curve or ability damage changed in this pass.
+
 ## Rare supplies / bounded magnet · 10 September 2026
 
 Vanguard-only random special drops now use 10% of the preceding baseline. Energy rolls independently at 10% on previously eligible kills (instead of guaranteed); repair independently rolls at 10% on its existing eligible kills. Random credit caches: 1/250; speed/reset combined: 1/150. Amounts, XP showers, chest discovery and guaranteed 75-credit boss rewards are unchanged. Practice still grants no permanent loot; legacy drop rules are unchanged.

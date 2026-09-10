@@ -163,10 +163,19 @@ static func progression(run) -> void:
 		if (run.level-1)%3==0: run.grant_utility()
 		run.emit_event("equipped",run.player,{"id":"power"})
 	# Chests remain tangible world loot; opening no longer stops the fight.
+	var receipt:=RewardLedger.empty()
 	while run.exp.pending_chests>0:
 		run.exp.pending_chests -= 1; run.exp.chests_opened += 1
-		earn(run); run.exp.field_credits += 20
-		if run.loot_rng.randf()<0.18: run.exp.pending_items.append(ForgeEquipment.roll_item(run.loot_rng,run.exp.ascension))
+		receipt.chests+=1; receipt.credits+=20; run.exp.field_credits+=20
+		if run.kit.loadout.rewards18.size()<256 and not candidates(run,"upgrade").is_empty():
+			earn(run); receipt.points+=1
+		else: receipt.credits+=20; run.exp.field_credits+=20
+		if run.loot_rng.randf()<0.18:
+			var item:=ForgeEquipment.roll_item(run.loot_rng,run.exp.ascension)
+			run.exp.pending_items.append(item); receipt.items[item]=int(receipt.items.get(item,0))+1
+	if receipt.chests>0:
+		RewardLedger.merge(run.exp.reward_receipt,receipt)
+		run.emit_event("chest_contents",run.player,{"receipt":receipt})
 	if reward_kind(run)=="" and not run.kit.loadout.rewards18.is_empty():
 		run.exp.field_credits += 20*run.kit.loadout.rewards18.size(); run.kit.loadout.rewards18.clear()
 

@@ -55,6 +55,7 @@ static func chest(game) -> void:
 		if i==0: card.grab_focus()
 
 static func camp(game) -> void:
+	if Vanguard.enabled(game.model): vanguard_camp(game); return
 	var ui=game.ui
 	var run: SalvageRun=game.model
 	var exp: BotExpedition=run.exp
@@ -85,6 +86,36 @@ static func camp(game) -> void:
 			card.tooltip_text=game.collection.item_text(id)+"\nAdded to permanent collection. Equip at the workshop."
 	else:
 		var reward:=RewardMotion.new(); reward.position=Vector2(405,194); reward.size=Vector2(150,150); reward.reduced=ui.reduced; ui.overlay.add_child(reward)
+	if not game.collection.message.is_empty(): ui._label(ui.overlay,game.collection.message,Rect2(48,478,856,24),12,ui.CORAL)
+
+static func vanguard_camp(game) -> void:
+	var ui=game.ui; var run=game.model; var exp: BotExpedition=run.exp
+	var shop:=exp.is_shop(true)
+	frame(ui,"Stage clear" if shop else "Round clear",game.show_home)
+	ui._label(ui.overlay,exp.label(),Rect2(48,96,700,32),20,ui.TEAL,true)
+	var balance: Label=ui._label(ui.overlay,"%d field credits"%exp.field_credits,Rect2(48,140,410,28),17,ui.GOLD,true)
+	balance.mouse_filter=Control.MOUSE_FILTER_STOP; balance.tooltip_text="Buy equipment after each stage. Field credits reset with a new run; purchased gear persists."
+	ui._label(ui.overlay,"Recovered · %d chest%s"%[exp.reward_receipt.chests,"" if exp.reward_receipt.chests==1 else "s"] if exp.reward_receipt.chests>0 else "Recovered",Rect2(48,182,380,26),15,ui.MUTED,true)
+	var receipt:=LootReceipt.new(); receipt.name="RoundReceipt"; receipt.position=Vector2(48,218); receipt.size=Vector2(430 if shop else 820,174)
+	ui.overlay.add_child(receipt); receipt.build(ui,exp.reward_receipt)
+	if shop:
+		ui._label(ui.overlay,"Shop",Rect2(510,142,380,28),19,ui.CREAM,true)
+		for i in range(exp.shop_stock.size()):
+			var id: String=exp.shop_stock[i]
+			var rect:=Rect2(510+i*137,190,126,202)
+			if id=="":
+				ui._label(ui.overlay,"Sold",rect,16,ui.MUTED,true,HORIZONTAL_ALIGNMENT_CENTER); continue
+			var data: Dictionary=ForgeEquipment.ITEMS[id]; var price: int=100+data.tier*100
+			var card: Button=ui._button("",rect,func(): game.buy_item(i),false)
+			card.disabled=exp.field_credits<price or game.collection.blocked
+			ui._ability_icon(card,data.icon,Rect2(29,12,68,68))
+			var label: Label=ui._label(card,data.name,Rect2(8,91,110,57),14,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
+			label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+			ui._label(card,str(price),Rect2(8,164,110,26),18,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
+			card.tooltip_text=game.collection.item_text(id)+"\nBuy for %d field credits. Added to equipment."%price
+	ui._button("Build",Rect2(48,423,182,44),game._open_build,false)
+	ui._button("Equipment",Rect2(245,423,182,44),game._open_gear,false)
+	ui._button("Finish" if exp.route_index==21 else "Next stage" if shop else "Next round",Rect2(652,423,260,44),game.continue_expedition).grab_focus()
 	if not game.collection.message.is_empty(): ui._label(ui.overlay,game.collection.message,Rect2(48,478,856,24),12,ui.CORAL)
 
 static func gear(game) -> void:

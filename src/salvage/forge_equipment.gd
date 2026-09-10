@@ -72,6 +72,7 @@ static func integer(value: Variant, low: int, high: int) -> bool:
 	return (value is float or value is int) and is_finite(value) and value == floorf(value) and value >= low and value <= high
 
 static func valid_checkpoint(c: Dictionary) -> bool:
+	if c.has("receipt") and not RewardLedger.valid(c.receipt): return false
 	if not c.get("loadout") is Dictionary: return false
 	if not c.loadout.get("flexible",false): return ExpeditionGear.valid_checkpoint(c)
 	if c.get("class","")!="shared" and not BotExpedition.CLASSES.has(c.get("class","")): return false
@@ -229,6 +230,7 @@ func apply_to(run) -> void:
 
 func pack_run(run) -> Dictionary:
 	return {
+		"receipt":run.exp.reward_receipt.duplicate(true),
 		"route": run.exp.route_index, "ascension": run.exp.ascension, "class": run.exp.class_id,
 		"bindings":run.kit.bindings.duplicate(), "loadout": run.kit.loadout.duplicate(true), "discovered": run.kit.discovered.duplicate(),
 		"ranks": run.kit.ranks.duplicate(), "tiers": run.kit.tiers.duplicate(), "upgrades": run.upgrades.duplicate(),
@@ -244,6 +246,7 @@ func pack_run(run) -> Dictionary:
 
 func bank_camp(run, persist: bool = true) -> bool:
 	if run.state != "camp" or blocked: return false
+	run.exp.ensure_shop(run)
 	var before := snapshot()
 	credits = mini(10000000, credits + int(run.exp.carry_credits * (1 + run.exp.ascension * 0.1)))
 	for id in run.exp.pending_items: inventory[id].copies = mini(999, inventory[id].copies + 1)
@@ -280,6 +283,7 @@ func resume_into(run) -> bool:
 	run.consumables.assign(c.consumables)
 	run.spawn_rng.state=int(c.rng); run.offer_rng.state=int(c.offers_rng); run.loot_rng.state=int(c.loot_rng)
 	expedition.shop_stock.assign(c.shop)
+	expedition.reward_receipt=c.get("receipt",RewardLedger.empty()).duplicate(true)
 	run.time=float(c.get("time",0)); run.kills=int(c.get("kills",0))
 	BotKeyboard.enable(run)
 	if run.kit.loadout.get("rules17",false): expedition.enable_revision(run)

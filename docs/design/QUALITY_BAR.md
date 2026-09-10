@@ -1,5 +1,7 @@
 # MobaBot.io quality bar
 
+10 September 2026, reward-clarity owner feedback: chest opening appeared to show only the box, with no outcomes; field-credit purpose and shop timing were unclear. Implemented exact reward receipts, gear-first icon/count presentation, skippable/reduced-effects reveal, and a shop after each Vanguard stage. Acceptance questions: can the player identify their item/point/credit gains without opening another menu; do reveals avoid concealing threats; is the stage shopping cadence useful without becoming a chore? Automated accounting/UI checks and actual-size inspection pass separately from these still-pending human judgments. Existing numeric ratings are unchanged.
+
 Version 1 · 8 September 2026 · baseline: 0.15. This is an editable review contract, not another in-game menu. The owner's ratings and priorities override the assistant's taste. Preserve dated snapshots when changing a criterion so that moving the goalposts does not look like progress.
 
 ## North star

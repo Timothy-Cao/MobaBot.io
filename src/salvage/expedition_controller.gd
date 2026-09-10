@@ -63,6 +63,9 @@ func launch_expedition(resume: bool=false) -> void:
 		if not collection.resume_into(model): show_home(); return
 		model.exp.enable_revision(model)
 		banked_camp=model.exp.route_index
+		# Upgrade an older stage-end checkpoint once, preserving existing stock.
+		if Vanguard.enabled(model) and model.exp.is_shop(true) and model.exp.shop_stock.is_empty():
+			collection.bank_camp(model,persistent_run())
 		screen="camp"; ExpeditionView.camp(self)
 	else:
 		var expedition:=BotExpedition.new()
@@ -140,7 +143,7 @@ func continue_expedition() -> void:
 
 func buy_item(index: int) -> void:
 	var exp: BotExpedition=model.exp
-	if model.state!="camp" or not exp.is_shop() or index<0 or index>=exp.shop_stock.size(): return
+	if model.state!="camp" or not exp.is_shop(Vanguard.enabled(model)) or index<0 or index>=exp.shop_stock.size(): return
 	var id: String=exp.shop_stock[index]
 	if id == "": return
 	var price: int=100+ForgeEquipment.ITEMS[id].tier*100
@@ -327,6 +330,19 @@ func system_event(event: InputEvent) -> InputEvent:
 func _unhandled_key_input(event: InputEvent) -> void:
 	if screen=="keyboard": return
 	super._unhandled_key_input(system_event(event))
+
+func _drain_events() -> void:
+	for event in model.events:
+		if event.kind!="chest_contents" or screen!="running": continue
+		var old=ui.hud.get_node_or_null("ChestReceipt")
+		if old!=null: ui.hud.remove_child(old); old.queue_free()
+		var receipt:=LootReceipt.new(); receipt.name="ChestReceipt"
+		receipt.position=Vector2(250,78); receipt.size=Vector2(460,82)
+		ui.hud.add_child(receipt); receipt.build(ui,event.receipt,true)
+		var tween:=receipt.create_tween()
+		tween.tween_interval(5.0); tween.tween_property(receipt,"modulate:a",0.0,0.25); tween.tween_callback(receipt.queue_free)
+		sound.receive({"kind":"equipped"})
+	super._drain_events()
 
 func _load_settings() -> void:
 	super._load_settings()

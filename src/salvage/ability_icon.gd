@@ -72,6 +72,16 @@ func _draw() -> void:
 		_draw_gear_tier()
 		return
 	match icon_id:
+		"field_credit":
+			for at in [Vector2(25,40),Vector2(38,27)]:
+				draw_circle(at+Vector2(0,4),17,INK)
+				draw_circle(at,15,GOLD)
+				draw_arc(at,11,PI,TAU,18,CREAM,2,true)
+				line(at+Vector2(0,-6),at+Vector2(0,6),INK,4)
+		"reward_point":
+			poly([Vector2(32,7),Vector2(55,32),Vector2(32,57),Vector2(9,32)],TEAL)
+			line(Vector2(22,32),Vector2(42,32),CREAM,5)
+			line(Vector2(32,22),Vector2(32,42),CREAM,5)
 		"hammer":
 			line(Vector2(17,52),Vector2(40,24),INK,11)
 			line(Vector2(17,52),Vector2(40,24),STEEL,6)

@@ -31,6 +31,7 @@ var last_wave := -1
 var clear_clock := -1.0
 var cleared := 0
 var shop_stock: Array[String] = []
+var reward_receipt: Dictionary={"chests":0,"points":0,"credits":0,"items":{}}
 var save_id := ""
 var last_receipt := -1
 var resistance := 0.0
@@ -172,6 +173,7 @@ func enter(run) -> void:
 	run.stage_time = 0; run.boss_spawned = false; run.boss_defeated = false
 	run.stage_clear_wait = -1; run.spawn_clock = 0.8; run.demo_minis_killed = 0
 	encounter_spawned = false; last_wave = -1; clear_clock = -1
+	reward_receipt=RewardLedger.empty()
 	threat_wave = 0
 	run.kit.extra.clear_combat()
 	run.enemies.clear(); run.projectiles.clear(); run.hazards.clear(); run.pickups.clear(); run.supply_drops.clear(); run.orbit.clear()
@@ -288,9 +290,12 @@ func finish_step(run, delta: float) -> void:
 			run.supply_drops.clear()
 			carry_credits += run.coins
 			field_credits += 65 + int(ROUTE[route_index][0]) * 15
+			if Vanguard.enabled(run): reward_receipt.credits+=65+int(ROUTE[route_index][0])*15
 			run.coins = 0
 			pending_chests += (3 if kind == "loot" else 1) + loot_chests.size(); loot_chests.clear(); clear_clock = -2
-			if kind == "loot": pending_items.append(ForgeEquipment.roll_item(run.loot_rng,ascension) if run.kit.flexible() else ExpeditionGear.roll_item(run.loot_rng,ascension))
+			if kind == "loot":
+				pending_items.append(ForgeEquipment.roll_item(run.loot_rng,ascension) if run.kit.flexible() else ExpeditionGear.roll_item(run.loot_rng,ascension))
+				if Vanguard.enabled(run): reward_receipt.items[pending_items.back()]=int(reward_receipt.items.get(pending_items.back(),0))+1
 			run.enemies.clear(); run.projectiles.clear(); run.hazards.clear()
 			run.health = minf(max_health(run), run.health + max_health(run) * 0.2)
 			run.kit.energy = run.kit.energy_max()
@@ -372,5 +377,10 @@ func advance(run) -> void:
 	route_index += 1
 	enter(run)
 
-func is_shop() -> bool:
+func is_shop(every_stage: bool=false) -> bool:
+	if every_stage: return route_index==ROUTE.size()-1 or ROUTE[route_index+1][0]!=ROUTE[route_index][0]
 	return route_index in [5,12,19]
+
+func ensure_shop(run) -> void:
+	if run.state!="camp" or not is_shop(Vanguard.enabled(run)) or not shop_stock.is_empty(): return
+	for i in range(3): shop_stock.append(ForgeEquipment.roll_item(run.loot_rng,ascension) if run.kit.flexible() else ExpeditionGear.roll_item(run.loot_rng,ascension))

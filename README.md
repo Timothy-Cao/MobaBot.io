@@ -10,6 +10,8 @@ New expeditions use the fixed **Vanguard** kit and non-modal skill progression. 
 
 ## Current Vanguard controls
 
+Chests now show their actual contents: a brief combat notification plus a saved round-clear receipt with item icons and quantities. The opening reveal is skippable; Reduced effects shows results immediately. Field credits buy equipment at the end of **every stage**, including Stage 1 (not after each individual round). Field credits reset on a new expedition; banked equipment persists. [Reward presentation and economy notes](docs/design/REWARD_REVEAL_18.md).
+
 Random special supplies are now one-tenth as frequent by default. Luck mastery provides stronger improvements, capped at 5× that new baseline. Magnet starts at 65 units and caps at 320 (the turret's normal range). Guaranteed boss rewards and end-of-round collection remain unchanged.
 
 Latest pressure pass: Stage-1 waves/guardians preserved; later enemy health/damage scale consistently, including surges and ranged units. Main bosses have 50× previous HP and main-boss encounters deal 25% more damage before stage scaling. XP remains at one-third. Equipment tiers now have distinctive names and silver/green/blue/violet/gold glow frames with tier pips; saved items/stats are unchanged. See BALANCE_16 for the tuning curve and boss-duration caution.
