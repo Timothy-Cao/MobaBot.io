@@ -40,6 +40,26 @@ Equal usage is not the goal. Situational purpose, understandable tradeoffs and m
 - Reward partial progress proportionally. Persistent gains should make another attempt feel worthwhile without making grinding mandatory for a learnable baseline difficulty.
 - Low-input farming should be safest on content the player has already demonstrated they can clear. Level-pushing builds should retain a meaningful advantage from active execution.
 
+## Current playtest feedback and combat hypotheses
+
+These are the owner's latest observations and ideas. The hull-bar issue is direct presentation feedback; guided Q and restored projectile cover are proposals to evaluate together rather than implemented behavior.
+
+### Make the player hull bar substantially easier to read
+
+The world-space hull bar over/below the player is currently too small. Increase its width, height, contrast and depleted-background clarity enough to read health peripherally at normal combat zoom and maximum zoom-out. Low-health state changes should remain visible without relying only on color, but the bar must not obscure the robot, aim direction or nearby collision. Check actual gameplay size, HUD scaling and Reduced effects rather than approving a magnified fixture.
+
+### Explore tap-versus-hold Impact Bolt
+
+Preserve tap Q as the immediate, reliable straight Impact Bolt. Candidate hold behavior: launch on press, then let the player hold Q to keep the missile alive for up to roughly twice its normal flight time and gradually steer it toward the mouse direction. Use a capped turn rate rather than snapping, perfect homing or automatic pathfinding. The intended payoff is deliberate long-range routing—especially bending around cover—not a guaranteed hit.
+
+Guidance needs an opportunity cost so holding is not strictly better than tapping. A leading option is to keep movement and passive systems active while guidance occupies the hammer and other main active casts; releasing Q commits the current trajectory and ends guidance. Decide whether D/F cancel or coexist, whether the camera needs a bounded look-ahead/offscreen marker, and whether long-distance damage stays unchanged before implementation. Test tap responsiveness, tight/large turns, missing a moving enemy, two simultaneous Q charges, wall contact, screen edges and loss of the projectile.
+
+### Reconsider permeable projectile cover
+
+The owner now leans toward making projectiles collide with walls again. Treat this as the latest desired direction for a future prototype; the current build still allows shots through walls. A first coherent rule should make discrete friendly and hostile projectiles respect thick cover symmetrically. Impact Bolt should explode on wall contact unless the player guides it around the obstruction, giving held Q a distinct purpose.
+
+Define ground-targeted W/R, continuous beams, enemy targeting, turret acquisition and boss attacks separately instead of calling every effect a projectile. Enemies should not repeatedly fire ordinary shots through known blocking cover, previews must communicate legal paths, and collision must use the same wall thickness the player sees. Restored cover should create lane, flank and safety decisions without enabling effortless permanent hiding or making fights stall.
+
 ## Encounter and drop ideas to consider
 
 These are owner ideas for later prototypes, not implemented rules.
