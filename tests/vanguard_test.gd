@@ -307,6 +307,30 @@ func ui_checks() -> void:
 	check(JSON.stringify(game.collection.snapshot())==before,"Practice collection unchanged")
 	Vanguard.setup(game.model,5); game.close_practice()
 	Vanguard.earn(game.model); game.ui.update_hud(game.model)
+	await process_frame; await process_frame
+	var hud_slots:=0
+	var upgrade_buttons:=0
+	for child in game.ui.ability_bar.get_children():
+		if child.has_meta("vanguard_slot"):
+			hud_slots+=1
+			var slot: String=child.get_meta("vanguard_slot")
+			check(child.get_rect()==VanguardHud.slot_rect(slot),"HUD slot uses authored layout")
+			check(child.size.x in [48.0,54.0],"Icons use consistent size with modest QWER emphasis")
+		if child.has_meta("vanguard_upgrade"):
+			upgrade_buttons+=1
+			var slot: String=child.get_meta("vanguard_upgrade")
+			var rect:=VanguardHud.slot_rect(slot)
+			check(is_equal_approx(child.size.x,rect.size.x) and child.size.y<=18,"Upgrade bar is full width and flat after layout")
+			check(child.position.x==rect.position.x and child.position.y+child.size.y<rect.position.y,"Upgrade bar clears icon and key label")
+		if child is Button: check(child.text not in ["5","6"],"No consumable HUD buttons")
+	check(hud_slots==12 and upgrade_buttons==12,"All twelve abilities have consistent upgrade affordances")
+	for slot in VanguardHud.SLOT_X:
+		for other in VanguardHud.SLOT_X:
+			if slot!=other: check(not VanguardHud.slot_rect(slot).intersects(VanguardHud.slot_rect(other)),"Ability icons do not overlap")
+	var hammer_button=game.ui.ability_bar.get_children().filter(func(c): return c.get_meta("vanguard_upgrade","")=="hammer")[0]
+	hammer_button.pressed.emit()
+	check(Vanguard.hammer_rank(game.model)==6,"Wide upgrade button still spends the intended rank")
+	Vanguard.earn(game.model); game.ui.update_hud(game.model)
 	var gun_key:=InputEventKey.new(); gun_key.keycode=KEY_QUOTELEFT; gun_key.pressed=true
 	game._input(gun_key); check(not game.model.vanguard.gun_on,"Backtick toggles gun off")
 	game._input(gun_key); check(game.model.vanguard.gun_on,"Backtick toggles gun back on")

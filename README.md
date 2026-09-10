@@ -10,6 +10,8 @@ New expeditions use the fixed **Vanguard** kit and non-modal skill progression. 
 
 The commanded hammer upgrades from rank 1–10 through the HUD's LMB tile. Rank 5 expands its reach and sweep; rank 10 allows swings while moving, including attack-move. Practice's Build rank selector includes Hammer and Gun separately. Vanguard damage has pronounced rank-5/10 spikes; see `docs/design/BALANCE_16.md` for the measured curve.
 
+HUD: grouped 1234 modules on the left, central QWER, then D/F and mouse weapons. Flat full-width upgrade bars sit above eligible icons. QWER is only slightly larger than the other icons. Consumable 5/6 buttons are hidden from this HUD; existing keyboard shortcuts remain.
+
 Right click moves or approaches a target for hammer attacks. Left click swings the hammer; A provides attack-move. S stops movement and commanded attacks, never the permanent automatic gun. Q is Impact bolt, W Core strike, E Body slam, R Reactor drop. Hold D for Ghost drive; release it before casting. F blinks. Modules: 1 orbit near/far, 2 Bulwark, 3 Reserve, 4 Overclock well. T has no Vanguard ability.
 
 Backtick (`) toggles the gun; MG shows OFF while disabled. Q/W each store two charges, with charge pips on the HUD; Q recharges in 4s at rank one before bonuses. Close orbit spins three times faster than before and hits more frequently. Camera lock defaults to L and can be rebound in Settings → Controls to keyboard or mouse (a mouse binding replaces that button's gameplay action).

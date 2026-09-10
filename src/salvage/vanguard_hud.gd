@@ -1,6 +1,13 @@
 class_name VanguardHud
 extends RefCounted
 
+const SLOT_X := {"p1":150,"x1":204,"x2":258,"x3":312,"q":390,"w":450,"e":510,"r":570,"d":658,"f":712,"hammer":794,"gun":848}
+
+static func slot_rect(slot: String) -> Rect2:
+	var core: bool=slot in ["q","w","e","r"]
+	var width: float=54 if core else 48
+	return Rect2(SLOT_X[slot],470 if core else 476,width,width)
+
 static func icon(slot: String) -> String:
 	if slot=="hammer": return "hammer"
 	return {"gun":"bolt","p1":"orbit","e":"thrust","r":"nuke","x1":"pulse_sentry","x2":"medic_sentry","x3":"converter"}.get(slot,Vanguard.TOOLS.get(slot,"bolt"))
@@ -26,17 +33,22 @@ static func draw(ui, run) -> void:
 		ui.bar_signature=signature
 		for child in ui.ability_bar.get_children(): ui.ability_bar.remove_child(child); child.queue_free()
 		ui.ability_labels.clear(); ui.ability_shades.clear(); ui.ability_recharge.clear()
-		# Quiet lower strip, open upper edges; icons retain their established size.
-		ui._surface(ui.ability_bar,Rect2(133,476,789,54),Color("14242cd9"),0,ui.INK,0)
+		# Central QWER rail, grouped modules and quieter flanking tools.
+		ui._surface(ui.ability_bar,Rect2(141,470,228,61),Color("14242cdd"),0,ui.INK,0)
+		ui._surface(ui.ability_bar,Rect2(381,464,252,67),Color("14242cf2"),0,ui.EDGE,1)
+		ui._surface(ui.ability_bar,Rect2(381,529,252,2),ui.GOLD,0,ui.GOLD,0)
+		ui._surface(ui.ability_bar,Rect2(649,470,120,61),Color("14242cdd"),0,ui.INK,0)
+		ui._surface(ui.ability_bar,Rect2(785,470,120,61),Color("14242cdd"),0,ui.INK,0)
 		var kind:=Vanguard.reward_kind(run)
-		ui._label(ui.ability_bar,("LEARN" if kind=="learn" else "UPGRADE")+" · %d"%run.kit.loadout.rewards18.size() if kind!="" else "MODIFIED TEST" if modified else "",Rect2(185,440,220,17),11,ui.GOLD,true)
+		ui._label(ui.ability_bar,("LEARN" if kind=="learn" else "UPGRADE")+" · %d"%run.kit.loadout.rewards18.size() if kind!="" else "MODIFIED TEST" if modified else "",Rect2(381,428,252,17),11,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
 		for i in range(slots.size()):
 			var slot: String=slots[i]
-			var core: bool=slot in ["q","w","e","r"]
-			var x: float=[139,188,233,278,323,368,429,499,569,639,744,799][i]
-			var width: float=62 if core else 39
-			var y: float=459 if core else 479
+			var rect:=slot_rect(slot)
+			var x: float=rect.position.x
+			var width: float=rect.size.x
+			var y: float=rect.position.y
 			var tile=ui._surface(ui.ability_bar,Rect2(x,y,width,width),ui.PANEL,0,ui.EDGE)
+			tile.set_meta("vanguard_slot",slot)
 			tile.mouse_filter=Control.MOUSE_FILTER_STOP; tile.tooltip_text=detail(run,slot)
 			ui._ability_icon(tile,icon(slot),Rect2(2,2,width-4,width-4))
 			var shade:=ColorRect.new(); shade.size=Vector2.ONE*width; shade.color=Color("14242cbb"); shade.mouse_filter=Control.MOUSE_FILTER_IGNORE; tile.add_child(shade)
@@ -46,21 +58,16 @@ static func draw(ui, run) -> void:
 			ui.ability_labels[slot]=ui._label(tile,"",Rect2(0,width*0.38,width,20),12,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
 			if slot in ["q","w","e"]: ui.ability_recharge[slot]=ui._label(tile,"",Rect2(4,width-16,30,14),9,ui.GOLD,true)
 			if slot in Vanguard.candidates(run,kind) and kind!="":
-				var button: Button=ui._button("+",Rect2(x+width-18,y-9,20,20),func(): Vanguard.spend(run,slot),true)
+				var button: Button=ui._button("+",Rect2(x,y-20,width,16),func(): Vanguard.spend(run,slot),true)
 				button.reparent(ui.ability_bar,false)
-				button.add_theme_font_size_override("font_size",14)
+				button.set_meta("vanguard_upgrade",slot)
+				button.add_theme_font_size_override("font_size",12)
 				for state in ["normal","hover","pressed","focus"]:
 					var style:=StyleBoxFlat.new(); style.bg_color=ui.GOLD if state!="hover" else ui.CREAM
 					style.set_content_margin_all(0); style.set_border_width_all(1); style.border_color=ui.EDGE
 					button.add_theme_stylebox_override(state,style)
-				button.custom_minimum_size=Vector2.ZERO; button.size=Vector2(20,20)
+				button.custom_minimum_size=Vector2.ZERO; button.size=Vector2(width,16)
 				button.tooltip_text=("Learn " if kind=="learn" else "Upgrade ")+ (slot if slot in ["gun","hammer"] else OS.get_keycode_string(Vanguard.KEYS[slot])) + (" · Ctrl + key" if slot not in ["gun","hammer"] else "")
-		ui._label(ui.ability_bar,"MODULES",Rect2(231,454,180,15),9,ui.MUTED,true)
-		ui._label(ui.ability_bar,"MOBILITY",Rect2(744,454,120,15),9,ui.MUTED,true)
-		for i in range(2):
-			var item: Button=ui._button(str(5+i),Rect2(867,469+i*27,33,23),func(): run.use_consumable(i),false)
-			item.reparent(ui.ability_bar,false); item.add_theme_font_size_override("font_size",11)
-			item.tooltip_text="Repair hull" if i==0 else "Restore energy"
 	for slot in slots:
 		var locked:=Vanguard.rank_of(run,slot)==0
 		var cd: float=run.kit.recharge.get(slot,0)
