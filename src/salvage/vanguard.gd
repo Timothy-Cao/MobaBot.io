@@ -47,6 +47,9 @@ var hammer_direction := Vector2.RIGHT
 var hammer_cooldown := 0.0
 var slam_left := 0.0
 var slam_direction := Vector2.RIGHT
+var slam_bounced := false
+const SLAM_SPEED := 950.0
+const REBOUND_SPEED := 1425.0
 var touch_guard := 0.0
 var touch_grace := 0.0
 var shield := 0.0
@@ -59,7 +62,7 @@ var time_scale := 1.0
 
 static func abilities() -> Dictionary:
 	return {
-		"body_slam":{"name":"Body slam","category":"active","icon":"thrust","glyph":"dash","cd":8.0,"max":2,"range":210.0,"aim":"line","cost":14,"text":"Two charges. Collide, blast and push. Touch protection only. Rank 5: stun. Rank 10: full shield through impact + 1s."},
+		"body_slam":{"name":"Body slam","category":"active","icon":"thrust","glyph":"dash","cd":8.0,"max":2,"range":210.0,"aim":"line","cost":14,"text":"Two charges. Collide, blast and push. One wall rebound for 2× remaining distance. Touch protection only. Rank 5: stun. Rank 10: full shield through impact + 1s."},
 		"reactor_drop":{"name":"Reactor drop","category":"ultimate","icon":"nuke","glyph":"target","cd":28.0,"max":1,"range":620.0,"aim":"ground","cost":32,"text":"Delayed wide reactor impact. Rank 5: standing inside grants a shield. Rank 10: second impact and stun."},
 		"guard_bot":{"name":"Bulwark","category":"summon","icon":"pulse_sentry","glyph":"turret","cd":16.0,"max":1,"range":340.0,"aim":"ground","cost":20,"text":"A durable decoy with a weak gun and pulse. Draws up to four ordinary enemies. Redeploy replaces it."},
 		"reserve_totem":{"name":"Reserve","category":"summon","icon":"medic_sentry","glyph":"cross","cd":10.0,"max":1,"range":340.0,"aim":"ground","cost":16,"text":"Banks repair while you are away. Return to convert reserve into hull, then energy, then a shock wave. Redeploy clears reserve."},
@@ -155,7 +158,7 @@ static func progression(run) -> void:
 		run.exp.field_credits += 20*run.kit.loadout.rewards18.size(); run.kit.loadout.rewards18.clear()
 
 func clear() -> void:
-	ghost=false; pending.clear(); hammer=-1; slam_left=0; touch_guard=0; shield=0
+	ghost=false; pending.clear(); hammer=-1; slam_left=0; slam_bounced=false; touch_guard=0; shield=0
 	constructs.clear(); impacts.clear(); ghosts.clear()
 	hammer_cooldown=0; touch_grace=0; ghost_clock=0
 
@@ -194,6 +197,7 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 		run.emit_event("v_blink",target)
 		return true
 	if slot=="e":
+		slam_bounced=false
 		slam_direction=(cursor-run.player).normalized(); slam_left=0.22
 		touch_guard=0.4; hammer=-1; run.attacks.stop(run)
 		if kit.effective_rank(slot)>=10: shield=0.45
@@ -274,19 +278,7 @@ func tick(run, delta: float) -> void:
 			impacts.append({"kind":"hammer","pos":run.player,"direction":hammer_direction,"life":0.30,"duration":0.30,"radius":reach,"angle":hammer_angle(run),"rank":hammer_rank(run)})
 			run.emit_event("v_hammer",run.player); hammer=-1
 	if slam_left>0:
-		var before: Vector2=run.player
-		var desired: Vector2=before+slam_direction*minf(delta,slam_left)*950
-		run.player=run.kit.extra.solid_point(before,desired,16)
-		slam_left=maxf(0,slam_left-delta)
-		for enemy in run.enemies:
-			if not run.attacks.valid(enemy): continue
-			if Geometry2D.get_closest_point_to_segment(enemy.pos,before,run.player).distance_to(enemy.pos)<=enemy.radius+24:
-				slam_left=0
-				var radius: float=95*run.kit.area_scale("e")
-				blast(run,run.player,radius,32*run.kit.damage_scale("e"),"body_slam",0.6 if run.kit.effective_rank("e")>=5 else 0,240)
-				if run.kit.effective_rank("e")>=10: shield=1.0
-				run.emit_event("v_impact",run.player); break
-		if run.player.distance_to(desired)>1: slam_left=0
+		step_slam(run,delta)
 		run.stop_movement()
 	for unit in constructs.duplicate():
 		unit.life-=delta; unit.clock-=delta; unit.pulse-=delta; unit.hurt_clock=maxf(0,unit.hurt_clock-delta)
@@ -339,6 +331,50 @@ func blast(run, point: Vector2, radius: float, damage: float, source: String, st
 		run.hit_enemy(enemy,damage,source,(Vector2(enemy.pos)-point).normalized()*knock if ordinary else Vector2.ZERO)
 		if ordinary and stun>0: enemy.stun=stun
 	impacts.append({"kind":"slam_hit" if source=="body_slam" else "blast","pos":point,"radius":radius,"direction":slam_direction,"life":0.4,"duration":0.4,"rank":run.kit.effective_rank("e") if source=="body_slam" else 1,"source":source})
+
+func step_slam(run, delta: float) -> void:
+	var budget:=delta
+	# Four-unit sweeps avoid tunnelling through capsule walls at low frame rates.
+	while budget>0.000001 and slam_left>0.000001:
+		var speed: float=REBOUND_SPEED if slam_bounced else SLAM_SPEED
+		var dt:=minf(budget,minf(slam_left,4.0/speed))
+		var before: Vector2=run.player
+		var desired: Vector2=before+slam_direction*dt*speed
+		var blocked:=not valid_point(run,desired,16)
+		var used:=dt
+		if blocked:
+			var low:=0.0; var high:=1.0
+			for i in range(12):
+				var middle: float=(low+high)*0.5
+				if valid_point(run,before.lerp(desired,middle),16): low=middle
+				else: high=middle
+			run.player=before.lerp(desired,low); used=dt*low
+		else: run.player=desired
+		slam_left=maxf(0,slam_left-used); budget=maxf(0,budget-used)
+		for enemy in run.enemies:
+			if not run.attacks.valid(enemy): continue
+			if Geometry2D.get_closest_point_to_segment(enemy.pos,before,run.player).distance_to(enemy.pos)<=enemy.radius+24:
+				slam_left=0
+				blast(run,run.player,95*run.kit.area_scale("e"),32*run.kit.damage_scale("e"),"body_slam",0.6 if run.kit.effective_rank("e")>=5 else 0,240)
+				if run.kit.effective_rank("e")>=10: shield=1.0
+				run.emit_event("v_impact",run.player); return
+		if blocked:
+			var normal:=Vector2.ZERO
+			var nearest:=INF
+			for wall in run.kit.extra.walls:
+				var point: Vector2=Geometry2D.get_closest_point_to_segment(run.player,wall.a,wall.b)
+				var distance: float=run.player.distance_to(point)-16-float(wall.get("width",6))
+				if distance<nearest and distance<0.1:
+					nearest=distance; normal=(run.player-point).normalized()
+			# One rebound per cast; a second obstacle or the arena boundary stops it.
+			if slam_bounced or normal.is_zero_approx() or slam_direction.dot(normal)>=0:
+				slam_left=0; return
+			var remaining_distance:=slam_left*SLAM_SPEED
+			slam_direction=slam_direction.bounce(normal).normalized()
+			slam_bounced=true; slam_left=remaining_distance*2.0/REBOUND_SPEED
+			poof(run.player,run.kit.effective_rank("e"))
+			run.emit_event("v_impact",run.player)
+	if slam_left<0.000001: slam_left=0
 
 static func valid_point(run, point: Vector2, radius: float) -> bool:
 	if not run.ARENA.grow(-radius).has_point(point): return false

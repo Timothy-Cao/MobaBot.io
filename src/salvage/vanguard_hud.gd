@@ -19,7 +19,7 @@ static func detail(run, slot: String) -> String:
 	if slot=="d": return "Ghost drive\nHold D: +%.0f%% speed, %.1f energy/sec. Release to cast.\nNo invulnerability. The gun and deployed machines continue."%[65+maxi(0,run.kit.effective_rank("d")-1)*3.5,10-maxi(0,run.kit.effective_rank("d")-1)*0.3]
 	if slot=="w": return "Core strike · 2 charges\n38 base edge damage / 76 center. 100 radius; 40 center.\nRank 5: wider impact. Rank 10: brief stun.\n%.1fs per charge · 18 energy"%run.kit.cooldown("w")
 	if slot=="q": return "Impact bolt · 2 charges\nStraight rocket with contact/range explosion.\n%.1fs per charge"%run.kit.cooldown("q")
-	if slot=="e": return "Body slam · 2 charges\nCollide, blast and push. Bodies still collide with walls.\n%.1fs per charge"%run.kit.cooldown("e")
+	if slot=="e": return "Body slam · 2 charges\nCollide, blast and push. Walls rebound you for 2× remaining dash distance, once per cast.\n%.1fs per charge"%run.kit.cooldown("e")
 	if slot=="f": return "Phase hop\nInstant blink. 80ms unreleased casts follow your new origin.\nPast the midpoint of thick cover: land on the far side."
 	var data: Dictionary=MobaKit.ABILITIES[Vanguard.TOOLS[slot]]
 	return data.name+"\n"+data.text+"\n%.1fs recharge · %d energy"%[run.kit.cooldown(slot),run.kit.ability_cost(Vanguard.TOOLS[slot])]

@@ -72,6 +72,38 @@ func execute() -> void:
 	check(run.vanguard.cast(run,"e",run.player+Vector2(200,0)),"Slam begins")
 	for i in range(15): run.vanguard.tick(run,1.0/60)
 	check(run.damage_dealt.get("body_slam",0)>0 and run.vanguard.slam_left==0,"Slam first contact impact")
+	for dt in [1.0/120,1.0/60,1.0/30,0.1,0.5]:
+		run=fresh(1); run.player=Vector2(1200,1000)
+		var origin: Vector2=run.player
+		run.kit.extra.walls=[{"a":origin+Vector2(80,-400),"b":origin+Vector2(80,400),"width":20,"life":100}]
+		run.vanguard.cast(run,"e",origin+Vector2(400,0))
+		for i in range(ceili(0.6/dt)): run.vanguard.tick(run,dt)
+		check(run.vanguard.slam_bounced and run.vanguard.slam_left==0,"Wall produces one completed rebound")
+		check(absf(run.player.x-(origin.x+44-2*(209-44)))<0.1,"Rebound travels twice remaining distance across frame rates")
+		check(Vanguard.valid_point(run,run.player,16),"Rebound remains outside collision")
+		check(run.kit.charges.e==1 and run.damage_dealt.get("body_slam",0)==0,"Wall bounce consumes no extra charge and deals no phantom damage")
+		run.vanguard.clear(); check(not run.vanguard.slam_bounced,"Reset clears rebound state")
+	run=fresh(1); run.player=Vector2(1200,1000)
+	var bounce_origin: Vector2=run.player
+	run.kit.extra.walls=[{"a":Vector2(1280,600),"b":Vector2(1280,1400),"width":20,"life":100},{"a":Vector2(1000,600),"b":Vector2(1000,1400),"width":20,"life":100}]
+	run.vanguard.cast(run,"e",run.player+Vector2(400,0)); run.vanguard.tick(run,0.6)
+	check(absf(run.player.x-1036)<0.1 and run.vanguard.slam_left==0,"Second wall stops rebound without tunnelling or chaining")
+	run.kit.extra.walls.pop_back(); run.player=bounce_origin
+	run.kit.charges.e=2; run.vanguard.cast(run,"e",run.player+Vector2(400,200)); run.vanguard.tick(run,0.6)
+	check(run.vanguard.slam_direction.x<0 and run.vanguard.slam_direction.y>0,"Angled wall contact reflects with forward tangent retained")
+	check(Vanguard.valid_point(run,run.player,16),"Angled rebound lands outside wall")
+	run=fresh(1); run.player=Vector2(1200,1000)
+	run.kit.extra.walls=[{"a":Vector2(1436,600),"b":Vector2(1436,1400),"width":20,"life":100}]
+	run.vanguard.cast(run,"e",run.player+Vector2(400,0)); run.vanguard.tick(run,0.6)
+	check(absf(run.player.x-1382)<0.1,"Late wall contact has only a short rebound")
+	run=fresh(5); run.player=Vector2(1200,1000)
+	run.kit.extra.walls=[{"a":Vector2(1280,600),"b":Vector2(1280,1400),"width":20,"life":100}]
+	run.spawn_enemy(Vector2(1050,1000),3); run.enemies[0].hp=1000; run.enemies[0].warmup=0
+	run.vanguard.cast(run,"e",run.player+Vector2(400,0)); run.vanguard.tick(run,0.6)
+	check(run.vanguard.slam_bounced and run.vanguard.slam_left==0 and run.damage_dealt.get("body_slam",0)>0,"Rebound retains normal first-enemy impact")
+	run=fresh(1); run.player=Vector2(run.ARENA.end.x-25,1000)
+	run.vanguard.cast(run,"e",run.player+Vector2(400,0)); run.vanguard.tick(run,0.6)
+	check(not run.vanguard.slam_bounced and run.vanguard.slam_left==0 and Vanguard.valid_point(run,run.player,16),"Arena edge stops dash safely")
 	run=fresh(5)
 	check(run.vanguard.cast(run,"x3",run.player),"Recovery deployment")
 	check(run.vanguard.powered(run),"Inside recovery aura")
@@ -348,6 +380,19 @@ func ui_checks() -> void:
 	game._input(event); check(game.model.kit.ranks.q==6 and game.model.vanguard.pending.is_empty(),"Ctrl-Q upgrades without casting")
 	if "--render" in OS.get_cmdline_user_args():
 		DirAccess.make_dir_recursive_absolute("res://output/vanguard")
+		var saved_model=game.model
+		for reduced in [false,true]:
+			game.model=fresh(5); game.model.player=Vector2(1200,1000)
+			game.model.kit.extra.walls.assign([{"a":Vector2(1280,800),"b":Vector2(1280,1200),"width":20,"life":100,"terrain":true}])
+			game.art.model=game.model; game.art.effects.clear(); game.art.reduced_effects=reduced
+			game.camera_offset=Vector2.ZERO; game.camera_locked=true; game._update_camera()
+			game.model.vanguard.cast(game.model,"e",Vector2(1500,1000))
+			game.model.vanguard.tick(game.model,0.08)
+			game.ui.update_hud(game.model); game.art.queue_redraw()
+			await process_frame; await RenderingServer.frame_post_draw
+			root.get_texture().get_image().save_png("res://output/vanguard/wall-rebound-%s.png"%str(reduced))
+		game.model=saved_model; game.art.model=game.model; game.art.reduced_effects=false
+		game._update_camera(); game.ui.update_hud(game.model)
 		await process_frame; await process_frame
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://output/vanguard/hud.png")

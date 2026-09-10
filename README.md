@@ -10,6 +10,8 @@ New expeditions use the fixed **Vanguard** kit and non-modal skill progression. 
 
 ## Current Vanguard controls
 
+E now rebounds once from walls: reflected direction, 2× the unused dash distance, at 1.5× dash speed. Another wall stops the rebound; enemy contact retains its normal blast. No extra charge or energy cost.
+
 The complete Vanguard icon family now uses the approved painterly MOBA direction: QWER plus D/F, 1–4, hammer and MG, all imported at 128px. New artwork is UI-only; combat animations and mechanics are unchanged. Exact new prompts and source hashes: `assets/vanguard_icons/REMAINING_PROVENANCE.md`.
 
 Interface follow-up: Painted icons are always used; QWER has a new painterly MOBA set imported at 128×128. Settings has sound (0=mute, 100%=full mix), camera-speed and in-game mouse-speed sliders; no icon-skin selector. Empty buttons no longer create blank tooltips.
