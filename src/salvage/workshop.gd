@@ -600,7 +600,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
 	if event.keycode == KEY_ESCAPE:
-		if screen == "equipment":
+		if screen == "paused":
+			_pause_toggle()
+		elif screen == "equipment":
 			show_home()
 		elif screen == "settings":
 			_close_settings()

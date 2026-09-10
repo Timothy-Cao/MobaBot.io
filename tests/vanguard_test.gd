@@ -168,6 +168,20 @@ func ui_checks() -> void:
 	var before:=JSON.stringify(game.collection.snapshot())
 	game.launch_practice(); await process_frame
 	check(game.screen=="practice" and Vanguard.enabled(game.model),"Practice fixed-kit default")
+	game.close_practice()
+	game.ui.system_keys=BotKeyboard.SYSTEM_DEFAULTS.duplicate()
+	game._notification(MainLoop.NOTIFICATION_APPLICATION_FOCUS_OUT)
+	check(game.screen=="paused","Alt-Tab pauses active combat")
+	game._notification(MainLoop.NOTIFICATION_APPLICATION_FOCUS_IN)
+	check(game.screen=="paused","Returning focus does not resume automatically")
+	var escape:=InputEventKey.new(); escape.keycode=KEY_ESCAPE; escape.pressed=true
+	game._unhandled_key_input(escape)
+	check(game.screen=="running","Esc resumes the focus-loss pause directly")
+	game._unhandled_key_input(escape)
+	check(game.screen=="settings","Esc during combat still opens settings")
+	game._unhandled_key_input(escape)
+	check(game.screen=="running","Esc closes settings back to combat")
+	game.open_practice()
 	check(game.practice_enemy=="dummy" and game.practice_count==1 and game.practice_formation=="Cluster","Single clustered dummy is default")
 	game.practice_page="Enemies"; PracticeSandbox.draw(game); await process_frame
 	game.practice_enemy="bumper"; game.practice_count=10; game.practice_formation="Cluster"
