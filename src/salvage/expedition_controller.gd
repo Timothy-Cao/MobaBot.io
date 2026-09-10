@@ -23,6 +23,8 @@ var practice_slot := "q"
 var volume_setting := 1.0
 var camera_speed := 620.0
 var mouse_speed := 1.0
+var hud_scale := 0.9
+var cast_quick := {"q":true,"w":true,"e":true,"r":false,"p1":true,"x1":false,"x2":false,"x3":false}
 var camera_offset := Vector2.ZERO
 var minimap_held := false
 var pointer_warp := Vector2(-9999,-9999)
@@ -88,6 +90,7 @@ func confirm_new_run() -> void:
 
 func _physics_process(delta: float) -> void:
 	_update_pointer_mode()
+	_apply_hud_scale()
 	if model!=null and model.kit!=null: model.kit.extra.cursor=get_global_mouse_position()
 	if model!=null and model.exp!=null and model.exp.practice: delta*=model.vanguard.time_scale
 	if model!=null and Vanguard.enabled(model) and screen!="running": model.vanguard.ghost=false
@@ -228,9 +231,11 @@ func _input(event: InputEvent) -> void:
 			for slot in Vanguard.KEYS:
 				if event.keycode!=Vanguard.KEYS[slot]: continue
 				if event.ctrl_pressed: Vanguard.spend(model,slot)
-				elif slot=="r" and not r_quickcast and not model.vanguard.ghost and model.kit.unlocked(slot): pending_cast_slot=slot
-				elif event.shift_pressed and slot in ["q","w","e","f","x1","x2","x3"] and not model.vanguard.ghost: pending_cast_slot=slot
-				else: model.vanguard.cast(model,slot,get_global_mouse_position())
+				elif _confirm_cast(slot) and not model.vanguard.ghost and model.kit.unlocked(slot): pending_attack=false; pending_cast_slot=slot
+				elif event.shift_pressed and slot in ["q","w","e","f","x1","x2","x3"] and not model.vanguard.ghost: pending_attack=false; pending_cast_slot=slot
+				else:
+					pending_cast_slot=""
+					model.vanguard.cast(model,slot,get_global_mouse_position())
 				get_viewport().set_input_as_handled(); return
 	if event is InputEventKey and event.keycode==KEY_TAB:
 		if event.pressed and not event.echo:
@@ -333,6 +338,11 @@ func _load_settings() -> void:
 	volume_setting=clampf(float(config.get_value("audio","volume",1.0)),0,1)
 	camera_speed=clampf(float(config.get_value("camera","speed",620.0)),200,1400)
 	mouse_speed=clampf(float(config.get_value("camera","mouse_speed",1.0)),0.5,2.0)
+	hud_scale=clampf(float(config.get_value("visual","hud_scale",0.9)),0.7,1.0)
+	var saved_cast: Variant=config.get_value("controls","cast_quick",{})
+	if saved_cast is Dictionary:
+		for slot in cast_quick:
+			if saved_cast.get(slot) is bool: cast_quick[slot]=saved_cast[slot]
 	_apply_volume()
 	var keys: Variant=config.get_value("keyboard","system",BotKeyboard.SYSTEM_DEFAULTS)
 	if keys is Dictionary and BotKeyboard.valid_system(keys):
@@ -347,8 +357,26 @@ func _save_settings() -> void:
 	config.set_value("audio","volume",volume_setting)
 	config.set_value("camera","speed",camera_speed)
 	config.set_value("camera","mouse_speed",mouse_speed)
+	config.set_value("visual","hud_scale",hud_scale)
+	config.set_value("controls","cast_quick",cast_quick)
 	config.set_value("keyboard","system",ui.system_keys)
 	if config.save("user://salvage_settings.cfg")!=OK: ui.announce("Could not save settings",2)
+
+func _confirm_cast(slot: String) -> bool:
+	if model!=null and Vanguard.enabled(model):
+		return slot!="p1" and cast_quick.has(slot) and not cast_quick[slot]
+	return super._confirm_cast(slot)
+
+func _apply_hud_scale() -> void:
+	# Scale each HUD island toward its screen anchor, never the menus or world.
+	for child in ui.hud.get_children():
+		if not child is Control or child==ui.threat_compass: continue
+		if not child.has_meta("hud_origin"): child.set_meta("hud_origin",child.position)
+		var origin: Vector2=child.get_meta("hud_origin")
+		var anchor:=Vector2(0 if origin.x<300 else 960 if origin.x>700 else 480,540 if origin.y>350 or child==ui.ability_bar else 0)
+		if child==ui.ability_bar: anchor=Vector2(480,540)
+		child.scale=Vector2.ONE*hud_scale
+		child.position=anchor+(origin-anchor)*hud_scale
 
 func apply_fullscreen() -> void:
 	get_window().mode=Window.MODE_FULLSCREEN if fullscreen_setting else Window.MODE_WINDOWED
@@ -373,7 +401,7 @@ func _set_mute(value: bool) -> void:
 
 func _update_pointer_mode() -> void:
 	if DisplayServer.get_name()=="headless": return
-	var confined: bool=screen=="running" and camera_locked and get_window().has_focus()
+	var confined: bool=screen=="running" and get_window().has_focus()
 	var desired: int=Input.MOUSE_MODE_CONFINED if confined else Input.MOUSE_MODE_VISIBLE
 	if Input.mouse_mode!=desired: Input.mouse_mode=desired; pointer_warp=Vector2(-9999,-9999)
 	if screen!="running": minimap_held=false
@@ -395,7 +423,7 @@ func _camera_input(event: InputEvent) -> bool:
 		_minimap_point(event.position)
 		return true
 	if event is InputEventMouseMotion:
-		if camera_locked and Input.mouse_mode==Input.MOUSE_MODE_CONFINED and not is_equal_approx(mouse_speed,1.0):
+		if Input.mouse_mode==Input.MOUSE_MODE_CONFINED and not is_equal_approx(mouse_speed,1.0):
 			if event.position.distance_to(pointer_warp)<1.0:
 				pointer_warp=Vector2(-9999,-9999)
 			else:
@@ -407,7 +435,7 @@ func _camera_input(event: InputEvent) -> bool:
 	return false
 
 func _minimap_point(point: Vector2) -> void:
-	var local_point: Vector2=point-ui.mini_map.global_position-Vector2(7,7)
+	var local_point: Vector2=ui.mini_map.get_global_transform().affine_inverse()*point-Vector2(7,7)
 	var fraction: Vector2=(local_point/(ui.mini_map.size-Vector2(14,14))).clamp(Vector2.ZERO,Vector2.ONE)
 	free_center=SalvageRun.ARENA.position+fraction*SalvageRun.ARENA.size
 	_update_camera()
@@ -420,14 +448,15 @@ func _scaled_pointer(point: Vector2, motion: Vector2) -> Vector2:
 	return (point+motion*(mouse_speed-1.0)).clamp(Vector2.ZERO,get_viewport_rect().size-Vector2.ONE)
 
 func _edge_pan(cursor: Vector2, delta: float) -> void:
-	if not camera_locked or recenter_held or minimap_held: return
+	if camera_locked or recenter_held or minimap_held: return
 	if not get_viewport_rect().has_point(cursor): return
 	var extent:=get_viewport_rect().size
 	var pan:=Vector2(float(cursor.x>extent.x-12)-float(cursor.x<12),float(cursor.y>extent.y-12)-float(cursor.y<12))
-	camera_offset+=pan.normalized()*camera_speed/zoom_value*delta
+	free_center+=pan.normalized()*camera_speed/zoom_value*delta
 
 func _set_camera_lock(value: bool) -> void:
 	camera_offset=Vector2.ZERO
+	minimap_held=false
 	super._set_camera_lock(value)
 	_update_pointer_mode()
 
@@ -439,10 +468,9 @@ func _update_camera() -> void:
 	if recenter_held and not minimap_held:
 		camera_offset=Vector2.ZERO; free_center=follow
 	elif camera_locked and not minimap_held:
-		free_center=follow+camera_offset
+		camera_offset=Vector2.ZERO; free_center=follow
 	free_center=free_center.clamp(SalvageRun.ARENA.position+model.view_size/2-Vector2(48,96)/zoom_value,SalvageRun.ARENA.end-model.view_size/2+Vector2(48,200)/zoom_value)
-	if camera_locked and not minimap_held: camera_offset=free_center-follow
-	model.detached_camera=minimap_held or (not recenter_held and (not camera_locked or not camera_offset.is_zero_approx()))
+	model.detached_camera=minimap_held or (not recenter_held and not camera_locked)
 	model.detached_origin=free_center-model.view_size/2
 	camera.position=free_center; camera.force_update_scroll()
 

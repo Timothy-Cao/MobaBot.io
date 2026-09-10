@@ -66,25 +66,66 @@ func run() -> void:
 	game.recenter_held=false; game.camera_locked=true
 	game.camera_offset=Vector2.ZERO; game.camera_speed=620; game.zoom_value=1
 	game._edge_pan(Vector2(959,270),0.1)
-	check(game.camera_offset.is_equal_approx(Vector2(62,0)),"Locked edge pan uses camera speed")
+	check(game.free_center.is_equal_approx(original),"Locked edges never move camera")
 	game.camera_locked=false; game._edge_pan(Vector2(959,270),0.1)
-	check(game.camera_offset.is_equal_approx(Vector2(62,0)),"Unlocked mode does not edge pan")
+	check(game.free_center.is_equal_approx(original+Vector2(62,0)),"Unlocked edge pan uses camera speed")
 	game.camera_locked=true; game.recenter_held=true; game._edge_pan(Vector2(959,270),0.1)
-	check(game.camera_offset.is_equal_approx(Vector2(62,0)),"Space suppresses edge pan")
+	check(game.free_center.is_equal_approx(original+Vector2(62,0)),"Space suppresses edge pan")
 	game.recenter_held=false; game.minimap_held=true; game._edge_pan(Vector2(959,270),0.1)
-	check(game.camera_offset.is_equal_approx(Vector2(62,0)),"Minimap inspection suppresses edge pan")
+	check(game.free_center.is_equal_approx(original+Vector2(62,0)),"Minimap inspection suppresses edge pan")
 	game.minimap_held=false; game.mouse_speed=2
 	check(game._scaled_pointer(Vector2(110,100),Vector2(10,0))==Vector2(120,100),"Mouse multiplier doubles relative travel")
 	check(game._scaled_pointer(Vector2(958,100),Vector2(10,0)).x==959,"Scaled cursor stays inside viewport")
 	game.mouse_speed=1
 	game.camera_offset=Vector2(100,0); game._update_camera()
-	check(game.camera.position.x>original.x,"Locked edge offset pans view")
+	check(game.camera.position.is_equal_approx(original),"Locked camera ignores stale edge offset")
+	game.camera_locked=false; game.free_center+=Vector2(300,0); game.minimap_held=true
+	game._set_camera_lock(true)
+	check(game.camera.position.is_equal_approx(original) and not game.minimap_held,"Turning lock on immediately cancels inspection and snaps home")
+	for scale_value in [0.7,0.9,1.0]:
+		game.hud_scale=scale_value; game._apply_hud_scale()
+		game.minimap_held=true
+		game._minimap_point(game.ui.mini_map.get_global_transform()*(game.ui.mini_map.size/2))
+		check(game.free_center.is_equal_approx(SalvageRun.ARENA.get_center()),"Scaled minimap maps center correctly")
+		check(game.ui.ability_bar.scale.is_equal_approx(Vector2.ONE*scale_value),"HUD scale applied")
+	game.minimap_held=false; game.hud_scale=0.9; game._apply_hud_scale()
+	for slot in game.cast_quick:
+		check(game._confirm_cast(slot)==(slot in ["r","x1","x2","x3"]),"Requested cast defaults")
+		if slot=="p1": continue
+		game.cast_quick[slot]=false
+		key.keycode=Vanguard.KEYS[slot]; key.pressed=true; game._input(key)
+		check(game.pending_cast_slot==slot,"Normal press arms preview")
+		key.pressed=false; game._input(key)
+		check(game.pending_cast_slot==slot,"Normal release waits for left click")
+		key.keycode=KEY_ESCAPE; key.pressed=true; game._input(key)
+		check(game.pending_cast_slot=="" and game.screen=="running","Escape cancels preview without opening menu")
+		game.cast_quick[slot]=true
+		check(not game._confirm_cast(slot),"Quick setting skips confirmation")
+	game.cast_quick={"q":true,"w":true,"e":true,"r":false,"p1":true,"x1":false,"x2":false,"x3":false}
+	game.cast_quick.q=false
+	game.pending_attack=true
+	var charges_before: int=game.model.kit.charges.q
+	key.keycode=KEY_Q; key.pressed=true; game._input(key)
+	check(not game.pending_attack and game.model.kit.charges.q==charges_before,"Preview replaces attack aim without spending charge")
+	click.pressed=true; click.position=Vector2(600,270)
+	game._unhandled_input(click)
+	check(game.pending_cast_slot=="" and game.model.kit.charges.q==charges_before-1,"Left click confirms exactly one cast")
+	game.model.vanguard.pending.clear(); game.cast_quick.q=true
+	game.ui.update_hud(game.model)
+	for slot in ["p1","x1","x2","x3"]:
+		if slot!="p1": game.model.vanguard.constructs.append({"slot":slot})
+	game.ui.update_hud(game.model)
+	for slot in ["x1","x2","x3"]:
+		check(game.ui.ability_shades[slot].get_parent().get_node("Active").active,"Deployed module has active overlay")
+		check(game.ui.ability_labels[slot].text=="","Active module avoids status words")
+	game.model.vanguard.constructs.clear(); game.ui.update_hud(game.model)
+	check(not game.ui.ability_shades.x1.get_parent().get_node("Active").active,"Expired construct clears overlay")
 	game._notification(MainLoop.NOTIFICATION_APPLICATION_FOCUS_OUT)
 	check(not game.minimap_held and game.camera_offset==Vector2.ZERO,"Alt-tab clears temporary inspection")
 	game.screen="settings"; game.ui.settings_page="options"; game.ui.show_settings()
 	await process_frame
 	var sliders: Array=controls(game.ui.overlay).filter(func(n): return n is HSlider)
-	check(sliders.size()==3,"Only sound and camera/mouse sliders")
+	check(sliders.size()==4,"Sound, camera, mouse and HUD sliders")
 	for node in controls(game.ui.overlay):
 		if node is Label: check(node.text!="Icon skin","No skin setting")
 	var volume=sliders.filter(func(n): return n.name=="sound")[0]
@@ -107,12 +148,16 @@ func run() -> void:
 		DirAccess.make_dir_recursive_absolute("res://output/interface-polish")
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://output/interface-polish/settings.png")
+		game.ui.settings_page="controls"; game.ui.show_settings()
+		await process_frame; await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png("res://output/interface-polish/controls.png")
 		game.open_practice(); game.practice_page="Build"; PracticeSandbox.draw(game)
 		await process_frame; await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://output/interface-polish/practice.png")
 		game.close_practice(); game.ui.update_hud(game.model)
 		for reduced in [false,true]:
 			game.art.reduced_effects=reduced
+			game.ui.reduced=reduced; game.ui.update_hud(game.model)
 			await process_frame; await RenderingServer.frame_post_draw
 			root.get_texture().get_image().save_png("res://output/interface-polish/hud-%s.png"%str(reduced))
 	game.queue_free(); await process_frame; await process_frame

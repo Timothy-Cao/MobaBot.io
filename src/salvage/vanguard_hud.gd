@@ -52,6 +52,9 @@ static func draw(ui, run) -> void:
 			ui._ability_icon(tile,icon(slot),Rect2(2,2,width-4,width-4))
 			var shade:=ColorRect.new(); shade.size=Vector2.ONE*width; shade.color=Color("14242cbb"); shade.mouse_filter=Control.MOUSE_FILTER_IGNORE; tile.add_child(shade)
 			ui.ability_shades[slot]=shade
+			if slot in ["p1","x1","x2","x3"]:
+				var active=preload("res://src/salvage/active_icon.gd").new()
+				active.name="Active"; active.size=Vector2.ONE*width; tile.add_child(active)
 			ui._label(tile,"LMB" if slot=="hammer" else "MG" if slot=="gun" else OS.get_keycode_string(Vanguard.KEYS[slot]),Rect2(2,0,width,17),11,ui.CREAM,true)
 			ui._label(tile,str(Vanguard.rank_of(run,slot)),Rect2(width-17,width-16,15,15),10,ui.GOLD,true)
 			ui.ability_labels[slot]=ui._label(tile,"",Rect2(0,width*0.38,width,20),12,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
@@ -76,7 +79,12 @@ static func draw(ui, run) -> void:
 		var cd: float=run.kit.recharge.get(slot,0)
 		var empty: bool=run.kit.charges.get(slot,1)<=0
 		ui.ability_shades[slot].visible=locked or empty
-		ui.ability_labels[slot].text="—" if locked else (str(ceili(cd)) if empty else ("FAR" if run.kit.orbit_far else "NEAR") if slot=="p1" else "")
+		ui.ability_labels[slot].text="—" if locked else (str(ceili(cd)) if empty else "")
+		if slot in ["p1","x1","x2","x3"]:
+			var active=ui.ability_shades[slot].get_parent().get_node("Active")
+			active.active=not locked and (run.kit.passive_active("orbit") if slot=="p1" else run.vanguard.constructs.any(func(unit): return unit.slot==slot))
+			active.reduced=ui.reduced
+			if active.active: ui.ability_shades[slot].visible=false; ui.ability_labels[slot].text=""
 		if slot=="d": ui.ability_labels[slot].text="ON" if run.vanguard.ghost else ""
 		if slot=="gun":
 			ui.ability_labels[slot].text="OFF" if not run.vanguard.gun_on else "PAUSE" if Vanguard.gun_paused(run) else "%d/5"%(run.vanguard.gun_shots%5+1) if Vanguard.gun_rank(run)>=10 else ""

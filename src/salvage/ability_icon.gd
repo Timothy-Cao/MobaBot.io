@@ -2,6 +2,7 @@ extends Control
 ## Original action icons: a fixed 64-unit canvas, shared materials, no bitmap variants.
 var ability := "salvo"
 var base_only := false
+var pixel_material: ShaderMaterial
 const INK := Color("14242c")
 const TEAL := Color("4cafaa")
 const LIGHT := Color("b9ead8")
@@ -34,6 +35,12 @@ func bolt(p: Vector2, scale_value: float = 1.0) -> void:
 	draw_circle(p + Vector2(-6, 6) * scale_value, 3 * scale_value, GOLD)
 
 func _draw() -> void:
+	if ability.begins_with("vanguard_") and not base_only and PaintedIcons.enabled:
+		if pixel_material==null:
+			pixel_material=ShaderMaterial.new()
+			pixel_material.shader=preload("res://src/salvage/pixel_icon.gdshader")
+		material=pixel_material
+	else: material=null
 	draw_set_transform(Vector2.ZERO, 0, size / 64.0)
 	texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	var painted: Texture2D=null if base_only else PaintedIcons.texture(ability)

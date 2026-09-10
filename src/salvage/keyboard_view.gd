@@ -148,10 +148,21 @@ static func settings(ui) -> void:
 		var names: Dictionary={"attack":"Attack move","center":"Recenter camera","build":"Build","settings":"Settings","lock":"Toggle camera lock"}
 		for i in range(names.size()):
 			var action: String=names.keys()[i]
-			ui._label(ui.overlay,names[action],Rect2(165,125+i*53,370,30),19,ui.CREAM)
-			var bind: Button=ui._button(("Key or mouse…" if action=="lock" else "Press key…") if ui.rebind_system==action else BotKeyboard.binding_name(ui.system_keys.get(action,BotKeyboard.SYSTEM_DEFAULTS[action])),Rect2(579,120+i*53,206,37),func() -> void:
+			ui._label(ui.overlay,names[action],Rect2(90,125+i*53,235,30),17,ui.CREAM)
+			var bind: Button=ui._button(("Key or mouse…" if action=="lock" else "Press key…") if ui.rebind_system==action else BotKeyboard.binding_name(ui.system_keys.get(action,BotKeyboard.SYSTEM_DEFAULTS[action])),Rect2(325,120+i*53,150,37),func() -> void:
 				ui.rebind_system=action; ui.show_settings(),false)
 			if action=="lock": bind.tooltip_text="Accepts mouse buttons, including wheel directions. Replaces that button's gameplay action."
+		ui._label(ui.overlay,"Casting",Rect2(535,112,300,30),19,ui.CREAM)
+		var cast_slots: Array=["p1","x1","x2","x3","q","w","e","r"]
+		for i in range(cast_slots.size()):
+			var slot: String=cast_slots[i]
+			var at:=Vector2(535+(i%4)*82,155+(i/4)*96)
+			ui._label(ui.overlay,OS.get_keycode_string(Vanguard.KEYS[slot]),Rect2(at,Vector2(72,24)),16,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
+			var cast_button: Button=ui._button("Quick" if ui.host.cast_quick[slot] else "Normal",Rect2(at+Vector2(0,29),Vector2(76,33)),func() -> void:
+				ui.host.cast_quick[slot]=not ui.host.cast_quick[slot]; ui.host._save_settings(); ui.show_settings(),false)
+			cast_button.name="Cast_"+slot
+			cast_button.add_theme_font_size_override("font_size",13)
+			cast_button.tooltip_text="Normal: aim, then left-click. Toggles act immediately."
 		ui._label(ui.overlay,"Right-click: move / target     S: stop     Wheel: zoom",Rect2(165,415,680,28),14,ui.MUTED)
 		ui._label(ui.overlay,"`: machine gun     5 / 6: consumables",Rect2(165,446,680,28),14,ui.MUTED)
 	else:
@@ -162,15 +173,16 @@ static func settings(ui) -> void:
 		slider(ui,"camera_speed",Rect2(470,169,315,32),40,220,5,game.camera_speed/6.2,func(v): game.camera_speed=v*6.2; game._save_settings(),"%d%%")
 		ui._label(ui.overlay,"Mouse speed",Rect2(165,224,270,28),18,ui.CREAM)
 		slider(ui,"mouse_speed",Rect2(470,219,315,32),0.5,2,0.05,game.mouse_speed,func(v): game.mouse_speed=v; game._save_settings(),"%.2f×")
-		ui._rule(Vector2(165,267),620)
+		ui._label(ui.overlay,"HUD size",Rect2(165,274,270,28),18,ui.CREAM)
+		slider(ui,"hud_scale",Rect2(470,269,315,32),70,100,5,game.hud_scale*100,func(v): game.hud_scale=v/100.0; game._apply_hud_scale(); game._save_settings(),"%d%%")
+		ui._rule(Vector2(165,310),620)
 		var rows: Array=[
 			["Reduced effects","On" if ui.reduced else "Off",func() -> void: ui.effects_changed.emit(not ui.reduced)],
 			["Camera lock","On" if ui.camera_locked else "Off",func() -> void: ui.camera_lock_changed.emit(not ui.camera_locked)],
-			["Area quick cast","On" if ui.r_quickcast else "Off",func() -> void: ui.quickcast_changed.emit(not ui.r_quickcast)],
 			["Fullscreen","On" if game.fullscreen_setting else "Off",game.toggle_fullscreen]]
 		for i in range(rows.size()):
-			ui._label(ui.overlay,rows[i][0],Rect2(165,284+i*42,350,28),18,ui.CREAM)
-			ui._button(rows[i][1],Rect2(675,280+i*42,110,32),rows[i][2],false)
+			ui._label(ui.overlay,rows[i][0],Rect2(165,330+i*42,350,28),18,ui.CREAM)
+			ui._button(rows[i][1],Rect2(675,326+i*42,110,32),rows[i][2],false)
 	if ui.settings_in_run: ui._button("Main menu",Rect2(725,468,186,33),func() -> void: ui.host.confirm_leave(),false)
 
 static func slider(ui, id: String, rect: Rect2, low: float, high: float, step_value: float, current: float, action: Callable, format_value: String) -> HSlider:
