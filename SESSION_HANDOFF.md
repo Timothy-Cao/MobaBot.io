@@ -37,3 +37,7 @@ Next test should start a **new expedition** after launching the new build. Conti
 4. QA_17, earlier QA_18 sections and numbered roadmap documents are history/compatibility, not instructions to restart old phases.
 
 Commit coherent verified milestones; keep source/assets/tests in Git and raw records/output private. Preserve dated owner feedback, separate implementation evidence from human quality, and refresh this handoff before switching sessions.
+
+## Post-commit launch limitation
+
+The normal visible launcher was attempted after implementation commit 97d9747. Godot reported WASAPI output initialization failure and dummy-audio fallback, and still had no titled main window after roughly two minutes while consuming CPU. The attempted process was stopped before any human run. This does not invalidate the automated/render checks, but the interactive launch is not verified ready. Investigate the local startup/audio environment before the next owner test; do not overwrite player settings or saves. Logs: ignored output/playtest-2026-09-10/review-launch.*.log.
