@@ -10,6 +10,8 @@ New expeditions use the fixed **Vanguard** kit and non-modal skill progression. 
 
 ## Current Vanguard controls
 
+The complete Vanguard icon family now uses the approved painterly MOBA direction: QWER plus D/F, 1–4, hammer and MG, all imported at 128px. New artwork is UI-only; combat animations and mechanics are unchanged. Exact new prompts and source hashes: `assets/vanguard_icons/REMAINING_PROVENANCE.md`.
+
 Interface follow-up: Painted icons are always used; QWER has a new painterly MOBA set imported at 128×128. Settings has sound (0=mute, 100%=full mix), camera-speed and in-game mouse-speed sliders; no icon-skin selector. Empty buttons no longer create blank tooltips.
 
 Camera lock **on** confines the pointer during focused gameplay and enables edge-panning as a following-camera offset. Space clears the offset; lock off releases the cursor and disables edge-panning. Hold left-click/drag on the minimap to inspect: releasing returns to the player when locked, otherwise keeps that location. Menus and Alt-Tab release the cursor. Mouse speed applies only during confined gameplay, not to the desktop or menus.

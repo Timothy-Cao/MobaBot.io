@@ -92,7 +92,7 @@ func run() -> void:
 	check(game.mute_setting and AudioServer.is_bus_mute(0),"Slider zero mutes effects and music")
 	volume.value=100
 	check(not game.mute_setting and not AudioServer.is_bus_mute(0) and is_zero_approx(AudioServer.get_bus_volume_db(0)),"Slider 100 restores full mix")
-	for slot in ["q","w","e","r"]:
+	for slot in VanguardHud.SLOT_X:
 		var texture:=PaintedIcons.texture(VanguardHud.icon(slot))
 		check(texture!=null,"Official Vanguard painted icon exists")
 		if texture!=null:

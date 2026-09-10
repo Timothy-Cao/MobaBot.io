@@ -1,5 +1,7 @@
 # Vanguard QWER icon provenance
 
+Owner subsequently approved this direction. The complete twelve-icon family now includes the eight additions documented in [REMAINING_PROVENANCE.md](REMAINING_PROVENANCE.md); QWER source images remain unchanged.
+
 9 September 2026. Generated with the built-in image-generation tool, one original image per ability. No third-party game artwork used as input. LoL/Dota were requested as broad painterly ability-icon references, not copied assets. These are AI-generated images, not claims of human authorship.
 
 Official current Vanguard icons; existing Painted icons remain for other abilities/equipment. The previous artwork remains archived in assets/painted, not exposed as a skin selection. Full-resolution opaque square source PNGs are retained for future replacement; Godot imports each at **128×128 with mipmaps**. No world animation change.

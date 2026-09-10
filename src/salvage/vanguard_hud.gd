@@ -9,9 +9,7 @@ static func slot_rect(slot: String) -> Rect2:
 	return Rect2(SLOT_X[slot],470 if core else 476,width,width)
 
 static func icon(slot: String) -> String:
-	if slot in ["q","w","e","r"]: return "vanguard_"+slot
-	if slot=="hammer": return "hammer"
-	return {"gun":"bolt","p1":"orbit","e":"thrust","r":"nuke","x1":"pulse_sentry","x2":"medic_sentry","x3":"converter"}.get(slot,Vanguard.TOOLS.get(slot,"bolt"))
+	return "vanguard_"+slot
 
 static func detail(run, slot: String) -> String:
 	if slot=="hammer": return "Hammer · Rank %d\n%.0f head damage · %.0f reach\n5: wider sweep. 10: swing while moving."%[Vanguard.hammer_rank(run),run.attacks.damage(run),run.attacks.attack_range(run)]
@@ -58,6 +56,10 @@ static func draw(ui, run) -> void:
 			ui._label(tile,str(Vanguard.rank_of(run,slot)),Rect2(width-17,width-16,15,15),10,ui.GOLD,true)
 			ui.ability_labels[slot]=ui._label(tile,"",Rect2(0,width*0.38,width,20),12,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
 			if slot in ["q","w","e"]: ui.ability_recharge[slot]=ui._label(tile,"",Rect2(4,width-16,30,14),9,ui.GOLD,true)
+			for child in tile.get_children():
+				if child is Label:
+					child.add_theme_color_override("font_outline_color",ui.INK)
+					child.add_theme_constant_override("outline_size",3)
 			if slot in Vanguard.candidates(run,kind) and kind!="":
 				var button: Button=ui._button("+",Rect2(x,y-20,width,16),func(): Vanguard.spend(run,slot),true)
 				button.reparent(ui.ability_bar,false)

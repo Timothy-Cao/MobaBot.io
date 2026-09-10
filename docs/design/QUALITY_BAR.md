@@ -157,6 +157,8 @@ Do not expand menus to display this scorecard. Do not build a telemetry service,
 
 ## Owner review
 
+9 September 2026: owner says the generated QWER icons are much better and selects this painterly Dota/LoL-inspired direction for the rest of Vanguard. This is positive art-direction feedback, not a numeric score for combat motion or the whole game. Eight additional UI paintings extend the approved style; their individual recognition/preference remains pending. Retain prior numeric ratings.
+
 For each aspect, fill **Yours /10** and give one concrete example. A brief play session can answer:
 
 - Which action felt best? Which felt weak or unclear?

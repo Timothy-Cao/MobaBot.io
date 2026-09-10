@@ -60,7 +60,7 @@ func review() -> void:
 	var showcase: bool="--showcase" in OS.get_cmdline_user_args()
 	var vanguard_showcase: bool="--vanguard-showcase" in OS.get_cmdline_user_args()
 	var rendered: bool=DisplayServer.get_name()!="headless"
-	for slot in ["q","w","e","r"]:
+	for slot in VanguardHud.SLOT_X:
 		var texture:=PaintedIcons.texture(VanguardHud.icon(slot))
 		check(texture!=null and texture.get_width()==128 and texture.get_height()==128,"Vanguard icon runtime budget")
 	for arg in OS.get_cmdline_user_args():
@@ -143,11 +143,12 @@ func vanguard_icon_sheet() -> void:
 	DirAccess.make_dir_recursive_absolute(folder)
 	art.hide(); title.text="Vanguard · 54 / 40 / 32 px"
 	var icons: Array=[]
-	for i in range(4):
+	var slots: Array=["q","w","e","r","d","f","p1","x1","x2","x3","hammer","gun"]
+	for i in range(slots.size()):
 		for j in range(3):
 			var icon=load("res://src/salvage/ability_icon.gd").new()
-			icon.ability=VanguardHud.icon(["q","w","e","r"][i])
-			icon.position=Vector2(35+i*225+j*66,110)
+			icon.ability=VanguardHud.icon(slots[i])
+			icon.position=Vector2(35+(i%4)*225+j*66,110+(i/4)*130)
 			icon.size=Vector2.ONE*[54,40,32][j]
 			root.add_child(icon); icons.append(icon)
 	for reduced in [false,true]:
