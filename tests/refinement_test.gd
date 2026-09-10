@@ -70,7 +70,7 @@ func _run() -> void:
 	check(run.attacks.shots==0 and run.attacks.windup<0,"Movement cancels windup")
 	run.attacks.attack(run,enemy)
 	for i in range(90): run.step(1.0/60,Vector2.ZERO)
-	check(run.attacks.shots==1 and enemy.hp<10000,"Heavy basic fired and hit")
+	check(run.attacks.shots==1 and run.damage_dealt.get("basic",0)>0 and enemy.hp==10000,"Heavy basic fired and registered on immortal dummy")
 	check(is_equal_approx(run.attacks.auto_damage(run)/run.attacks.auto_interval(run),7.5),"MG 20% nerf")
 	check(is_equal_approx(run.attacks.damage(run)/run.attacks.interval(run),14.0625),"Basic theoretical DPS")
 	check(run.attacks.attack_range(run)==run.attacks.auto_range(run)*2,"Double base range")

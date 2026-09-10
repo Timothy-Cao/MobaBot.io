@@ -14,6 +14,8 @@ Start with gun/Q/D/F. Level and chest rewards queue alternating **upgrade / lear
 
 Practice uses a collapsible left dock. Choose a kit rank or individual rank, set player modifiers, and place enemy Point/Line/Ring/Cluster formations with a paused preview. Left click commits; Shift repeats; right click/Esc cancels. Tab resumes/configures. The Legacy laboratory preserves the older fitting tool. Practice grants no loot and cannot write campaign progress.
 
+Practice → Enemies → Target dummy provides an immortal target with per-target burst damage/DPS. Three seconds without damage resets its readout. DPS uses first-to-latest-hit simulation time, excluding the idle grace; one instantaneous hit shows no DPS. Session → Damage numbers toggles floating hit values (on by default); Reset measurement clears meters. Automatic gun hits count, so leave its range to end a burst.
+
 The sections below retain 0.17 compatibility details; where controls/skills/progression differ, this section and QA_18 take precedence. Equipment, route and save locations are unchanged.
 
 [Next development brief](docs/design/NEXT_SESSION_BRIEF_17.md) · [Documentation index](docs/README.md) · [Current changes and audit](docs/design/QA_17.md) · [Visual ability review](docs/review/abilities.html) · [Prior damage study](docs/design/BALANCE_16.md) · [Quality bar](docs/design/QUALITY_BAR.md) · [Art schema](docs/design/ART_STYLE_SCHEMA.md)

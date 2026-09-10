@@ -114,21 +114,24 @@ func _ready() -> void:
 	hud = Control.new()
 	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(hud)
-	_surface(hud, Rect2(0, 0, 960, 72), Color("14242cef"), 0, INK, 0)
-	time_label = _label(hud, "01:30", Rect2(414, 6, 132, 35), 26, CREAM, true, HORIZONTAL_ALIGNMENT_CENTER)
-	stat_label = _label(hud, "", Rect2(640, 16, 293, 24), 14, CREAM, true, HORIZONTAL_ALIGNMENT_RIGHT)
-	_label(hud, "HULL", Rect2(24, 8, 55, 14), 9, MUTED, true)
-	health_bar = _bar(hud, Rect2(85, 12, 225, 8), TEAL, 5)
-	energy_bar = _bar(hud, Rect2(85, 30, 225, 6), Color("6abbeb"), 100)
-	energy_label = _label(hud, "ENERGY", Rect2(24, 25, 60, 14), 9, Color("8bccef"), true)
-	stage_label = _label(hud, "", Rect2(400, 40, 160, 16), 9, MUTED, true, HORIZONTAL_ALIGNMENT_CENTER)
+	# Small independent readouts leave the arena visible between them.
+	_surface(hud, Rect2(12, 10, 265, 53), Color("14242cce"), 0, INK, 0)
+	_surface(hud, Rect2(396, 8, 168, 48), Color("14242cc9"), 0, INK, 0)
+	_surface(hud, Rect2(802, 12, 146, 31), Color("14242cce"), 0, INK, 0)
+	time_label = _label(hud, "01:30", Rect2(410, 8, 140, 28), 21, CREAM, true, HORIZONTAL_ALIGNMENT_CENTER)
+	stat_label = _label(hud, "", Rect2(808, 15, 130, 22), 12, CREAM, true, HORIZONTAL_ALIGNMENT_RIGHT)
+	_label(hud, "HULL", Rect2(22, 15, 50, 13), 9, MUTED, true)
+	health_bar = _bar(hud, Rect2(75, 18, 188, 7), TEAL, 5)
+	energy_bar = _bar(hud, Rect2(75, 35, 188, 5), Color("6abbeb"), 100)
+	energy_label = _label(hud, "ENERGY", Rect2(22, 30, 50, 13), 9, Color("8bccef"), true)
+	stage_label = _label(hud, "", Rect2(400, 35, 160, 16), 9, MUTED, true, HORIZONTAL_ALIGNMENT_CENTER)
 	mission_rail = preload("res://src/salvage/mission_rail.gd").new()
 	mission_rail.position = Vector2(428, 58)
 	mission_rail.size = Vector2(104, 10)
 	mission_rail.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(mission_rail)
-	xp_bar = _bar(hud, Rect2(85, 46, 225, 4), GOLD, 1)
-	_label(hud, "XP", Rect2(24, 41, 55, 14), 9, GOLD, true)
+	xp_bar = _bar(hud, Rect2(75, 50, 188, 3), GOLD, 1)
+	_label(hud, "XP", Rect2(22, 44, 50, 13), 9, GOLD, true)
 	load_label = _label(hud, "", Rect2(24, 34, 340, 18), 11, MUTED)
 	help_label = _label(hud, "Wheel Zoom / S Stop / Shift + ability Aim / Hold Tab Inspect / Esc Settings", Rect2(250, 514, 678, 19), 10, CREAM, false, HORIZONTAL_ALIGNMENT_RIGHT)
 	help_label.visible = false
@@ -141,8 +144,8 @@ func _ready() -> void:
 	hud.add_child(ability_bar)
 	notice = _label(hud, "", Rect2(250, 85, 460, 30), 17, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
 	mini_map = load("res://src/salvage/mini_map.gd").new()
-	mini_map.position = Vector2(24, 399)
-	mini_map.size = Vector2(131, 94)
+	mini_map.position = Vector2(18, 439)
+	mini_map.size = Vector2(112, 80)
 	mini_map.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(mini_map)
 	threat_compass = load("res://src/salvage/threat_compass.gd").new()
@@ -446,7 +449,7 @@ func update_hud(model: SalvageRun) -> void:
 		energy_bar.tooltip_text = "%d / %d energy" % [model.kit.energy, model.kit.energy_max()]
 	stat_label.text = "Power %d   ◇ %d" % [model.level, model.mastery.available(model.level)]
 	stat_label.mouse_filter = Control.MOUSE_FILTER_STOP
-	stat_label.tooltip_text = "Hold Tab to spend mastery points. One per Power level."
+	stat_label.tooltip_text = "Tab: Build and mastery. ◇ Available points."
 	consumable_label.text = "5  +  x%d\n\n6  E  x%d" % [model.consumables[0], model.consumables[1]]
 	health_bar.max_value = model.max_health()
 	health_bar.value = model.health

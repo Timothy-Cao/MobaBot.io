@@ -134,6 +134,10 @@ func ui_checks() -> void:
 		game.model.hit_enemy(dummy,38,"q"); game.model.practice_meter.tick(1); game.model.hit_enemy(dummy,76,"w")
 		await process_frame; await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://output/vanguard/dummy.png")
+		game.art.reduced_effects=true
+		await process_frame; await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png("res://output/vanguard/dummy-reduced.png")
+		game.art.reduced_effects=false
 		game.model.enemies.clear(); game.model.practice_meter.clear()
 		game.open_practice(); game.practice_page="Enemies"; PracticeSandbox.draw(game)
 		await process_frame; await RenderingServer.frame_post_draw

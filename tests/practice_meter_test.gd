@@ -25,8 +25,16 @@ func _initialize() -> void:
 	run.hit_enemy(normal,99,"q")
 	check(not meter.targets.has(normal.id) and normal.dead,"Real enemy behavior unchanged")
 	meter.clear(); check(meter.targets.is_empty() and meter.hits.is_empty(),"Manual reset")
+	run.hit_enemy(dummy,20,"q"); run.state="paused"
+	run.step(4,Vector2.ZERO)
+	check(meter.targets.has(dummy.id),"Paused configuration does not expire burst")
+	run.state="running"; meter.tick(2)
+	run.spawn_enemy(Vector2(850,300),3); var second: Dictionary=run.enemies.back(); second["dummy"]=true
+	run.hit_enemy(second,50,"w"); meter.tick(1.1)
+	check(not meter.targets.has(dummy.id) and meter.targets[second.id].total==50,"Targets reset independently")
+	meter.clear()
 	run.exp.practice=false; run.spawn_enemy(Vector2(900,300),3)
 	run.hit_enemy(run.enemies.back(),1,"q")
 	check(meter.targets.is_empty() and meter.hits.is_empty(),"No campaign measurement")
-	print("Practice meter: 10 checks; failures: ",failures)
+	print("Practice meter: 12 checks; failures: ",failures)
 	quit(1 if failures else 0)

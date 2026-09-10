@@ -4,6 +4,8 @@ Version 1 · 8 September 2026 · baseline: 0.15. This is an editable review cont
 
 ## North star
 
+9 September 2026, post-Vanguard owner feedback: current presentation feels mobile-like. Follow-up direction is a restrained PC-first HUD refinement, not a wholesale art replacement. The owner also requests optional Practice hit numbers and per-dummy burst/DPS with a three-second no-hit reset. Technical verification is separate from whether these changes feel clearer; all existing numeric ratings remain unchanged pending playtesting.
+
 ### 0.18 integrated rewrite · 9 September 2026
 
 Owner authorized a larger integrated build before the next review. Implemented Vanguard's fixed kit, non-modal learn/upgrade queue and isolated dock/placement Practice workflow. Verification is recorded in QA_18 separately from human experience. **All historical numeric ratings below remain unchanged.** No new human review or listening session has occurred. The highest-priority questions are hammer exposure versus reward, D's held lockout, blink corner outcomes, noticing pending upgrades without distraction, and learning modules without a modal explanation. Current native effects establish timing and geometry but are not an artist-polished animation pack; Practice obstacles remain deliberately greybox. Marshal/Racer/economy work cannot inflate the delivered scope.

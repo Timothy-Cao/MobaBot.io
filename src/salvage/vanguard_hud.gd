@@ -21,15 +21,16 @@ static func draw(ui, run) -> void:
 		ui.bar_signature=signature
 		for child in ui.ability_bar.get_children(): ui.ability_bar.remove_child(child); child.queue_free()
 		ui.ability_labels.clear(); ui.ability_shades.clear(); ui.ability_recharge.clear()
-		ui._surface(ui.ability_bar,Rect2(178,435,744,89),Color("14242cf2"),0)
+		# Quiet lower strip, open upper edges; icons retain their established size.
+		ui._surface(ui.ability_bar,Rect2(178,476,744,54),Color("14242cd9"),0,ui.INK,0)
 		var kind:=Vanguard.reward_kind(run)
-		ui._label(ui.ability_bar,("LEARN" if kind=="learn" else "UPGRADE")+" · %d"%run.kit.loadout.rewards18.size() if kind!="" else "MODIFIED TEST" if modified else "VANGUARD",Rect2(185,418,400,17),11,ui.GOLD,true)
+		ui._label(ui.ability_bar,("LEARN" if kind=="learn" else "UPGRADE")+" · %d"%run.kit.loadout.rewards18.size() if kind!="" else "MODIFIED TEST" if modified else "",Rect2(185,440,220,17),11,ui.GOLD,true)
 		for i in range(slots.size()):
 			var slot: String=slots[i]
 			var core: bool=slot in ["q","w","e","r"]
 			var x: float=[188,233,278,323,368,429,499,569,639,744,799][i]
 			var width: float=62 if core else 39
-			var y: float=450 if core else 465
+			var y: float=459 if core else 479
 			var tile=ui._surface(ui.ability_bar,Rect2(x,y,width,width),ui.PANEL,0,ui.EDGE)
 			tile.mouse_filter=Control.MOUSE_FILTER_STOP; tile.tooltip_text=detail(run,slot)
 			ui._ability_icon(tile,icon(slot),Rect2(2,2,width-4,width-4))
@@ -48,11 +49,10 @@ static func draw(ui, run) -> void:
 					button.add_theme_stylebox_override(state,style)
 				button.custom_minimum_size=Vector2.ZERO; button.size=Vector2(20,20)
 				button.tooltip_text=("Learn " if kind=="learn" else "Upgrade ")+ ("machine gun" if slot=="gun" else OS.get_keycode_string(Vanguard.KEYS[slot])) + (" · Ctrl + key" if slot!="gun" else "")
-		ui._label(ui.ability_bar,"MODULES",Rect2(231,437,180,15),9,ui.MUTED,true)
-		ui._label(ui.ability_bar,"CORE",Rect2(429,437,100,15),9,ui.MUTED,true)
-		ui._label(ui.ability_bar,"MOBILITY",Rect2(744,437,120,15),9,ui.MUTED,true)
+		ui._label(ui.ability_bar,"MODULES",Rect2(231,454,180,15),9,ui.MUTED,true)
+		ui._label(ui.ability_bar,"MOBILITY",Rect2(744,454,120,15),9,ui.MUTED,true)
 		for i in range(2):
-			var item: Button=ui._button(str(5+i),Rect2(867,456+i*27,33,23),func(): run.use_consumable(i),false)
+			var item: Button=ui._button(str(5+i),Rect2(867,469+i*27,33,23),func(): run.use_consumable(i),false)
 			item.reparent(ui.ability_bar,false); item.add_theme_font_size_override("font_size",11)
 			item.tooltip_text="Repair hull" if i==0 else "Restore energy"
 	for slot in slots:
