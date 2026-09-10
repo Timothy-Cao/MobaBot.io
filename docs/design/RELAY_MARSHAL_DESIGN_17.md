@@ -4,6 +4,8 @@ Status: **organized owner direction plus assistant research for later implementa
 
 Date: 9 September 2026.
 
+Routing: this is the focused specification for Phase 4 in [`NEXT_SESSION_BRIEF_17.md`](NEXT_SESSION_BRIEF_17.md). Build only the one-relay slice first.
+
 ## Names
 
 The owner chose **Marshal** for this summon kit.

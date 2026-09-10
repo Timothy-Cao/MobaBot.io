@@ -2,6 +2,8 @@
 
 Status: **design research and recommendations for future prototyping; not implemented behavior.** This document evaluates the 49-ability catalog as it exists on 9 September 2026. It treats the owner's comments on abilities 1–11 as constraints and concentrates on the still-unreviewed abilities 12–49. “Promising” means the design has a clear reason to prototype; it does not mean the ability has passed a human feel test.
 
+Routing: this is supporting research, not the next-session entry point. Start with [`NEXT_SESSION_BRIEF_17.md`](NEXT_SESSION_BRIEF_17.md); use this file when revisiting the old/unreleased roster or the taxonomy behind a focused class decision.
+
 The current implementation remains defined by [`QA_17.md`](QA_17.md), the [root README](../../README.md) and the [ability catalog](../review/abilities.html). The owner's exact notes remain preserved in [`ABILITY_FEEDBACK_17.md`](ABILITY_FEEDBACK_17.md).
 
 **Subsequent owner direction:** later notes supersede this document's initial default 1–4 recommendation. The locked Vanguard defaults are orbiting tools on 1, an aggressive aggro-drawing summon on 2, a stored-healing totem on 3 and a short-lived cooldown/energy totem on 4. Paired zap geometry moved exclusively to Marshal. Keep the analysis below as research history and as input to later alternatives; do not mistake its Pulse-anchor/four-toggle recommendation for the latest owner decision.

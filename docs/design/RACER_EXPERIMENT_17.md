@@ -2,6 +2,8 @@
 
 Status: **owner-approved direction for deep exploration, not a locked final kit and not implemented.** Racer is deliberately more experimental than Vanguard or Marshal. Prove its movement with a small prototype before building a complete ability/module row.
 
+Routing: this is the experimental Phase 5 brief in [`NEXT_SESSION_BRIEF_17.md`](NEXT_SESSION_BRIEF_17.md). Its stop gates are requirements, not optional polish.
+
 ## Core promise
 
 **Racer is a two-speed route fighter:** stable and precise in Cruise, then briefly explosive in Overdrive. The player wins by drawing a good path past danger, correcting it at the right moment and converting that route into damage—not by holding permanent bonus movement speed.
@@ -143,4 +145,3 @@ Do not add all four until the class works without them.
 - Did Q's return make your movement matter?
 - Were you still making useful decisions during Cruise?
 - Would you choose another Overdrive because the route itself was enjoyable?
-

@@ -2,6 +2,8 @@
 
 Status: **owner direction for future research, design and playtesting; not implemented behavior.** `QA_17.md` continues to describe the current terrain until a later implementation is reviewed and verified.
 
+Routing: the small Practice greybox belongs to Phase 1; broader campaign terrain experiments wait for Phase 6 in [`NEXT_SESSION_BRIEF_17.md`](NEXT_SESSION_BRIEF_17.md).
+
 ## Current concern
 
 The owner does not like the present terrain. The obstacles read as basic walls without enough substance, thickness or environmental presence. A map made from thin wall segments is not the desired long-term look, even if collision and routing work correctly.

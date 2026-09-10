@@ -4,6 +4,8 @@ Status: **owner direction plus assistant proposals for later review; no implemen
 
 Date: 9 September 2026.
 
+Routing: use [`NEXT_SESSION_BRIEF_17.md`](NEXT_SESSION_BRIEF_17.md) for current priorities, [`RELAY_MARSHAL_DESIGN_17.md`](RELAY_MARSHAL_DESIGN_17.md) for Marshal and [`RACER_EXPERIMENT_17.md`](RACER_EXPERIMENT_17.md) for Racer. This file preserves brainstorm history, including superseded and parked concepts.
+
 **Later owner focus:** park the Circuit Weaver/combo proposal without deleting it. It is not ready for approval or implementation. Focus current kit design on the summon character, now named **Marshal** and refined in [`RELAY_MARSHAL_DESIGN_17.md`](RELAY_MARSHAL_DESIGN_17.md). That focused document supersedes the initial Relay Architect sketch below.
 
 **Latest owner focus:** approve **Vanguard** as the default name, move paired zap geometry exclusively to Marshal, and replace Vanguard slot 4 with a short cooldown/energy power totem. Explore only one additional class for now. The owner accepts deeper experimental work on **Racer**, with movement feel proven before a dense identity system. [`RACER_EXPERIMENT_17.md`](RACER_EXPERIMENT_17.md) supersedes this document's smaller sketch where details differ.
@@ -58,7 +60,7 @@ Every fixed input should reinforce that sentence. A mechanically strong ability 
 
 The focused [`RELAY_MARSHAL_DESIGN_17.md`](RELAY_MARSHAL_DESIGN_17.md) proposal supersedes this first sketch. It remains below as brainstorm history, not a competing current specification.
 
-### Core promise
+### Relay Architect core promise
 
 Build a temporary combat network. Summons turn one player input into attacks from several positions; swapping makes the network both weapon and escape route. Losing or badly placing the network is the kit's weakness.
 
@@ -74,7 +76,7 @@ The owner's BTD6-style shared vision idea needs translation because the current 
 - Several relays improve coverage and angles more than raw single-target multiplication. Same-target echo hits need diminishing value or a shared cap.
 - Natural expiry produces a small, predictable shutdown burst. A deliberate ultimate can convert remaining relays into stronger detonations, so self-destruction is a decision rather than free background damage.
 
-### Proposed fixed loadout
+### Relay Architect proposed fixed loadout
 
 | Input/system | Proposal | Synergy purpose |
 | --- | --- | --- |
@@ -91,14 +93,14 @@ The owner's BTD6-style shared vision idea needs translation because the current 
 | 3 | Ward relay | Weak protection/repair around itself; trades damage for a safer swap destination |
 | 4 | Breach relay | Shorter-lived armored relay with the strongest shutdown/detonation effect |
 
-### Why this version could feel good
+### Why Relay Architect could feel good
 
 - A beginner gets value by deploying machines and pressing Q.
 - An expert earns more through triangle/encirclement placement, target marking, safe swap routes and detonation order.
 - Relays create a changing map inside the map. Moving the player changes aim; moving through the network changes survival options.
 - The kit has a real failure state: expired or destroyed relays reduce both offense and mobility until rebuilt.
 
-### Main risks to prototype
+### Relay Architect prototype risks
 
 - Four simultaneous relays plus mirrored casts could overwhelm effects, performance and damage scaling.
 - Recast-to-swap must never accidentally replace a relay or spend a new deployment.
@@ -108,7 +110,7 @@ The owner's BTD6-style shared vision idea needs translation because the current 
 
 ## Parked concept — Circuit Weaver
 
-### Core promise
+### Circuit Weaver core promise
 
 Lay down simple attack shapes, then make unlike shapes intersect for stronger reactions. Individual casts remain usable, but deliberate geometry creates the kit's real ceiling.
 
@@ -122,7 +124,7 @@ The scalable solution is a small **reaction grammar**, not a unique rule for eve
 
 This delivers the owner's “any two abilities matter together” feeling without requiring players to memorize dozens of exceptions.
 
-### Proposed fixed loadout
+### Circuit Weaver proposed fixed loadout
 
 | Input/system | Proposal | Synergy purpose |
 | --- | --- | --- |
@@ -139,14 +141,14 @@ This delivers the owner's “any two abilities matter together” feeling withou
 | 3 | Capacitor | Stores one otherwise-wasted primed reaction for a short time; one visible charge only |
 | 4 | Prism lens | Powered mode that improves reaction coverage at an energy cost, not base single-target damage |
 
-### Why this version could feel good
+### Why Circuit Weaver could feel good
 
 - The player can understand three shapes before learning three pair outcomes.
 - The same cast has different value depending on its angle and timing, creating expression without demanding faster button presses.
 - R becomes a frequent punctuation mark for combo planning rather than a disconnected giant nuke.
 - Missed intersections still produce modest standalone effects, preventing total dead inputs while keeping a meaningful ceiling.
 
-### Main risks to prototype
+### Circuit Weaver prototype risks
 
 - Reaction feedback can become unreadable in a crowd. Preview the reaction at the intersection before detonation and keep colors secondary to shape.
 - If standalone abilities are too weak, learning feels punitive; if too strong, geometry becomes decorative. Compare isolated, accidental and deliberate use separately.
@@ -194,7 +196,7 @@ Do not specify all four modules yet. First test movement, camera comfort, near-p
 
 The table below is retained as brainstorm history. Racer intentionally starts with a smaller fun-first slice and does not inherit every resource, module or ability here unless testing earns it.
 
-### Core promise
+### Redline Runner core promise
 
 Alternate between a stable setup/recovery phase and a short high-speed release. The normal state banks power and aims precisely; the fast state turns route choice and near-passes into damage. Neither state should feel like waiting for the other.
 
@@ -206,7 +208,7 @@ Alternate between a stable setup/recovery phase and a short high-speed release. 
 - Distance lays trail segments at fixed spacing. Moving faster makes a longer trail, not denser overlapping patches.
 - The recovery phase restores better aiming, energy generation and access to stored-momentum payoffs. It is a combat mode, not a cooldown penalty box.
 
-### Proposed fixed loadout
+### Redline Runner proposed fixed loadout
 
 | Input/system | Proposal | Normal-state value / Overdrive value |
 | --- | --- | --- |
@@ -223,14 +225,14 @@ Alternate between a stable setup/recovery phase and a short high-speed release. 
 | 3 | Kinetic capacitor | Converts a capped portion of banked momentum into a shield when Overdrive ends |
 | 4 | Induction magnet | Pickups modestly help refill the bank; hard caps prevent infinite orb loops or runaway AFK scaling |
 
-### Why this version could feel good
+### Why Redline Runner could feel good
 
 - Speed is both offense and a steering challenge rather than a permanent stat advantage.
 - The high-speed route creates value that pays off after it ends: W spends banked distance, the capacitor protects recovery and Ghost lap keeps attacking.
 - Normal mode still has a dependable basic/Q, better precision, a defensive E and the kit's largest aimed cash-out.
 - Wave clear favors long curved routes and trails; bosses favor controlled near-passes followed by a Kinetic lance. The same identity serves different encounters.
 
-### Main risks to prototype
+### Redline Runner prototype risks
 
 - High speed can break camera readability, obstacle routing and enemy telegraphs. Start in a simple arena and never compensate with blanket invulnerability.
 - Movement-speed multipliers need a hard total cap across gear, mastery and the kit.
@@ -249,11 +251,10 @@ Do not build all three at once.
 
 For each slice, compare beginner value, expert ceiling, damage taken, energy pressure, invalid actions and whether the player can explain the kit's win sentence. Automated probes can verify caps and geometry; only human play can decide whether maintaining relays, constructing intersections or alternating speed states is enjoyable.
 
-## Decisions for the owner after a first skim
+## Remaining decisions after the latest owner pass
 
 - Should all kits share the permanent autonomous gun, or may a kit replace it with a different permanent passive weapon?
 - For Marshal, should 1–3 remain distinct relays with slot 4 as a network command?
 - Should mirrored casts copy the player's aim direction or converge on the marked target?
-- Is **Racer** the right third direction, or should the third class explore a different gameplay element?
-- During Racer Overdrive, should all active abilities remain usable, or should only Q/E transform while steering takes priority?
-- Does Racer need a formal momentum resource, or is a fixed D window more immediately fun?
+- During Racer Overdrive, should W/R remain usable, or should the first prototype limit inputs to movement, Q and E while steering takes priority?
+- After the movement slice, does Racer earn continued development? The first prototype intentionally uses a fixed D window and no formal momentum resource.

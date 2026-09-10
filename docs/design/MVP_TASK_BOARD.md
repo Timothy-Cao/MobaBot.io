@@ -2,7 +2,7 @@
 
 > **Historical task board through v0.9.** For current scope and verification priorities, see [QA_17.md](QA_17.md), [QUALITY_BAR.md](QUALITY_BAR.md) and the [documentation index](../README.md).
 
-Scope: Stage 1, Levels 1–3 only. Owner: the current game-development task. Authority: user-approved Survivor.io × League direction. Updated September 8, 2026.
+Historical scope: Stage 1, Levels 1–3 only. Owner: the v0.9 game-development task. Authority at that time: user-approved Survivor.io × League direction. Updated September 8, 2026.
 
 ## Done in this iteration
 

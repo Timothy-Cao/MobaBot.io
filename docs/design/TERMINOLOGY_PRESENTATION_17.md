@@ -2,6 +2,8 @@
 
 Status: **working language and visual-direction guide, 9 September 2026; future-facing where it describes static kits.** Use these terms consistently in new owner notes, UI and implementation. Existing code identifiers and historical documents do not need a risky bulk rename.
 
+Routing: apply this guide across the phases in [`NEXT_SESSION_BRIEF_17.md`](NEXT_SESSION_BRIEF_17.md); it is not a request for a standalone bulk-renaming pass.
+
 ## Player-facing terminology
 
 | Term | Meaning | Examples / boundary |
@@ -79,4 +81,3 @@ These are starting briefs for Astra/animation exploration, not final art approva
 ## Future consumable language
 
 The owner has floated `C` for simple consumables such as hull repair or energy regeneration. Keep this parked. Before implementation, decide whether `C` uses the selected quick item, opens a compact selector, or uses tap/hold for both. Call the category **Consumables**, use concrete item names, display remaining count, and never hide a real-money or permanent-currency spend behind an immediate combat key.
-

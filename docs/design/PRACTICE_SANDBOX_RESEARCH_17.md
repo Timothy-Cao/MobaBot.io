@@ -2,6 +2,8 @@
 
 Status: **owner-requested research and implementation notes, 9 September 2026. Nothing in this document is implemented merely because it is proposed here.** The current behavior remains the contract in [`QA_17.md`](QA_17.md) until a later implementation is verified.
 
+Routing: this is Phase 1 in [`NEXT_SESSION_BRIEF_17.md`](NEXT_SESSION_BRIEF_17.md) and the first intended implementation workstream.
+
 ## Owner direction
 
 The Practice tool needs a cleanup pass focused on quickly testing builds and combat interactions. The owner wants:

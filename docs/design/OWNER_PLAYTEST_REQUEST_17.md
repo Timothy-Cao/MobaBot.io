@@ -2,6 +2,8 @@
 
 Status: **organized handoff for the next development session; no item in this document is implemented merely because it appears here.** Pull the latest `main`, read the linked source notes, implement coherent prototypes in small milestones, run relevant automated checks, and keep owner experience separate from technical verification.
 
+For the concise precedence, latest-decision summary and staged work order, start with [`NEXT_SESSION_BRIEF_17.md`](NEXT_SESSION_BRIEF_17.md). This document is the fuller dated record to consult for implementation detail.
+
 This document consolidates the owner's 9 September 2026 directions. It is a working request, not a replacement for the full detail in:
 
 - [`ABILITY_FEEDBACK_17.md`](ABILITY_FEEDBACK_17.md)
@@ -278,18 +280,21 @@ The research explicitly advises against importing Swarm's champion classes, exac
 
 ## Implementation sequence
 
+[`NEXT_SESSION_BRIEF_17.md`](NEXT_SESSION_BRIEF_17.md) owns the concise current order. The expanded table here matches it; stop for the named owner test rather than completing every row in one development pass.
+
 | Pass | Scope | Do not combine yet |
 | --- | --- | --- |
-| 0 | Practice left dock, mouse placement and simple test greybox as specified in the separate research note | Campaign terrain, balance or save-format changes |
-| 1 | Permanent gun, hammer, Q/W and body-slam E in isolated Practice | Terrain overhaul, new progression, all four modules |
-| 2 | Ghost drive restriction/effects and Phase hop blink rules/effects | XP increase |
-| 3 | Each 1–4 module alone, then combined with explicit caps | Stashed skill reintroduction |
-| 4 | Non-modal alternating learn/upgrade interaction | Faster XP until usability passes |
-| 5 | Three terrain greyboxes and one-landmark variants | Finished environment art |
-| 6 | Rank milestones, wave grammar and selected synergies | Broad catalog expansion |
-| 7 | Focused owner playtest, tune, then decide what returns | Deletion of old content |
-| 8 | Approve Robot AI eligibility/economy policy, then prototype the selected visible AI in isolated Practice with no rewards | Permanent rewards or offline boxes before takeover/failure transactions are proven |
-| 9 | Validate capped offline accrual with one currency in disposable fixtures, then one existing box track | Charms, decorative loot and consumables before their systems are separately designed |
+| 0 | Pull, read, run current baseline checks and plan Practice only | Gameplay/save/balance changes |
+| 1A | Practice dock, reset/clear and small test greybox | Campaign terrain or progression |
+| 1B | Class-first loadouts and mouse enemy placement | Normal access to prototype/legacy content |
+| 2A | Permanent gun, hammer, Q/W and body-slam E in isolated Practice, then owner test | R/D/F and all modules |
+| 2B | Ghost drive and Phase hop rules/effects, then owner test | XP increase |
+| 2C | R and each 1–4 module individually, then combined Vanguard test | Stashed skill reintroduction |
+| 3 | Non-modal fixed-kit learn/upgrade interaction, then owner test | Faster XP until usability passes |
+| 4 | Marshal one-relay/Command Fire/Q/reposition/transfer slice | Full network before the core is fun/readable |
+| 5 | Racer movement/side-band/Handbrake experiment | Full abilities/modules before the movement stop gate |
+| 6 | Campaign terrain greyboxes, wave grammar and selected synergies | Finished environment art or broad catalog expansion |
+| 7 | Robot AI eligibility/economy decision, no-reward visible prototype, then isolated offline fixture | Permanent rewards, charms, decorative loot or consumables |
 
 Commit coherent verified milestones. Preserve saves, user music, migration fixtures and old skill data. Practice and automated tests must never award permanent loot.
 

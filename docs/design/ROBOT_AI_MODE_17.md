@@ -2,6 +2,8 @@
 
 Status: **owner direction plus implementation guardrails, 9 September 2026; not implemented.** Exact reward tables, eligibility, failure handling and UI still require research and owner review.
 
+Routing: this is later Phase 7 in [`NEXT_SESSION_BRIEF_17.md`](NEXT_SESSION_BRIEF_17.md), after the core classes and playtesting foundation. Do not pull it into the first implementation milestone.
+
 ## Owner decisions
 
 MobaBot may support two separate low-input systems:
@@ -120,4 +122,3 @@ Do not add all future reward categories merely to make the first screen look ful
 - May visible AI farm the highest manually cleared level?
 - Should offline loot use expected value with fractional box progress, or roll discrete boxes only at claim time?
 - Is a 48-hour cap communicated clearly enough that missing a claim never feels punitive?
-

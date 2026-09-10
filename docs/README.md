@@ -5,23 +5,29 @@ The current playable version is **0.17 Field Test**. `QA_17.md` supersedes earli
 ## Start here
 
 - [Project README](../README.md) — setup, controls, game scope, progression, saves and verification commands.
+- [Next session brief](design/NEXT_SESSION_BRIEF_17.md) — **first read for new work:** latest decisions, current-versus-target distinctions, precedence, phased work order, stop gates and task routing.
 - [0.17 QA and handoff](design/QA_17.md) — authoritative current behavior, measurements, verification evidence and open limits.
 - [Quality bar](design/QUALITY_BAR.md) — editable acceptance contract, dated owner feedback and human-review gates.
 - [Ability review](review/abilities.html) — interactive catalog for the 49 current ability icons.
 
-## Active owner direction
+The shortest safe instruction for another session is: **“Pull `main`, read `docs/design/NEXT_SESSION_BRIEF_17.md`, and begin Phase 0.”**
 
-- [Owner implementation and playtest request](design/OWNER_PLAYTEST_REQUEST_17.md) — consolidated pull-and-work handoff covering locked Vanguard, Marshal direction, experimental Racer, progression, controls, modules, terrain, Practice cleanup, selected visible/offline Robot AI models, a true-top-down animation bookmark and focused owner tests. Owner direction and assistant findings are labeled separately.
-- [Ability direction and owner feedback](design/ABILITY_FEEDBACK_17.md) — current owner notes for fixed slots, non-modal progression, a permanent autonomous gun, default D/F mechanics, the leading body-slam E proposal, and the proposed 1–4 row of orbiting tools plus three summon concepts. These are future design inputs, not current implemented behavior.
-- [Ability taxonomy and roster research](design/ABILITY_TAXONOMY_RESEARCH_17.md) — source-backed multi-axis taxonomy, Q/W/E/R/D/F/module slot proposal, design-purpose audit of abilities 12–49, recommended default summon and four powered toggles, and a focused Practice test plan. Recommendations are hypotheses, not implemented behavior or proven fun.
-- [Environment and terrain owner feedback](design/ENVIRONMENT_FEEDBACK_17.md) — direction away from thin basic walls toward substantial thick forms, clustered pockets, corridors and simple multi-entrance macro-shapes, with reference and greybox questions for a later terrain pass.
-- [Swarm design research](design/SWARM_DESIGN_RESEARCH_17.md) — source-backed analysis of Swarm's baseline offense, map destinations, evolutions, optional objectives, wave authoring, progression and technical constraints, translated into non-copying MobaBot hypotheses.
-- [Static-kit design brainstorm](design/KIT_DESIGN_BRAINSTORM_17.md) — records locked Vanguard, Marshal's separate summon direction, the parked combo concept and the current fun-first Racer proposal. Racer remains an assistant recommendation rather than an approved third kit.
-- [Marshal focused kit research](design/RELAY_MARSHAL_DESIGN_17.md) — current owner-revised, source-backed design for the summon character: X/3X shared targeting, separate commanded relay shots, maximum-range missiles, relay EMPs and pair pulses, three compatible robot bodies, reposition/control-transfer inputs and Overclock sacrifices. The combo-kit concept is parked.
+## Focused specifications for upcoming work
+
 - [Practice sandbox redesign research](design/PRACTICE_SANDBOX_RESEARCH_17.md) — owner-requested cleanup direction informed by League Practice Tool, BTD6 Sandbox and Warframe Simulacrum: a persistent left dock, complete build/stat controls, mouse enemy placement, a small substantial-rock greybox, measurement and strict save isolation.
+- [Vanguard and ability direction](design/ABILITY_FEEDBACK_17.md) — locked Vanguard slots, non-modal fixed-kit progression, permanent gun, hammer, D/F, body-slam E, rank milestones and current 1–4 module rules. Earlier alternatives are retained and labeled.
+- [Marshal focused kit](design/RELAY_MARSHAL_DESIGN_17.md) — current owner-revised design for X/3X shared targeting, commanded relay shots, missiles, EMPs, pair pulses, three robot bodies, reposition/transfer and Overclock sacrifices.
 - [Racer experimental kit brief](design/RACER_EXPERIMENT_17.md) — movement-first two-speed route fighter proposal, mouse-steering requirements, coherent core interactions, anti-degenerate rules, presentation direction and explicit prototype stop gates.
 - [Robot AI and offline salvage](design/ROBOT_AI_MODE_17.md) — selected visible 75%-strength/simple-pilot model and slow offline accrual capped at 48 hours/about three last-cleared-level runs, with transactional and economy guardrails.
 - [Terminology and class presentation](design/TERMINOLOGY_PRESENTATION_17.md) — consistent player-facing language, release/prototype/legacy states and starting visual/audio identities for Vanguard, Marshal and experimental Racer.
+- [Environment and terrain direction](design/ENVIRONMENT_FEEDBACK_17.md) — substantial thick forms, clustered pockets, broad corridors and simple multi-entrance greybox questions.
+
+## Detailed record and research background
+
+- [Owner implementation and playtest record](design/OWNER_PLAYTEST_REQUEST_17.md) — detailed consolidated owner directions and test scripts. Use the next-session brief for order and this file when implementation needs the fuller wording.
+- [Ability taxonomy and roster research](design/ABILITY_TAXONOMY_RESEARCH_17.md) — multi-axis taxonomy and audit of abilities 12–49. Its initial 1–4 recommendation is superseded by Vanguard's locked modules but remains useful for old alternatives.
+- [Swarm design research](design/SWARM_DESIGN_RESEARCH_17.md) — source-backed transferable principles and explicit non-copying boundaries.
+- [Static-kit brainstorm history](design/KIT_DESIGN_BRAINSTORM_17.md) — retained first Marshal sketch, parked Circuit Weaver concept and superseded Racer sketches. Focused class files win where they differ.
 
 ## Current supporting specifications
 

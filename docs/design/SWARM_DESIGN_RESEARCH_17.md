@@ -2,6 +2,8 @@
 
 Status: **source-backed design research and adaptation hypotheses; not implemented behavior.** This study examines Riot Games' 2024 mode *Swarm | Operation: Anima Squad* for transferable principles. It does not recommend copying its characters, maps, assets, recipes, encounter counts or pacing.
 
+Routing: this is supporting research only. [`NEXT_SESSION_BRIEF_17.md`](NEXT_SESSION_BRIEF_17.md) decides when a specific Swarm-derived hypothesis enters a prototype.
+
 The current MobaBot implementation remains defined by [`QA_17.md`](QA_17.md). Current owner direction is consolidated in [`OWNER_PLAYTEST_REQUEST_17.md`](OWNER_PLAYTEST_REQUEST_17.md), with detailed ability and terrain notes in [`ABILITY_FEEDBACK_17.md`](ABILITY_FEEDBACK_17.md) and [`ENVIRONMENT_FEEDBACK_17.md`](ENVIRONMENT_FEEDBACK_17.md).
 
 ## Executive conclusions

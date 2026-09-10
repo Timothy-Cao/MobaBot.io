@@ -2,6 +2,8 @@
 
 Status: **owner notes for future research, design and playtesting; not implemented behavior.** These notes were made from the text descriptions while away from the playtesting computer. Abilities 1–11 have initial feedback; abilities 12–49 remain unreviewed. Preserve the distinction between description-based expectations and hands-on experience.
 
+Routing: [`NEXT_SESSION_BRIEF_17.md`](NEXT_SESSION_BRIEF_17.md) carries the latest work order. Use this document for detailed Vanguard mechanics and the dated history of earlier ability alternatives; later-owner-direction banners and explicitly superseding sections win within this file.
+
 `QA_17.md` and the root README continue to describe the current build until a later implementation is verified.
 
 **Later owner direction:** the first/default kit is now locked and kits should remain static for the next design pass. Body slam/Piston thrust is therefore the default E for that locked composition. Cross-kit ability swapping, stored alternatives and replacement choices are deferred rather than deleted. See [`KIT_DESIGN_BRAINSTORM_17.md`](KIT_DESIGN_BRAINSTORM_17.md) and the consolidated [`OWNER_PLAYTEST_REQUEST_17.md`](OWNER_PLAYTEST_REQUEST_17.md).
