@@ -77,6 +77,7 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 	if not c.loadout.get("flexible",false): return ExpeditionGear.valid_checkpoint(c)
 	if c.get("class","")!="shared" and not BotExpedition.CLASSES.has(c.get("class","")): return false
 	if not BotKeyboard.valid_config(c.loadout): return false
+	if c.loadout.has("review19") and (c.loadout.review19!=true or not c.loadout.get("vanguard",false)): return false
 	if c.loadout.has("vanguard"):
 		if not integer(c.loadout.get("hammer_rank",1),1,10): return false
 		if not c.get("bindings") is Dictionary: return false

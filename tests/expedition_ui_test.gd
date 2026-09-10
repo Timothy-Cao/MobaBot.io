@@ -66,6 +66,8 @@ func _run() -> void:
 		game.ui.loadout_gallery_page=page; game.ui.show_loadout()
 		await capture(game,"passives-"+str(page))
 	game.launch_expedition()
+	# Historical catalog fixtures intentionally exercise legacy offer IDs.
+	game.model.kit.loadout.erase("review19")
 	for id in BotSkillCatalog.SPECS:
 		var slot: String={"active":"q","ultimate":"r","mobility":"f","speed":"d","summon":"t"}[MobaKit.ABILITIES[id].category]
 		game.model.exp.install(game.model,slot,id)

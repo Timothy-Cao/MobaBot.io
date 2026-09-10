@@ -89,6 +89,7 @@ static func camp(game) -> void:
 	if not game.collection.message.is_empty(): ui._label(ui.overlay,game.collection.message,Rect2(48,478,856,24),12,ui.CORAL)
 
 static func vanguard_camp(game) -> void:
+	if ReviewRules.enabled(game.model): ReviewView.camp(game); return
 	var ui=game.ui; var run=game.model; var exp: BotExpedition=run.exp
 	var shop:=exp.is_shop(true)
 	frame(ui,"Stage clear" if shop else "Round clear",game.show_home)
@@ -119,7 +120,9 @@ static func vanguard_camp(game) -> void:
 	if not game.collection.message.is_empty(): ui._label(ui.overlay,game.collection.message,Rect2(48,478,856,24),12,ui.CORAL)
 
 static func gear(game) -> void:
-	if game.collection is ForgeEquipment: ForgeView.draw(game); return
+	if game.collection is ForgeEquipment:
+		ForgeView.draw(game)
+		return
 	var ui=game.ui
 	var collection: ExpeditionGear=game.collection
 	frame(ui,"Equipment",game.close_gear)
@@ -185,7 +188,9 @@ static func mastery(ui,run) -> void:
 		var p:=Vector2(64+node.branch*143+(index%2)*59,177+(index/2)*72)
 		if index>=2: ui._surface(ui.overlay,Rect2(p+Vector2(25,-21),Vector2(1,21)),ui.EDGE,0,ui.EDGE,0)
 		var button: Button=ui._button("",Rect2(p,Vector2(51,51)),func() -> void:
-			run.mastery.buy(run,id); ui.show_build(run,false),false)
+			run.mastery.buy(run,id)
+			if ReviewRules.enabled(run) and run.state=="camp": ReviewView.camp(ui.host)
+			else: ui.show_build(run,false),false)
 		var icon: String={"attack":"power","damage":"rocket","haste":"rapid","range":"rail","shock":"lightning","aftershock":"pulse","speed":"tumble","cooldown":"cell","tenacity":"sprint","resistance":"shield","health":"capacity","health_regen":"repair_channel","energy":"reactor","regen":"cell","magnet":"magnet","xp":"poison","luck":"ricochet","summon_damage":"forward_sentry","duration":"mirror_sentry","capacity":"pulse_sentry"}[node.stat]
 		ui._ability_icon(button,icon,Rect2(4,3,43,43))
 		ui._label(button,"%d/%d" % [run.mastery.rank_of(id),node.max],Rect2(12,38,36,15),10,ui.GOLD,true)
@@ -195,4 +200,6 @@ static func mastery(ui,run) -> void:
 		button.mouse_entered.connect(inspect); button.focus_entered.connect(inspect)
 	if run.state=="camp":
 		ui._button("Reset points",Rect2(718,472,190,30),func() -> void:
-			run.mastery.refund(run); ui.show_build(run,false),false)
+			run.mastery.refund(run)
+			if ReviewRules.enabled(run) and run.state=="camp": ReviewView.camp(ui.host)
+			else: ui.show_build(run,false),false)

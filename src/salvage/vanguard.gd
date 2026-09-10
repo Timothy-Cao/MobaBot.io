@@ -47,6 +47,9 @@ static func slam_range(rank_value: int) -> float:
 
 func drive_blocks(run) -> bool:
 	return ghost and run.kit.effective_rank("d")<10
+var emp_left := 0.0
+var combo_left := 0.0
+var combo_swing := false
 var ghost := false
 var gun_on := true
 var gun_shots := 0
@@ -83,6 +86,7 @@ static func enabled(run) -> bool:
 
 static func setup(run, rank_value: int = 0) -> void:
 	BotKeyboard.enable(run)
+	run.kit.loadout.erase("review19"); run.kit.emp_left=0
 	var kit: MobaKit = run.kit
 	kit.loadout["vanguard"] = true
 	kit.loadout["rewards18"] = []
@@ -118,6 +122,7 @@ static func rank_of(run, slot: String) -> int:
 static func candidates(run, kind: String) -> Array:
 	var result: Array = []
 	if kind=="": return result
+	if ReviewRules.enabled(run): return ReviewRules.candidates(run)
 	var advanced:=true
 	for slot in KEYS.keys()+["gun","hammer"]:
 		if rank_of(run,slot)<5: advanced=false; break
@@ -140,6 +145,7 @@ static func earn(run) -> void:
 
 static func spend(run, slot: String) -> bool:
 	if not enabled(run) or slot not in candidates(run,reward_kind(run)) or reward_kind(run)=="": return false
+	if ReviewRules.enabled(run) and (run.state!="upgrade" or slot not in run.offers): return false
 	if slot == "hammer": run.kit.loadout.hammer_rank=rank_of(run,slot)+1
 	elif slot == "gun": run.upgrades.power += 1
 	elif slot == "p1":
@@ -160,6 +166,7 @@ static func progression(run) -> void:
 		run.level += 1
 		run.next_level += ceili((12+run.level*8)*BotExpedition.xp_factor(run.level))
 		earn(run)
+		if ReviewRules.enabled(run): earn(run); earn(run)
 		if (run.level-1)%3==0: run.grant_utility()
 		run.emit_event("equipped",run.player,{"id":"power"})
 	# Chests remain tangible world loot; opening no longer stops the fight.
@@ -167,7 +174,8 @@ static func progression(run) -> void:
 	while run.exp.pending_chests>0:
 		run.exp.pending_chests -= 1; run.exp.chests_opened += 1
 		receipt.chests+=1; receipt.credits+=20; run.exp.field_credits+=20
-		if run.kit.loadout.rewards18.size()<256 and not candidates(run,"upgrade").is_empty():
+		if ReviewRules.enabled(run): pass
+		elif run.kit.loadout.rewards18.size()<256 and not candidates(run,"upgrade").is_empty():
 			earn(run); receipt.points+=1
 		else: receipt.credits+=20; run.exp.field_credits+=20
 		if run.loot_rng.randf()<0.18:
@@ -180,11 +188,13 @@ static func progression(run) -> void:
 		run.exp.field_credits += 20*run.kit.loadout.rewards18.size(); run.kit.loadout.rewards18.clear()
 
 func clear() -> void:
+	emp_left=0; combo_left=0; combo_swing=false
 	ghost=false; pending.clear(); hammer=-1; slam_left=0; slam_bounced=false; touch_guard=0; shield=0
 	constructs.clear(); impacts.clear(); ghosts.clear()
 	hammer_cooldown=0; touch_grace=0; ghost_clock=0
 
 func powered(run) -> bool:
+	if emp_left>0: return false
 	for unit in constructs:
 		if unit.id=="recovery_totem" and run.player.distance_to(unit.pos)<=unit.radius: return true
 	return false
@@ -192,6 +202,8 @@ func powered(run) -> bool:
 func cast(run, slot: String, cursor: Vector2) -> bool:
 	var kit: MobaKit=run.kit
 	kit.last_failure="Not ready"
+	if emp_left>0 and slot in ReviewRules.MODULES+["d","f"]:
+		kit.last_failure="EMP suppressed"; run.emit_event("cast_unready",run.player); return false
 	if run.state!="running" or slot not in KEYS or not kit.unlocked(slot): return false
 	if slot=="d":
 		if ghost: return true
@@ -244,7 +256,9 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 
 func swing(run, cursor: Vector2) -> bool:
 	if run.state!="running" or drive_blocks(run) or slam_left>0 or hammer_cooldown>0 or hammer>=0 or not pending.is_empty(): return false
-	hammer=0.20; hammer_direction=(cursor-run.player).normalized()
+	combo_swing=ReviewRules.enabled(run) and combo_left>0
+	combo_left=0
+	hammer=0.12 if combo_swing else 0.20; hammer_direction=(cursor-run.player).normalized()
 	if hammer_direction==Vector2.ZERO: hammer_direction=Vector2.RIGHT
 	hammer_cooldown=run.attacks.interval(run)
 	if hammer_roots(run): run.stop_movement()
@@ -270,11 +284,13 @@ func release(run) -> void:
 	else:
 		var p: Vector2=kit.target_point(run,slot,cursor)
 		impacts.append({"kind":"strike" if slot=="w" else "reactor","pos":p,"life":0.55 if slot=="w" else 0.75,"duration":0.55 if slot=="w" else 0.75,"radius":100.0*kit.area_scale(slot) if slot=="w" else 170.0*kit.area_scale(slot),"slot":slot,"damage":38.0*scale_value if slot=="w" else 135.0*scale_value,"rank":kit.effective_rank(slot)})
+		if ReviewRules.enabled(run) and slot=="r": impacts.back().life=1.0; impacts.back().duration=1.0
 		if slot=="r" and kit.effective_rank(slot)>=10: impacts.back().damage*=0.8
 	pending.clear()
 
 func tick(run, delta: float) -> void:
-	orbit_angle=fposmod(orbit_angle+delta*10.2,TAU)
+	if ReviewRules.enabled(run): ReviewRules.tick(run,delta)
+	orbit_angle=fposmod(orbit_angle+delta*(lerpf(3.0,10.2,float(clampi(rank_of(run,"p1"),1,10)-1)/9.0) if ReviewRules.enabled(run) else 10.2),TAU)
 	if run.kit.passive_active("orbit"):
 		while run.orbit.size()<mini(run.capacity(),3+int(run.rank_of("grinder"))/2):
 			run.orbit.append({"slot":run.orbit.size(),"hits":9999,"cooldown":0.0})
@@ -283,7 +299,7 @@ func tick(run, delta: float) -> void:
 	for trace in ghosts: trace.life-=delta
 	ghosts=ghosts.filter(func(g): return g.life>0)
 	if ghost:
-		var upkeep: float=drive_upkeep(run.kit.effective_rank("d"))
+		var upkeep: float=ReviewRules.drive_cost(run) if ReviewRules.enabled(run) else drive_upkeep(run.kit.effective_rank("d"))
 		if run.kit.energy<delta*upkeep: ghost=false; run.kit.sprint=0
 		else:
 			run.kit.energy-=delta*upkeep; run.kit.energy_spent+=delta*upkeep
@@ -303,14 +319,19 @@ func tick(run, delta: float) -> void:
 				var offset: Vector2=enemy.pos-run.player
 				if run.attacks.valid(enemy) and offset.length()<=reach+enemy.radius and absf(hammer_direction.angle_to(offset))<=hammer_angle(run):
 					var head: bool=offset.length()>=reach*0.512
-					run.hit_enemy(enemy,(38 if head else 9)*power(hammer_rank(run))*(1+run.kit.attack_damage_bonus),"hammer",offset.normalized()*190 if head and not enemy.has("role") else Vector2.ZERO)
+					run.hit_enemy(enemy,(38 if head else 9)*power(hammer_rank(run))*(1+run.kit.attack_damage_bonus)*(ReviewRules.hammer_multiplier(run,enemy) if ReviewRules.enabled(run) else 1.0),"hammer",offset.normalized()*190 if head and not enemy.has("role") else Vector2.ZERO)
 					if head and not enemy.has("role"): enemy.stun=0.25
 			impacts.append({"kind":"hammer","pos":run.player,"direction":hammer_direction,"life":0.30,"duration":0.30,"radius":reach,"angle":hammer_angle(run),"rank":hammer_rank(run)})
 			run.emit_event("v_hammer",run.player); hammer=-1
 	if slam_left>0:
 		step_slam(run,delta)
+		if slam_left<=0 and ReviewRules.enabled(run): combo_left=1.2
 		run.stop_movement()
 	for unit in constructs.duplicate():
+		if emp_left>0:
+			unit.life-=delta
+			if unit.life<=0: constructs.erase(unit)
+			continue
 		var current_rank: int=run.kit.effective_rank(unit.slot)
 		if unit.get("rank",current_rank)!=current_rank:
 			var hull_fraction: float=unit.hp/unit.max_hp
@@ -357,7 +378,8 @@ func tick(run, delta: float) -> void:
 			if not run.attacks.valid(enemy) or Vector2(enemy.pos).distance_to(effect.pos)>effect.radius+enemy.radius: continue
 			var multiplier:=2.0 if effect.kind=="strike" and Vector2(enemy.pos).distance_to(effect.pos)<=effect.radius*0.4 else 1.0
 			run.hit_enemy(enemy,effect.damage*multiplier,effect.kind)
-			if effect.rank>=10 and not enemy.has("role"): enemy.stun=0.75
+			if ReviewRules.enabled(run) and effect.kind=="strike": ReviewRules.strike_status(run,enemy,multiplier>1)
+			if effect.rank>=10 and not enemy.has("role") and (not ReviewRules.enabled(run) or effect.kind!="strike"): enemy.stun=0.75
 		if effect.kind=="reactor" and effect.rank>=5 and run.player.distance_to(effect.pos)<=effect.radius: shield=maxf(shield,1.5)
 		if effect.kind=="reactor" and effect.rank>=10 and not effect.get("second",false):
 			var second: Dictionary=effect.duplicate(); second.life=0.4; second.duration=0.4; second.second=true; second.damage*=0.25; impacts.append(second)

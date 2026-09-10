@@ -4,6 +4,7 @@ extends RefCounted
 static func draw(game) -> void:
 	var ui=game.ui; var collection: ForgeEquipment=game.collection
 	ExpeditionView.frame(ui,"Equipment",game.close_gear)
+	if ReviewRules.enabled(game.model) and game.model.state=="camp" and game.gear_return=="camp": ReviewView.tabs(game)
 	for i in range(8):
 		var slot: String=ForgeEquipment.SLOTS[i]
 		var id: String=collection.equipped[slot]

@@ -92,6 +92,7 @@ static func spawns(run, delta: float) -> void:
 		run._spawn_pack(count)
 
 static func enemy_step(run, enemy: Dictionary, delta: float) -> void:
+	if ReviewRules.enabled(run) and (enemy.has("exp_boss") or (run.exp.practice and enemy.role=="foreman")): ReviewEnemies.boss(run,enemy,delta); return
 	var role: String = enemy.role
 	var tracked: Vector2 = run.kit.extra.decoy_position if run.kit.extra.decoy_left > 0 else run.player
 	var direction: Vector2 = (tracked - Vector2(enemy.pos)).normalized()

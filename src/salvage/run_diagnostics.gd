@@ -2,9 +2,11 @@ class_name RunDiagnostics
 extends RefCounted
 ## Metadata only. Never reads/writes equipment or changes the simulation.
 const BUILD := "vanguard-18-pressure-audio"
+const REVIEW_BUILD := "vanguard-19-deliberate-combat"
 static func annotate(record: Dictionary, run, automated: bool) -> void:
 	record.log_schema=2
 	record.build=BUILD if Vanguard.enabled(run) else "slice-16-keyboard-forge" if run.exp!=null else "slice-13-mobabot"
+	if ReviewRules.enabled(run): record.build=REVIEW_BUILD
 	record.practice=run.exp!=null and run.exp.practice
 	record.automated=automated
 	if Vanguard.enabled(run):

@@ -291,7 +291,7 @@ func fire_interval() -> float:
 func orbit_damage() -> float:
 	if Vanguard.enabled(self):
 		var count: float=mini(capacity(),3+int(rank_of("grinder"))/2)
-		return 4.8*Vanguard.power(rank_of("grinder"))/sqrt(maxf(1,count/3.0))
+		return 4.8*Vanguard.power(rank_of("grinder"))/sqrt(maxf(1,count/3.0))*(lerpf(0.45,1.0,float(clampi(rank_of("grinder"),1,10)-1)/9.0) if ReviewRules.enabled(self) else 1.0)
 	if staged:
 		return 4.0 * SalvageProgression.multiplier(rank_of("grinder"))
 	return 4.0 + rank_of("grinder") * 2.0
@@ -346,6 +346,7 @@ func capacity() -> int:
 	return 6 + rank_of("capacity") * 2
 
 func orbit_radius() -> float:
+	if ReviewRules.enabled(self): return lerpf(52.0 if kit.orbit_far else 34.0,140.0 if kit.orbit_far else 82.0,float(clampi(rank_of("grinder"),1,10)-1)/9.0)
 	if kit != null and kit.onboarding and kit.orbit_far:
 		return 105.0 * (1 + milestone("grinder") * 0.35)
 	if staged:
@@ -616,9 +617,11 @@ func _enemy_step(delta: float) -> void:
 			DemoCampaign.enemy_step(self, enemy, delta)
 			if state != "running": break
 			continue
+		if ReviewRules.enabled(self) and enemy.kind==3:
+			ReviewEnemies.tank(self,enemy,delta); continue
 		var tracked_player: Vector2 = kit.extra.decoy_position if kit != null and kit.extra.decoy_left > 0 else player
 		var lure: Dictionary={}
-		if Vanguard.enabled(self) and drawn<4:
+		if Vanguard.enabled(self) and vanguard.emp_left<=0 and drawn<4:
 			for unit in vanguard.constructs:
 				if unit.id=="guard_bot" and unit.hp>0 and Vector2(enemy.pos).distance_to(unit.pos)<280:
 					lure=unit; tracked_player=unit.pos; drawn+=1; break
@@ -635,10 +638,10 @@ func _enemy_step(delta: float) -> void:
 				speed = 0.0
 				if enemy.clock <= 0:
 					enemy.phase = "dash"
-					enemy.clock = 0.65
+					enemy.clock = 0.3 if ReviewRules.enabled(self) else 0.65
 			elif enemy.phase == "dash":
 				direction = enemy.dir
-				speed = 255.0
+				speed = 780.0 if ReviewRules.enabled(self) else 255.0
 				if enemy.clock <= 0:
 					enemy.phase = "seek"
 					enemy.clock = 2.2
@@ -834,6 +837,7 @@ func _projectile_step(delta: float) -> void:
 func hit_enemy(enemy: Dictionary, damage: float, source: String, knock: Vector2 = Vector2.ZERO) -> void:
 	if enemy.dead:
 		return
+	if ReviewRules.enabled(self) and float(enemy.get("vulnerable",0))>0: damage*=1.5
 	if demo_mode and enemy.has("role") and enemy.phase == "recover": damage *= 1.5
 	var dummy: bool=exp!=null and exp.practice and enemy.get("dummy",false)
 	var dealt:=maxf(0,damage) if dummy else minf(maxf(0,damage),enemy.hp)
@@ -988,7 +992,7 @@ func collect_pickup(pickup: Dictionary) -> void:
 	if value <= 0:
 		return
 	pickup.value = 0 # Claim before triggering damage/reward events.
-	xp_fraction += value * (1.0 + (float(exp.stats.get("xp", 0)) if exp != null else mastery.rank_of("learning") * 0.1)) / (3.0 if Vanguard.enabled(self) else 1.0)
+	xp_fraction += value * (1.0 + (float(exp.stats.get("xp", 0)) if exp != null else mastery.rank_of("learning") * 0.1)) / (9.0 if ReviewRules.enabled(self) else 3.0 if Vanguard.enabled(self) else 1.0)
 	var gained := floori(xp_fraction + 0.000001)
 	total_xp += gained
 	xp_fraction = maxf(0, xp_fraction - gained)
@@ -1053,6 +1057,7 @@ func _make_offers() -> void:
 		offers.append("repair")
 
 func choose_upgrade(index: int) -> bool:
+	if ReviewRules.enabled(self): return ReviewRules.choose(self,index)
 	if state != "upgrade" or index < 0 or index >= offers.size():
 		return false
 	var id := offers[index]

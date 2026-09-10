@@ -148,6 +148,7 @@ func scale_enemy(run, enemy: Dictionary) -> void:
 		if number>1: factor*=3.0
 	else: factor*=1.2 if ascension>=2 else 1.0
 	enemy.hp*=factor; enemy.max_hp*=factor
+	if ReviewRules.enabled(run): ReviewRules.scale_role(run,enemy)
 
 func enemy_speed(run=null) -> float:
 	return 1 + (0.08 if ascension >= 1 else 0) + (0.07 if ascension >= 4 else 0) + (minf(0.18,route_index*0.008) if run!=null and Vanguard.enabled(run) and not practice else 0.0)
@@ -174,7 +175,7 @@ static func difficulty_text(value: int) -> String:
 	return "\n".join(rules)
 
 func enter(run) -> void:
-	if Vanguard.enabled(run): run.vanguard.clear()
+	if Vanguard.enabled(run): run.vanguard.clear(); run.kit.emp_left=0
 	run.stage = mini(3, int(ROUTE[route_index][0])) # Legacy renderer sectors, not campaign ownership.
 	run.stage_time = 0; run.boss_spawned = false; run.boss_defeated = false
 	run.stage_clear_wait = -1; run.spawn_clock = 0.8; run.demo_minis_killed = 0
@@ -223,6 +224,7 @@ func spawns(run, delta: float) -> void:
 			var roster: Array=["lancer","volley","bomber"]
 			if Vanguard.enabled(run):
 				roster=["breacher","volley","lancer","scatter"] if route_index==0 else ["breacher","mender","scatter","lancer","volley","bomber"]
+				if ReviewRules.enabled(run) and route_index>=1: roster.append("emp")
 			RangedThreats.spawn(run,roster[(threat_index+route_index-1)%roster.size()])
 	run.spawn_clock -= delta
 	if run.spawn_clock <= 0:
@@ -267,6 +269,7 @@ func finish_step(run, delta: float) -> void:
 				run.kit.recharge[slot] = 0.0
 		return
 	if Vanguard.enabled(run): Vanguard.progression(run)
+	if ReviewRules.enabled(run): ReviewRules.offer(run)
 	courier_clock = maxf(0, courier_clock - delta)
 	dynamo_clock = maxf(0, dynamo_clock - delta)
 	bastion_clock = maxf(0, bastion_clock - delta)

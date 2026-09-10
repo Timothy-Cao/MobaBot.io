@@ -3,6 +3,7 @@ extends RefCounted
 ## Ability rank previews are not additional purchases.
 
 static func draw(ui: CanvasLayer, model: SalvageRun) -> void:
+	if ReviewRules.enabled(model): ReviewView.build(ui,model); return
 	ui._panel(Rect2(24, 24, 912, 492), Color("172932"))
 	ui._label(ui.overlay, "Build", Rect2(47, 39, 212, 42), 30, ui.CREAM, true)
 	ui._tab("Overview", Rect2(491, 42, 140, 34), func() -> void:

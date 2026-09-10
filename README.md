@@ -1,10 +1,16 @@
-# MobaBot.io — 0.18 Vanguard
+# MobaBot.io — 0.19 Deliberate combat
+
+New expeditions now use **paused core upgrades and round-by-round module purchases**. XP income is one-third of the preceding build; each level gives three choose-one-of-three picks from QWERDF/MG/hammer. Chests give credits/items, not skill points. The rank-five specialization gate is removed. Buy/upgrade 1234 with run-only field credits after any round; equipment remains persistent and its shop remains at stage ends. Continue preserves the saved run's original rules.
+
+The human-reviewed combat pass keeps main-boss HP, adds aimed W-stun/vulnerability and E-to-hammer combo openings, and gives bosses lateral movement, pursuit, denser volleys, bombs and a sweeping laser. Thick Practice-style obstacles, clearer enemy roles and a slow EMP suppressor create movement decisions. Early orbit is weaker; D is energy-expensive early; F gains its second charge at rank five. Camp has peer Round clear / Build / Mastery / Equipment tabs and multi-column rewards. [Exact rules, balance estimates and deferred work](docs/design/REVIEW_COMBAT_19.md).
+
+The sections below retain the 0.18 and earlier compatibility details. Where they differ, the 0.19 rules above and linked specification govern new expeditions. Broad mastery redesign and equipment regeneration additions remain deferred.
 
 New session: [current handoff](SESSION_HANDOFF.md). Human testing: [playtest protocol](docs/design/PLAYTEST_PROTOCOL.md), with a read-only result summary via `scripts/read_playtest.ps1`. Freeze the build while testing; results finalize on victory/defeat, not continuously.
 
 A Windows-first, single-player survivor-like with MOBA mouse controls. Build a salvage robot through an eight-stage expedition: independent automatic fire, commanded attacks, aimed skills and deployed machines.
 
-New expeditions use the fixed **Vanguard** kit and non-modal skill progression. The 22-round route, 48-node run mastery tree, eight equipment slots × five tiers, shops, Ascensions 0–5 and cleared-round checkpoints remain. Existing 0.17 checkpoints retain their shared-pool rules rather than losing learned skills. Legacy abilities remain in Practice. Marshal, Racer and offline progression are not implemented.
+New expeditions use the fixed **Vanguard** kit and paused core skill progression. The 22-round route, 48-node run mastery tree, eight equipment slots × five tiers, shops, Ascensions 0–5 and cleared-round checkpoints remain. Existing checkpoints retain their original rules rather than losing learned skills. Legacy abilities remain in Practice. Marshal, Racer and offline progression are not implemented.
 
 [0.18 changes, verification and known limits](docs/design/QA_18.md) supersedes the older shared-pool controls and progression below for **new runs**.
 

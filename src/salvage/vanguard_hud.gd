@@ -12,6 +12,7 @@ static func icon(slot: String) -> String:
 	return "vanguard_"+slot
 
 static func detail(run, slot: String) -> String:
+	if ReviewRules.enabled(run) and ReviewRules.detail(run,slot)!="": return ReviewRules.detail(run,slot)
 	if slot=="hammer": return "Hammer · Rank %d\n%.0f head damage · %.0f reach\n5: wider sweep. 10: swing while moving."%[Vanguard.hammer_rank(run),run.attacks.damage(run),run.attacks.attack_range(run)]
 	if slot=="gun": return "Machine gun · Rank %d\n%.2f damage · %.2f shots/sec\n5: fires during E / Ghost drive.\n10: every fifth shot deals 2× damage, reaches 450 and hits up to four targets.\nAlso upgrades Bulwark's gun. `: toggle; S never disables it."%[Vanguard.gun_rank(run),run.attacks.auto_damage(run),1/run.attacks.auto_interval(run)]
 	if slot=="p1": return "Orbit tools\n1: close / far. Always fast. 2 energy/sec.\nPermanent blades. Rank increases damage and blade count."
@@ -61,12 +62,12 @@ static func draw(ui, run) -> void:
 			ui._label(tile,"LMB" if slot=="hammer" else "MG" if slot=="gun" else OS.get_keycode_string(Vanguard.KEYS[slot]),Rect2(2,0,width,17),11,ui.CREAM,true)
 			ui._label(tile,str(Vanguard.rank_of(run,slot)),Rect2(width-17,width-16,15,15),10,ui.GOLD,true)
 			ui.ability_labels[slot]=ui._label(tile,"",Rect2(0,width*0.38,width,20),12,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
-			if slot in ["q","w","e"]: ui.ability_recharge[slot]=ui._label(tile,"",Rect2(4,width-16,30,14),9,ui.GOLD,true)
+			if slot in ["q","w","e","f"]: ui.ability_recharge[slot]=ui._label(tile,"",Rect2(4,width-16,30,14),9,ui.GOLD,true)
 			for child in tile.get_children():
 				if child is Label:
 					child.add_theme_color_override("font_outline_color",ui.INK)
 					child.add_theme_constant_override("outline_size",3)
-			if slot in Vanguard.candidates(run,kind) and kind!="":
+			if not ReviewRules.enabled(run) and slot in Vanguard.candidates(run,kind) and kind!="":
 				var button: Button=ui._button("+",Rect2(x,y-20,width,16),func(): Vanguard.spend(run,slot),true)
 				button.reparent(ui.ability_bar,false)
 				button.set_meta("vanguard_upgrade",slot)
@@ -85,14 +86,16 @@ static func draw(ui, run) -> void:
 		ui.ability_labels[slot].text="—" if locked else (str(ceili(cd)) if empty else "")
 		if slot in ["p1","x1","x2","x3"]:
 			var active=ui.ability_shades[slot].get_parent().get_node("Active")
-			active.active=not locked and (run.kit.passive_active("orbit") if slot=="p1" else run.vanguard.constructs.any(func(unit): return unit.slot==slot))
+			active.active=run.vanguard.emp_left<=0 and not locked and (run.kit.passive_active("orbit") if slot=="p1" else run.vanguard.constructs.any(func(unit): return unit.slot==slot))
 			active.reduced=ui.reduced
 			if active.active: ui.ability_shades[slot].visible=false; ui.ability_labels[slot].text=""
 		if slot=="d": ui.ability_labels[slot].text="ON" if run.vanguard.ghost else ""
 		if slot=="gun":
 			ui.ability_labels[slot].text="OFF" if not run.vanguard.gun_on else "PAUSE" if Vanguard.gun_paused(run) else "%d/5"%(run.vanguard.gun_shots%5+1) if Vanguard.gun_rank(run)>=10 else ""
 			ui.ability_shades[slot].visible=not run.vanguard.gun_on
-		if slot in ["q","w","e"]:
+		if run.vanguard.emp_left>0 and slot in ReviewRules.MODULES+["d","f"]:
+			ui.ability_shades[slot].visible=true; ui.ability_labels[slot].text="EMP"
+		if slot in ["q","w","e"] or (ReviewRules.enabled(run) and slot=="f"):
 			ui.ability_recharge[slot].text="" if locked else ["○○","●○","●●"][clampi(run.kit.charges[slot],0,2)]
 
 static func rank_of_gate(run, slot: String) -> bool:

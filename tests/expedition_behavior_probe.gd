@@ -1,4 +1,9 @@
 extends SceneTree
+class ProbeShop extends RefCounted:
+	var model: SalvageRun
+	var collection=ForgeEquipment.new()
+	func persistent_run() -> bool: return false
+
 func _initialize() -> void: _run.call_deferred()
 
 func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary:
@@ -10,7 +15,7 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 	BotExpedition.new().start(run,class_id,difficulty)
 	BotKeyboard.enable(run)
 	if "--revised" in OS.get_cmdline_user_args() or "--vanguard" in OS.get_cmdline_user_args(): run.exp.enable_revision(run)
-	if "--vanguard" in OS.get_cmdline_user_args(): Vanguard.setup(run)
+	if "--vanguard" in OS.get_cmdline_user_args(): Vanguard.setup(run); ReviewRules.enable(run)
 	ForgeEquipment.new().apply_to(run)
 	# Reliability only: a normal-HP refill can still die to several hits in one
 	# frame. Inflate maximum health too, preserving all AI/damage/collision paths.
@@ -20,7 +25,8 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 	var max_us:=0
 	var samples: Array[int]=[]
 	for frame in range(240000 if run.exp.revised else 120000):
-		if Vanguard.enabled(run):
+		if Vanguard.enabled(run): run.vanguard.ghost=false
+		if Vanguard.enabled(run) and not ReviewRules.enabled(run):
 			run.vanguard.ghost=false
 			var choices:=Vanguard.candidates(run,Vanguard.reward_kind(run))
 			if not choices.is_empty() and Vanguard.reward_kind(run)!="":
@@ -36,6 +42,9 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 			run.choose_upgrade(index)
 		elif run.state=="chest": run.exp.choose_chest(run,0)
 		elif run.state=="camp":
+			if ReviewRules.enabled(run):
+				var shop:=ProbeShop.new(); shop.model=run
+				for slot in ["p1","x1","x2","x3"]: ReviewRules.buy_module(shop,slot)
 			if run.exp.pending_chests>0: run.exp.make_chest(run); run.state="chest"
 			else: run.exp.advance(run)
 		else:

@@ -28,6 +28,7 @@ var cast_quick := {"q":true,"w":true,"e":true,"r":false,"p1":true,"x1":false,"x2
 var camera_offset := Vector2.ZERO
 var minimap_held := false
 var pointer_warp := Vector2(-9999,-9999)
+var review_tab := "Round clear"
 var combat_feedback: CombatFeedback
 
 func _ready() -> void:
@@ -76,6 +77,7 @@ func launch_expedition(resume: bool=false) -> void:
 		BotKeyboard.enable(model)
 		expedition.enable_revision(model)
 		Vanguard.setup(model)
+		ReviewRules.enable(model)
 		collection.apply_to(model)
 		model.health=model.max_health(); model.kit.energy=model.kit.energy_max()
 		banked_camp=-1
@@ -114,7 +116,7 @@ func _physics_process(delta: float) -> void:
 	if screen=="running" and model.state=="chest":
 		_clear_held_movement(); screen="chest"; ExpeditionView.chest(self)
 	elif screen=="running" and model.state=="camp":
-		_clear_held_movement(); screen="camp"
+		_clear_held_movement(); screen="camp"; review_tab="Round clear"
 		if banked_camp!=model.exp.route_index:
 			if collection.bank_camp(model,persistent_run()): banked_camp=model.exp.route_index
 		ExpeditionView.camp(self)
@@ -146,6 +148,10 @@ func continue_expedition() -> void:
 	screen="running"; ui.show_running()
 	camera_offset=Vector2.ZERO; free_center=model.player; _update_camera()
 
+func buy_review_module(slot: String) -> void:
+	ReviewRules.buy_module(self,slot)
+	ReviewView.camp(self)
+
 func buy_item(index: int) -> void:
 	var exp: BotExpedition=model.exp
 	if model.state!="camp" or not exp.is_shop(Vanguard.enabled(model)) or index<0 or index>=exp.shop_stock.size(): return
@@ -163,7 +169,9 @@ func _open_gear() -> void:
 	screen="gear"; ExpeditionView.gear(self)
 
 func close_gear() -> void:
-	if gear_return == "camp": screen = "camp"; ExpeditionView.camp(self)
+	if gear_return == "camp":
+		if ReviewRules.enabled(model): review_tab="Round clear"
+		screen = "camp"; ExpeditionView.camp(self)
 	else: show_home()
 
 func gear_action(action: String, id: String) -> void:
@@ -171,6 +179,11 @@ func gear_action(action: String, id: String) -> void:
 		collection.apply_to(model)
 		collection.bank_camp(model,persistent_run())
 	ExpeditionView.gear(self)
+
+func _open_build() -> void:
+	if ReviewRules.enabled(model) and model.state=="camp":
+		review_tab="Build"; screen="camp"; ReviewView.camp(self); return
+	super._open_build()
 
 func _close_build() -> void:
 	super._close_build()
@@ -521,7 +534,7 @@ func launch_practice(legacy: bool=false) -> void:
 	expedition.start(model,"ranged",0)
 	BotKeyboard.enable(model); expedition.enable_revision(model)
 	expedition.practice=true
-	if not legacy: Vanguard.setup(model,1)
+	if not legacy: Vanguard.setup(model,1); ReviewRules.enable(model); PracticeSandbox.terrain(model)
 	PracticeSandbox.terrain(model)
 	model.health=model.max_health(); model.kit.energy=model.kit.energy_max()
 	model.events.clear(); ui.notice_time=0
@@ -545,7 +558,7 @@ func begin_practice_placement() -> void:
 
 func practice_reset() -> void:
 	practice_clear(); model.player=Vector2(480,300); PracticeSandbox.terrain(model)
-	Vanguard.setup(model,practice_rank)
+	Vanguard.setup(model,practice_rank); ReviewRules.enable(model); PracticeSandbox.terrain(model)
 	model.damage_dealt.clear(); model.time=0; camera_offset=Vector2.ZERO
 	free_center=model.player; _update_camera(); PracticeSandbox.draw(self)
 

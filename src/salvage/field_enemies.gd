@@ -9,13 +9,14 @@ static func step(run, e: Dictionary, dt: float) -> void:
 		var desired: float=180 if e.gunner_kind=="breacher" else 310
 		var point: Vector2=run.kit.extra.route(e.pos,run.player,e.radius)
 		var move: Vector2=(point-Vector2(e.pos)).normalized()* (125 if e.gunner_kind=="breacher" else 80)*speed
-		if offset.length()>desired: e.pos=run.kit.extra.solid_point(e.pos,Vector2(e.pos)+move*dt,e.radius)
+		if ReviewRules.enabled(run) and e.gunner_kind in ["scatter","mender"]: ReviewEnemies.mobile_ranged(run,e,dt)
+		elif offset.length()>desired: e.pos=run.kit.extra.solid_point(e.pos,Vector2(e.pos)+move*dt,e.radius)
 		elif offset.length()<170 and e.gunner_kind!="breacher": e.pos=run.kit.extra.solid_point(e.pos,Vector2(e.pos)-offset.normalized()*65*speed*dt,e.radius)
 		if e.clock<=0 and offset.length()< (310 if e.gunner_kind=="breacher" else 510) and Rect2(run.follow_origin(),run.view_size).grow(-30).has_point(e.pos):
 			e.phase="aim"; e.clock=0.65; e.dir=offset.normalized(); e.hit_player=false
 			run.emit_event("enemy_windup",e.pos)
 	elif e.phase=="aim" and e.clock<=0:
-		if e.gunner_kind=="breacher": e.phase="rush"; e.clock=0.6
+		if e.gunner_kind=="breacher": e.phase="rush"; e.clock=0.38 if ReviewRules.enabled(run) else 0.6
 		elif e.gunner_kind=="scatter":
 			for i in range(7):
 				var direction: Vector2=Vector2(e.dir).rotated(deg_to_rad(-30+i*10))
@@ -33,7 +34,7 @@ static func step(run, e: Dictionary, dt: float) -> void:
 			if not e.links.is_empty(): run.emit_event("enemy_repair",e.pos)
 	elif e.phase=="rush":
 		var start: Vector2=e.pos
-		var desired: Vector2=start+Vector2(e.dir)*480*minf(dt,maxf(0,e.clock+dt))
+		var desired: Vector2=start+Vector2(e.dir)*(950 if ReviewRules.enabled(run) else 480)*minf(dt,maxf(0,e.clock+dt))
 		# Substeps prevent a long frame from tunnelling through a thick wall edge.
 		var travel: float=start.distance_to(desired)
 		for i in range(ceili(travel/4)):
@@ -80,7 +81,7 @@ static func draw(art, e: Dictionary) -> void:
 
 static func tell(art, e: Dictionary) -> void:
 	if e.gunner_kind=="breacher" and e.phase=="aim":
-		var end: Vector2=e.pos+Vector2(e.dir)*288
+		var end: Vector2=e.pos+Vector2(e.dir)*(361 if ReviewRules.enabled(art.model) else 288)
 		for side in [-1,1]:
 			var shift: Vector2=Vector2(e.dir).orthogonal()*e.radius*side
 			art._line(e.pos+shift,end+shift,Color(art.CORAL,0.55),2)

@@ -190,6 +190,8 @@ func rank_up(slot: String) -> bool:
 	recharge[slot] = float(recharge[slot]) * cooldown(slot) / old
 	return true
 
+var emp_left := 0.0
+
 func energy_max() -> float:
 	return 100.0 + energy_bonus + rank_energy
 
@@ -204,6 +206,7 @@ func drain_rate() -> float:
 	return rate
 
 func passive_active(id: String) -> bool:
+	if emp_left>0 and id=="orbit": return false
 	if loadout.get("vanguard",false) and id=="bolt": return true
 	if id=="": return false
 	var index: int = loadout.passives.find(id)
@@ -352,7 +355,7 @@ func has_passive(id: String) -> bool:
 func speed() -> float:
 	var drive:=0.65
 	if loadout.get("vanguard",false): drive+=maxi(0,effective_rank("d")-1)*0.035
-	return 205.0 * (1.0 + gear_speed + (0.4 if boost_speed > 0 else 0.0) + (drive if sprint > 0 else 0.0) + (0.25 if overdrive > 0 else 0.0))
+	return (185.0 if loadout.get("review19",false) else 205.0) * (1.0 + gear_speed + (0.4 if boost_speed > 0 else 0.0) + (drive if sprint > 0 else 0.0) + (0.25 if overdrive > 0 else 0.0))
 
 func target_point(run, slot: String, cursor: Vector2) -> Vector2:
 	var offset: Vector2 = cursor - run.player
@@ -362,6 +365,7 @@ func target_point(run, slot: String, cursor: Vector2) -> Vector2:
 	return point.clamp(run.ARENA.position + Vector2.ONE * 16, run.ARENA.end - Vector2.ONE * 16)
 
 func preview_ready(run, slot: String, cursor: Vector2) -> bool:
+	if emp_left>0 and slot in ReviewRules.MODULES+["d","f"]: return false
 	if Vanguard.enabled(run):
 		if run.vanguard.drive_blocks(run) or slot not in Vanguard.KEYS or not unlocked(slot) or run.vanguard.slam_left>0: return false
 		if slot=="p1": return true
@@ -534,6 +538,7 @@ func step(run, delta: float) -> void:
 	for slot in active_slots():
 		var data: Dictionary = ABILITIES[loadout[slot]]
 		var maximum: int=2 if loadout.get("vanguard",false) and slot in ["q","w","e"] else int(data.max)
+		if loadout.get("review19",false) and slot=="f": maximum=2 if effective_rank("f")>=5 else 1
 		charges[slot]=mini(charges[slot],maximum)
 		if charges[slot] < maximum:
 			recharge[slot] -= delta

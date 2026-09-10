@@ -580,6 +580,8 @@ func _drain_events() -> void:
 
 func _choose(index: int) -> void:
 	if model.choose_upgrade(index):
+		if ReviewRules.enabled(model) and model.state=="upgrade":
+			screen="upgrade"; ui.show_upgrades(model); return
 		screen = "running"
 		ui.show_running()
 		_drain_events()

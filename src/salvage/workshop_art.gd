@@ -102,6 +102,7 @@ func _draw() -> void:
 		_draw_caches()
 		_moba_ground()
 		ExpeditionArt.draw(self, model)
+		if ReviewRules.enabled(model): ReviewEnemyArt.atmosphere(self)
 		if Vanguard.enabled(model): VanguardArt.draw(self,model)
 		for point in placement_points:
 			draw_circle(point,placement_radius,Color(TEAL if placement_valid else CORAL,0.18))
@@ -207,6 +208,7 @@ func _draw() -> void:
 		if bullet.kind == "hostile":
 			draw_arc(bullet.pos, 8, 0, TAU, 16, CREAM, 1.3, true)
 	if model.demo_mode: _demo_tells()
+	if ReviewRules.enabled(model): ReviewEnemyArt.draw(self)
 	if model.exp!=null and model.exp.practice: model.practice_meter.draw(self,model)
 	for enemy in model.enemies:
 		if not enemy.dead and enemy.has("gunner_kind"): RangedThreats.tell(self,enemy)
@@ -424,6 +426,7 @@ func _enemy(enemy: Dictionary) -> void:
 			_box(Rect2(-13, 0, 26, 12), INK, 4)
 			_line(Vector2(-6, 5), Vector2(6, 5), CORAL, 3)
 		else:
+			if enemy.get("review_boss",false): draw_set_transform(p,0,Vector2.ONE*enemy.radius/65.0)
 			# Foreman: paired piston arms, rotating outer cutter and exposed reactor.
 			for side in [-1, 1]:
 				_box(Rect2(side * 42 - 9, -24, 18, 49), PALE, 3, INK, 3)

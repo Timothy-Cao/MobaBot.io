@@ -5,7 +5,8 @@ static func pose(progress: float, count: int=8) -> float:
 	return floorf(clampf(progress,0,1)*float(count-1))/float(count-1)
 
 static func shard(c, center: Vector2, direction: Vector2, length: float, width: float, tint: Color) -> void:
-	if length<=0 or width<=0: return
+	if length<0.25 or width<0.25 or direction.length_squared()<0.0001: return
+	direction=direction.normalized()
 	var side:=direction.orthogonal()*width
 	var points:=PackedVector2Array([center-direction*length*0.25,center+side,center+direction*length,center-side])
 	c.draw_colored_polygon(points,tint)

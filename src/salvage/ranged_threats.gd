@@ -1,6 +1,6 @@
 class_name RangedThreats
 extends RefCounted
-const NAMES := {"lancer":"Arc lancer", "volley":"Burst battery", "bomber":"Bomb carrier", "breacher":"Breacher", "mender":"Mender", "scatter":"Scattergun"}
+const NAMES := {"lancer":"Arc lancer", "volley":"Burst battery", "bomber":"Bomb carrier", "breacher":"Breacher", "mender":"Mender", "scatter":"Scattergun", "emp":"EMP suppressor"}
 
 static func spawn(run, type: String, point: Vector2 = Vector2.INF, bypass_cap: bool = false) -> Dictionary:
 	if not NAMES.has(type) or run.enemies.size()>=run.MAX_ENEMIES: return {}
@@ -16,6 +16,7 @@ static func spawn(run, type: String, point: Vector2 = Vector2.INF, bypass_cap: b
 	if type in ["breacher","mender","scatter"]:
 		enemy.hp={"breacher":55.0,"mender":32.0,"scatter":45.0}[type]; enemy.max_hp=enemy.hp
 		enemy["links"]=[]; enemy["hit_player"]=false
+	if ReviewRules.enabled(run) and type=="emp": enemy.hp=120.0; enemy.max_hp=120.0
 	return enemy
 
 static func beam_end(run, point: Vector2, direction: Vector2) -> Vector2:
@@ -34,12 +35,14 @@ static func beam_end(run, point: Vector2, direction: Vector2) -> Vector2:
 	return end
 
 static func step(run, e: Dictionary, delta: float) -> void:
+	if ReviewRules.enabled(run) and e.gunner_kind=="emp": ReviewEnemies.emp(run,e,delta); return
 	if e.gunner_kind in ["breacher","mender","scatter"]: FieldEnemies.step(run,e,delta); return
 	e.clock-=delta
 	var offset: Vector2=run.player-e.pos
 	if e.phase=="seek":
 		var point: Vector2=run.kit.extra.route(e.pos,run.player,e.radius)
-		if offset.length()>360:
+		if ReviewRules.enabled(run) and e.gunner_kind=="bomber": ReviewEnemies.mobile_ranged(run,e,delta)
+		elif offset.length()>360:
 			e.pos=run.kit.extra.solid_point(e.pos,Vector2(e.pos)+(point-Vector2(e.pos)).normalized()*95*delta,e.radius)
 		elif offset.length()<190:
 			e.pos=run.kit.extra.solid_point(e.pos,Vector2(e.pos)-offset.normalized()*60*delta,e.radius)
@@ -48,12 +51,13 @@ static func step(run, e: Dictionary, delta: float) -> void:
 		if e.clock<=0 and offset.length()<560 and visible_area.grow(-25).has_point(e.pos):
 			e.phase="aim"; e.clock=0.8 if e.gunner_kind=="lancer" else 0.65
 			run.emit_event("enemy_windup",e.pos)
-			e.dir=offset.normalized(); e.beam_end=beam_end(run,e.pos,e.dir)
+			e.dir=(offset+run.velocity.limit_length(240)*0.4).normalized() if ReviewRules.enabled(run) and e.gunner_kind=="lancer" else offset.normalized(); e.beam_end=beam_end(run,e.pos,e.dir)
 			if e.gunner_kind=="bomber":
 				var predicted: Vector2=run.player+run.velocity.limit_length(160)*0.3
-				for i in range(3):
+				for i in range(5 if ReviewRules.enabled(run) else 3):
 					var target: Vector2=predicted+Vector2.from_angle(i*TAU/3+e.id)*100
-					run.hazards.append({"pos":target,"radius":66.0,"time":1.05+i*0.1,"duration":1.05+i*0.1,"owner":e.id,"spent":false})
+					if ReviewRules.enabled(run): target=run.player+run.velocity.limit_length(185)*minf(i*0.3,0.9)+offset.normalized().orthogonal()*sin(i*2.1)*70
+					run.hazards.append({"pos":target,"radius":66.0,"time":1.05+i*(0.5 if ReviewRules.enabled(run) else 0.1),"duration":1.05+i*(0.5 if ReviewRules.enabled(run) else 0.1),"owner":e.id,"spent":false})
 	elif e.phase=="aim":
 		if e.clock<=0:
 			if e.gunner_kind=="lancer":
@@ -70,7 +74,7 @@ static func step(run, e: Dictionary, delta: float) -> void:
 			e.burst+=1; e.clock+=0.12
 			if e.burst>=5: e.phase="recover"; e.clock=2.7
 	elif e.clock<=0:
-		if e.phase=="beam": e.phase="recover"; e.clock=2.8
+		if e.phase=="beam": e.phase="recover"; e.clock=1.8 if ReviewRules.enabled(run) else 2.8
 		else: e.phase="seek"; e.clock=0.4
 	if offset.length()<e.radius+12: run.hurt_player(e.pos,NAMES[e.gunner_kind]+" contact",1)
 	e.pos+=Vector2(e.knock)*delta; e.knock=Vector2(e.knock).move_toward(Vector2.ZERO,900*delta)

@@ -533,6 +533,7 @@ func announce(text: String, priority: int = 0) -> void:
 	notice_priority = priority
 
 func show_upgrades(model: SalvageRun) -> void:
+	if ReviewRules.enabled(model): ReviewView.upgrades(self,model); return
 	clear_overlay()
 	hud.visible = true
 	notice_time = 0
