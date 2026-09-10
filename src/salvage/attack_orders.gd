@@ -105,7 +105,7 @@ func prepare(run, delta: float) -> void:
 	if not enabled: return
 	cooldown = maxf(-delta, cooldown - delta)
 	auto_cooldown = maxf(-delta, auto_cooldown - delta)
-	if Vanguard.enabled(run) and run.vanguard.ghost: return
+	if Vanguard.enabled(run) and run.vanguard.drive_blocks(run): return
 	if windup >= 0: windup = maxf(0, windup-delta)
 	if run.kit.laser_left > 0 or run.kit.dash_left > 0:
 		windup=-1; return
@@ -142,7 +142,7 @@ func fire(run) -> void:
 	if not enabled: return
 	_fire_auto(run)
 	if Vanguard.enabled(run):
-		if not suppressed and not run.vanguard.ghost:
+		if not suppressed and not run.vanguard.drive_blocks(run):
 			var victim := target(run)
 			if valid(victim) and run.player.distance_to(victim.pos)<=attack_range(run)+victim.radius: run.vanguard.swing(run,victim.pos)
 		return

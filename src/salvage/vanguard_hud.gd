@@ -15,12 +15,14 @@ static func detail(run, slot: String) -> String:
 	if slot=="hammer": return "Hammer · Rank %d\n%.0f head damage · %.0f reach\n5: wider sweep. 10: swing while moving."%[Vanguard.hammer_rank(run),run.attacks.damage(run),run.attacks.attack_range(run)]
 	if slot=="gun": return "Machine gun · Rank %d\n%.2f damage · %.2f shots/sec\n5: fires during E / Ghost drive.\n10: every fifth shot deals 2× damage, reaches 450 and hits up to four targets.\nAlso upgrades Bulwark's gun. `: toggle; S never disables it."%[Vanguard.gun_rank(run),run.attacks.auto_damage(run),1/run.attacks.auto_interval(run)]
 	if slot=="p1": return "Orbit tools\n1: close / far. Always fast. 2 energy/sec.\nPermanent blades. Rank increases damage and blade count."
-	if slot=="x1": return "Bulwark\nGun damage, speed and fifth shot use MG rank.\nBulwark ranks improve hull and pulse.\n%.1fs recharge · 20 energy"%run.kit.cooldown(slot)
-	if slot=="d": return "Ghost drive\nHold D: +%.0f%% speed, %.1f energy/sec. Release to cast.\nNo invulnerability. The gun and deployed machines continue."%[65+maxi(0,run.kit.effective_rank("d")-1)*3.5,10-maxi(0,run.kit.effective_rank("d")-1)*0.3]
+	if slot=="x1": return "Bulwark\nGun follows MG rank. Ranks increase hull/pulse.\n5: faster, wider pulses. 10: pulses stun.\n%.1fs recharge · 20 energy"%run.kit.cooldown(slot)
+	if slot=="x2": return "Reserve\nBank repair outside; return for hull, energy, then damage.\n5: larger reserves and coverage. 10: also banks while inside."
+	if slot=="x3": return "Overclock well\nFree skill energy inside.\nDuration 5 / 7 / 9s at ranks 1 / 5 / 10.\nRecharge 2×; rank 10: 3×."
+	if slot=="d": return "Ghost drive\nHold D: +%.0f%% speed, %.1f energy/sec.\n5: much lower upkeep. 10: cast while driving.\nNo invulnerability."%[65+maxi(0,run.kit.effective_rank("d")-1)*3.5,Vanguard.drive_upkeep(run.kit.effective_rank("d"))]
 	if slot=="w": return "Core strike · 2 charges\n38 base edge damage / 76 center. 100 radius; 40 center.\nRank 5: wider impact. Rank 10: brief stun.\n%.1fs per charge · 18 energy"%run.kit.cooldown("w")
 	if slot=="q": return "Impact bolt · 2 charges\nStraight rocket with contact/range explosion.\n%.1fs per charge"%run.kit.cooldown("q")
-	if slot=="e": return "Body slam · 2 charges\nCollide, blast and push. Walls rebound you for 2× remaining dash distance, once per cast.\n%.1fs per charge"%run.kit.cooldown("e")
-	if slot=="f": return "Phase hop\nInstant blink. 80ms unreleased casts follow your new origin.\nPast the midpoint of thick cover: land on the far side."
+	if slot=="e": return "Body slam · 2 charges\n%.0f reach. 5: +40%% reach. 10: +90%%.\nOne wall rebound: 2× remaining distance.\n%.1fs per charge"%[run.kit.cast_range("e"),run.kit.cooldown("e")]
+	if slot=="f": return "Phase hop\nInstant blink. 5: lower recharge / energy.\n10: arrival explosion (110 radius).\n%.1fs recharge · %.0f energy"%[run.kit.cooldown("f"),run.kit.ability_cost("blink")]
 	var data: Dictionary=MobaKit.ABILITIES[Vanguard.TOOLS[slot]]
 	return data.name+"\n"+data.text+"\n%.1fs recharge · %d energy"%[run.kit.cooldown(slot),run.kit.ability_cost(Vanguard.TOOLS[slot])]
 
@@ -39,7 +41,7 @@ static func draw(ui, run) -> void:
 		ui._surface(ui.ability_bar,Rect2(649,470,120,61),Color("14242cdd"),0,ui.INK,0)
 		ui._surface(ui.ability_bar,Rect2(785,470,120,61),Color("14242cdd"),0,ui.INK,0)
 		var kind:=Vanguard.reward_kind(run)
-		ui._label(ui.ability_bar,("LEARN" if kind=="learn" else "UPGRADE")+" · %d"%run.kit.loadout.rewards18.size() if kind!="" else "MODIFIED TEST" if modified else "",Rect2(381,428,252,17),11,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
+		ui._label(ui.ability_bar,"POINTS · %d"%run.kit.loadout.rewards18.size() if kind!="" else "MODIFIED TEST" if modified else "",Rect2(381,428,252,17),11,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
 		for i in range(slots.size()):
 			var slot: String=slots[i]
 			var rect:=slot_rect(slot)
@@ -49,6 +51,7 @@ static func draw(ui, run) -> void:
 			var tile=ui._surface(ui.ability_bar,Rect2(x,y,width,width),ui.PANEL,0,ui.EDGE)
 			tile.set_meta("vanguard_slot",slot)
 			tile.mouse_filter=Control.MOUSE_FILTER_STOP; tile.tooltip_text=detail(run,slot)
+			if rank_of_gate(run,slot): tile.tooltip_text+="\nRank 6+: bring every tool to rank 5 first."
 			ui._ability_icon(tile,icon(slot),Rect2(2,2,width-4,width-4))
 			var shade:=ColorRect.new(); shade.size=Vector2.ONE*width; shade.color=Color("14242cbb"); shade.mouse_filter=Control.MOUSE_FILTER_IGNORE; tile.add_child(shade)
 			ui.ability_shades[slot]=shade
@@ -73,7 +76,7 @@ static func draw(ui, run) -> void:
 					style.set_content_margin_all(0); style.set_border_width_all(1); style.border_color=ui.EDGE
 					button.add_theme_stylebox_override(state,style)
 				button.custom_minimum_size=Vector2.ZERO; button.size=Vector2(width,16)
-				button.tooltip_text=("Learn " if kind=="learn" else "Upgrade ")+ (slot if slot in ["gun","hammer"] else OS.get_keycode_string(Vanguard.KEYS[slot])) + (" · Ctrl + key" if slot not in ["gun","hammer"] else "")
+				button.tooltip_text=("Learn " if Vanguard.rank_of(run,slot)==0 else "Upgrade ")+ (slot if slot in ["gun","hammer"] else OS.get_keycode_string(Vanguard.KEYS[slot])) + (" · Ctrl + key" if slot not in ["gun","hammer"] else "")
 	for slot in slots:
 		var locked:=Vanguard.rank_of(run,slot)==0
 		var cd: float=run.kit.recharge.get(slot,0)
@@ -91,3 +94,6 @@ static func draw(ui, run) -> void:
 			ui.ability_shades[slot].visible=not run.vanguard.gun_on
 		if slot in ["q","w","e"]:
 			ui.ability_recharge[slot].text="" if locked else ["○○","●○","●●"][clampi(run.kit.charges[slot],0,2)]
+
+static func rank_of_gate(run, slot: String) -> bool:
+	return Vanguard.rank_of(run,slot)>=5 and Vanguard.rank_of(run,slot)<10 and slot not in Vanguard.candidates(run,"upgrade")

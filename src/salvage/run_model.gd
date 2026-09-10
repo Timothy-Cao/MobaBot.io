@@ -60,6 +60,7 @@ var next_id := 1
 var enemies: Array[Dictionary] = []
 var projectiles: Array[Dictionary] = []
 var pickups: Array[Dictionary] = []
+var pickup_merge_clock := 0.0
 var orbit: Array[Dictionary] = []
 var events: Array[Dictionary] = []
 var offers: Array[String] = []
@@ -934,12 +935,19 @@ func _drop(point: Vector2, value: int) -> void:
 	next_id += 1
 
 func _pickup_step(delta: float) -> void:
+	if Vanguard.enabled(self):
+		pickup_merge_clock-=delta
+		if pickup_merge_clock<=0:
+			pickup_merge_clock=0.5
+			if pickups.size()>=80: compact_pickups()
 	if staged and rank_of("magnet") >= 5 and not (kit != null and kit.onboarding):
 		vacuum_clock -= delta
 		if vacuum_clock <= 0:
 			vacuum_clock += 15
 			for pickup in pickups: pickup.pull = true
 			emit_event("vacuum", player)
+	var reach:=magnet_radius()
+	var pull_speed: float=800+rank_of("magnet")*180 if staged else 640
 	for pickup in pickups.duplicate():
 		if pickup.get("settle", 0.0) > 0:
 			pickup.settle -= delta
@@ -947,21 +955,35 @@ func _pickup_step(delta: float) -> void:
 			pickup.scatter = Vector2(pickup.scatter).move_toward(Vector2.ZERO, delta * 260)
 			continue
 		var distance := Vector2(pickup.pos).distance_to(player)
-		if distance < magnet_radius():
+		if distance < reach:
 			pickup.pull = true
 		if pickup.pull:
-			pickup.speed = minf(800 + rank_of("magnet") * 180 if staged else 640, float(pickup.speed) + delta * (2200 if staged else 1100))
+			pickup.speed = minf(pull_speed, float(pickup.speed) + delta * (2200 if staged else 1100))
 			pickup.pos = Vector2(pickup.pos).move_toward(player, float(pickup.speed) * delta)
 		if Vector2(pickup.pos).distance_to(player) < 17:
 			collect_pickup(pickup)
 	pickups = pickups.filter(func(p: Dictionary) -> bool: return p.value > 0)
+
+func compact_pickups() -> void:
+	# Local O(n) buckets: never merge fresh shower particles or flying pickups.
+	# No random draws, no lost value, no relocation across the map.
+	var cells: Dictionary={}
+	var retained: Array[Dictionary]=[]
+	for pickup in pickups:
+		if pickup.value<=0: continue
+		if pickup.pull or pickup.get("settle",0.0)>0:
+			retained.append(pickup); continue
+		var cell:=Vector2i(floori(pickup.pos.x/48.0),floori(pickup.pos.y/48.0))
+		if cells.has(cell): cells[cell].value+=pickup.value
+		else: cells[cell]=pickup; retained.append(pickup)
+	pickups=retained
 
 func collect_pickup(pickup: Dictionary) -> void:
 	var value := int(pickup.value)
 	if value <= 0:
 		return
 	pickup.value = 0 # Claim before triggering damage/reward events.
-	xp_fraction += value * (1.0 + (float(exp.stats.get("xp", 0)) if exp != null else mastery.rank_of("learning") * 0.1))
+	xp_fraction += value * (1.0 + (float(exp.stats.get("xp", 0)) if exp != null else mastery.rank_of("learning") * 0.1)) / (3.0 if Vanguard.enabled(self) else 1.0)
 	var gained := floori(xp_fraction + 0.000001)
 	total_xp += gained
 	xp_fraction = maxf(0, xp_fraction - gained)

@@ -18,10 +18,10 @@ func execute() -> void:
 	run.exp.practice=false; run.total_xp=run.next_level
 	Vanguard.progression(run)
 	check(run.state=="running" and run.level==2 and Vanguard.reward_kind(run)=="upgrade","XP non-modal")
-	check(not Vanguard.spend(run,"w"),"Cannot learn during upgrade")
+	check("w" in Vanguard.candidates(run,Vanguard.reward_kind(run)),"Same point can learn or upgrade")
 	check(Vanguard.spend(run,"q") and run.kit.ranks.q==2,"Spend owned rank")
 	Vanguard.earn(run)
-	check(Vanguard.reward_kind(run)=="learn" and Vanguard.spend(run,"w"),"Alternating learn")
+	check(Vanguard.reward_kind(run)=="upgrade" and Vanguard.spend(run,"w"),"Universal point learns W")
 	var gear:=ForgeEquipment.new()
 	run.state="camp"
 	var packed:=gear.pack_run(run)
@@ -134,6 +134,7 @@ func execute() -> void:
 	check(ForgeEquipment.valid_checkpoint(gear.pack_run(run)),"End-round save validates")
 	playtest_refinements()
 	rank_milestones()
+	new_milestones()
 	machine_gun_milestones()
 	await ui_checks()
 	print("VANGUARD: %d checks, %d failures"%[checks,failures]); quit(1 if failures else 0)
@@ -193,10 +194,75 @@ func machine_gun_milestones() -> void:
 	check(is_equal_approx(run.projectiles.back().damage,3.4*Vanguard.GUN_POWER[10]*2),"Turret inherits MG damage")
 	check(is_equal_approx(turret.clock,0.5),"Turret inherits MG cadence")
 
+func new_milestones() -> void:
+	for rank_value in [1,5,10]:
+		var run:=fresh(rank_value)
+		var origin: Vector2=run.player
+		check(run.vanguard.cast(run,"e",origin+Vector2(600,0)),"Milestone E starts")
+		run.vanguard.tick(run,1.0)
+		check(is_equal_approx(run.player.distance_to(origin),Vanguard.slam_range(rank_value)),"E range matches preview at each milestone")
+		for slot in ["q","w","e","r","f","p1","x1","x2","x3"]:
+			run=fresh(rank_value); run.vanguard.cast(run,"d",run.player)
+			check(run.vanguard.cast(run,slot,run.player+Vector2(100,0))==(rank_value>=10),"D unlocks all casts only at ten")
+		run=fresh(rank_value)
+		run.spawn_enemy(run.player+Vector2(100,0),3); run.enemies[0].hp=10000; run.enemies[0].warmup=0
+		run.vanguard.cast(run,"f",run.player+Vector2(100,0))
+		check((run.damage_dealt.get("phase_hop",0)>0)==(rank_value>=10),"Flash landing damage only at ten")
+		run=fresh(rank_value); run.vanguard.cast(run,"x3",run.player)
+		check(run.vanguard.constructs[0].duration==5+run.kit.milestone("x3")*2,"Well duration milestone")
+		run.kit.recharge.q=4; run.vanguard.tick(run,0.1)
+		check(is_equal_approx(run.kit.recharge.q,3.8 if rank_value>=10 else 3.9),"Well adds correct recharge including charge refill")
+		run=fresh(rank_value); run.vanguard.cast(run,"x2",run.player); run.health=1
+		run.vanguard.tick(run,0.1)
+		check((run.health>1)==(rank_value>=10),"Reserve banks while inside only at ten")
+		run=fresh(rank_value); run.vanguard.cast(run,"x1",run.player); run.vanguard.constructs[0].pulse=0
+		run.spawn_enemy(run.player+Vector2(70,0),3); run.enemies[0].warmup=0; run.enemies[0].hp=10000
+		run.vanguard.tick(run,0.01)
+		check(is_equal_approx(run.vanguard.constructs[0].pulse,1.8 if rank_value>=5 else 2.4),"Bulwark faster pulses at five")
+		check((run.enemies[0].get("stun",0)>0)==(rank_value>=10),"Bulwark pulse stun at ten")
+	var low:=fresh(1); var high:=fresh(5)
+	check(high.kit.cooldown("f")<low.kit.cooldown("f")*0.7 and high.kit.ability_cost("blink")<=low.kit.ability_cost("blink")*0.6,"Flash rank five efficiency spike")
+	check(Vanguard.drive_upkeep(5)<Vanguard.drive_upkeep(1)*0.6,"D rank five upkeep spike")
+	var run:=fresh(4); run.vanguard.cast(run,"x3",run.player)
+	run.kit.ranks.x3=5; run.vanguard.tick(run,0.01)
+	check(run.vanguard.constructs[0].radius==145 and run.vanguard.constructs[0].duration==7,"Live tower upgrade updates geometry and duration")
+	run=fresh(0); run.kit.loadout.rewards18=["learn","upgrade"]
+	check(Vanguard.spend(run,"q") and Vanguard.spend(run,"w"),"Legacy queued kinds both spend anywhere")
+	run=fresh(5); run.kit.ranks.w=4; Vanguard.earn(run)
+	check(not Vanguard.spend(run,"q") and run.kit.loadout.rewards18.size()==1,"Gate preserves rejected point")
+	check(Vanguard.spend(run,"w"),"Last tool reaches five")
+	Vanguard.earn(run); check(Vanguard.spend(run,"q"),"All-five unlocks sixth rank")
+	run=fresh(1); run.exp.stats.xp=0
+	for i in range(360): run._drop(Vector2(3000+(i%12)*96,3000+(i%3)),1)
+	var before: Array=run.pickups.duplicate(true)
+	var started:=Time.get_ticks_usec(); run.pickup_merge_clock=1000
+	for i in range(200): run._pickup_step(1.0/60)
+	var unmerged_us:=Time.get_ticks_usec()-started
+	run.pickups.assign(before); run.compact_pickups()
+	check(run.pickups.size()==12,"360 local drops become twelve bundles")
+	var total:=0
+	for pickup in run.pickups: total+=pickup.value
+	check(total==360,"Compaction preserves all reward value")
+	started=Time.get_ticks_usec()
+	for i in range(200): run._pickup_step(1.0/60)
+	var merged_us:=Time.get_ticks_usec()-started
+	print("PICKUP_BENCH 200 ticks: 360 drops=%dus; 12 bundles=%dus (CPU only)"%[unmerged_us,merged_us])
+	for pickup in run.pickups: run.collect_pickup(pickup)
+	check(run.total_xp==120 and run.collected==360,"One-third XP, full collection value")
+	run=fresh(1); run._drop(Vector2(3000,3000),2); run._drop(Vector2(3001,3000),3)
+	run.pickups[0].settle=0.2; run.compact_pickups()
+	check(run.pickups.size()==2,"Fresh shower remains separate")
+	run.pickups[0].settle=0; run.pickups[0].pull=true; run.compact_pickups()
+	check(run.pickups.size()==2,"Flying pickup remains separate")
+
 func rank_milestones() -> void:
 	var run:=fresh(1)
 	check("hammer" in Vanguard.candidates(run,"upgrade"),"Hammer participates in upgrade queue")
 	for rank_value in range(2,11):
+		if rank_value==6:
+			run.kit.loadout.rewards18=["upgrade"]
+			check(not Vanguard.spend(run,"hammer"),"Rank six blocked while other tools below five")
+			Vanguard.setup(run,5)
 		run.kit.loadout.rewards18=["upgrade"]
 		check(Vanguard.spend(run,"hammer") and Vanguard.hammer_rank(run)==rank_value,"Hammer earned rank %d"%rank_value)
 	check("hammer" not in Vanguard.candidates(run,"upgrade"),"Hammer cap is ten")

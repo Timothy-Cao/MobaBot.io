@@ -37,6 +37,15 @@ static func hammer_angle(run) -> float:
 
 static func hammer_roots(run) -> bool:
 	return hammer_rank(run)<10
+
+static func drive_upkeep(rank_value: int) -> float:
+	return (12.0 if rank_value<5 else 7.0)-maxi(0,rank_value-(1 if rank_value<5 else 5))*0.2
+
+static func slam_range(rank_value: int) -> float:
+	return 397.1 if rank_value>=10 else 292.6 if rank_value>=5 else 209.0
+
+func drive_blocks(run) -> bool:
+	return ghost and run.kit.effective_rank("d")<10
 var ghost := false
 var gun_on := true
 var gun_shots := 0
@@ -62,11 +71,11 @@ var time_scale := 1.0
 
 static func abilities() -> Dictionary:
 	return {
-		"body_slam":{"name":"Body slam","category":"active","icon":"thrust","glyph":"dash","cd":8.0,"max":2,"range":210.0,"aim":"line","cost":14,"text":"Two charges. Collide, blast and push. One wall rebound for 2× remaining distance. Touch protection only. Rank 5: stun. Rank 10: full shield through impact + 1s."},
+		"body_slam":{"name":"Body slam","category":"active","icon":"thrust","glyph":"dash","cd":8.0,"max":2,"range":210.0,"aim":"line","cost":14,"text":"Two charges. One wall rebound for 2× remaining distance. Rank 5: +40% reach and stun. Rank 10: +90% reach and impact shield."},
 		"reactor_drop":{"name":"Reactor drop","category":"ultimate","icon":"nuke","glyph":"target","cd":28.0,"max":1,"range":620.0,"aim":"ground","cost":32,"text":"Delayed wide reactor impact. Rank 5: standing inside grants a shield. Rank 10: second impact and stun."},
 		"guard_bot":{"name":"Bulwark","category":"summon","icon":"pulse_sentry","glyph":"turret","cd":16.0,"max":1,"range":340.0,"aim":"ground","cost":20,"text":"A durable decoy with a weak gun and pulse. Draws up to four ordinary enemies. Redeploy replaces it."},
 		"reserve_totem":{"name":"Reserve","category":"summon","icon":"medic_sentry","glyph":"cross","cd":10.0,"max":1,"range":340.0,"aim":"ground","cost":16,"text":"Banks repair while you are away. Return to convert reserve into hull, then energy, then a shock wave. Redeploy clears reserve."},
-		"recovery_totem":{"name":"Overclock well","category":"summon","icon":"pylon","glyph":"sun","cd":15.0,"max":1,"range":340.0,"aim":"ground","cost":20,"text":"5-second aura: double recharge and free ability energy inside. Cooldown starts when it expires."}}
+		"recovery_totem":{"name":"Overclock well","category":"summon","icon":"pylon","glyph":"sun","cd":15.0,"max":1,"range":340.0,"aim":"ground","cost":20,"text":"Double recharge and free ability energy inside. Rank 5: 7 seconds. Rank 10: 9 seconds and triple recharge. Cooldown starts on expiry."}}
 
 static func enabled(run) -> bool:
 	return run != null and run.kit != null and run.kit.loadout.get("vanguard",false)
@@ -107,21 +116,24 @@ static func rank_of(run, slot: String) -> int:
 
 static func candidates(run, kind: String) -> Array:
 	var result: Array = []
+	if kind=="": return result
+	var advanced:=true
+	for slot in KEYS.keys()+["gun","hammer"]:
+		if rank_of(run,slot)<5: advanced=false; break
 	for slot in KEYS.keys()+["gun","hammer"]:
 		var rank_value := rank_of(run,slot)
-		if (kind == "learn" and rank_value == 0) or (kind == "upgrade" and rank_value > 0 and rank_value < 10): result.append(slot)
+		if rank_value<5 or (advanced and rank_value<10): result.append(slot)
 	return result
 
 static func reward_kind(run) -> String:
 	var queue: Array = run.kit.loadout.get("rewards18",[])
 	if queue.is_empty(): return ""
-	var kind: String = queue[0]
-	if candidates(run,kind).is_empty(): kind = "upgrade" if kind == "learn" else "learn"
-	return kind if not candidates(run,kind).is_empty() else ""
+	return "upgrade" if not candidates(run,"upgrade").is_empty() else ""
 
 static func earn(run) -> void:
 	var turn: int = run.kit.loadout.reward_turn18
-	run.kit.loadout.rewards18.append("upgrade" if turn%2 == 0 else "learn")
+	# Keep the validated checkpoint queue format; both old kinds now mean one point.
+	run.kit.loadout.rewards18.append("upgrade")
 	run.kit.loadout.reward_turn18 = turn+1
 	if run.kit.loadout.rewards18.size()>256: run.kit.loadout.rewards18.pop_back()
 
@@ -176,7 +188,7 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 		if kit.energy<2 or not pending.is_empty() or slam_left>0: return false
 		ghost=true; hammer=-1; run.attacks.stop(run)
 		run.emit_event("v_drive",run.player); return true
-	if ghost: kit.last_failure="Release D"; return false
+	if drive_blocks(run): kit.last_failure="Release D"; return false
 	if slot=="p1": kit.orbit_far=not kit.orbit_far; kit.toggles[0]=true; return true
 	if slam_left>0 or (not pending.is_empty() and slot!="f"): return false
 	if kit.charges[slot]<=0: return false
@@ -194,17 +206,22 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	if slot=="f":
 		poof(run.player,kit.effective_rank(slot)); poof(target,kit.effective_rank(slot))
 		run.player=target; run.stop_movement()
+		if kit.effective_rank("f")>=10:
+			blast(run,target,110,30*kit.damage_scale("f"),"phase_hop",0,100)
+			impacts.back().rank=10
 		run.emit_event("v_blink",target)
 		return true
 	if slot=="e":
 		slam_bounced=false
-		slam_direction=(cursor-run.player).normalized(); slam_left=0.22
+		slam_direction=(cursor-run.player).normalized(); slam_left=slam_range(kit.effective_rank("e"))/SLAM_SPEED
 		touch_guard=0.4; hammer=-1; run.attacks.stop(run)
 		if kit.effective_rank(slot)>=10: shield=0.45
 		run.emit_event("v_slam",run.player); return true
 	if slot in ["x1","x2","x3"]:
 		constructs=constructs.filter(func(u): return u.id!=id)
-		constructs.append({"id":id,"pos":target,"life":5.0 if slot=="x3" else 35.0,"clock":0.3,"shots":0,"bank":0.0,"radius":125.0+kit.milestone(slot)*20,"hp":135.0*power(kit.effective_rank(slot)),"max_hp":135.0*power(kit.effective_rank(slot)),"slot":slot,"pulse":2.0,"hurt_clock":0.0})
+		var lifetime: float=(5.0+kit.milestone(slot)*2.0) if slot=="x3" else 35.0
+		constructs.append({"id":id,"pos":target,"life":lifetime,"duration":lifetime,"clock":0.3,"shots":0,"bank":0.0,"radius":125.0+kit.milestone(slot)*20,"hp":135.0*power(kit.effective_rank(slot)),"max_hp":135.0*power(kit.effective_rank(slot)),"slot":slot,"pulse":2.0,"hurt_clock":0.0})
+		constructs.back().rank=kit.effective_rank(slot)
 		poof(target,kit.effective_rank(slot)); return true
 	# 80ms anticipation: F can move the unreleased origin; world aim stays fixed.
 	pending={"slot":slot,"target":cursor,"left":0.08}
@@ -213,7 +230,7 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	return true
 
 func swing(run, cursor: Vector2) -> bool:
-	if run.state!="running" or ghost or slam_left>0 or hammer_cooldown>0 or hammer>=0 or not pending.is_empty(): return false
+	if run.state!="running" or drive_blocks(run) or slam_left>0 or hammer_cooldown>0 or hammer>=0 or not pending.is_empty(): return false
 	hammer=0.20; hammer_direction=(cursor-run.player).normalized()
 	if hammer_direction==Vector2.ZERO: hammer_direction=Vector2.RIGHT
 	hammer_cooldown=run.attacks.interval(run)
@@ -253,7 +270,7 @@ func tick(run, delta: float) -> void:
 	for trace in ghosts: trace.life-=delta
 	ghosts=ghosts.filter(func(g): return g.life>0)
 	if ghost:
-		var upkeep: float=10-maxi(0,run.kit.effective_rank("d")-1)*0.3
+		var upkeep: float=drive_upkeep(run.kit.effective_rank("d"))
 		if run.kit.energy<delta*upkeep: ghost=false; run.kit.sprint=0
 		else:
 			run.kit.energy-=delta*upkeep; run.kit.energy_spent+=delta*upkeep
@@ -281,6 +298,15 @@ func tick(run, delta: float) -> void:
 		step_slam(run,delta)
 		run.stop_movement()
 	for unit in constructs.duplicate():
+		var current_rank: int=run.kit.effective_rank(unit.slot)
+		if unit.get("rank",current_rank)!=current_rank:
+			var hull_fraction: float=unit.hp/unit.max_hp
+			unit.max_hp=135.0*power(current_rank); unit.hp=unit.max_hp*hull_fraction
+			unit.radius=125.0+run.kit.milestone(unit.slot)*20
+			if unit.id=="recovery_totem":
+				var duration: float=5.0+run.kit.milestone(unit.slot)*2.0
+				unit.life+=duration-unit.duration; unit.duration=duration
+			unit.rank=current_rank
 		unit.life-=delta; unit.clock-=delta; unit.pulse-=delta; unit.hurt_clock=maxf(0,unit.hurt_clock-delta)
 		var inside: bool=run.player.distance_to(unit.pos)<=unit.radius
 		var rank_value: int=run.kit.effective_rank(unit.slot)
@@ -292,10 +318,12 @@ func tick(run, delta: float) -> void:
 					var direction: Vector2=(Vector2(enemy.pos)-Vector2(unit.pos)).normalized()
 					if gun_bullet(run,unit.pos,direction,3.4*GUN_POWER[gun_rank(run)],reach,unit.shots,"sentry"):
 						unit.shots+=1; unit.clock=0.8*GUN_INTERVAL[gun_rank(run)]/0.24; unit["aim"]=direction
-			if unit.pulse<=0: unit.pulse=2.4; blast(run,unit.pos,unit.radius,6*power(rank_value),"bulwark",0,40)
+			if unit.pulse<=0:
+				unit.pulse=1.8 if rank_value>=5 else 2.4
+				blast(run,unit.pos,unit.radius,6*power(rank_value),"bulwark",0.3 if rank_value>=10 else 0,40)
 		elif unit.id=="reserve_totem":
-			if not inside: unit.bank=minf(86*power(rank_value),unit.bank+delta*6*power(rank_value))
-			elif unit.bank>0:
+			if not inside or rank_value>=10: unit.bank=minf(86*power(rank_value),unit.bank+delta*6*power(rank_value))
+			if inside and unit.bank>0:
 				var amount: float=minf(unit.bank,delta*45*sqrt(power(rank_value)))
 				unit.bank-=amount
 				var heal: float=minf(amount,run.max_health()-run.health); run.health+=heal; amount-=heal
@@ -305,7 +333,7 @@ func tick(run, delta: float) -> void:
 			run.kit.charges[unit.slot]=0; run.kit.recharge[unit.slot]=run.kit.cooldown(unit.slot)
 			if inside:
 				for slot in KEYS:
-					if slot!="p1" and slot!=unit.slot and run.kit.recharge[slot]>0: run.kit.recharge[slot]-=delta
+					if slot!="p1" and slot!=unit.slot and run.kit.recharge[slot]>0: run.kit.recharge[slot]=maxf(0,run.kit.recharge[slot]-delta*(2.0 if rank_value>=10 else 1.0))
 		if unit.life<=0 or unit.hp<=0: constructs.erase(unit)
 	for effect in impacts.duplicate():
 		effect.life-=delta
@@ -331,6 +359,7 @@ func blast(run, point: Vector2, radius: float, damage: float, source: String, st
 		run.hit_enemy(enemy,damage,source,(Vector2(enemy.pos)-point).normalized()*knock if ordinary else Vector2.ZERO)
 		if ordinary and stun>0: enemy.stun=stun
 	impacts.append({"kind":"slam_hit" if source=="body_slam" else "blast","pos":point,"radius":radius,"direction":slam_direction,"life":0.4,"duration":0.4,"rank":run.kit.effective_rank("e") if source=="body_slam" else 1,"source":source})
+	if source in ["bulwark","reserve","phase_hop"]: impacts.back().rank=run.kit.effective_rank({"bulwark":"x1","reserve":"x2","phase_hop":"f"}[source])
 
 func step_slam(run, delta: float) -> void:
 	var budget:=delta

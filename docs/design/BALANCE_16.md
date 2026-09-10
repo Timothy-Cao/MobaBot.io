@@ -1,5 +1,15 @@
 # 0.16 — Focused design and damage pass
 
+## Vanguard milestone / pacing follow-up · 9 September 2026
+
+Supersedes earlier mobility/tower/pacing numbers for Vanguard only. E reach: 209 / 292.6 / 397.1 at ranks 1 / 5 / 10 (1 / 1.4 / 1.9×); same movement speed, damage, two charges and one 2×-remaining wall rebound. D upkeep starts at 12/sec, tapers to 11.4 at rank 4, then 7 at rank 5 and 6 at rank 10; rank 10 removes the drive casting/hammer restriction. D is held upkeep, not a cooldown skill. F unmodified recharge is 10.8 / 6.4 / 5.4 seconds at ranks 1 / 5 / 10, costs 20 below 5 and 12 thereafter; rank 10 arrival blast has 110 radius and 30×damage_scale(f) damage (118.8 without gear/mastery/rarity). One arrival hit, not departure damage.
+
+Bulwark retains MG-linked gun output; its own damage/hull curve remains. Rank 5 pulse interval 2.4→1.8s and radius 125→145; rank 10 radius 165 plus 0.3s stun on ordinary enemies. Reserve retains its power curve (rank 5 larger bank/rate/radius); rank 10 banks even while inside, creating ongoing repair. Overclock lasts 5 / 7 / 9 seconds, with recharge 2 / 2 / 3×; free skill energy and expiry-started cooldown remain. Live upgrades update deployed hull proportionally, radius and remaining duration; they do not heal a damaged unit to full.
+
+Universal level/chest points replace alternating learn/upgrade. Earned rank 6+ requires all twelve tools at earned rank 5, including MG/hammer and initially unlearned tools. Gear bonuses do not satisfy the gate. Old high ranks are not removed; older queued learn/upgrade strings become universal points without save-schema changes. Practice 1/5/10 remains unrestricted.
+
+XP pickups grant one-third the previous XP, retaining fractional gains and prior threshold taper. Raw collected value, loot quantity, credits and chests are unchanged. Existing XP/ranks stay intact. This combination delays milestones substantially: fixed-seed Vanguard naive active/basic policies now lose in round 1 at 28.5/24.2s (idle 17.4s), versus prior basic policy reaching round 15. Policy choice and timing are sensitive to progression; this is a serious early-pacing playtest flag, not a human win-rate prediction. Enemy damage has not been lowered to hide this change.
+
 ## MG follow-up · 9 September 2026 (supersedes MG numbers below)
 
 | MG metric | Rank 1 | Rank 5 | Rank 10 |

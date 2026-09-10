@@ -149,6 +149,7 @@ static func with_starter_gun(config: Dictionary) -> Dictionary:
 	return result
 
 func ability_cost(id: String) -> float:
+	if loadout.get("vanguard",false) and id=="blink": return 12.0 if effective_rank("f")>=5 else 20.0
 	return float({"rocket": 8, "flame": 18, "nuke": 28, "laser": 40}.get(id, ENERGY_COST.get(id, ABILITIES[id].get("cost", 0))))
 
 static func deals_damage(id: String) -> bool:
@@ -176,6 +177,7 @@ func area_scale(slot: String) -> float:
 	return (1.0 + milestone(slot) * 0.25) * (1.15 if loadout.get("rules17",false) and loadout.get(slot,"") in ["flame","reap","sweep","thrust","repulsor","tractor"] else 1.0)
 
 func cast_range(slot: String) -> float:
+	if loadout.get("vanguard",false) and slot=="e": return Vanguard.slam_range(effective_rank(slot))
 	if loadout.get("vanguard",false) and slot=="w": return 650.0
 	var id: String = loadout[slot]
 	return float(ABILITIES[id].range) * (area_scale(slot) if id in ["nova", "overdrive", "blink", "dash", "lunge", "tumble", "echo_dash", "veil_dash", "hop", "vault", "pursuit", "landing"] else 1.0)
@@ -251,6 +253,7 @@ func cooldown(slot: String) -> float:
 func cooldown_at(slot: String, rank_value: int, tier_value: int = -1) -> float:
 	var tier := int(tiers.get(slot, 0)) if tier_value < 0 else tier_value
 	var base: float=4.0/0.9 if loadout.get("vanguard",false) and slot=="q" else float(ABILITIES[loadout[slot]].cd)
+	if loadout.get("vanguard",false) and slot=="f": base=8.0 if rank_value+rank_bonus>=5 else 12.0
 	return base * (1.0 - tier * 0.08) * (1.0 - SalvageProgression.bonus(mini(10,rank_value+(rank_bonus if unlocked(slot) else 0))) * 0.5) / (1.0 + cooldown_bonus)
 
 func damage_scale(slot: String) -> float:
@@ -360,7 +363,7 @@ func target_point(run, slot: String, cursor: Vector2) -> Vector2:
 
 func preview_ready(run, slot: String, cursor: Vector2) -> bool:
 	if Vanguard.enabled(run):
-		if run.vanguard.ghost or slot not in Vanguard.KEYS or not unlocked(slot) or run.vanguard.slam_left>0: return false
+		if run.vanguard.drive_blocks(run) or slot not in Vanguard.KEYS or not unlocked(slot) or run.vanguard.slam_left>0: return false
 		if slot=="p1": return true
 		if charges[slot]<=0 or (energy<ability_cost(loadout[slot]) and not run.vanguard.powered(run)): return false
 		var target:=target_point(run,slot,cursor)

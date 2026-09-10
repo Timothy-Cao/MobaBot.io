@@ -129,8 +129,9 @@ func _draw() -> void:
 			draw_arc(enemy.pos, float(enemy.radius) + 10, 0, TAU, 32, Color(CORAL, 0.55), 2, true)
 		if enemy.phase == "windup":
 			_charge_tell(enemy.pos, Vector2(enemy.pos) + Vector2(enemy.dir) * (255 * 0.65), enemy.radius + 12)
+	var loot_view:=Rect2(model.camera_origin()-Vector2.ONE*32,model.view_size+Vector2.ONE*64)
 	for pickup in model.pickups:
-		_scrap(pickup)
+		if loot_view.has_point(pickup.pos): _scrap(pickup)
 	for supply in model.supply_drops:
 		var p: Vector2 = supply.pos
 		var color: Color = {"energy": TEAL, "repair": Color("ed9285"), "coins": GOLD, "speed": Color("b7ddee"), "reset": Color("bfa6dd")}.get(supply.kind, TEAL)
@@ -344,7 +345,8 @@ func _scrap(pickup: Dictionary) -> void:
 		_line(p, p + tail * minf(18, pickup.speed * 0.025), Color(GOLD, 0.32), 3)
 	var bob := sin(visual_time * 4 + float(pickup.id)) * 1.5
 	draw_circle(p + Vector2(0, 4), 5, Color(INK, 0.6))
-	draw_set_transform(p + Vector2(0, bob), 0.3)
+	var bundle_scale: float=1.5 if pickup.value>=20 else 1.25 if pickup.value>=5 else 1.0
+	draw_set_transform(p + Vector2(0, bob), 0.3,Vector2.ONE*bundle_scale)
 	_box(Rect2(-4, -5, 8, 10), GOLD, 2, INK, 1)
 	_line(Vector2(-2, -2), Vector2(2, -2), CREAM, 1)
 	if pickup.value > 1:

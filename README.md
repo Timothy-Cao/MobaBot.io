@@ -10,6 +10,10 @@ New expeditions use the fixed **Vanguard** kit and non-modal skill progression. 
 
 ## Current Vanguard controls
 
+Latest milestone pass: universal skill points learn **or** upgrade any eligible tool. All twelve tools (including MG/hammer) must have earned rank 5 before any rank 6+ purchase. Existing higher ranks are preserved; Practice presets bypass the gate. Future Vanguard XP gain is one-third of the preceding build; current XP/ranks are retained.
+
+D rank 5 reduces upkeep; rank 10 permits casting while driving. F rank 5 reduces energy/recharge, rank 10 adds a landing blast. E travels 209 / 292.6 / 397.1 units at ranks 1 / 5 / 10. Towers gain visible hardware and stronger milestone effects. Settled nearby XP drops coalesce under load without losing value; fresh loot showers and flying pickups remain separate.
+
 E now rebounds once from walls: reflected direction, 2× the unused dash distance, at 1.5× dash speed. Another wall stops the rebound; enemy contact retains its normal blast. No extra charge or energy cost.
 
 The complete Vanguard icon family now uses the approved painterly MOBA direction: QWER plus D/F, 1–4, hammer and MG, all imported at 128px. New artwork is UI-only; combat animations and mechanics are unchanged. Exact new prompts and source hashes: `assets/vanguard_icons/REMAINING_PROVENANCE.md`.
@@ -28,7 +32,7 @@ The commanded hammer upgrades from rank 1–10 through the HUD's LMB tile. Rank 
 
 HUD: grouped 1234 modules on the left, central QWER, then D/F and mouse weapons. Flat full-width upgrade bars sit above eligible icons. QWER is only slightly larger than the other icons. Consumable 5/6 buttons are hidden from this HUD; existing keyboard shortcuts remain.
 
-Right click moves or approaches a target for hammer attacks. Left click swings the hammer; A provides attack-move. S stops movement and commanded attacks, never the permanent automatic gun. Q is Impact bolt, W Core strike, E Body slam, R Reactor drop. Hold D for Ghost drive; release it before casting. F blinks. Modules: 1 orbit near/far, 2 Bulwark, 3 Reserve, 4 Overclock well. T has no Vanguard ability.
+Right click moves or approaches a target for hammer attacks. Left click swings the hammer; A provides attack-move. S stops movement and commanded attacks, never the permanent automatic gun. Q is Impact bolt, W Core strike, E Body slam, R Reactor drop. Hold D for Ghost drive; below rank 10, release it before casting. F blinks. Modules: 1 orbit near/far, 2 Bulwark, 3 Reserve, 4 Overclock well. T has no Vanguard ability.
 
 Backtick (`) toggles the gun; MG shows OFF while disabled. Q/W each store two charges, with charge pips on the HUD; Q recharges in 4s at rank one before bonuses. Close orbit spins three times faster than before and hits more frequently. Camera lock defaults to L and can be rebound in Settings → Controls to keyboard or mouse (a mouse binding replaces that button's gameplay action).
 
@@ -38,7 +42,7 @@ E also stores two charges. Walls stop movement, including E, but no longer stop 
 
 Custom native cursors: cream/teal menu pointer, open combat crosshair, brass diamond while aiming or placing Practice enemies. Interactive UI restores the menu pointer; click positions and camera controls are unchanged.
 
-Start with gun/Q/D/F. Level and chest rewards queue alternating **upgrade / learn** opportunities. Click a small HUD **+**, or Ctrl + the skill key. The gun has its own clickable upgrade control. Choices do not pause combat; no ability replacement or binding swaps in this fixed kit. Tab toggles Build, Esc opens Settings, wheel zooms, L toggles camera lock and Space recenters.
+Start with gun/Q/D/F. Levels and chests grant universal skill points. Click a small HUD **+**, or Ctrl + the skill key. Gun and hammer have clickable upgrade controls. Choices do not pause combat; no ability replacement or binding swaps in this fixed kit. Tab toggles Build, Esc opens Settings, wheel zooms, L toggles camera lock and Space recenters.
 
 Practice uses a collapsible left dock. Choose a kit rank or individual rank, set player modifiers, and place enemies in clusters with a paused preview (default: one target dummy). Left click commits; Shift repeats; right click/Esc cancels. Tab resumes/configures. The Legacy laboratory preserves the older fitting tool. Practice grants no loot and cannot write campaign progress.
 

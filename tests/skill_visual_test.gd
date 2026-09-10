@@ -121,6 +121,9 @@ func review() -> void:
 					if rendered: await RenderingServer.frame_post_draw
 					check(snapshot(run)==state,"Vanguard renderer stays read-only")
 					check(run.vanguard.impacts.size()<32,"Vanguard effects bounded")
+					if rendered and "--milestones" in OS.get_cmdline_user_args() and tick==15 and slot in ["x1","x2","x3"]:
+						DirAccess.make_dir_recursive_absolute(folder)
+						root.get_texture().get_image().save_png(folder+"/tower-%s-%d-%s.png"%[slot,rank_value,str(reduced)])
 					if vanguard_showcase and rendered:
 						root.get_texture().get_image().save_png(folder+"/frame-%04d.png"%frame_number); frame_number+=1
 	for reduced in [false,true]:

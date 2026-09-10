@@ -43,7 +43,7 @@ static func draw(c, run) -> void:
 		var tint: Color=Color("92d1ac") if unit.id=="reserve_totem" else Color("72b9de") if unit.id=="recovery_totem" else c.TEAL
 		c.draw_arc(p,unit.radius,0,TAU,64,Color(tint,0.42),1.3,true)
 		c.draw_circle(p,unit.radius,Color(tint,0.035))
-		var age: float=(5 if unit.id=="recovery_totem" else 35)-unit.life
+		var age: float=unit.get("duration",5 if unit.id=="recovery_totem" else 35)-unit.life
 		var deployment: float=1-pow(1-clampf(age/0.24,0,1),3)
 		for i in range(3):
 			var d:=Vector2.from_angle(i*TAU/3+PI/2)
@@ -54,6 +54,19 @@ static func draw(c, run) -> void:
 		c.draw_circle(p,15,tint)
 		c.draw_circle(p,9,c.INK)
 		var grade: int=run.kit.milestone(unit.slot)
+		# Upgrades change hardware silhouettes, not just tint or aura size.
+		if grade>=1:
+			for side in [-1,1]:
+				var shoulder:=p+Vector2(side*18,-5)
+				c._box(Rect2(shoulder-Vector2(5,9),Vector2(10,18)),c.INK,2,c.PALE,2)
+				c.draw_line(shoulder-Vector2(0,5),shoulder+Vector2(0,5),tint,3,true)
+		if grade>=2:
+			c.draw_arc(p,29,0,TAU,32,Color(c.GOLD,0.6),2,true)
+			for side in [-1,1]:
+				var fin:=p+Vector2(side*14,-20)
+				c.draw_line(p+Vector2(side*8,-8),fin,c.INK,7,true)
+				c.draw_line(p+Vector2(side*8,-8),fin,c.GOLD,3,true)
+				c.draw_circle(fin,3,c.CREAM)
 		for i in range(grade+1):
 			var spoke:=Vector2.from_angle(run.time*(0.7+grade*0.3)+i*TAU/(grade+1))
 			c.draw_line(p+spoke*18,p+spoke*23,c.GOLD,3,true)
@@ -61,6 +74,11 @@ static func draw(c, run) -> void:
 			var barrel: Vector2=unit.get("aim",Vector2.RIGHT)
 			var cadence: float=0.8*Vanguard.GUN_INTERVAL[Vanguard.gun_rank(run)]/0.24
 			c.draw_line(p,p+barrel*(24-5*clampf(unit.clock/cadence,0,1)),c.PALE,9,true)
+			if grade>=1:
+				for side in [-1,1]:
+					var mount: Vector2=p+barrel.orthogonal()*side*6
+					c.draw_line(mount,mount+barrel*(26+grade*3),c.INK,5,true)
+					c.draw_line(mount,mount+barrel*(26+grade*3),c.PALE,2,true)
 			if Vanguard.gun_rank(run)>=10 and unit.get("shots",0)>0 and int(unit.shots)%5==0 and unit.clock>cadence-0.08:
 				c.draw_circle(p+barrel*25,4,c.GOLD)
 			c.draw_rect(Rect2(p+Vector2(-20,27),Vector2(40,4)),c.INK)
@@ -75,7 +93,7 @@ static func draw(c, run) -> void:
 				if not c.reduced_effects: c.draw_circle(p.lerp(run.player,fposmod(phase+0.5,1)),2,c.CREAM)
 		else:
 			c.draw_polyline(PackedVector2Array([p+Vector2(4,-8),p+Vector2(-4,1),p+Vector2(3,1),p+Vector2(-3,8)]),c.CREAM,3,true)
-			c.draw_arc(p,23,-PI/2,-PI/2+TAU*unit.life/5,40,c.GOLD,2,true)
+			c.draw_arc(p,23,-PI/2,-PI/2+TAU*unit.life/unit.get("duration",5.0),40,c.GOLD,2,true)
 			if run.player.distance_to(p)<=unit.radius:
 				for i in range(2):
 					var d:=Vector2.from_angle(run.time*2+i*PI)

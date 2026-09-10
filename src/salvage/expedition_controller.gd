@@ -231,8 +231,8 @@ func _input(event: InputEvent) -> void:
 			for slot in Vanguard.KEYS:
 				if event.keycode!=Vanguard.KEYS[slot]: continue
 				if event.ctrl_pressed: Vanguard.spend(model,slot)
-				elif _confirm_cast(slot) and not model.vanguard.ghost and model.kit.unlocked(slot): pending_attack=false; pending_cast_slot=slot
-				elif event.shift_pressed and slot in ["q","w","e","f","x1","x2","x3"] and not model.vanguard.ghost: pending_attack=false; pending_cast_slot=slot
+				elif _confirm_cast(slot) and not model.vanguard.drive_blocks(model) and model.kit.unlocked(slot): pending_attack=false; pending_cast_slot=slot
+				elif event.shift_pressed and slot in ["q","w","e","f","x1","x2","x3"] and not model.vanguard.drive_blocks(model): pending_attack=false; pending_cast_slot=slot
 				else:
 					pending_cast_slot=""
 					model.vanguard.cast(model,slot,get_global_mouse_position())
@@ -263,7 +263,7 @@ func _input(event: InputEvent) -> void:
 	super._input(event)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if screen=="running" and Vanguard.enabled(model) and model.vanguard.ghost and event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_RIGHT:
+	if screen=="running" and Vanguard.enabled(model) and model.vanguard.drive_blocks(model) and event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_RIGHT:
 		pending_attack=false; pending_cast_slot=""; mouse_moving=true
 		model.command_move(get_global_mouse_position())
 		get_viewport().set_input_as_handled(); return

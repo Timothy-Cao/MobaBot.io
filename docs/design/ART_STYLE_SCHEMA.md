@@ -2,6 +2,8 @@
 
 ## v0.18 Vanguard override
 
+9 September tower milestones: rank 5 adds paired steel-edged side housings; rank 10 adds brass crown fins and an outer collar. Bulwark adds twin barrel rails. Preserve the central barrel/cross/lightning glyph to distinguish functions. Read radius and lifetime from the deployed unit, including live upgrades; never enlarge only the decorative range. Secondary pulse accents use current skill rank. Reduced effects retains hardware and functional rings. No raster additions. Review captures: skill_visual_test `-- --milestones`.
+
 9 September follow-up: owner finds the full-detail family too polished for the world. Trial a reversible runtime 32×32 pixel grid on all twelve Vanguard icons, saturation ×0.85 and brightness ×0.97. Retain original source PNGs and 128px imports unchanged; no new raster provenance needed. This is a display filter, not replacement artwork or a pixel-art redraw. Review actual combat size in normal/reduced effects before judging style fit.
 
 Complete Vanguard icon follow-up: owner approves QWER's painterly MOBA direction. D/F, 1–4, hammer and MG now match it with generated 128px imports. Distinct silhouettes: cyan propulsion boot, violet blink rifts, three orbiting blades, armored turret, green repair reservoir, blue open-fork well, block hammer, multi-barrel gun. Preserve QWER unchanged. First D rocket-shaped draft rejected for confusion with Q. Exact prompts/hashes in `assets/vanguard_icons/REMAINING_PROVENANCE.md`. This extends icons only, not world animation. New eight still need owner approval at combat size.
