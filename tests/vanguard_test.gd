@@ -269,7 +269,7 @@ func playtest_refinements() -> void:
 	check(is_equal_approx(run.vanguard.orbit_angle,1.02),"Close orbit spins three times faster")
 	var angle: float=run.vanguard.orbit_angle
 	run.vanguard.cast(run,"p1",run.player); run.vanguard.tick(run,0.1)
-	check(is_equal_approx(run.vanguard.orbit_angle-angle,0.16),"Far orbit retains speed and continuous angle")
+	check(is_equal_approx(run.vanguard.orbit_angle-angle,1.02),"Far orbit uses the same fast speed and continuous angle")
 	var keys: Dictionary=BotKeyboard.SYSTEM_DEFAULTS.duplicate()
 	keys.lock=-8; check(BotKeyboard.valid_system(keys),"Mouse side camera binding valid")
 	keys.lock=KEY_G; check(BotKeyboard.valid_system(keys),"Unused camera key valid")

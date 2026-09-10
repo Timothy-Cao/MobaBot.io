@@ -240,7 +240,7 @@ func release(run) -> void:
 	pending.clear()
 
 func tick(run, delta: float) -> void:
-	orbit_angle=fposmod(orbit_angle+delta*(1.6 if run.kit.orbit_far else 10.2),TAU)
+	orbit_angle=fposmod(orbit_angle+delta*10.2,TAU)
 	if run.kit.passive_active("orbit"):
 		while run.orbit.size()<mini(run.capacity(),3+int(run.rank_of("grinder"))/2):
 			run.orbit.append({"slot":run.orbit.size(),"hits":9999,"cooldown":0.0})

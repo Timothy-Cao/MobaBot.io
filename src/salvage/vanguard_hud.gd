@@ -15,7 +15,7 @@ static func icon(slot: String) -> String:
 static func detail(run, slot: String) -> String:
 	if slot=="hammer": return "Hammer · Rank %d\n%.0f head damage · %.0f reach\n5: wider sweep. 10: swing while moving."%[Vanguard.hammer_rank(run),run.attacks.damage(run),run.attacks.attack_range(run)]
 	if slot=="gun": return "Machine gun · Rank %d\n%.2f damage · %.2f shots/sec\n5: fires during E / Ghost drive.\n10: every fifth shot deals 2× damage, reaches 450 and hits up to four targets.\nAlso upgrades Bulwark's gun. `: toggle; S never disables it."%[Vanguard.gun_rank(run),run.attacks.auto_damage(run),1/run.attacks.auto_interval(run)]
-	if slot=="p1": return "Orbit tools\n1: close / fast or far / slow. 2 energy/sec.\nPermanent blades. Rank increases damage and blade count."
+	if slot=="p1": return "Orbit tools\n1: close / far. Always fast. 2 energy/sec.\nPermanent blades. Rank increases damage and blade count."
 	if slot=="x1": return "Bulwark\nGun damage, speed and fifth shot use MG rank.\nBulwark ranks improve hull and pulse.\n%.1fs recharge · 20 energy"%run.kit.cooldown(slot)
 	if slot=="d": return "Ghost drive\nHold D: +%.0f%% speed, %.1f energy/sec. Release to cast.\nNo invulnerability. The gun and deployed machines continue."%[65+maxi(0,run.kit.effective_rank("d")-1)*3.5,10-maxi(0,run.kit.effective_rank("d")-1)*0.3]
 	if slot=="w": return "Core strike · 2 charges\n38 base edge damage / 76 center. 100 radius; 40 center.\nRank 5: wider impact. Rank 10: brief stun.\n%.1fs per charge · 18 energy"%run.kit.cooldown("w")

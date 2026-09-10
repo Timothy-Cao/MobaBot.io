@@ -10,6 +10,8 @@ New expeditions use the fixed **Vanguard** kit and non-modal skill progression. 
 
 ## Current Vanguard controls
 
+Vanguard 1 always spins at the fast (10.2 rad/s) speed. Its toggle changes near/far radius, not rotation speed.
+
 The commanded hammer upgrades from rank 1–10 through the HUD's LMB tile. Rank 5 expands its reach and sweep; rank 10 allows swings while moving, including attack-move. Practice's Build rank selector includes Hammer and Gun separately. Vanguard damage has pronounced rank-5/10 spikes; see `docs/design/BALANCE_16.md` for the measured curve.
 
 HUD: grouped 1234 modules on the left, central QWER, then D/F and mouse weapons. Flat full-width upgrade bars sit above eligible icons. QWER is only slightly larger than the other icons. Consumable 5/6 buttons are hidden from this HUD; existing keyboard shortcuts remain.
