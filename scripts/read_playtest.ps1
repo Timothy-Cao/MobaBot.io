@@ -32,6 +32,7 @@ $records = @(
             damage_by_source = $entry.damage_by_source
             casts = $entry.casts
             earned_tool_ranks = $entry.earned_tool_ranks
+            progression_samples = $entry.progression_samples
             energy_spent = $entry.energy_spent
             equipment = $entry.equipment
             render_timing = $entry.render_timing

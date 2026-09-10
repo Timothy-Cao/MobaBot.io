@@ -11,6 +11,25 @@ const ROUTES := [
 	[["Signal gain", "summon_damage", 0.06], ["Long battery", "duration", 0.08], ["Linked reactor", "regen", 0.5], ["Support frame", "health", 8], ["Relay power", "summon_damage", 0.08], ["Reserve battery", "duration", 0.1], ["Parallel command", "capacity", 1], ["Command core", "summon_damage", 0.2]],
 ]
 static var TREE: Dictionary = make_nodes()
+static var UNIFIED: Dictionary = make_unified()
+var unified := false
+
+static func make_unified() -> Dictionary:
+	var result: Dictionary={}
+	var paths: Array=[["b0_1","b0_3","b0_5","b0_7"],["b2_0","b2_2","b2_4","b2_6"],["b3_0","b3_2","b3_4","b3_6"]]
+	result.b0_0=TREE.b0_0.duplicate(); result.b0_0.name="Field training"; result.b0_0.max=1; result.b0_0.value=0.08
+	for branch in range(3):
+		for depth in range(4):
+			var id: String=paths[branch][depth]
+			result[id]=TREE[id].duplicate(); result[id].branch=branch; result[id].index=depth
+			result[id].parent="b0_0" if depth==0 else paths[branch][depth-1]
+	result.b0_1.value=0.08
+	result.b0_3.name="Fast cycle"; result.b0_3.stat="haste"; result.b0_3.value=0.06
+	result.b2_2.value=0.35
+	result.b3_2.name="Recycling loop"; result.b3_2.stat="regen"; result.b3_2.value=0.6
+	return result
+
+func nodes() -> Dictionary: return UNIFIED if unified else TREE
 
 static func make_nodes() -> Dictionary:
 	var nodes := {}
@@ -22,12 +41,12 @@ static func make_nodes() -> Dictionary:
 	return nodes
 
 func available(power_level: int) -> int:
-	return maxi(0, 1 + (power_level - 1) * 2 - spent)
+	return maxi(0, 1 + (power_level - 1) * (1 if unified else 2) - spent)
 
 func value(stat: String) -> float:
 	var total := 0.0
 	for id in ranks:
-		if TREE.has(id) and TREE[id].stat == stat: total += TREE[id].value * int(ranks[id])
+		if nodes().has(id) and nodes()[id].stat == stat: total += nodes()[id].value * int(ranks[id])
 	return total
 
 func rank_of(id: String) -> int:
@@ -36,8 +55,8 @@ func rank_of(id: String) -> int:
 	return int(ranks.get(id, 0))
 
 func can_buy(id: String, power_level: int) -> bool:
-	if read_only or not TREE.has(id) or available(power_level) < 1: return false
-	var node: Dictionary = TREE[id]
+	if read_only or not nodes().has(id) or available(power_level) < 1: return false
+	var node: Dictionary = nodes()[id]
 	return rank_of(id) < node.max and (node.parent.is_empty() or rank_of(node.parent) > 0)
 
 func buy(run, id: String) -> bool:
@@ -52,8 +71,8 @@ func refund(run) -> bool:
 	run.exp.sync_stats(run)
 	return true
 
-static func text(id: String, vanguard: bool=false) -> String:
-	var node: Dictionary = TREE[id]
+static func text(id: String, vanguard: bool=false, compact: bool=false) -> String:
+	var node: Dictionary = (UNIFIED if compact else TREE)[id]
 	var stat: String = node.stat
 	if vanguard and stat=="luck": return "+%d%% relative special-drop chance per rank. Shared cap: 5× base chance."%roundi(node.value*400)
 	if vanguard and stat=="magnet": return "+%d pickup radius per rank. Maximum: %d."%[node.value,Vanguard.TURRET_RANGE]

@@ -2,17 +2,7 @@ class_name ReviewView
 extends RefCounted
 
 static func upgrade_hint(run, slot: String) -> String:
-	var rank_value:=Vanguard.rank_of(run,slot)+1
-	match slot:
-		"d": return "Lower energy upkeep.\nRank 5: better endurance.\nRank 10: cast while driving."
-		"f": return "Instant reposition across obstacles.\nRank 5: second stored charge.\nRank 10: landing blast."
-		"w": return "Double center damage and stun.\nOne-second vulnerability on hit.\nSet up R or a melee combo."
-		"e": return "Dash into an empowered hammer swing.\nRanks 5/10 increase reach.\nTwo stored charges."
-		"r": return "Wide delayed impact.\nRank 5: shield if inside.\nRank 10: follow-up explosion."
-		"q": return "Direct rocket and impact explosion.\nMore damage with each rank.\nRanks 5/10 expand the blast."
-		"gun": return "More damage and faster fire.\nRank 5: fires while driving/slamming.\nRank 10: empowered fifth shot."
-		"hammer": return "Stronger close-range hits.\nRank 5: wider sweep.\nRank 10: attack while moving."
-	return "Rank %d"%rank_value
+	return UpgradePreview.text(run,slot)
 
 static func overview(ui, run) -> void:
 	var slots: Array=ReviewRules.CORE+ReviewRules.MODULES
@@ -66,7 +56,7 @@ static func upgrades(ui, run) -> void:
 		ui._ability_icon(card,VanguardHud.icon(slot),Rect2(99,24,78,78))
 		ui._label(card,name,Rect2(12,121,252,38),21,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
 		ui._label(card,"Learn" if rank_value==0 else "Rank %d → %d"%[rank_value,rank_value+1],Rect2(12,167,252,28),18,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
-		var hint: Label=ui._label(card,upgrade_hint(run,slot),Rect2(14,207,248,78),12,ui.MUTED)
+		var hint: Label=ui._label(card,upgrade_hint(run,slot),Rect2(14,201,248,95),12,ui.MUTED)
 		hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		card.tooltip_text=VanguardHud.detail(run,slot)
 		if i==0: card.grab_focus()

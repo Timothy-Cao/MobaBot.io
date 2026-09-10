@@ -486,6 +486,9 @@ func update_hud(model: SalvageRun) -> void:
 			var name_text: String = CombatReadability.enemy_name(enemy)
 			var phase_text := "EXPOSED" if enemy.phase == "recover" else ("OVERCLOCKED" if enemy.enraged else "")
 			boss_label.text = name_text
+			if ReviewRules.enabled(model) and enemy.has("exp_boss"):
+				var left:=maxi(0,ceili(ReviewRules.BOSS_ENRAGE_SECONDS-(model.stage_time-model.exp.round_seconds())))
+				boss_label.text+=" · OVERLOAD" if left==0 else " · Overload in %d:%02d"%[left/60,left%60]
 			if not phase_text.is_empty(): boss_label.text += " / " + phase_text
 			boss_bar.max_value = enemy.max_hp
 			boss_bar.value = enemy.hp

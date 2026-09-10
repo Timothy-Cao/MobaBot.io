@@ -3,12 +3,24 @@ extends RefCounted
 ## September human-review rules. Opt-in new runs preserve older checkpoints.
 const CORE := ["q","w","e","r","d","f","gun","hammer"]
 const MODULES := ["p1","x1","x2","x3"]
+const BOSS_ENRAGE_SECONDS := 300.0
+
+static func boss_overtime(run) -> float:
+	if not enabled(run) or run.exp.practice or not run.boss_spawned or run.boss_defeated: return 0.0
+	return maxf(0,run.stage_time-run.exp.round_seconds()-BOSS_ENRAGE_SECONDS)
+
+static func specialist_roster(round_index: int) -> Array:
+	# Teach pursuit and aimed shots first; add support/area denial next, EMP in Stage 2.
+	if round_index==0: return ["breacher","volley","lancer","scatter"]
+	if round_index<3: return ["breacher","mender","scatter","lancer","volley","bomber"]
+	return ["breacher","mender","scatter","lancer","volley","bomber","emp"]
 
 static func enabled(run) -> bool:
 	return Vanguard.enabled(run) and run.kit.loadout.get("review19",false)
 
 static func enable(run) -> void:
 	run.kit.loadout.review19=true
+	run.kit.loadout.unified_mastery=true; run.mastery.unified=true
 	run.kit.charges.f=1 if run.kit.effective_rank("f")<5 else 2
 	RunTerrain.build(run)
 
@@ -110,7 +122,7 @@ static func estimate_rank(round_index: int) -> int:
 	return mini(10,1+round_index/2)
 
 static func reference_w(round_index: int) -> float:
-	return 76.0*Vanguard.power(estimate_rank(round_index))
+	return 76.0*1.2*Vanguard.power(estimate_rank(round_index))
 
 static func scale_role(run, enemy: Dictionary) -> void:
 	if run.exp.practice or enemy.get("review_scaled",false): return

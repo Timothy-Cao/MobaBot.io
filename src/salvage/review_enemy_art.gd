@@ -19,6 +19,7 @@ static func draw(art) -> void:
 				if e.phase=="emp_wave": art.draw_arc(e.emp_target,radius,0,TAU,64,art.CREAM,4,true)
 		if e.get("melee_phase","")=="aim": art.draw_arc(e.pos,125,Vector2(e.dir).angle()-PI*0.45,Vector2(e.dir).angle()+PI*0.45,32,art.CORAL,3,true)
 		if not e.get("review_boss",false): continue
+		if e.get("overload",false): art.draw_arc(e.pos,e.radius+19,0,TAU,32,art.CORAL,5,true)
 		if e.phase=="pursuit":
 			art.draw_arc(e.pos,e.radius+12,0,TAU,32,art.CORAL,3,true)
 		if e.phase not in ["telegraph","attack"]: continue

@@ -78,6 +78,14 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 	if c.get("class","")!="shared" and not BotExpedition.CLASSES.has(c.get("class","")): return false
 	if not BotKeyboard.valid_config(c.loadout): return false
 	if c.loadout.has("review19") and (c.loadout.review19!=true or not c.loadout.get("vanguard",false)): return false
+	if c.loadout.has("unified_mastery"):
+		if c.loadout.unified_mastery!=true or not c.loadout.get("review19",false): return false
+		if not integer(c.get("level"),1,2147483647): return false
+		if not c.get("tree") is Dictionary or not integer(c.get("spent"),0,int(c.get("level",0))): return false
+		for id in c.tree:
+			if not ExpeditionTree.UNIFIED.has(id) or not integer(c.tree[id],0,ExpeditionTree.UNIFIED[id].max): return false
+			var parent: String=ExpeditionTree.UNIFIED[id].parent
+			if c.tree[id]>0 and parent!="" and c.tree.get(parent,0)<=0: return false
 	if c.loadout.has("vanguard"):
 		if not integer(c.loadout.get("hammer_rank",1),1,10): return false
 		if not c.get("bindings") is Dictionary: return false
@@ -203,6 +211,8 @@ func values(id: String) -> Dictionary:
 	var factor: float=[1.0,1.6,2.4,3.5,5.0][data.tier-1]
 	var result: Dictionary={"health":(7.0 if data.slot in ["helmet","legs","flower","cape"] else 2.0)*factor,"resistance":(4.0 if data.slot=="chest" else 1.0)*factor}
 	if data.slot=="boots": result.speed=0.085*factor
+	if data.tier>=3 and data.slot=="helmet": result.regen=0.4*(data.tier-2)
+	if data.tier>=3 and data.slot=="chest": result.health_regen=0.25*(data.tier-2)
 	return result
 
 func item_text(id: String) -> String:
@@ -275,6 +285,7 @@ func resume_into(run) -> bool:
 		if Vanguard.enabled(run) and slot in ["q","w","e"]: run.kit.charges[slot]=2
 		run.kit.recharge[slot] = 0.0
 	run.mastery.ranks = c.tree.duplicate(); run.mastery.spent = int(c.spent)
+	run.mastery.unified=c.loadout.get("unified_mastery",false)
 	run.level = int(c.level); run.total_xp = int(c.xp); run.next_level = int(c.next)
 	expedition.pending_chests = int(c.pending); expedition.chests_opened = int(c.opened); expedition.field_credits = int(c.field)
 	expedition.pending_items.assign(c.items)

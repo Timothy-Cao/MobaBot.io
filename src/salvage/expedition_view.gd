@@ -177,6 +177,7 @@ static func gear(game) -> void:
 	if not collection.message.is_empty(): ui._label(ui.overlay,collection.message,Rect2(48,478,858,25),12,ui.CORAL)
 
 static func mastery(ui,run) -> void:
+	if run.mastery.unified: UnifiedMasteryView.draw(ui,run); return
 	ui._label(ui.overlay,"◇ %d" % run.mastery.available(run.level),Rect2(48,94,140,27),19,ui.GOLD,true)
 	var detail: Label = ui._label(ui.overlay,"",Rect2(48,468,649,36),12,ui.MUTED)
 	detail.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART

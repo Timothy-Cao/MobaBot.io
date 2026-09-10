@@ -87,6 +87,8 @@ static func enabled(run) -> bool:
 static func setup(run, rank_value: int = 0) -> void:
 	BotKeyboard.enable(run)
 	run.kit.loadout.erase("review19"); run.kit.emp_left=0
+	run.kit.loadout.erase("unified_mastery")
+	if run.mastery is ExpeditionTree: run.mastery.unified=false
 	var kit: MobaKit = run.kit
 	kit.loadout["vanguard"] = true
 	kit.loadout["rewards18"] = []

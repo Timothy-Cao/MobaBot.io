@@ -1,5 +1,7 @@
 # Deliberate combat · 10 September human-review revision
 
+Follow-up override: [0.19.1 progression research and implementation](PROGRESSION_RESEARCH_20.md) supersedes this document's deferred mastery/regen status and its W reference table. New runs have a unified tree; numerical cards, delayed EMP and timed overload are implemented. The original 0.19 decisions below remain historical evidence.
+
 New expeditions opt into `review19`, build family `vanguard-19-deliberate-combat`. Existing checkpoints keep their previous rules and learned tools. Primary Practice uses the new combat rules; Legacy laboratory remains a compatibility tool. No player collection reset, new bitmap assets, music replacement or multiplayer work.
 
 ## Approved decisions

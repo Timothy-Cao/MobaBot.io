@@ -30,6 +30,7 @@ Useful evidence: result, final route/stage/ascension, level/kills, damage receiv
 Limits:
 
 - Final aggregate is not a per-round timeline. Recent damage keeps only a bounded tail. Some projectile causes are generic; do not confidently attribute them to a specific enemy.
+- 0.19.1 adds `progression_samples`: the most recent 96 completed 15-second simulation intervals, with contemporaneous route, ranks, level, mastery spending, field credits and boss HP. Damage is credited HP removed (overkill excluded), across all targets; it is not single-target boss DPS, attempted damage or a hit-rate estimate. Intervals start afresh after Continue and round transitions, and do not include paused decision time. An incomplete final interval is not recorded. Old results have no samples; never manufacture them.
 - Continue restores some campaign counters but not every damage/cast counter. Mark resumed runs explicitly. Do not blindly divide damage by cumulative restored time or compare with fresh-run DPS.
 - No hit-rate estimator, attempted/failed-cast history, positioning replay, pickup route, audio recording or evidence that an effect felt satisfying. Cast counts alone don't explain why something went unused.
 - Frame timings sample a bounded part of running gameplay (initial warmup excluded), not every frame of a long expedition. CPU simulation probes are not GPU FPS. Wall/screen timing is process-local, not a complete resumed campaign clock.

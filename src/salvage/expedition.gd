@@ -48,6 +48,9 @@ var god_mode := true
 var free_energy := true
 var fast_cooldowns := false
 var threat_wave := 0
+var progression_samples: Array[Dictionary]=[]
+var sample_time := -1.0
+var sample_damage: Dictionary={}
 
 func enable_revision(run) -> void:
 	revised = true
@@ -120,6 +123,7 @@ func incoming(run, hull_units: float) -> float:
 	if Vanguard.enabled(run) and not practice:
 		value*=stage_damage(ROUTE[route_index][0])*round_damage()
 		if encounter_spawned and ROUTE[route_index][1] in ["boss","final"]: value*=1.25
+		if ReviewRules.enabled(run): value*=1.0+minf(9.0,ReviewRules.boss_overtime(run)/10.0)
 	if run.kit.extra.roll_left > 0: value *= 0.65
 	if run.kit.extra.flywheel >= 1: value *= 0.85
 	return value
@@ -175,6 +179,7 @@ static func difficulty_text(value: int) -> String:
 	return "\n".join(rules)
 
 func enter(run) -> void:
+	sample_time=-1; sample_damage.clear()
 	if Vanguard.enabled(run): run.vanguard.clear(); run.kit.emp_left=0
 	run.stage = mini(3, int(ROUTE[route_index][0])) # Legacy renderer sectors, not campaign ownership.
 	run.stage_time = 0; run.boss_spawned = false; run.boss_defeated = false
@@ -224,7 +229,7 @@ func spawns(run, delta: float) -> void:
 			var roster: Array=["lancer","volley","bomber"]
 			if Vanguard.enabled(run):
 				roster=["breacher","volley","lancer","scatter"] if route_index==0 else ["breacher","mender","scatter","lancer","volley","bomber"]
-				if ReviewRules.enabled(run) and route_index>=1: roster.append("emp")
+				if ReviewRules.enabled(run): roster=ReviewRules.specialist_roster(route_index)
 			RangedThreats.spawn(run,roster[(threat_index+route_index-1)%roster.size()])
 	run.spawn_clock -= delta
 	if run.spawn_clock <= 0:
@@ -260,6 +265,7 @@ func level_up(run) -> void:
 
 func finish_step(run, delta: float) -> void:
 	if run.state != "running": return
+	if ReviewRules.enabled(run) and not practice: RunDiagnostics.sample_progression(run)
 	if practice:
 		if god_mode: run.health = run.max_health()
 		if free_energy: run.kit.energy = run.kit.energy_max()

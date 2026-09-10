@@ -56,7 +56,18 @@ static func boss(run, e: Dictionary, delta: float) -> void:
 	if not e.get("review_boss",false):
 		e.review_boss=true; e.radius=48.0; e.sequence=0; e.phase="approach"; e.clock=0.7
 		e.summon_clock=9.0; e.shot_clock=0.0; e.attack="fan"; e.pursuit=0.0
-	e.enraged=e.hp<e.max_hp*0.5
+	var overtime:=ReviewRules.boss_overtime(run) if e.has("exp_boss") else 0.0
+	e.overload=overtime>0
+	e.enraged=e.hp<e.max_hp*0.5 or e.overload
+	if e.overload:
+		e.overload_clock=float(e.get("overload_clock",0))-delta
+		if e.overload_clock<=0:
+			e.overload_clock=maxf(0.55,2.0-overtime/60.0)
+			# Rotating gaps remain physical exits; the deadline never directly sets a loss.
+			for i in range(20):
+				if i%10<2: continue
+				var aim:=Vector2.from_angle(i*TAU/20+run.time*0.22)
+				run._add_projectile(Vector2(e.pos)+aim*e.radius,aim*360,1,"hostile",0,3.0)
 	e.clock-=delta; e.summon_clock-=delta
 	var offset: Vector2=run.player-e.pos
 	var direction:=offset.normalized()
@@ -116,5 +127,5 @@ static func boss(run, e: Dictionary, delta: float) -> void:
 				if e.burst==0:
 					e.burst=1
 					if offset.length()<155 and absf(Vector2(e.dir).angle_to(offset))<PI*0.6: run.hurt_player(e.pos,"Boss melee sweep",3)
-		if e.clock<=0: e.phase="recover"; e.clock=0.85 if e.enraged else 1.15
+		if e.clock<=0: e.phase="recover"; e.clock=0.45 if e.overload else 0.85 if e.enraged else 1.15
 	elif e.phase=="recover" and e.clock<=0: e.phase="approach"; e.clock=0.7

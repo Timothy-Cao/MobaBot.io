@@ -68,7 +68,8 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 				if run.health<run.max_health()*0.4: run.use_consumable(0)
 				if run.kit.energy<20: run.use_consumable(1)
 				if run.mastery.available(run.level)>0:
-					for id in ["b0_0","b0_1","b3_1","b2_0","b2_1","b3_3","b0_3","b2_2","b2_4"]:
+					var path: Array=["b0_0","b0_1","b3_0","b3_2","b2_0","b2_2","b0_3","b2_4"] if run.mastery.unified else ["b0_0","b0_1","b3_1","b2_0","b2_1","b3_3","b0_3","b2_2","b2_4"]
+					for id in path:
 						if run.mastery.can_buy(id,run.level): run.mastery.buy(run,id); break
 			var before:=Time.get_ticks_usec()
 			run.step(1.0/30,Vector2.ZERO)

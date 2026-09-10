@@ -109,8 +109,55 @@ func execute() -> void:
 		check(run.projectiles.size()<=run.MAX_PROJECTILES,"Boss projectile budget")
 	ReviewRules.terrain(run)
 	check(run.kit.extra.walls.all(func(w): return w.width>=65),"Thick Practice-style campaign terrain")
+	followup_checks()
 	await ui_checks()
 	print("REVIEW RULES: %d checks, %d failures"%[checks,failures]); quit(0 if failures==0 else 1)
+
+func followup_checks() -> void:
+	var run:=fresh(4)
+	var collection:=ForgeEquipment.new()
+	var snapshot:=collection.pack_run(run)
+	for slot in ReviewRules.CORE:
+		var label:=UpgradePreview.text(run,slot)
+		check(label.contains("→") and label.split("\n").size()<=5,"Compact numerical preview: "+slot)
+	check(collection.pack_run(run)==snapshot,"Preview does not mutate simulation or RNG")
+	var preview:=UpgradePreview.stats(run,"w",5)
+	run.kit.ranks.w=5; run.vanguard.pending={"slot":"w","target":run.player}; run.vanguard.release(run)
+	check(is_equal_approx(preview["Center damage"],run.vanguard.impacts.back().damage*2),"Card matches actual W damage")
+	check(UpgradePreview.text(run,"f").contains("Charges  1 → 2"),"F card exposes charge milestone")
+	run.kit.rank_bonus=1; run.kit.ranks.f=9
+	check(UpgradePreview.text(run,"f").contains("Equipment already"),"Effective-rank cap never promises false gains")
+	run=fresh()
+	check(run.mastery.nodes().size()==13 and run.mastery.can_buy("b0_0",1),"Unified mastery has 13 nodes and one starting point")
+	for id in run.mastery.nodes():
+		if id!="b0_0": check(not run.mastery.can_buy(id,25),"Branches require root")
+	check(run.mastery.buy(run,"b0_0"),"Buy shared root")
+	run.level=5
+	for id in ["b0_1","b2_0","b3_0"]: check(run.mastery.can_buy(id,5),"Three branches unlock after root")
+	check(run.mastery.buy(run,"b3_0") and run.mastery.buy(run,"b3_2"),"Utility path buys energy regeneration")
+	check(run.mastery.value("regen")==0.6,"Unified mastery feeds actual resource stats")
+	collection.checkpoint=collection.pack_run(run)
+	check(ForgeEquipment.valid_checkpoint(collection.checkpoint),"Unified checkpoint validates")
+	var restored:=fresh()
+	check(collection.resume_into(restored) and restored.mastery.unified and restored.mastery.value("regen")==0.6,"Unified mastery resumes with same effects")
+	var corrupt:=collection.checkpoint.duplicate(true); corrupt.tree.erase("b0_0"); corrupt.spent-=1
+	check(not ForgeEquipment.valid_checkpoint(corrupt),"Disconnected mastery save rejected")
+	check(collection.values("dynamo_helmet").regen>0 and collection.values("dynamo_chest").health_regen>0,"Middle-tier equipment offers regeneration")
+	check("emp" not in ReviewRules.specialist_roster(1) and "emp" in ReviewRules.specialist_roster(3),"EMP introduced in stage two")
+	run=fresh(); run.exp.route_index=2; run.boss_spawned=true; run.stage_time=run.exp.round_seconds()+ReviewRules.BOSS_ENRAGE_SECONDS
+	var incoming: float=run.exp.incoming(run,1)
+	check(ReviewRules.boss_overtime(run)==0,"Full five-minute boss window")
+	run.stage_time+=30
+	check(is_equal_approx(run.exp.incoming(run,1),incoming*4),"Overload damage ramps after deadline")
+	DemoCampaign.spawn_special(run,"foreman"); var boss: Dictionary=run.enemies.back(); boss.exp_boss=1
+	ReviewEnemies.boss(run,boss,0)
+	check(boss.overload and run.state=="running" and run.projectiles.size()>0,"Overload adds physical threats without forced loss")
+	run.exp.practice=true; check(ReviewRules.boss_overtime(run)==0,"Practice excluded from timed overload")
+	run=fresh(); run.time=1000; run.damage_dealt={"hammer":10000.0}
+	RunDiagnostics.sample_progression(run); run.time+=15; run.damage_dealt.hammer+=150
+	RunDiagnostics.sample_progression(run)
+	check(run.exp.progression_samples.size()==1 and run.exp.progression_samples[0].credited_damage_per_second==10,"Sample uses interval delta, not resumed aggregate")
+	check(run.exp.progression_samples[0].ranks.q==1,"Sample records contemporaneous ranks")
 
 func capture(game, name: String) -> void:
 	await process_frame; await process_frame
