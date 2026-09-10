@@ -58,12 +58,13 @@ func review() -> void:
 	title=Label.new(); title.position=Vector2(30,25); title.add_theme_font_size_override("font_size",22)
 	root.add_child(title)
 	var showcase: bool="--showcase" in OS.get_cmdline_user_args()
+	var vanguard_showcase: bool="--vanguard-showcase" in OS.get_cmdline_user_args()
 	var rendered: bool=DisplayServer.get_name()!="headless"
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--folder="): folder=arg.trim_prefix("--folder=")
-	if showcase and rendered: DirAccess.make_dir_recursive_absolute(folder)
+	if (showcase or vanguard_showcase) and rendered: DirAccess.make_dir_recursive_absolute(folder)
 	var ids: Array=SHOWCASE if showcase else []
-	if not showcase:
+	if not showcase and not vanguard_showcase:
 		for category in ["active","ultimate","speed","mobility","summon"]: ids.append_array(BotSkillCatalog.modern_ids(category))
 	for id in ids:
 		for rank_value in ([5] if showcase else [0,5,10]):
@@ -88,25 +89,37 @@ func review() -> void:
 					check(art.effects.size()<=(65 if reduced else 180),"Visual event pool stays bounded")
 					if showcase and rendered:
 						root.get_texture().get_image().save_png(folder+"/frame-%04d.png"%frame_number); frame_number+=1
-	for rank_value in [1,5,10]:
-		for reduced in [false,true]:
+	for rank_value in ([5,10] if vanguard_showcase else [1,5,10]):
+		for reduced in ([false] if vanguard_showcase else [false,true]):
 			for slot in Vanguard.KEYS.keys()+["hammer","gun"]:
 				var run:=fixture("rocket",0)
 				BotKeyboard.enable(run); run.exp.enable_revision(run); Vanguard.setup(run,rank_value)
 				run.projectiles.clear(); run.kit.extra.walls.clear()
 				art.model=run; art.effects.clear(); art.reduced_effects=reduced
+				art.visual_time=0; art.auto_flash=0; art.cast_pose=0
+				var target: Vector2=run.player+(Vector2(80,45) if slot in ["x1","x2","x3"] else Vector2(160,0))
+				title.text="Vanguard / %s / Rank %d"%[slot.to_upper(),rank_value]
 				if slot=="gun":
 					run.vanguard.gun_shots=4; run.attacks.auto_cooldown=0; run.attacks._fire_auto(run)
 					check(not run.projectiles.is_empty(),"MG milestone visual shot")
-				else: check(run.vanguard.swing(run,run.player+Vector2(160,0)) if slot=="hammer" else run.vanguard.cast(run,slot,run.player+Vector2(160,0)),"Vanguard visual cast")
-				for tick in range(30):
+				else: check(run.vanguard.swing(run,target) if slot=="hammer" else run.vanguard.cast(run,slot,target),"Vanguard visual cast")
+				if slot=="x2": run.vanguard.constructs[0].bank=70; run.health=30
+				for tick in range(60 if vanguard_showcase else 30):
+					run.time+=1.0/30
 					run.vanguard.tick(run,1.0/30)
-					if tick not in [0,6,15,29]: continue
+					run._projectile_step(1.0/30)
+					if slot=="gun": run.attacks.auto_cooldown-=1.0/30; run.attacks._fire_auto(run)
+					if slot=="d": run.velocity=Vector2(120,0); run.player+=Vector2(2,0)
+					for event in run.events: art.receive(event)
+					run.events.clear(); art._process(1.0/30)
+					if not vanguard_showcase and tick not in [0,6,15,29]: continue
 					var state:=snapshot(run)
 					art.queue_redraw(); await process_frame
 					if rendered: await RenderingServer.frame_post_draw
 					check(snapshot(run)==state,"Vanguard renderer stays read-only")
 					check(run.vanguard.impacts.size()<32,"Vanguard effects bounded")
+					if vanguard_showcase and rendered:
+						root.get_texture().get_image().save_png(folder+"/frame-%04d.png"%frame_number); frame_number+=1
 	for reduced in [false,true]:
 		art.reduced_effects=reduced; art.effects.clear()
 		var limit: int=65 if reduced else 180

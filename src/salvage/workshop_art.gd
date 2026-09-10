@@ -23,6 +23,9 @@ var preview_slot := ""
 var preview_attack := false
 var cursor_world := Vector2.ZERO
 var cast_pose := 0.0
+var auto_flash := 0.0
+var auto_direction := Vector2.RIGHT
+var auto_empowered := false
 var placement_points: Array[Vector2] = []
 var placement_valid := false
 var placement_radius := 25.0
@@ -34,6 +37,7 @@ func _process(delta: float) -> void:
 	visual_time += delta
 	shot_recoil = maxf(0, shot_recoil - delta * 6)
 	cast_pose = maxf(0, cast_pose-delta*3.5)
+	auto_flash=maxf(0,auto_flash-delta)
 	shake = maxf(0, shake - delta * 20)
 	for effect in effects:
 		effect.age += delta
@@ -45,7 +49,11 @@ func receive(event: Dictionary) -> void:
 	if kind in ["shot","heavy_shot"]:
 		shot_recoil = 1.0
 		return
-	if kind == "auto_shot": return
+	if kind == "auto_shot":
+		if Vanguard.enabled(model):
+			auto_flash=0.065; auto_direction=model.aim
+			auto_empowered=Vanguard.gun_rank(model)>=10 and model.vanguard.gun_shots%5==0
+		return
 	if kind == "cast": cast_pose = 1.0
 	if kind == "hurt" and not reduced_effects:
 		shake = 5.0
@@ -486,6 +494,10 @@ func _player(presentation_scale: float = 1.0) -> void:
 		_line(Vector2(26,6+cast_pose*3),Vector2(32+cast_pose*5,6+cast_pose*3),PALE,2)
 	draw_set_transform(Vector2.ZERO)
 	if presentation_scale != 1.0: return
+	if Vanguard.enabled(model) and auto_flash>0:
+		var muzzle: Vector2=p+auto_direction*34
+		var extent: float=15 if auto_empowered else 8
+		VanguardArt.Motion.shard(self,muzzle,auto_direction,extent,4 if auto_empowered else 2,Color(CREAM,0.6 if reduced_effects else 0.9))
 	if model.invincible > 0:
 		draw_arc(p, 30, 0, TAU, 48, Color(CREAM, 0.5), 1.5, true)
 	if model.pulse_damage() > 0:
@@ -635,6 +647,11 @@ func _companions() -> void:
 		draw_set_transform(Vector2.ZERO)
 
 func _effect(effect: Dictionary) -> void:
+	if Vanguard.enabled(model) and effect.kind in ["nuke_impact","rocket_impact"]:
+		# W/R already own a simulation-aligned impact. Keep their audio event,
+		# but do not layer the legacy ring effect over the authored animation.
+		if effect.kind=="rocket_impact": VanguardArt.Motion.burst(self,effect.pos+frame_offset,effect.radius,effect.age/effect.life,"rocket",Vector2.RIGHT,model.kit.milestone("q"))
+		return
 	if effect.kind=="hit" and effect.get("heavy",false):
 		var fade: float=1-effect.age/effect.life
 		for i in range(4):

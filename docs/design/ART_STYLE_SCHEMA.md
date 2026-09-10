@@ -2,6 +2,8 @@
 
 ## v0.18 Vanguard override
 
+Current animation-review pass: original `vanguard_motion.gd` defines eight-pose shard bursts and six-pose blink brackets. W is a narrow impact dart; R is a wide caged drum, not merely a scaled W. E burst wedges follow the dash direction. Support pulses stay mint; Overclock's in-range brackets are blue. Construct legs unfold, Reserve transfer motes require a bank and proximity, and Ghost echoes follow travel direction. Smooth rigid transforms coexist with stepped impact shapes; no new bitmap or third-party asset dependency. See `VANGUARD_ANIMATION_REVIEW_18.md` for per-animation maturity, timing, sources and review instructions. This supersedes older generic-ring descriptions below, not the collision, palette or reduced-effects contracts.
+
 Cursor family: original 40×40 SVGs in assets/cursors. Menu uses a cream/steel arrow with teal inset/brass tail; combat uses open steel/teal brackets around a precise center dot; armed aim/Practice placement uses a brass diamond. Native hardware cursor, no trails, bobbing or zoom scaling. Menu pointer returns over interactive controls; native text/resize cursors remain. Hotspots and actual-size light/dark contrast are verified by cursor_test.gd. No generated bitmap assets.
 
 Third playtest: keep the paired hull/energy strips below the player's feet (fixed screen-size bars with a body-space offset), not above the magnet. Walls remain physical movement obstacles but no longer visually clip current-rule projectiles or laser rays; tells and damaging ray endpoints must agree.

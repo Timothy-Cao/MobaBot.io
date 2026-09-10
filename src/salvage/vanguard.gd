@@ -330,7 +330,7 @@ func tick(run, delta: float) -> void:
 			var second: Dictionary=effect.duplicate(); second.life=0.4; second.duration=0.4; second.second=true; second.damage*=0.25; impacts.append(second)
 		run.emit_event("nuke_impact",effect.pos,{"radius":effect.radius})
 		var duration: float=0.65 if effect.kind=="reactor" else 0.4
-		impacts.append({"kind":"detonation" if effect.kind=="reactor" else "blast","pos":effect.pos,"radius":effect.radius,"life":duration,"duration":duration,"rank":effect.rank})
+		impacts.append({"kind":"detonation" if effect.kind=="reactor" else "blast","pos":effect.pos,"radius":effect.radius,"life":duration,"duration":duration,"rank":effect.rank,"source":effect.kind})
 
 func blast(run, point: Vector2, radius: float, damage: float, source: String, stun: float, knock: float) -> void:
 	for enemy in run.enemies:
@@ -338,7 +338,7 @@ func blast(run, point: Vector2, radius: float, damage: float, source: String, st
 		var ordinary: bool=not enemy.has("role") and enemy.kind!=2
 		run.hit_enemy(enemy,damage,source,(Vector2(enemy.pos)-point).normalized()*knock if ordinary else Vector2.ZERO)
 		if ordinary and stun>0: enemy.stun=stun
-	impacts.append({"kind":"slam_hit" if source=="body_slam" else "blast","pos":point,"radius":radius,"direction":slam_direction,"life":0.4,"duration":0.4,"rank":run.kit.effective_rank("e") if source=="body_slam" else 1})
+	impacts.append({"kind":"slam_hit" if source=="body_slam" else "blast","pos":point,"radius":radius,"direction":slam_direction,"life":0.4,"duration":0.4,"rank":run.kit.effective_rank("e") if source=="body_slam" else 1,"source":source})
 
 static func valid_point(run, point: Vector2, radius: float) -> bool:
 	if not run.ARENA.grow(-radius).has_point(point): return false

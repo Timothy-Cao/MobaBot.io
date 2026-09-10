@@ -6,6 +6,8 @@ New expeditions use the fixed **Vanguard** kit and non-modal skill progression. 
 
 [0.18 changes, verification and known limits](docs/design/QA_18.md) supersedes the older shared-pool controls and progression below for **new runs**.
 
+[Vanguard animation assessment and asset sources](docs/design/VANGUARD_ANIMATION_REVIEW_18.md): per-skill maturity, current motion definitions and a reproducible 48-second Godot review reel. Latest pass separates W/R silhouettes, sharpens E/hammer contact, animates construct deployment/support and removes duplicate legacy impact rings. No combat balance changes or new bitmap pack.
+
 ## Current Vanguard controls
 
 The commanded hammer upgrades from rank 1–10 through the HUD's LMB tile. Rank 5 expands its reach and sweep; rank 10 allows swings while moving, including attack-move. Practice's Build rank selector includes Hammer and Gun separately. Vanguard damage has pronounced rank-5/10 spikes; see `docs/design/BALANCE_16.md` for the measured curve.

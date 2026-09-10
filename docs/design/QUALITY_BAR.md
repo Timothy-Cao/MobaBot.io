@@ -4,6 +4,8 @@ Version 1 · 8 September 2026 · baseline: 0.15. This is an editable review cont
 
 ## North star
 
+9 September 2026, Vanguard-only animation review: owner requests an explicit maturity assessment and a polished style candidate before other kits. `VANGUARD_ANIMATION_REVIEW_18.md` records qualitative per-animation judgments, preserved strengths, implemented motion and remaining gaps. Q/orbit were relatively mature; W/R identity, E contact and static support units needed more work. Reserve/Overclock clarity and directional chassis posing still need maturation. Fresh tests/captures do not raise the numeric baseline or imply owner approval.
+
 9 September 2026, rank-power owner feedback: rank 5 should feel roughly twice as capable as rank 1, and rank 10 another two-to-three times stronger including reach and ease of use. Implemented a measured Vanguard curve, separate hammer progression, milestone geometry/mobility and native animation accents. Review questions: can the player recognize 1/5/10 without reading a number; does rank-10 moving hammer feel responsive; do hostile attacks remain legible during upgraded impacts? Automated tests and screenshot inspection do not establish these answers. All dated numeric ratings remain unchanged.
 
 9 September 2026, post-Vanguard owner feedback: current presentation feels mobile-like. Follow-up direction is a restrained PC-first HUD refinement, not a wholesale art replacement. The owner also requests optional Practice hit numbers and per-dummy burst/DPS with a three-second no-hit reset. Technical verification is separate from whether these changes feel clearer; all existing numeric ratings remain unchanged pending playtesting.
