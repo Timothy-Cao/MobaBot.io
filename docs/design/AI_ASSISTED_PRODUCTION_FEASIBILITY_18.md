@@ -16,6 +16,8 @@ Yes, a solo creator using the $200 Codex plan, Godot, Blender and one focused mo
 
 My recommendation is to target a distinctive **MobaBot-quality stylized survivor game**, initially in 2D or restrained 2.5D, and use DRG/DRG: Survivor as references for silhouette, material language, impact and environmental atmosphere rather than as a feature checklist.
 
+11 September owner clarification: the high-fidelity direction is a parallel A/B-test treatment, not a replacement or migration target. Preserve the current cartoony game as a complete, fun visual direction. Continue designing one core game, then compare matched cartoony and high-fidelity presentations with players before making any product decision.
+
 The companion [high-ROI animation and visual-production study](HIGH_ROI_VISUAL_PRODUCTION_18.md) turns that target into an animation-economy plan: canonical rigs, pose extremes, procedural motion, material/VFX/audio layering, rendered-sprite and runtime-3D alternatives, and a concrete four-treatment bakeoff.
 
 ## What the current project makes realistic

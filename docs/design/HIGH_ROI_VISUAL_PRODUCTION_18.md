@@ -4,6 +4,8 @@
 
 ## Decision
 
+This is a **parallel presentation experiment**, not a migration away from the current game. Preserve the existing cartoony treatment because it already has a coherent style and is fun. A separate high-fidelity/high-graphics treatment should present the same core gameplay, timings and design decisions so the owner can A/B test both versions with players. Do not remove, overwrite or gradually replace the cartoony version while exploring the alternative.
+
 MobaBot should not try to look expensive by animating every part on every frame. It should look intentional by placing a small number of excellent motions and feedback beats exactly where the player reads cause, impact and consequence.
 
 The highest-return strategy is:
@@ -217,7 +219,7 @@ Riot's VFX priorities place gameplay clarity and clutter control before surprise
 
 ## Smallest useful bakeoff
 
-Before changing the full game, compare the same 10-second combat action in four treatments:
+Before changing either full presentation, compare the same 10-second combat action in four treatments:
 
 1. current MobaBot presentation;
 2. current art plus improved timing/material/VFX/audio packet;
@@ -238,14 +240,28 @@ Record:
 
 The winning method is the one that produces the best **moving combat result per revision hour**, not the highest-quality still image.
 
+This technical bakeoff chooses how to produce the high-fidelity treatment efficiently. It does **not** choose between the high-fidelity game and the current cartoony game. That later choice requires player A/B evidence, and both treatments should remain available during testing.
+
+## Player A/B test contract
+
+The two presentations should differ primarily in visual treatment:
+
+- **Cartoony treatment:** the current readable, stylized game, preserved as its own valid product direction.
+- **High-fidelity treatment:** richer models, materials, lighting, animation and effects built as a parallel skin/presentation layer.
+
+For useful comparison, keep the tested build, controls, enemy behavior, ability geometry, damage, cooldowns, encounter seed, camera framing and audio mix equivalent wherever practical. Record which treatment each participant sees first, then counterbalance the order to reduce first-play and novelty bias. Measure readability, responsiveness, perceived impact, visual appeal, fatigue, performance and preference after actual play—not from screenshots alone.
+
+If technical constraints require gameplay differences, document them before the session instead of attributing the resulting preference to graphics. Preserve both source pipelines and avoid shared-file edits that make the cartoony treatment difficult to restore.
+
 ## Recommended next step
 
-Keep this as research until the current home-machine work is synchronized. When visual experimentation resumes:
+Keep this as research until the current home-machine work is synchronized. When parallel visual experimentation resumes:
 
 1. establish the canonical robot articulation/rig contract;
 2. build the four-treatment hammer or Body Slam bakeoff;
 3. implement a reusable impact-feedback timeline and material family;
-4. choose current 2D, rendered sprites or runtime 3D from the comparison;
-5. apply the winning grammar to the next class with the animation budget above.
+4. choose rendered sprites or runtime 3D as the production method for the separate high-fidelity treatment;
+5. preserve the current cartoony presentation and prepare matched player A/B builds;
+6. apply the efficient high-fidelity grammar to more content only if the initial player evidence justifies it.
 
 That is the most credible way to make the game appear far more expensive without authoring an expensive number of animations.
