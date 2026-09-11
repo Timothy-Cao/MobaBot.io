@@ -21,7 +21,7 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 		for arg in OS.get_cmdline_user_args():
 			if arg.begins_with("--chapter="): chapter=int(arg.trim_prefix("--chapter="))
 		OperationRules.enable(run,chapter)
-		LevelMastery.enable(run); run.kit.loadout.support23=true
+		LevelMastery.enable(run); run.kit.loadout.support23=true; run.kit.loadout.arsenal26=true
 	ForgeEquipment.new().apply_to(run)
 	# Reliability only: a normal-HP refill can still die to several hits in one
 	# frame. Inflate maximum health too, preserving all AI/damage/collision paths.

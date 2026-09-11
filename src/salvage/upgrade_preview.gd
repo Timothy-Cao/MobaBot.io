@@ -29,9 +29,11 @@ static func stats(run, slot: String, earned: int) -> Dictionary:
 		"d": return {"Energy / sec":lerpf(28,10,float(clampi(rank_value,1,10)-1)/9.0)*(1-run.kit.energy_efficiency),"Speed bonus %":65+(rank_value-1)*3.5}
 		"f": data={"Charges":2 if rank_value>=5 else 1,"Energy":kit.ability_cost("blink"),"Reach":kit.cast_range(slot)}
 	data["Recharge sec"]=kit.cooldown(slot)
+	if ArsenalBurst.enabled(run) and slot=="e": data["Charges"]=4 if rank_value>=10 else 2
 	return data
 
-static func milestone(slot: String, before: int, after: int, current_gun: bool=false) -> String:
+static func milestone(slot: String, before: int, after: int, current_gun: bool=false, arsenal: bool=false) -> String:
+	if arsenal and slot=="e" and before<10 and after>=10: return "NEW · four charges"
 	if slot=="gun" and current_gun:
 		if before<5 and after>=5: return "NEW · +25% range"
 		if before<10 and after>=10: return "NEW · hits 3 enemies"
@@ -54,7 +56,7 @@ static func text(run, slot: String, include_bonus: bool=true) -> String:
 	for key in after:
 		if earned==0: lines.append("%s  %s"%[key,number(after[key])])
 		elif not is_equal_approx(before[key],after[key]): lines.append("%s  %s → %s"%[key,number(before[key]),number(after[key])])
-	var extra:=milestone(slot,mini(10,earned+run.kit.rank_bonus),mini(10,earned+1+run.kit.rank_bonus),SupportModules.enabled(run))
+	var extra:=milestone(slot,mini(10,earned+run.kit.rank_bonus),mini(10,earned+1+run.kit.rank_bonus),SupportModules.enabled(run),ArsenalBurst.enabled(run))
 	if include_bonus and not extra.is_empty(): lines.append(extra)
 	if lines.is_empty(): lines.append("Earned rank  %d → %d"%[earned,earned+1]); lines.append("Equipment already grants rank 10")
 	return "\n".join(lines)

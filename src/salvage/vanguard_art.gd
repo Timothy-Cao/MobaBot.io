@@ -141,6 +141,9 @@ static func draw(c, run) -> void:
 		elif effect.kind=="hammer":
 			var direction: Vector2=effect.direction
 			var half_angle: float=effect.get("angle",PI/4)
+			if half_angle>=PI and ArsenalBurst.enabled(run):
+				c.draw_arc(p,effect.radius*0.92,direction.angle()+progress*TAU-1.5,direction.angle()+progress*TAU,24,Color(c.CREAM,(1-progress)*0.8),5,true)
+				if not c.reduced_effects: c.draw_arc(p,effect.radius*0.78,direction.angle()+progress*TAU-2.2,direction.angle()+progress*TAU,24,Color(c.TEAL,(1-progress)*0.6),4,true)
 			var sweep: float=1-pow(1-clampf(progress/0.28,0,1),3)
 			c.draw_arc(p,effect.radius,direction.angle()-half_angle,direction.angle()+half_angle,40,Color(c.GOLD,1-progress),4+grade,true)
 			for i in range(0 if c.reduced_effects else grade):

@@ -5,6 +5,7 @@ static func draw(art) -> void:
 	var run=art.model
 	for e in run.enemies:
 		if e.dead: continue
+		if float(e.get("aura_left",0))>0: art.draw_arc(e.pos,e.radius+6,0,TAU,24,Color(0.53,0.84,0.62,0.65*e.aura_left/3.0),2,true)
 		if float(e.get("vulnerable",0))>0:
 			art.draw_arc(e.pos,e.radius+7,0,TAU,32,art.GOLD,2,true)
 		if e.get("gunner_kind","")=="emp":
@@ -29,7 +30,7 @@ static func draw(art) -> void:
 			art.draw_line(e.pos,end,art.CREAM if e.phase=="attack" else art.CORAL,4 if e.phase=="attack" else 2,true)
 		elif e.attack=="melee": art.draw_arc(e.pos,155,Vector2(e.dir).angle()-PI*0.6,Vector2(e.dir).angle()+PI*0.6,48,art.CORAL,3,true)
 	if run.vanguard.combo_left>0:
-		art.draw_arc(run.player,28,-PI/2,-PI/2+TAU*run.vanguard.combo_left/1.2,24,art.GOLD,3,true)
+		art.draw_arc(run.player,28,-PI/2,-PI/2+TAU*run.vanguard.combo_left/(0.1 if ArsenalBurst.enabled(run) else 1.2),24,art.GOLD,3,true)
 
 static func atmosphere(art) -> void:
 	# Darken the environment before actors/tells, never the threat overlay.

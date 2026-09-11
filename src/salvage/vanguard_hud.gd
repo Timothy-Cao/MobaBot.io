@@ -9,11 +9,14 @@ static func slot_rect(slot: String) -> Rect2:
 	return Rect2(SLOT_X[slot],470 if core else 476,width,width)
 
 static func icon(slot: String, run=null) -> String:
+	if ArsenalBurst.enabled(run) and slot=="x3": return "vanguard_q"
 	if Conductor.enabled(run) and slot in ["q","w","e","r"]: return "conductor_"+slot
 	if SupportModules.enabled(run) and slot in ["x1","x3"]: return "vanguard_anchor" if slot=="x1" else "vanguard_energy"
 	return "vanguard_"+slot
 
 static func detail(run, slot: String) -> String:
+	if ArsenalBurst.enabled(run) and slot=="x3": return "Missile Barrage\n8 seconds of unlimited small Q rockets. One shot every 0.3 seconds; 5 energy per shot.\n60-second recharge. Normal Q charges are preserved. EMP pauses the effect, not its timer."
+	if ArsenalBurst.enabled(run) and slot=="e": return "Body slam\nFixed reach and damage. Ranks improve recharge. No shield.\n5: impact stun. 10: stores four charges.\nBuffer hammer during E or within 0.1s of arrival for a committed spin (+15% damage).\nQ charges extend travel; Flash ends E at the destination."
 	if SupportModules.enabled(run) and slot=="gun": return "Machine gun\nPrioritizes Mosquitoes with fast tracking shots. Fires while moving.\n5: +25%% range. 10: each shot can hit 3 enemies.\n%.0f range · %.1f damage · %.1f shots/sec\n`: toggle; S never disables it."%[run.attacks.auto_range(run),run.attacks.auto_damage(run),1/run.attacks.auto_interval(run)]
 	if Conductor.enabled(run) and slot in ["q","w","e","r"]: return Conductor.detail(slot)
 	if SupportModules.enabled(run) and slot in ["x1","x3"]: return SupportModules.detail(slot)
@@ -92,6 +95,7 @@ static func draw(ui, run) -> void:
 		if slot in ["p1","x1","x2","x3"]:
 			var active=ui.ability_shades[slot].get_parent().get_node("Active")
 			active.active=run.vanguard.emp_left<=0 and not locked and (run.kit.passive_active("orbit") if slot=="p1" else run.vanguard.constructs.any(func(unit): return unit.slot==slot))
+			if ArsenalBurst.enabled(run) and slot=="x3": active.active=run.vanguard.emp_left<=0 and run.vanguard.burst_left>0
 			active.reduced=ui.reduced
 			if active.active: ui.ability_shades[slot].visible=false; ui.ability_labels[slot].text=""
 		if slot=="d": ui.ability_labels[slot].text="ON" if run.vanguard.ghost else ""
@@ -102,6 +106,10 @@ static func draw(ui, run) -> void:
 			ui.ability_shades[slot].visible=true; ui.ability_labels[slot].text="EMP"
 		if slot in ["q","w","e"] or (ReviewRules.enabled(run) and slot=="f"):
 			ui.ability_recharge[slot].text="" if locked else ["○○","●○","●●"][clampi(run.kit.charges[slot],0,2)]
+			if ArsenalBurst.enabled(run) and slot=="e" and run.kit.effective_rank("e")>=10: ui.ability_recharge[slot].text="●".repeat(clampi(run.kit.charges.e,0,4))+"○".repeat(4-clampi(run.kit.charges.e,0,4))
+		if ArsenalBurst.enabled(run) and slot=="q" and run.vanguard.burst_left>0 and run.vanguard.emp_left<=0:
+			ui.ability_labels[slot].text="∞"; ui.ability_recharge[slot].text="%.1fs"%run.vanguard.burst_left
+			ui.ability_shades[slot].visible=run.vanguard.burst_clock>0
 			if slot=="q" and run.kit.extra_q_charge and not locked: ui.ability_recharge[slot].text="●".repeat(clampi(run.kit.charges[slot],0,3))+"○".repeat(3-clampi(run.kit.charges[slot],0,3))
 
 static func rank_of_gate(run, slot: String) -> bool:

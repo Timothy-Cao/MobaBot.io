@@ -69,7 +69,7 @@ static func upgrades(ui, run) -> void:
 		var changes:=UpgradePreview.text(run,slot,false).split("\n")
 		for row in range(changes.size()):
 			ui._label(card,changes[row],Rect2(15,138+row*17,194,17),12,ui.CREAM)
-		var bonus:=UpgradePreview.milestone(slot,mini(10,rank_value+run.kit.rank_bonus),mini(10,next+run.kit.rank_bonus),SupportModules.enabled(run))
+		var bonus:=UpgradePreview.milestone(slot,mini(10,rank_value+run.kit.rank_bonus),mini(10,next+run.kit.rank_bonus),SupportModules.enabled(run),ArsenalBurst.enabled(run))
 		if next in [5,10] or not bonus.is_empty():
 			var label: Label=ui._label(card,bonus if not bonus.is_empty() else "Milestone · stronger stats",Rect2(15,211,194,30),12,accent,true)
 			label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -110,6 +110,7 @@ static func camp(game) -> void:
 		ui._ability_icon(card,VanguardHud.icon(slot,run),Rect2(8,13,46,46))
 		var title: String="Orbit" if slot=="p1" else MobaKit.ABILITIES[Vanguard.TOOLS[slot]].name
 		if SupportModules.enabled(run) and slot in ["x1","x3"]: title=SupportModules.title(slot)
+		if ArsenalBurst.enabled(run) and slot=="x3": title="Missile Barrage"
 		ui._label(card,title,Rect2(62,7,140,26),15,ui.CREAM,true)
 		ui._label(card,"Max rank" if rank_value>=10 else "%s · %d"%["Buy" if rank_value==0 else "Rank %d"%(rank_value+1),price],Rect2(62,38,140,25),14,ui.GOLD)
 		card.tooltip_text=VanguardHud.detail(run,slot)+"\nRun-only purchase. Resets next level."

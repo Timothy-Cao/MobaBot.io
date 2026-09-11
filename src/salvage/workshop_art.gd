@@ -161,6 +161,11 @@ func _draw() -> void:
 			draw_circle(bullet.pos, 6, CORAL)
 			draw_circle(bullet.pos, 2, CREAM)
 		elif bullet.kind == "rocket":
+			if bullet.get("mini_rocket",false):
+				_line(bullet.pos-direction*19,bullet.pos,Color(TEAL,0.6),3)
+				_line(bullet.pos-direction*7,bullet.pos+direction*5,GOLD,4)
+				draw_circle(bullet.pos+direction*5,2,CREAM)
+				continue
 			var m: int = bullet.get("milestone", 0)
 			_line(bullet.pos - direction * (65 + m * 18), bullet.pos, Color(TEAL, 0.3), 18 + m * 4)
 			_line(bullet.pos - direction * 45, bullet.pos, GOLD, 7 + m * 2)

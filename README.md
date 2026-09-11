@@ -1,4 +1,8 @@
-# Current 0.25 override
+# Current 0.26 override
+
+See [Arsenal and support enemies](docs/design/ARSENAL_SUPPORT_26.md): E buffers another E, rebounds off arena boundaries and stores four charges at rank ten; fixed reach/damage, improved recharge, no shield. Missile Barrage replaces Energy reserve with eight seconds of Q rockets at 0.3-second intervals and 5 energy per shot. Hatchery/Uplink enemies and a full-circle boss laser add pressure. Start a new run or primary Practice for these rules.
+
+## Previous 0.25 override
 
 See [Mosquito and enrage](docs/design/MOSQUITO_ENRAGE_25.md): fragile evasive ranged enemies, machine-gun priority and range/piercing milestones, and a gradual boss enrage starting at one minute. Mosquito is also available in Practice. These changes are ready for balance review, not a claim of calibrated difficulty.
 

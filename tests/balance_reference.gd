@@ -9,7 +9,7 @@ static func build(chapter: int, round_index: int, tier: int, focus: String="bala
 	run.enable_moba(MobaKit.demo_preset()); run.enable_demo(); run.attacks.enabled=true
 	BotExpedition.new().start(run,"ranged",0); run.exp.enable_revision(run)
 	Vanguard.setup(run); ReviewRules.enable(run); OperationRules.enable(run,chapter); LevelMastery.enable(run)
-	run.kit.loadout.support23=true
+	run.kit.loadout.support23=true; run.kit.loadout.arsenal26=true
 	run.exp.route_index=round_index
 	# Same earned budget in every comparison; ideal selection ignores card luck.
 	run.total_xp=(LEVELS[round_index]-1)*20; Vanguard.progression(run)

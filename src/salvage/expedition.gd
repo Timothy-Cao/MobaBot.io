@@ -251,6 +251,9 @@ func spawns(run, delta: float) -> void:
 				if operation_chapter>0: roster=OperationRules.roster(run)
 			var selected: String=roster[(threat_index+route_index-1)%roster.size()]
 			if SupportModules.enabled(run) and Mosquito.wave(operation_chapter,route_index,threat_index): selected="mosquito"
+			if ArsenalBurst.enabled(run) and (operation_chapter>=2 or route_index>=1):
+				if threat_index%4==1: selected="hatchery"
+				elif threat_index%4==3: selected="uplink"
 			RangedThreats.spawn(run,selected)
 	run.spawn_clock -= delta
 	if run.spawn_clock <= 0:

@@ -153,6 +153,7 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 		if spent!=c.spent: return false
 	if c.loadout.has("level22") and (c.loadout.level22!=true or not c.loadout.get("operation20",0)>0): return false
 	if c.loadout.has("support23") and (c.loadout.support23!=true or not c.loadout.get("level22",false)): return false
+	if c.loadout.has("arsenal26") and (c.loadout.arsenal26!=true or not c.loadout.get("support23",false)): return false
 	if c.loadout.has("vanguard"):
 		if not integer(c.loadout.get("hammer_rank",1),1,10): return false
 		if not c.get("bindings") is Dictionary: return false
@@ -363,6 +364,7 @@ func resume_into(run) -> bool:
 	for slot in run.kit.active_slots():
 		run.kit.charges[slot] = int(MobaKit.ABILITIES[run.kit.loadout[slot]].max)
 		if Vanguard.enabled(run) and slot in ["q","w","e"]: run.kit.charges[slot]=2
+		if ArsenalBurst.enabled(run) and slot=="e" and run.kit.effective_rank("e")>=10: run.kit.charges.e=4
 		run.kit.recharge[slot] = 0.0
 	run.mastery.ranks = c.tree.duplicate(); run.mastery.spent = int(c.spent)
 	run.mastery.unified=c.loadout.get("unified_mastery",false)

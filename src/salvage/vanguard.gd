@@ -45,7 +45,8 @@ static func hammer_roots(run) -> bool:
 static func drive_upkeep(rank_value: int) -> float:
 	return (12.0 if rank_value<5 else 7.0)-maxi(0,rank_value-(1 if rank_value<5 else 5))*0.2
 
-static func slam_range(rank_value: int) -> float:
+static func slam_range(rank_value: int, compact: bool=false) -> float:
+	if compact: return 209.0
 	return 397.1 if rank_value>=10 else 292.6 if rank_value>=5 else 209.0
 
 func drive_blocks(run) -> bool:
@@ -69,10 +70,15 @@ var slam_left := 0.0
 var slam_direction := Vector2.RIGHT
 var slam_bounced := false
 var buffered_hammer := false
+var buffered_e := false
+var buffered_e_target := Vector2.ZERO
 var slam_fueled := false
 var spin_swing := false
 var conductor_active := false
 var conductor:=Conductor.new()
+var burst_left:=0.0
+var burst_ammo:=0
+var burst_clock:=0.0
 const SLAM_SPEED := 950.0
 const REBOUND_SPEED := 1425.0
 var touch_guard := 0.0
@@ -103,6 +109,7 @@ static func setup(run, rank_value: int = 0) -> void:
 	run.kit.loadout.erase("operation20"); run.kit.loadout.erase("operation_xp")
 	run.kit.loadout.erase("level22")
 	run.kit.loadout.erase("support23")
+	run.kit.loadout.erase("arsenal26")
 	if run.mastery is ExpeditionTree: run.mastery.modern=false
 	if run.exp!=null: run.exp.operation_chapter=0
 	if run.mastery is ExpeditionTree: run.mastery.unified=false
@@ -213,6 +220,8 @@ func clear() -> void:
 	emp_left=0; combo_left=0; combo_swing=false
 	ghost=false; pending.clear(); hammer=-1; slam_left=0; slam_bounced=false; touch_guard=0; shield=0
 	buffered_hammer=false; slam_fueled=false; spin_swing=false
+	buffered_e=false
+	burst_left=0; burst_ammo=0; burst_clock=0
 	constructs.clear(); impacts.clear(); ghosts.clear()
 	hammer_cooldown=0; touch_grace=0; ghost_clock=0
 
@@ -229,6 +238,8 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	if emp_left>0 and slot in ReviewRules.MODULES+["d","f"]:
 		kit.last_failure="EMP suppressed"; run.emit_event("cast_unready",run.player); return false
 	if run.state!="running" or slot not in KEYS or not kit.unlocked(slot): return false
+	if ArsenalBurst.enabled(run) and slam_left>0 and slot=="e":
+		buffered_e=true; buffered_e_target=cursor; return true
 	if slot=="d":
 		if ghost: return true
 		if kit.energy<2:
@@ -246,6 +257,7 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	if drive_blocks(run) and not (SupportModules.enabled(run) and slot=="f"): kit.last_failure="Release D"; return false
 	if slot=="p1": kit.orbit_far=not kit.orbit_far; kit.toggles[0]=true; run.emit_event("mode_switch",run.player); return true
 	if (slam_left>0 and not (SupportModules.enabled(run) and slot=="f")) or (not pending.is_empty() and slot!="f"): return false
+	if ArsenalBurst.enabled(run) and slot=="q" and burst_left>0 and emp_left<=0: return ArsenalBurst.fire(run,cursor)
 	if kit.charges[slot]<=0: run.emit_event("cast_unready",run.player); return false
 	var id: String=kit.loadout[slot]
 	var cost: float=kit.ability_cost(id)
@@ -254,11 +266,13 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	var target: Vector2=kit.target_point(run,slot,cursor)
 	if slot=="f": target=blink_target(run,target)
 	if slot in ["f","e"] and target.distance_to(run.player)<1: return false
-	if slot in ["x1","x2","x3"] and not valid_point(run,target,22): kit.last_failure="Blocked"; return false
+	if slot in ["x1","x2","x3"] and not (ArsenalBurst.enabled(run) and slot=="x3") and not valid_point(run,target,22): kit.last_failure="Blocked"; return false
 	if not powered(run): kit.energy-=cost; kit.energy_spent+=cost
 	kit.charges[slot]-=1
 	if kit.recharge[slot]<=0: kit.recharge[slot]=kit.cooldown(slot)
 	kit.cast_counts[id]=int(kit.cast_counts.get(id,0))+1
+	if ArsenalBurst.enabled(run) and slot=="x3":
+		burst_left=8; burst_clock=0; return true
 	if Conductor.enabled(run) and slot in ["q","w","e","r"]:
 		conductor.cast(run,slot,target); return true
 	if slot=="f":
@@ -269,7 +283,7 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 			if slam_left>0:
 				slam_left=0
 				blast(run,target,95*kit.area_scale("e"),32*kit.damage_scale("e"),"body_slam",0.6 if kit.effective_rank("e")>=5 else 0,240)
-				if kit.effective_rank("e")>=10: shield=1.0
+				if kit.effective_rank("e")>=10 and not ArsenalBurst.enabled(run): shield=1.0
 				finish_slam(run,true)
 			elif spin_swing and hammer>=0: hit_hammer(run)
 		if kit.effective_rank("f")>=10:
@@ -280,9 +294,9 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	if slot=="e":
 		slam_bounced=false
 		slam_fueled=false; buffered_hammer=false; spin_swing=false
-		slam_direction=(cursor-run.player).normalized(); slam_left=slam_range(kit.effective_rank("e"))/SLAM_SPEED
+		slam_direction=(cursor-run.player).normalized(); slam_left=kit.cast_range("e")/SLAM_SPEED
 		touch_guard=0.4; hammer=-1; run.attacks.stop(run)
-		if kit.effective_rank(slot)>=10: shield=0.45
+		if kit.effective_rank(slot)>=10 and not ArsenalBurst.enabled(run): shield=0.45
 		run.emit_event("v_slam",run.player); return true
 	if slot in ["x1","x2","x3"]:
 		constructs=constructs.filter(func(u): return u.id!=id)
@@ -310,9 +324,19 @@ func swing(run, cursor: Vector2) -> bool:
 	hammer_cooldown=run.attacks.interval(run)
 	if hammer_roots(run): run.stop_movement()
 	run.aim=hammer_direction
+	if ArsenalBurst.enabled(run) and spin_swing: hit_hammer(run)
 	return true
 
 func finish_slam(run, immediate: bool=false) -> void:
+	if ArsenalBurst.enabled(run):
+		combo_left=0.1
+		if buffered_hammer:
+			buffered_hammer=false; combo_swing=true; spin_swing=true
+			hammer_cooldown=run.attacks.interval(run); combo_left=0; hit_hammer(run)
+		if buffered_e:
+			buffered_e=false
+			cast(run,"e",buffered_e_target)
+		return
 	if ReviewRules.enabled(run): combo_left=1.2
 	if buffered_hammer:
 		var started:=swing(run,run.player+hammer_direction)
@@ -321,11 +345,12 @@ func finish_slam(run, immediate: bool=false) -> void:
 
 func hit_hammer(run) -> void:
 	var reach: float=run.attacks.attack_range(run)
+	var spin_bonus: float=1.15 if spin_swing and ArsenalBurst.enabled(run) else 1.0
 	for enemy in run.enemies:
 		var offset: Vector2=enemy.pos-run.player
 		if run.attacks.valid(enemy) and offset.length()<=reach+enemy.radius and (spin_swing or absf(hammer_direction.angle_to(offset))<=hammer_angle(run)):
 			var head: bool=offset.length()>=reach*0.512
-			run.hit_enemy(enemy,(38 if head else 9)*power(hammer_rank(run))*(1+run.kit.attack_damage_bonus)*(ReviewRules.hammer_multiplier(run,enemy) if ReviewRules.enabled(run) else 1.0),"hammer",offset.normalized()*190 if head and not enemy.has("role") else Vector2.ZERO)
+			run.hit_enemy(enemy,(38 if head else 9)*power(hammer_rank(run))*(1+run.kit.attack_damage_bonus)*(ReviewRules.hammer_multiplier(run,enemy) if ReviewRules.enabled(run) else 1.0)*spin_bonus,"hammer",offset.normalized()*190 if head and not enemy.has("role") else Vector2.ZERO)
 			if head and not enemy.has("role"): enemy.stun=0.25
 	impacts.append({"kind":"hammer","pos":run.player,"direction":hammer_direction,"life":0.30,"duration":0.30,"radius":reach,"angle":PI if spin_swing else hammer_angle(run),"rank":hammer_rank(run)})
 	run.emit_event("v_hammer",run.player); hammer=-1; spin_swing=false
@@ -354,6 +379,8 @@ func release(run) -> void:
 	pending.clear()
 
 func tick(run, delta: float) -> void:
+	burst_left=maxf(0,burst_left-delta); burst_clock=maxf(0,burst_clock-delta)
+	if burst_left<=0: burst_ammo=0
 	if Conductor.enabled(run): conductor.tick(run,delta)
 	if ReviewRules.enabled(run): ReviewRules.tick(run,delta)
 	orbit_angle=fposmod(orbit_angle+delta*(lerpf(3.0,10.2,float(clampi(rank_of(run,"p1"),1,10)-1)/9.0) if ReviewRules.enabled(run) else 10.2),TAU)
@@ -488,7 +515,7 @@ func step_slam(run, delta: float) -> void:
 			if Geometry2D.get_closest_point_to_segment(enemy.pos,before,run.player).distance_to(enemy.pos)<=enemy.radius+24:
 				slam_left=0
 				blast(run,run.player,95*run.kit.area_scale("e"),32*run.kit.damage_scale("e"),"body_slam",0.6 if run.kit.effective_rank("e")>=5 else 0,240)
-				if run.kit.effective_rank("e")>=10: shield=1.0
+				if run.kit.effective_rank("e")>=10 and not ArsenalBurst.enabled(run): shield=1.0
 				run.emit_event("v_impact",run.player); return
 		if blocked:
 			var normal:=Vector2.ZERO
@@ -498,7 +525,14 @@ func step_slam(run, delta: float) -> void:
 				var distance: float=run.player.distance_to(point)-16-float(wall.get("width",6))
 				if distance<nearest and distance<0.1:
 					nearest=distance; normal=(run.player-point).normalized()
-			# One rebound per cast; a second obstacle or the arena boundary stops it.
+			if ArsenalBurst.enabled(run) and normal.is_zero_approx():
+				var bounds: Rect2=run.ARENA.grow(-16)
+				if desired.x<=bounds.position.x: normal.x=1
+				elif desired.x>=bounds.end.x: normal.x=-1
+				if desired.y<=bounds.position.y: normal.y=1
+				elif desired.y>=bounds.end.y: normal.y=-1
+				normal=normal.normalized()
+			# One rebound per cast, including arena edges on current runs.
 			if slam_bounced or normal.is_zero_approx() or slam_direction.dot(normal)>=0:
 				slam_left=0; return
 			var remaining_distance:=slam_left*SLAM_SPEED

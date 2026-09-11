@@ -1,5 +1,11 @@
 # MobaBot.io quality bar
 
+## Arsenal, E buffers and support pressure · 11 September 2026 · 0.26
+
+Owner requested a four-pursuer/eight-second spawner, an enemy healing/speed aura with decaying speed outside, and a full-circle boss laser. Energy-totem replacement evolved from twenty rockets/ten seconds to unlimited paced rockets/eight seconds, then explicitly five energy per rocket. Latest version supersedes earlier ammo/free-shot proposals. Owner also requested committed +15% E/hammer spins with strict buffering, fixed E damage/reach with recharge progression, removal of every E shield, boundary rebounds, four charges at rank ten and buffering the next E.
+
+Implemented in ARSENAL_SUPPORT_26 for new runs/primary Practice. Existing healing Reserve and real-boss HP remain unchanged. One queued E uses the selected world aim and checks resources on arrival. Tests and normal/reduced visual captures pass; no new human test or fun/quality rating implied. Next human review: whether chained movement is smooth, Barrage energy is affordable, support enemies are readable and the rotating laser creates useful movement choices. Automated perfect-burst damage is only a ceiling; do not present it as sustainable player DPS.
+
 ## Mosquito counterplay and gentle enrage · 11 September 2026 · 0.25
 
 Owner requested a mosquito-like ranged enemy that avoids hammer range and quickly dodges individual Q/W/E/R attacks, but can be caught point blank, through positioning or with overlapping abilities. They want the machine gun to be the reliable counter, prioritize this enemy, gain 25% range at five and pierce three total enemies at ten. They approved starting boss enrage as early as one minute with a slow ramp to calibrate through their testing. Implemented scope and exact starting values are in MOSQUITO_ENRAGE_25.

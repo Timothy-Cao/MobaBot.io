@@ -1,6 +1,6 @@
 class_name RangedThreats
 extends RefCounted
-const NAMES := {"lancer":"Arc lancer", "volley":"Burst battery", "bomber":"Bomb carrier", "breacher":"Breacher", "mender":"Mender", "scatter":"Scattergun", "emp":"EMP suppressor", "mosquito":"Mosquito"}
+const NAMES := {"lancer":"Arc lancer", "volley":"Burst battery", "bomber":"Bomb carrier", "breacher":"Breacher", "mender":"Mender", "scatter":"Scattergun", "emp":"EMP suppressor", "mosquito":"Mosquito", "hatchery":"Hatchery", "uplink":"Uplink"}
 
 static func spawn(run, type: String, point: Vector2 = Vector2.INF, bypass_cap: bool = false) -> Dictionary:
 	if not NAMES.has(type) or run.enemies.size()>=run.MAX_ENEMIES: return {}
@@ -19,6 +19,7 @@ static func spawn(run, type: String, point: Vector2 = Vector2.INF, bypass_cap: b
 	if ReviewRules.enabled(run) and type=="emp": enemy.hp=120.0; enemy.max_hp=120.0
 	if type=="mosquito":
 		enemy.radius=12.0; enemy.hp=10.0*(1+0.22*(run.exp.stage_number()-1))*(1+0.15*run.exp.route_index); enemy.max_hp=enemy.hp
+	if type in ["hatchery","uplink"]: enemy.hp=120; enemy.max_hp=120; enemy.clock=8.0
 	return enemy
 
 static func beam_end(run, point: Vector2, direction: Vector2) -> Vector2:
@@ -37,6 +38,7 @@ static func beam_end(run, point: Vector2, direction: Vector2) -> Vector2:
 	return end
 
 static func step(run, e: Dictionary, delta: float) -> void:
+	if e.gunner_kind in ["hatchery","uplink"]: SupportEnemies.step(run,e,delta); return
 	if e.gunner_kind=="mosquito": Mosquito.step(run,e,delta); return
 	if ReviewRules.enabled(run) and e.gunner_kind=="emp": ReviewEnemies.emp(run,e,delta); return
 	if e.gunner_kind in ["breacher","mender","scatter"]: FieldEnemies.step(run,e,delta); return
@@ -84,6 +86,7 @@ static func step(run, e: Dictionary, delta: float) -> void:
 	e.pos=Vector2(e.pos).clamp(run.ARENA.position+Vector2.ONE*30,run.ARENA.end-Vector2.ONE*30)
 
 static func draw(art, e: Dictionary) -> void:
+	if e.gunner_kind in ["hatchery","uplink"]: SupportEnemies.draw(art,e); return
 	if e.gunner_kind=="mosquito": Mosquito.draw(art,e); return
 	if e.gunner_kind in ["breacher","mender","scatter"]: FieldEnemies.draw(art,e); return
 	var p: Vector2=e.pos+art.frame_offset

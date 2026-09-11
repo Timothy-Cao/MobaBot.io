@@ -1,8 +1,14 @@
 # Current session handoff
 
-Updated 10 September 2026. Stable entry point; human feedback and technical evidence stay in their dated review documents.
+Updated 11 September 2026. Stable entry point; human feedback and technical evidence stay in their dated review documents.
 
-## Next action: owner review of 0.25 Mosquito and gradual enrage
+## Next action: owner review of 0.26 arsenal and support enemies
+
+Latest override: [ARSENAL_SUPPORT_26](docs/design/ARSENAL_SUPPORT_26.md). New runs/primary Practice use `arsenal26`; older checkpoints preserve their rules. E has fixed reach/damage, reduced recharge with rank, no shield, four charges at rank ten, boundary rebounds and one queued E. Buffered spin commits with +15% damage and a strict 0.1-second arrival window. Slot 4 is eight-second Missile Barrage: unlimited Q shots every 0.3 seconds, five energy each, 60-second activation cooldown. Hatchery spawns runners; Uplink heals/speeds nearby enemies; boss laser sweeps 360 degrees. Healing Reserve, Anchor and boss HP unchanged.
+
+Build tag `vanguard-26-arsenal-support`. Record actual commit/log baseline before human review and freeze the build while the owner plays. No human game was restarted. QA_18 records automated verification; do not equate bot results with human balance. Earlier Head start interpretation and Practice-only Conductor limitations still apply.
+
+## Previous milestone: 0.25 Mosquito and gradual enrage
 
 Latest owner-authorized override: [MOSQUITO_ENRAGE_25](docs/design/MOSQUITO_ENRAGE_25.md). Current support-rule runs gain the physically dodging Mosquito, introduced after Level 1 round one and more frequent in Levels 3/6. Gun prioritizes it, uses fast tracking shots, has 340 base range, +25% range at rank five and three total targets per rank-ten shot. Old fifth-shot burst/counter is removed; gun fires during movement at every rank. Owner explicitly supplied the rank-ten piercing choice and clarified that overlapping/point-blank skill shots must remain viable.
 

@@ -92,6 +92,7 @@ static func boss(run, e: Dictionary, delta: float) -> void:
 			run.emit_event("boss_windup",e.pos)
 	elif e.phase=="telegraph" and e.clock<=0:
 		e.phase="attack"; e.clock={"fan":0.9,"charge":0.48,"shells":2.5,"sweep":1.5,"ring":0.2,"melee":0.2}[e.attack]
+		if ArsenalBurst.enabled(run) and e.attack=="sweep": e.clock=4.0
 		e.shot_clock=0.0; e.burst=0
 	elif e.phase=="attack":
 		e.shot_clock-=delta
@@ -101,7 +102,7 @@ static func boss(run, e: Dictionary, delta: float) -> void:
 				move(run,e,e.dir,1000,minf(delta,minf(maxf(0,e.clock+delta),Vector2(e.pos).distance_to(e.target)/1000)))
 				if Geometry2D.get_closest_point_to_segment(run.player,before,e.pos).distance_to(run.player)<e.radius+12: run.hurt_player(e.pos,"Boss charge",3)
 			"sweep":
-				e.dir=Vector2(e.dir).rotated(minf(delta,maxf(0,e.clock+delta))*0.9)
+				e.dir=Vector2(e.dir).rotated(minf(delta,maxf(0,e.clock+delta))*(TAU/4.0 if ArsenalBurst.enabled(run) else 0.9))
 				if e.shot_clock<=0:
 					e.shot_clock=0.25
 					if Geometry2D.get_closest_point_to_segment(run.player,e.pos,Vector2(e.pos)+Vector2(e.dir)*740).distance_to(run.player)<23: run.hurt_player(e.pos,"Boss sweep laser",1,"ground")

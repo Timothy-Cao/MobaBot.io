@@ -179,7 +179,7 @@ func area_scale(slot: String) -> float:
 	return (1.0 + milestone(slot) * 0.25) * (1.15 if loadout.get("rules17",false) and loadout.get(slot,"") in ["flame","reap","sweep","thrust","repulsor","tractor"] else 1.0)
 
 func cast_range(slot: String) -> float:
-	if loadout.get("vanguard",false) and slot=="e": return Vanguard.slam_range(effective_rank(slot))
+	if loadout.get("vanguard",false) and slot=="e": return Vanguard.slam_range(effective_rank(slot),loadout.get("arsenal26",false))
 	if loadout.get("vanguard",false) and slot=="w": return 650.0
 	var id: String = loadout[slot]
 	return float(ABILITIES[id].range) * (area_scale(slot) if id in ["nova", "overdrive", "blink", "dash", "lunge", "tumble", "echo_dash", "veil_dash", "hop", "vault", "pursuit", "landing"] else 1.0)
@@ -256,6 +256,8 @@ func cooldown(slot: String) -> float:
 	return cooldown_at(slot, int(ranks.get(slot, 0)))
 
 func cooldown_at(slot: String, rank_value: int, tier_value: int = -1) -> float:
+	if loadout.get("arsenal26",false) and slot=="x3": return 60.0
+	if loadout.get("arsenal26",false) and slot=="e": return 8.0*(1.0-0.025*(clampi(rank_value+rank_bonus,1,10)-1))/(1.0+cooldown_bonus)
 	var tier := int(tiers.get(slot, 0)) if tier_value < 0 else tier_value
 	var base: float=4.0/0.9 if loadout.get("vanguard",false) and slot=="q" else float(ABILITIES[loadout[slot]].cd)
 	if loadout.get("level22",false) and slot=="w": base*=1.15
@@ -267,6 +269,7 @@ func damage_scale(slot: String) -> float:
 
 func damage_scale_at(slot: String, rank_value: int, tier_value: int = -1) -> float:
 	var tier: int = int(tiers.get(slot, 0)) if tier_value < 0 else tier_value
+	if loadout.get("arsenal26",false) and slot=="e": return (1.0+gear_damage+mastery_damage)*(1+tier*0.15)*1.2
 	if loadout.get("vanguard",false): return (1.0+gear_damage+mastery_damage)*(1+tier*0.15)*1.2*Vanguard.power(mini(10,rank_value+(rank_bonus if unlocked(slot) else 0)))
 	return (1.6 if loadout.get("rules17",false) and loadout.get(slot,"") in ["flame","reap","sweep","thrust","repulsor","tractor"] else 1.0) * (1.0 + gear_damage + mastery_damage) * (1.0 + tier * 0.15) * (1.0 + SalvageProgression.bonus(mini(10,rank_value+(rank_bonus if unlocked(slot) else 0))))
 
@@ -371,11 +374,14 @@ func preview_ready(run, slot: String, cursor: Vector2) -> bool:
 	if emp_left>0 and slot in ReviewRules.MODULES+["d","f"]: return false
 	if Vanguard.enabled(run):
 		if slot not in Vanguard.KEYS or not unlocked(slot): return false
+		if ArsenalBurst.enabled(run) and run.vanguard.slam_left>0 and slot=="e": return true
 		if SupportModules.enabled(run) and run.vanguard.slam_left>0 and slot=="q": return charges.q>0 and not run.vanguard.slam_fueled
 		if run.vanguard.drive_blocks(run) and not (SupportModules.enabled(run) and slot=="f"): return false
 		if run.vanguard.slam_left>0 and not (SupportModules.enabled(run) and slot=="f"): return false
+		if ArsenalBurst.enabled(run) and slot=="q" and run.vanguard.burst_left>0 and run.vanguard.emp_left<=0: return energy>=5 and run.vanguard.burst_clock<=0 and run.vanguard.pending.is_empty()
 		if slot=="p1": return true
 		if charges[slot]<=0 or (energy<ability_cost(loadout[slot]) and not run.vanguard.powered(run)): return false
+		if ArsenalBurst.enabled(run) and slot=="x3": return true
 		var target:=target_point(run,slot,cursor)
 		if slot=="f": return Vanguard.blink_target(run,target).distance_to(run.player)>1
 		return Vanguard.valid_point(run,target,22) if slot in ["x1","x2","x3"] else true
@@ -544,6 +550,7 @@ func step(run, delta: float) -> void:
 	for slot in active_slots():
 		var data: Dictionary = ABILITIES[loadout[slot]]
 		var maximum: int=2 if loadout.get("vanguard",false) and slot in ["q","w","e"] else int(data.max)
+		if loadout.get("arsenal26",false) and slot=="e" and effective_rank("e")>=10: maximum=4
 		if loadout.get("review19",false) and slot=="f": maximum=2 if effective_rank("f")>=5 else 1
 		if slot=="q" and extra_q_charge: maximum+=1
 		charges[slot]=mini(charges[slot],maximum)

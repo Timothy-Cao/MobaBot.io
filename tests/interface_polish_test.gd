@@ -12,8 +12,11 @@ func controls(node: Node) -> Array:
 func run() -> void:
 	var game=load("res://src/salvage/expedition.tscn").instantiate()
 	game.persist_settings=false
+	var default_cast: Dictionary=game.cast_quick.duplicate()
 	root.add_child(game)
 	await process_frame
+	# Exercise shipped defaults independently of the owner's saved preferences.
+	game.cast_quick=default_cast
 	game.set_physics_process(false)
 	var collection_before: String=JSON.stringify(game.collection.snapshot())
 	game.launch_practice()

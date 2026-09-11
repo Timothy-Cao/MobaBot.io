@@ -24,7 +24,7 @@ func cast(run, slot: String, target: Vector2) -> void:
 			relays.append({"pos":target,"life":12.0})
 		"e":
 			departure=run.player; moved_relay=false
-			run.vanguard.slam_direction=aim; run.vanguard.slam_left=Vanguard.slam_range(run.kit.effective_rank("e"))/Vanguard.SLAM_SPEED
+			run.vanguard.slam_direction=aim; run.vanguard.slam_left=run.kit.cast_range("e")/Vanguard.SLAM_SPEED
 			run.vanguard.slam_bounced=false; run.vanguard.buffered_hammer=false
 			run.vanguard.blast(run,run.player,75,16*run.kit.damage_scale("e"),"conductor",0,100)
 		"r":

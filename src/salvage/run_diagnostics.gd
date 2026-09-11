@@ -31,6 +31,7 @@ static func annotate(record: Dictionary, run, automated: bool) -> void:
 	if OperationRules.enabled(run): record.build="vanguard-20-chapter-operations"; record.chapter=run.exp.operation_chapter; record.operation_rounds=run.exp.route().size()
 	if LevelMastery.enabled(run): record.build="vanguard-22-level-progression"
 	if SupportModules.enabled(run): record.build="vanguard-25-mosquito-enrage"
+	if ArsenalBurst.enabled(run): record.build="vanguard-26-arsenal-support"
 	record.practice=run.exp!=null and run.exp.practice
 	record.automated=automated
 	if Vanguard.enabled(run):
