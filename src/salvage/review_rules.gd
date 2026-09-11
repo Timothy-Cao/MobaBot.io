@@ -82,16 +82,18 @@ static func buy_module(game, slot: String) -> bool:
 static func drive_cost(run) -> float:
 	# Rank 1: 100 energy / (28 drain - 8 regen) = 5 seconds.
 	# Rank 10: 8 / 10 gross drain = 80% duty cycle without other spending.
-	return lerpf(28.0,10.0,float(clampi(run.kit.effective_rank("d"),1,10)-1)/9.0)
+	return lerpf(28.0,10.0,float(clampi(run.kit.effective_rank("d"),1,10)-1)/9.0)*(1-run.kit.energy_efficiency)
 
 static func suppress(run, seconds: float=3.0) -> void:
 	if not enabled(run): return
+	if LevelMastery.enabled(run): seconds*=1-run.mastery.value("emp_resist")
 	run.vanguard.emp_left=maxf(run.vanguard.emp_left,seconds)
 	run.kit.emp_left=run.vanguard.emp_left
 	run.vanguard.ghost=false; run.kit.sprint=0
 	run.emit_event("energy_empty",run.player)
 
 static func tick(run, delta: float) -> void:
+	LevelMastery.tick(run,delta)
 	var v=run.vanguard
 	v.emp_left=maxf(0,v.emp_left-delta); run.kit.emp_left=v.emp_left
 	v.combo_left=maxf(0,v.combo_left-delta)

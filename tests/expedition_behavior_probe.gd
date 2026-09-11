@@ -21,6 +21,7 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 		for arg in OS.get_cmdline_user_args():
 			if arg.begins_with("--chapter="): chapter=int(arg.trim_prefix("--chapter="))
 		OperationRules.enable(run,chapter)
+		LevelMastery.enable(run)
 	ForgeEquipment.new().apply_to(run)
 	# Reliability only: a normal-HP refill can still die to several hits in one
 	# frame. Inflate maximum health too, preserving all AI/damage/collision paths.
@@ -75,6 +76,7 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 				if run.kit.energy<20: run.use_consumable(1)
 				if run.mastery.available(run.level)>0:
 					var path: Array=["b0_0","b0_1","b3_0","b3_2","b2_0","b2_2","b0_3","b2_4"] if run.mastery.unified else ["b0_0","b0_1","b3_1","b2_0","b2_1","b3_3","b0_3","b2_2","b2_4"]
+					if run.mastery.modern: path=["field","reach","economy","insulation","charge","learner","salvager","supplies","windfall","companion","collector","repair","disruptor"]
 					for id in path:
 						if run.mastery.can_buy(id,run.level): run.mastery.buy(run,id); break
 			var before:=Time.get_ticks_usec()
@@ -86,7 +88,7 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 			max_us=maxi(max_us,elapsed); peak=maxi(peak,run.enemies.size())
 			run.events.clear()
 	samples.sort()
-	return {"class":class_id,"policy":policy,"artificial_health":policy=="soak","chapter":run.exp.operation_chapter,"arrivals":arrivals,"ascension":difficulty,"state":run.state,"round":run.exp.route_index+1,"seconds":snappedf(run.time,0.1),"level":run.level,"kills":run.kills,"peak_enemies":peak,"p95_step_us":samples[int(samples.size()*0.95)] if not samples.is_empty() else 0,"max_step_us":max_us,"casts":run.kit.cast_counts}
+	return {"class":class_id,"policy":policy,"artificial_health":policy=="soak","chapter":run.exp.operation_chapter,"arrivals":arrivals,"ascension":run.exp.ascension,"state":run.state,"round":run.exp.route_index+1,"seconds":snappedf(run.time,0.1),"level":run.level,"kills":run.kills,"peak_enemies":peak,"p95_step_us":samples[int(samples.size()*0.95)] if not samples.is_empty() else 0,"max_step_us":max_us,"casts":run.kit.cast_counts}
 
 func _run() -> void:
 	if "--soak" in OS.get_cmdline_user_args():

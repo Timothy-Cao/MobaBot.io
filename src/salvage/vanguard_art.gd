@@ -4,6 +4,10 @@ const Motion=preload("res://src/salvage/vanguard_motion.gd")
 ## Teal/steel bodies, brass impacts, mint support. Geometry reads from simulation.
 static func draw(c, run) -> void:
 	var v: Vanguard=run.vanguard
+	if LevelMastery.enabled(run) and run.mastery.value("pet_damage")>0:
+		var p: Vector2=run.kit.pet_position
+		c.draw_circle(p,9,c.INK); c.draw_circle(p,6,c.TEAL if v.emp_left<=0 else c.PALE)
+		c.draw_line(p+Vector2(-3,-1),p+Vector2(3,-1),c.CREAM,2,true)
 	for trace in v.ghosts:
 		if c.reduced_effects: continue
 		c._box(Rect2(trace.pos-Vector2(16,17),Vector2(32,30)),Color(c.TEAL,trace.life*0.25),8,Color(c.PALE,trace.life*0.65),1)
@@ -84,6 +88,16 @@ static func draw(c, run) -> void:
 			c.draw_rect(Rect2(p+Vector2(-20,27),Vector2(40,4)),c.INK)
 			c.draw_rect(Rect2(p+Vector2(-20,27),Vector2(40*clampf(unit.hp/unit.max_hp,0,1),4)),tint)
 		elif unit.id=="reserve_totem":
+			if LevelMastery.enabled(run):
+				var inside: bool=run.player.distance_to(p)<=unit.radius
+				var fill: float=clampf(unit.bank/(86*Vanguard.power(run.kit.effective_rank(unit.slot))),0,1)
+				c.draw_rect(Rect2(p+Vector2(-24,29),Vector2(48,7)),c.INK)
+				c.draw_rect(Rect2(p+Vector2(-23,30),Vector2(46*fill,5)),c.TEAL)
+				if not inside:
+					c.draw_line(p+Vector2(0,22),p+Vector2(0,12),c.TEAL,3,true)
+					c.draw_line(p+Vector2(-4,17),p+Vector2(0,12),c.TEAL,2,true)
+				elif unit.bank<=0.1:
+					c.draw_line(p+Vector2(-7,23),p+Vector2(7,23),c.PALE,3,true)
 			c.draw_line(p-Vector2(0,6),p+Vector2(0,6),c.CREAM,4,true)
 			c.draw_line(p-Vector2(6,0),p+Vector2(6,0),c.CREAM,4,true)
 			c.draw_arc(p,21,-PI/2,-PI/2+TAU*minf(1,unit.bank/(86*Vanguard.power(run.kit.effective_rank(unit.slot)))),32,tint,3,true)

@@ -1,3 +1,9 @@
+# Current 0.22 override
+
+New games use eight numbered Levels of three rounds, with no Ascension selection. See [Level progression](docs/design/LEVEL_PROGRESSION_22.md) for the Utility/Looting/Pet mastery tree, equipment changes, bulk actions and bounded recovery assist. Existing saves remain compatible. The energy/turret module rework is on hold; the existing combat remains playable.
+
+## Earlier 0.20 documentation
+
 # MobaBot.io — 0.20 Chapter Operations
 
 New attempts are **three-round Operations** in one of eight replayable Chapters. Abilities, mastery and field credits reset each attempt; equipment and **Salvage** persist. Survival lasts 90/105/120 seconds, with a final Operation boss. Buy modules between rounds; buy 150-Salvage equipment crates at Home → Equipment. Clear a Chapter to unlock the next, or replay earlier Chapters. Existing checkpoints keep their original route. [Current rules and verification](docs/design/OPERATIONS_20.md).

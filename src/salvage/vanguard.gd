@@ -50,6 +50,10 @@ func drive_blocks(run) -> bool:
 var emp_left := 0.0
 var combo_left := 0.0
 var combo_swing := false
+var helper_clock := 0.0
+var helper_stun := 0.0
+var helper_safe := 0.0
+var helper_health := 0.0
 var ghost := false
 var gun_on := true
 var gun_shots := 0
@@ -89,6 +93,8 @@ static func setup(run, rank_value: int = 0) -> void:
 	run.kit.loadout.erase("review19"); run.kit.emp_left=0
 	run.kit.loadout.erase("unified_mastery")
 	run.kit.loadout.erase("operation20"); run.kit.loadout.erase("operation_xp")
+	run.kit.loadout.erase("level22")
+	if run.mastery is ExpeditionTree: run.mastery.modern=false
 	if run.exp!=null: run.exp.operation_chapter=0
 	if run.mastery is ExpeditionTree: run.mastery.unified=false
 	var kit: MobaKit = run.kit
@@ -178,6 +184,8 @@ static func progression(run) -> void:
 	while run.exp.pending_chests>0:
 		run.exp.pending_chests -= 1; run.exp.chests_opened += 1
 		receipt.chests+=1; receipt.credits+=20; run.exp.field_credits+=20
+		if LevelMastery.enabled(run) and run.mastery.value("double_chest")>0 and run.loot_rng.randf()<run.mastery.value("double_chest"):
+			receipt.credits+=20; run.exp.field_credits+=20
 		if ReviewRules.enabled(run): pass
 		elif run.kit.loadout.rewards18.size()<256 and not candidates(run,"upgrade").is_empty():
 			earn(run); receipt.points+=1
@@ -192,6 +200,7 @@ static func progression(run) -> void:
 		run.exp.field_credits += 20*run.kit.loadout.rewards18.size(); run.kit.loadout.rewards18.clear()
 
 func clear() -> void:
+	helper_clock=0; helper_stun=0; helper_safe=0; helper_health=0
 	emp_left=0; combo_left=0; combo_swing=false
 	ghost=false; pending.clear(); hammer=-1; slam_left=0; slam_bounced=false; touch_guard=0; shield=0
 	constructs.clear(); impacts.clear(); ghosts.clear()

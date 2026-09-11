@@ -1,5 +1,7 @@
 # Balance benchmarks · 10 September 2026
 
+0.22 follow-up: the executable grid now uses Utility/Looting/Pet mastery and the current W/gear rules. Numerical findings explicitly labeled 0.20 below are retained history, not current measurements. See LEVEL_PROGRESSION_22.md. Extra boss/variant tuning remains deferred in light of the owner's positive combat review.
+
 Owner direction: a correctly built, perfectly executed boss fight should take about **60 seconds**, with **90–120 seconds** available for dodging and misses. Balanced investment should maintain roughly comparable difficulty within an Operation; specialization should create advantages and weaknesses. Increase mechanical demands as mobility develops, and alternate tension with occasional relief.
 
 This document defines acceptance targets, not claims that the current build meets them. The offline benchmark is implemented; special-round variants below are an authored design specification, not playable content yet. Existing Operations and saves are unchanged by this milestone.

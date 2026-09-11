@@ -18,13 +18,14 @@ static func stats(run, slot: String, earned: int) -> Dictionary:
 	kit.discovered=run.kit.discovered.duplicate(); kit.discovered.append(slot)
 	kit.ranks[slot]=earned; kit.tiers=run.kit.tiers.duplicate(); kit.rank_bonus=run.kit.rank_bonus
 	kit.gear_damage=run.kit.gear_damage; kit.mastery_damage=run.kit.mastery_damage; kit.cooldown_bonus=run.kit.cooldown_bonus
+	kit.energy_efficiency=run.kit.energy_efficiency
 	var scale_value:=kit.damage_scale(slot)
 	match slot:
 		"q": data={"Direct + blast":23*scale_value,"Blast radius":62*area}
 		"w": data={"Center damage":76*scale_value,"Radius":100*area}
 		"e": data={"Impact damage":32*scale_value,"Reach":kit.cast_range(slot)}
 		"r": data={"Impact damage":135*scale_value*(0.8 if rank_value>=10 else 1.0),"Radius":170*area}
-		"d": return {"Energy / sec":lerpf(28,10,float(clampi(rank_value,1,10)-1)/9.0),"Speed bonus %":65+(rank_value-1)*3.5}
+		"d": return {"Energy / sec":lerpf(28,10,float(clampi(rank_value,1,10)-1)/9.0)*(1-run.kit.energy_efficiency),"Speed bonus %":65+(rank_value-1)*3.5}
 		"f": data={"Charges":2 if rank_value>=5 else 1,"Energy":kit.ability_cost("blink"),"Reach":kit.cast_range(slot)}
 	data["Recharge sec"]=kit.cooldown(slot)
 	return data

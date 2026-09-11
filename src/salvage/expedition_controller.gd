@@ -43,7 +43,7 @@ func _ready() -> void:
 	if persistent_run(): apply_fullscreen()
 	if screen == "home": ui.show_home()
 	select_class(class_choice)
-	get_window().title="MobaBot.io · Chapter Operations"
+	get_window().title="MobaBot.io · Levels"
 
 func select_class(id: String) -> void:
 	class_choice = id
@@ -62,7 +62,7 @@ func launch_expedition(resume: bool=false) -> void:
 	if collection.blocked:
 		ui.announce(collection.message,2); return
 	if not resume and collection is ForgeEquipment and (chapter_choice<1 or chapter_choice>collection.unlocked_chapter()):
-		ui.announce("Clear the preceding Chapter first",2); return
+		ui.announce("Clear the preceding level first",2); return
 	camera_offset=Vector2.ZERO; minimap_held=false
 	seed_value=int(collection.checkpoint.get("seed",2407)) if resume else int(Time.get_unix_time_from_system())%2147483647
 	super.start_run("salvage")
@@ -76,12 +76,13 @@ func launch_expedition(resume: bool=false) -> void:
 		screen="camp"; ExpeditionView.camp(self)
 	else:
 		var expedition:=BotExpedition.new()
-		expedition.start(model,class_choice,ascension_choice)
+		expedition.start(model,class_choice,0 if collection is ForgeEquipment else ascension_choice)
 		BotKeyboard.enable(model)
 		expedition.enable_revision(model)
 		Vanguard.setup(model)
 		ReviewRules.enable(model)
-		if collection is ForgeEquipment: OperationRules.enable(model,chapter_choice)
+		if collection is ForgeEquipment:
+			OperationRules.enable(model,chapter_choice); LevelMastery.enable(model)
 		collection.apply_to(model)
 		model.health=model.max_health(); model.kit.energy=model.kit.energy_max()
 		banked_camp=-1
@@ -94,8 +95,8 @@ func launch_expedition(resume: bool=false) -> void:
 func confirm_new_run() -> void:
 	if collection.checkpoint.is_empty(): launch_expedition(false); return
 	var dialog := ConfirmationDialog.new()
-	dialog.dialog_text = "Start a new Operation? Current abilities, mastery and field credits reset. Banked equipment and Salvage stay."
-	dialog.title = "New Operation"
+	dialog.dialog_text = "Start a new level? Current abilities, mastery and field credits reset. Banked equipment and Salvage stay."
+	dialog.title = "New level"
 	dialog.confirmed.connect(func() -> void: launch_expedition(false); dialog.queue_free())
 	dialog.canceled.connect(dialog.queue_free)
 	add_child(dialog); dialog.popup_centered(Vector2i(440,140))
@@ -190,6 +191,23 @@ func buy_supply_crate() -> void:
 	if id!="": gear_item=id; gear_slot=ForgeEquipment.ITEMS[id].slot
 	ForgeView.draw(self)
 
+func bulk_gear(action: String) -> void:
+	var before: Dictionary=collection.snapshot()
+	if not collection.bulk(action,false): return
+	var feedback: String=collection.message
+	if gear_return=="camp": collection.apply_to(model)
+	var ok: bool=collection.bank_camp(model,persistent_run()) if gear_return=="camp" else (not persistent_run() or collection.save())
+	if not ok:
+		collection.restore(before)
+		if gear_return=="camp": collection.apply_to(model)
+		collection.message="Save failed. Nothing changed."
+	else: collection.message=feedback
+	ForgeView.draw(self)
+
+func result_next() -> void:
+	chapter_choice=mini(8,model.exp.operation_chapter+(1 if model.state=="won" else 0))
+	screen="prepare"; OperationView.prepare(self)
+
 func _open_build() -> void:
 	if ReviewRules.enabled(model) and model.state=="camp":
 		review_tab="Build"; screen="camp"; ReviewView.camp(self); return
@@ -215,7 +233,8 @@ func _bank_loot(completed_level: int) -> void:
 	if not persistent_run(): return
 	var before:=collection.snapshot()
 	collection.credits=mini(10000000,collection.credits+model.coins)
-	if model.state=="won" and (not OperationRules.enabled(model) or model.exp.operation_chapter==OperationRules.CHAPTERS): collection.unlocked_ascension=mini(5,maxi(collection.unlocked_ascension,model.exp.ascension+1))
+	if collection is ForgeEquipment: collection.record_failure(model)
+	if model.state=="won" and not OperationRules.enabled(model): collection.unlocked_ascension=mini(5,maxi(collection.unlocked_ascension,model.exp.ascension+1))
 	collection.checkpoint.clear()
 	if not collection.save(): collection.restore(before); collection.message="Could not save rewards. Last checkpoint preserved."
 

@@ -118,6 +118,11 @@ func sync_stats(run) -> void:
 	run.kit.cooldown_bonus = minf(0.6, stats.cooldown)
 	run.kit.rank_bonus=int(stats.get("ability_rank",0))
 	run.kit.forge_pet=stats.get("forge_pet",0)>0
+	run.kit.energy_efficiency=run.mastery.value("efficiency") if LevelMastery.enabled(run) else 0.0
+	run.kit.extra_q_charge=LevelMastery.enabled(run) and run.mastery.value("extra_charge")>0
+	if LevelMastery.enabled(run):
+		stats.magnet+=run.mastery.value("pet_magnet")
+		run.kit.regen_bonus+=run.mastery.rank_of("economy")*0.2
 	run.kit.extra.capacity = mini(4, (2 if class_id == "summoner" else 1) + int(stats.capacity))
 	run.kit.extra.duration_bonus = stats.duration + (0.2 if class_id == "summoner" else 0)
 	run.kit.extra.summon_power = 1 + stats.summon_damage + (0.2 if class_id == "summoner" else 0)
@@ -171,7 +176,7 @@ func round_seconds() -> float:
 	return 35.0 if ROUTE[route_index][1] in ["boss", "final"] else (40.0 if ROUTE[route_index][1] == "loot" else 50.0)
 
 func label() -> String:
-	if operation_chapter>0: return "Chapter %d · Round %d / 3"%[operation_chapter,route_index+1]
+	if operation_chapter>0: return "Level %d · Round %d / 3"%[operation_chapter,route_index+1]
 	if revised:
 		var round_number:=1
 		for i in range(route_index):

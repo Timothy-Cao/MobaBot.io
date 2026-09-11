@@ -13,6 +13,7 @@ const ROUTES := [
 static var TREE: Dictionary = make_nodes()
 static var UNIFIED: Dictionary = make_unified()
 var unified := false
+var modern := false
 
 static func make_unified() -> Dictionary:
 	var result: Dictionary={}
@@ -29,7 +30,7 @@ static func make_unified() -> Dictionary:
 	result.b3_2.name="Recycling loop"; result.b3_2.stat="regen"; result.b3_2.value=0.6
 	return result
 
-func nodes() -> Dictionary: return UNIFIED if unified else TREE
+func nodes() -> Dictionary: return LevelMastery.TREE if modern else UNIFIED if unified else TREE
 
 static func make_nodes() -> Dictionary:
 	var nodes := {}
@@ -57,12 +58,14 @@ func rank_of(id: String) -> int:
 func can_buy(id: String, power_level: int) -> bool:
 	if read_only or not nodes().has(id) or available(power_level) < 1: return false
 	var node: Dictionary = nodes()[id]
+	if modern and node.parent!="" and rank_of(node.parent)<nodes()[node.parent].max: return false
 	return rank_of(id) < node.max and (node.parent.is_empty() or rank_of(node.parent) > 0)
 
 func buy(run, id: String) -> bool:
 	if run.state not in ["running", "upgrade", "stage_reward", "chest", "camp"] or not can_buy(id, run.level): return false
 	ranks[id] = rank_of(id) + 1; spent += 1
 	run.exp.sync_stats(run)
+	if modern and id=="charge": run.kit.charges.q=mini(3,run.kit.charges.q+1)
 	return true
 
 func refund(run) -> bool:

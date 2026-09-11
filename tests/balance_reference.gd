@@ -2,13 +2,13 @@ extends RefCounted
 ## Offline design instrument. Never loaded by gameplay and never opens a save.
 const LEVELS := [5,14,24]
 const IDEAL_SECONDS := 60.0
-const PATHS := [["b0_1","b0_3","b0_5","b0_7"],["b2_0","b2_2","b2_4","b2_6"],["b3_0","b3_2","b3_4","b3_6"]]
+const PATHS := [["reach","economy","insulation","charge"],["learner","salvager","supplies","windfall"],["companion","collector","repair","disruptor"]]
 
 static func build(chapter: int, round_index: int, tier: int, focus: String="balanced") -> SalvageRun:
 	var run:=SalvageRun.new(7127); run.loot_rng.seed=8028
 	run.enable_moba(MobaKit.demo_preset()); run.enable_demo(); run.attacks.enabled=true
 	BotExpedition.new().start(run,"ranged",0); run.exp.enable_revision(run)
-	Vanguard.setup(run); ReviewRules.enable(run); OperationRules.enable(run,chapter)
+	Vanguard.setup(run); ReviewRules.enable(run); OperationRules.enable(run,chapter); LevelMastery.enable(run)
 	run.exp.route_index=round_index
 	# Same earned budget in every comparison; ideal selection ignores card luck.
 	run.total_xp=(LEVELS[round_index]-1)*20; Vanguard.progression(run)
@@ -17,8 +17,8 @@ static func build(chapter: int, round_index: int, tier: int, focus: String="bala
 		pool.sort_custom(func(a,b): return Vanguard.rank_of(run,a)<Vanguard.rank_of(run,b))
 		run.state="upgrade"; run.offers=[pool[0]]; Vanguard.spend(run,pool[0])
 	run.state="running"
-	var order: Array=[0,1,2] if focus=="balanced" else [0,2,1] if focus=="offense" else [1,2,0] if focus=="defense" else [2,1,0]
-	run.mastery.buy(run,"b0_0")
+	var order: Array=[0,1,2] if focus=="balanced" else [0,2,1] if focus=="utility" else [1,2,0] if focus=="looting" else [2,1,0]
+	run.mastery.buy(run,"field")
 	while run.mastery.available(run.level)>0:
 		var bought:=false
 		for branch in order:

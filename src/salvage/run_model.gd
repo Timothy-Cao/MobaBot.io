@@ -854,10 +854,15 @@ func hit_enemy(enemy: Dictionary, damage: float, source: String, knock: Vector2 
 		if exp!=null and exp.practice:
 			emit_event("kill",enemy.pos,{"enemy_kind":enemy.kind})
 			return
+		if LevelMastery.enabled(self):
+			var recovery: float=mastery.value("supplies")
+			if recovery>0 and loot_rng.randf()<0.01*recovery:
+				var energy_drop: bool=loot_rng.randf()<0.5
+				_drop_supply(enemy.pos,"energy" if energy_drop else "repair",int(12+4*recovery) if energy_drop else int(2+recovery))
 		if kit != null and kit.onboarding:
 			if loot_rng.randf() < (special_drop_chance(1.0/25) if Vanguard.enabled(self) else minf(0.20, (1.0 + drop_bonus) / 25.0)):
 				_drop_supply(enemy.pos, "coins", 25)
-			if loot_rng.randf() < (special_drop_chance(1.0/15) if Vanguard.enabled(self) else minf(0.25, (1.0 + drop_bonus) / 15.0)):
+			if not LevelMastery.enabled(self) and loot_rng.randf() < (special_drop_chance(1.0/15) if Vanguard.enabled(self) else minf(0.25, (1.0 + drop_bonus) / 15.0)):
 				_drop_supply(Vector2(enemy.pos) + Vector2(-20, 0), "speed" if loot_rng.randf() < 0.5 else "reset", 1)
 			if enemy.has("role"): _drop_supply(Vector2(enemy.pos) + Vector2(0, 24), "coins", 75)
 		if kit != null:
@@ -865,7 +870,7 @@ func hit_enemy(enemy: Dictionary, damage: float, source: String, knock: Vector2 
 			if enemy.has("role") and enemy.role != "foreman": count = 30
 			if staged and enemy.get("elite", false): count += 5
 			loot_shower(enemy.pos, count)
-			if staged and enemy.kind != 0:
+			if staged and enemy.kind != 0 and not LevelMastery.enabled(self):
 				if not Vanguard.enabled(self) or loot_rng.randf()<special_drop_chance(1.0):
 					_drop_supply(enemy.pos, "energy", 18 if enemy.kind != 2 else 50)
 				if enemy.kind == 2 or (enemy.kind == 3 and kills % 3 == 0):
@@ -1108,9 +1113,11 @@ func _collect_supply(supply: Dictionary) -> void:
 	if supply.value <= 0: return
 	match supply.kind:
 		"energy": kit.energy = minf(kit.energy_max(), kit.energy + supply.value)
-		"repair": heal(supply.value)
+		"repair":
+			if LevelMastery.enabled(self): health=minf(max_health(),health+supply.value)
+			else: heal(supply.value)
 		"coins":
-			if OperationRules.enabled(self): exp.field_credits+=supply.value
+			if OperationRules.enabled(self): exp.field_credits+=roundi(supply.value*(1+mastery.value("loot_bonus")))
 			else: coins += supply.value
 		"speed": kit.boost_speed = 6.0
 		"reset":

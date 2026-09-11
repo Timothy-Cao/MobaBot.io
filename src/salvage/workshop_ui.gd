@@ -571,13 +571,17 @@ func show_result(model: SalvageRun, saved: bool = false) -> void:
 	notice_time = 0
 	_dim()
 	_panel(Rect2(188, 126, 584, 353))
-	_label(overlay, ("Operation complete" if OperationRules.enabled(model) else "Expedition complete" if model.exp != null else ("Demo complete" if model.demo_mode else "Shift complete")) if model.state == "won" else "Destroyed", Rect2(222, 151, 516, 52), 33, CREAM, true)
+	_label(overlay, ("Level complete" if OperationRules.enabled(model) else "Expedition complete" if model.exp != null else ("Demo complete" if model.demo_mode else "Shift complete")) if model.state == "won" else "Destroyed", Rect2(222, 151, 516, 52), 33, CREAM, true)
 	_label(overlay, "%d\nKills" % model.kills, Rect2(230, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
 	_label(overlay, "%d\nRounds" % (model.exp.route_index+(1 if model.state=="won" else 0)) if model.exp != null else "%d\nCredits" % model.coins, Rect2(405, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
 	_label(overlay, "%ds\nSurvived" % int(model.time), Rect2(580, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
 	if model.state == "lost" and not model.last_damage.is_empty():
 		_label(overlay, "Final hit: " + model.last_damage, Rect2(219, 305, 522, 20), 13, CREAM, true, HORIZONTAL_ALIGNMENT_CENTER)
-	var again := _button("Play again", Rect2(228, 353, 244, 44), func() -> void: restart_requested.emit())
+	var operation: bool=OperationRules.enabled(model) and host!=null
+	var title: String=("Next level · %d"%(model.exp.operation_chapter+1) if model.exp.operation_chapter<8 else "Choose level") if operation and model.state=="won" else "Retry level" if operation else "Play again"
+	var again := _button(title, Rect2(228, 353, 244, 44), func() -> void:
+		if operation: host.result_next()
+		else: restart_requested.emit())
 	_button("Main menu", Rect2(488, 353, 244, 44), func() -> void: menu_requested.emit(), false)
 	_button("View build", Rect2(388, 413, 184, 33), func() -> void: build_requested.emit(), false)
 	if not saved: _label(overlay, "Run not saved", Rect2(610, 445, 126, 18), 10, MUTED, false, HORIZONTAL_ALIGNMENT_RIGHT)

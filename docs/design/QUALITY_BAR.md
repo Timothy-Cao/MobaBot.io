@@ -1,5 +1,11 @@
 # MobaBot.io quality bar
 
+## Owner approval and focused progression · 10 September 2026 · 0.22
+
+Owner reports direct games are fun across several rounds; current abilities have strong purposes, especially E for dodge/attack/bounce/reposition/escape, and the healing module is very good. Energy charge/turret feel lame, but owner is no longer convinced by stationary siege and explicitly asks to hold those reworks and brainstorm alternatives. Latest authorization covers the accumulated level/menu/gear/mastery changes; do not treat it as approval for the paused module replacements.
+
+Implemented stronger, rarer upper equipment tiers with bulk actions; numbered levels without new-run Ascensions; run-only Utility/Looting/Pet mastery and inspectable locked nodes; bounded frontier recovery assist; W recharge +15%; clearer health/Reserve bars and camp progression actions. Equipment remains the durability source and mobility growth is bounded. Technical evidence is in QA_18; next human review should focus on new mastery/equipment pacing while preserving the positively reviewed combat. No automatic fun-score increase.
+
 ## Benchmark direction · 10 September 2026 · after 5ab5355
 
 Owner requests a 60-second ideal boss kill with 90–120 seconds for practical dodging/misses; balanced offense/defense progression should maintain comparable relative pressure, while specialization leaves weaknesses. Mechanical challenge should develop with movement, and occasional loot breaks, difficult encounters, double bosses and map challenges should vary the experience. Owner authorizes judgment on the direction.

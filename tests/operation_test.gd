@@ -61,8 +61,8 @@ func execute() -> void:
 	for i in range(5000):
 		var found:=rolls.buy_crate(false)
 		if found!="": counts[ForgeEquipment.ITEMS[found].tier-1]+=1
-	check(counts[0]>3850 and counts[0]<4150 and counts[1]>700 and counts[1]<1000,"Fixed-seed crate distribution mostly low tiers")
-	check(counts[2]>75 and counts[2]<225 and counts[3]>0 and counts[3]<25 and counts[4]==0,"High-tier crate chances remain rare; tier five is forged")
+	check(counts[0]>4600 and counts[0]<4800 and counts[1]>190 and counts[1]<360,"Fixed-seed crate distribution mostly low tiers")
+	check(counts[2]>8 and counts[2]<45 and counts[3]<8 and counts[4]==0,"High-tier crate chances remain rare; tier five is forged")
 	var failed_run:=fresh(2); failed_run.state="camp"; failed_run.exp.route_index=2; failed_run.exp.clear_clock=-2; failed_run.exp.carry_credits=80
 	before=fail.snapshot()
 	check(not fail.bank_camp(failed_run,true) and fail.snapshot()==before and failed_run.exp.carry_credits==80,"Failed Chapter save preserves reward and unlock for retry")

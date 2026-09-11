@@ -21,7 +21,7 @@ static func detail(run, slot: String) -> String:
 	if slot=="x3": return "Overclock well\nFree skill energy inside.\nDuration 5 / 7 / 9s at ranks 1 / 5 / 10.\nRecharge 2×; rank 10: 3×."
 	if slot=="d": return "Ghost drive\nHold D: +%.0f%% speed, %.1f energy/sec.\n5: much lower upkeep. 10: cast while driving.\nNo invulnerability."%[65+maxi(0,run.kit.effective_rank("d")-1)*3.5,Vanguard.drive_upkeep(run.kit.effective_rank("d"))]
 	if slot=="w": return "Core strike · 2 charges\n38 base edge damage / 76 center. 100 radius; 40 center.\nRank 5: wider impact. Rank 10: brief stun.\n%.1fs per charge · 18 energy"%run.kit.cooldown("w")
-	if slot=="q": return "Impact bolt · 2 charges\nStraight rocket with contact/range explosion.\n%.1fs per charge"%run.kit.cooldown("q")
+	if slot=="q": return "Impact bolt · %d charges\nStraight rocket with contact/range explosion.\n%.1fs per charge"%[3 if run.kit.extra_q_charge else 2,run.kit.cooldown("q")]
 	if slot=="e": return "Body slam · 2 charges\n%.0f reach. 5: +40%% reach. 10: +90%%.\nOne wall rebound: 2× remaining distance.\n%.1fs per charge"%[run.kit.cast_range("e"),run.kit.cooldown("e")]
 	if slot=="f": return "Phase hop\nInstant blink. 5: lower recharge / energy.\n10: arrival explosion (110 radius).\n%.1fs recharge · %.0f energy"%[run.kit.cooldown("f"),run.kit.ability_cost("blink")]
 	var data: Dictionary=MobaKit.ABILITIES[Vanguard.TOOLS[slot]]
@@ -29,7 +29,7 @@ static func detail(run, slot: String) -> String:
 
 static func draw(ui, run) -> void:
 	var modified: bool=run.exp.practice and (run.exp.god_mode or run.exp.free_energy or run.exp.fast_cooldowns or run.vanguard.freeze_ai or run.vanguard.time_scale!=1)
-	var signature:=JSON.stringify(["v18",run.kit.loadout.get("hammer_rank",1),run.kit.ranks,run.kit.discovered,run.upgrades.power,run.upgrades.grinder,Vanguard.reward_kind(run),run.kit.loadout.rewards18.size(),PaintedIcons.enabled,modified])
+	var signature:=JSON.stringify(["v18",run.kit.extra_q_charge,run.kit.energy_efficiency,run.kit.loadout.get("hammer_rank",1),run.kit.ranks,run.kit.discovered,run.upgrades.power,run.upgrades.grinder,Vanguard.reward_kind(run),run.kit.loadout.rewards18.size(),PaintedIcons.enabled,modified])
 	var slots: Array=["hammer","gun","p1","x1","x2","x3","q","w","e","r","d","f"]
 	if ui.bar_signature!=signature:
 		ui.bar_signature=signature
@@ -97,6 +97,7 @@ static func draw(ui, run) -> void:
 			ui.ability_shades[slot].visible=true; ui.ability_labels[slot].text="EMP"
 		if slot in ["q","w","e"] or (ReviewRules.enabled(run) and slot=="f"):
 			ui.ability_recharge[slot].text="" if locked else ["○○","●○","●●"][clampi(run.kit.charges[slot],0,2)]
+			if slot=="q" and run.kit.extra_q_charge and not locked: ui.ability_recharge[slot].text="●".repeat(clampi(run.kit.charges[slot],0,3))+"○".repeat(3-clampi(run.kit.charges[slot],0,3))
 
 static func rank_of_gate(run, slot: String) -> bool:
 	return Vanguard.rank_of(run,slot)>=5 and Vanguard.rank_of(run,slot)<10 and slot not in Vanguard.candidates(run,"upgrade")

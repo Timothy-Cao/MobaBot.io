@@ -96,6 +96,8 @@ var last_failure := ""
 var ranks: Dictionary = {}
 var rank_regen := 0.0
 var rank_energy := 0.0
+var energy_efficiency := 0.0
+var extra_q_charge := false
 var shield_hits := 1
 var onboarding := false
 var elapsed := 0.0
@@ -149,8 +151,8 @@ static func with_starter_gun(config: Dictionary) -> Dictionary:
 	return result
 
 func ability_cost(id: String) -> float:
-	if loadout.get("vanguard",false) and id=="blink": return 12.0 if effective_rank("f")>=5 else 20.0
-	return float({"rocket": 8, "flame": 18, "nuke": 28, "laser": 40}.get(id, ENERGY_COST.get(id, ABILITIES[id].get("cost", 0))))
+	if loadout.get("vanguard",false) and id=="blink": return (12.0 if effective_rank("f")>=5 else 20.0)*(1-energy_efficiency)
+	return float({"rocket": 8, "flame": 18, "nuke": 28, "laser": 40}.get(id, ENERGY_COST.get(id, ABILITIES[id].get("cost", 0))))*(1-energy_efficiency)
 
 static func deals_damage(id: String) -> bool:
 	return id not in ["shield", "sprint", "blink", "dash", "pylon", "sacrifice", "repair_channel", "wall", "medic_sentry", "tumble", "veil_dash", "vault", "consume"]
@@ -256,6 +258,7 @@ func cooldown(slot: String) -> float:
 func cooldown_at(slot: String, rank_value: int, tier_value: int = -1) -> float:
 	var tier := int(tiers.get(slot, 0)) if tier_value < 0 else tier_value
 	var base: float=4.0/0.9 if loadout.get("vanguard",false) and slot=="q" else float(ABILITIES[loadout[slot]].cd)
+	if loadout.get("level22",false) and slot=="w": base*=1.15
 	if loadout.get("vanguard",false) and slot=="f": base=8.0 if rank_value+rank_bonus>=5 else 12.0
 	return base * (1.0 - tier * 0.08) * (1.0 - SalvageProgression.bonus(mini(10,rank_value+(rank_bonus if unlocked(slot) else 0))) * 0.5) / (1.0 + cooldown_bonus)
 
@@ -539,6 +542,7 @@ func step(run, delta: float) -> void:
 		var data: Dictionary = ABILITIES[loadout[slot]]
 		var maximum: int=2 if loadout.get("vanguard",false) and slot in ["q","w","e"] else int(data.max)
 		if loadout.get("review19",false) and slot=="f": maximum=2 if effective_rank("f")>=5 else 1
+		if slot=="q" and extra_q_charge: maximum+=1
 		charges[slot]=mini(charges[slot],maximum)
 		if charges[slot] < maximum:
 			recharge[slot] -= delta

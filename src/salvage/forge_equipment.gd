@@ -10,6 +10,8 @@ const ITEM_NAMES := {"helmet":"Visor","chest":"Carapace","legs":"Greaves","boots
 const AFFIXES := {"health": 2.0, "damage": 0.006, "regen": 0.15, "luck": 0.025, "resistance": 1.0}
 var credits := 150
 var chapter_cleared := 0
+var recovery_used: Array=[]
+var recovery_target := 0
 var unlocked_ascension := 0
 var inventory: Dictionary = {}
 var equipped: Dictionary = {}
@@ -47,16 +49,43 @@ static func roll_item(random: RandomNumberGenerator, ascension: int) -> String:
 	return SETS[tier]+"_"+SLOTS[random.randi_range(0,7)]
 
 func snapshot() -> Dictionary:
-	return {"version": 3, "credits": credits, "chapter_cleared":chapter_cleared,"crate_rng":str(rng.state), "ascension": unlocked_ascension, "inventory": inventory.duplicate(true), "equipped": equipped.duplicate(), "checkpoint": checkpoint.duplicate(true), "migration": migration.duplicate(true), "loadouts": loadouts.duplicate(true)}
+	return {"version": 3, "credits": credits, "chapter_cleared":chapter_cleared,"recovery_used":recovery_used.duplicate(),"recovery_target":recovery_target,"crate_rng":str(rng.state), "ascension": unlocked_ascension, "inventory": inventory.duplicate(true), "equipped": equipped.duplicate(), "checkpoint": checkpoint.duplicate(true), "migration": migration.duplicate(true), "loadouts": loadouts.duplicate(true)}
 
 func unlocked_chapter() -> int: return mini(OperationRules.CHAPTERS,chapter_cleared+1)
+
+func record_failure(run) -> void:
+	if not LevelMastery.enabled(run) or run.state!="lost" or run.exp.practice: return
+	var level: int=run.exp.operation_chapter
+	if level<=1 or level!=chapter_cleared+1 or level in recovery_used or run.time<90 or run.kills<60: return
+	recovery_used.append(level); recovery_target=level-1
+
+func bulk(action: String, persist: bool=true) -> bool:
+	if blocked or action not in ["craft","equip"]: return false
+	var before:=snapshot(); var changed:=0
+	for slot in SLOTS:
+		if action=="craft":
+			for tier in range(4):
+				var id: String=SETS[tier]+"_"+slot; var next: String=SETS[tier+1]+"_"+slot
+				var count:=mini(int(inventory[id].copies)/3,999-int(inventory[next].copies))
+				if count<=0: continue
+				inventory[id].copies-=count*3; inventory[next].copies+=count; changed+=count
+				if equipped[slot]==id and inventory[id].copies==0: equipped[slot]=next
+		else:
+			for tier in range(4,-1,-1):
+				var id: String=SETS[tier]+"_"+slot
+				if inventory[id].copies>0:
+					if equipped[slot]!=id: equipped[slot]=id; changed+=1
+					break
+	if persist and not save(): restore(before); message="Save failed. Nothing changed."; return false
+	message=("Crafted %d upgrades" if action=="craft" else "Updated %d equipment slots")%changed
+	return true
 
 func buy_crate(persist: bool=true) -> String:
 	if blocked: return ""
 	if credits<150: message="150 Salvage required"; return ""
 	var before:=snapshot()
 	var roll:=rng.randf()
-	var tier:=0 if roll<0.8 else 1 if roll<0.97 else 2 if roll<0.998 else 3
+	var tier:=0 if roll<0.94 else 1 if roll<0.995 else 2 if roll<0.9998 else 3
 	var id: String=SETS[tier]+"_"+SLOTS[rng.randi_range(0,7)]
 	if inventory[id].copies>=999: restore(before); message="Inventory full; nothing spent"; return ""
 	credits-=150; inventory[id].copies+=1
@@ -67,6 +96,12 @@ func buy_crate(persist: bool=true) -> String:
 func valid(data: Variant) -> bool:
 	if not data is Dictionary or data.get("version") != 3: return false
 	if not integer(data.get("chapter_cleared",0),0,OperationRules.CHAPTERS): return false
+	if not integer(data.get("recovery_target",0),0,7) or not data.get("recovery_used",[]) is Array: return false
+	var used: Array=[]
+	for level in data.get("recovery_used",[]):
+		if not integer(level,2,8) or level in used: return false
+		used.append(level)
+	if data.get("recovery_target",0)>0 and data.recovery_target+1 not in used: return false
 	if data.has("crate_rng") and (not data.crate_rng is String or not data.crate_rng.is_valid_int() or str(int(data.crate_rng))!=data.crate_rng): return false
 	for key in ["inventory", "equipped", "checkpoint", "migration"]:
 		if not data.get(key) is Dictionary: return false
@@ -105,10 +140,16 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 		if c.loadout.unified_mastery!=true or not c.loadout.get("review19",false): return false
 		if not integer(c.get("level"),1,2147483647): return false
 		if not c.get("tree") is Dictionary or not integer(c.get("spent"),0,int(c.get("level",0))): return false
+		var tree: Dictionary=LevelMastery.TREE if c.loadout.get("level22",false) else ExpeditionTree.UNIFIED
+		var spent:=0
 		for id in c.tree:
-			if not ExpeditionTree.UNIFIED.has(id) or not integer(c.tree[id],0,ExpeditionTree.UNIFIED[id].max): return false
-			var parent: String=ExpeditionTree.UNIFIED[id].parent
+			if not tree.has(id) or not integer(c.tree[id],0,tree[id].max): return false
+			spent+=int(c.tree[id])
+			var parent: String=tree[id].parent
 			if c.tree[id]>0 and parent!="" and c.tree.get(parent,0)<=0: return false
+			if c.loadout.get("level22",false) and c.tree[id]>0 and parent!="" and c.tree.get(parent,0)<tree[parent].max: return false
+		if spent!=c.spent: return false
+	if c.loadout.has("level22") and (c.loadout.level22!=true or not c.loadout.get("operation20",0)>0): return false
 	if c.loadout.has("vanguard"):
 		if not integer(c.loadout.get("hammer_rank",1),1,10): return false
 		if not c.get("bindings") is Dictionary: return false
@@ -152,6 +193,7 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 	for key in ["ability_rank","forge_pet"]:
 		if not integer(c.stats.get(key,0),0,1): return false
 	var old: Dictionary=c.duplicate(true)
+	if c.loadout.get("level22",false): old.tree={}; old.spent=0
 	old["class"]="ranged" if c.get("class","")=="shared" else c.get("class","ranged")
 	old.loadout=BotExpedition.class_loadout(old["class"])
 	old.toggles=old.toggles.slice(0,4)
@@ -163,6 +205,7 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 func restore(data: Dictionary) -> void:
 	credits = int(data.credits); unlocked_ascension = int(data.ascension)
 	chapter_cleared=int(data.get("chapter_cleared",0))
+	recovery_used=data.get("recovery_used",[]).duplicate(); recovery_target=int(data.get("recovery_target",0))
 	if data.has("crate_rng"): rng.state=int(data.crate_rng)
 	inventory = data.inventory.duplicate(true); equipped = data.equipped.duplicate()
 	checkpoint = data.checkpoint.duplicate(true); migration = data.migration.duplicate(true)
@@ -233,9 +276,9 @@ func transact(action: String, id: String, persist: bool=true) -> bool:
 
 func values(id: String) -> Dictionary:
 	var data: Dictionary=ITEMS[id]
-	var factor: float=[1.0,1.6,2.4,3.5,5.0][data.tier-1]
+	var factor: float=[1.0,2.0,3.5,5.5,8.0][data.tier-1]
 	var result: Dictionary={"health":(7.0 if data.slot in ["helmet","legs","flower","cape"] else 2.0)*factor,"resistance":(4.0 if data.slot=="chest" else 1.0)*factor}
-	if data.slot=="boots": result.speed=0.085*factor
+	if data.slot=="boots": result.speed=[0.085,0.12,0.17,0.23,0.30][data.tier-1]
 	if data.tier>=3 and data.slot=="helmet": result.regen=0.4*(data.tier-2)
 	if data.tier>=3 and data.slot=="chest": result.health_regen=0.25*(data.tier-2)
 	return result
@@ -285,8 +328,12 @@ func bank_camp(run, persist: bool = true) -> bool:
 	run.exp.ensure_shop(run)
 	var before := snapshot()
 	credits = mini(10000000, credits + int(run.exp.carry_credits * (1 + run.exp.ascension * 0.1)))
+	if LevelMastery.enabled(run): credits=mini(10000000,credits+roundi(run.exp.carry_credits*run.mastery.value("loot_bonus")))
+	if LevelMastery.enabled(run) and run.exp.final_round() and run.exp.clear_clock==-2 and recovery_target==run.exp.operation_chapter:
+		credits=mini(10000000,credits+45); recovery_target=0
 	if OperationRules.enabled(run) and run.exp.final_round() and run.exp.clear_clock==-2 and run.exp.operation_chapter>chapter_cleared:
 		chapter_cleared=run.exp.operation_chapter; credits=mini(10000000,credits+100)
+		if recovery_target>0 and recovery_target+1<=chapter_cleared: recovery_target=0
 	for id in run.exp.pending_items: inventory[id].copies = mini(999, inventory[id].copies + 1)
 	checkpoint = pack_run(run)
 	checkpoint.items = []
@@ -314,6 +361,7 @@ func resume_into(run) -> bool:
 		run.kit.recharge[slot] = 0.0
 	run.mastery.ranks = c.tree.duplicate(); run.mastery.spent = int(c.spent)
 	run.mastery.unified=c.loadout.get("unified_mastery",false)
+	run.mastery.modern=c.loadout.get("level22",false)
 	run.level = int(c.level); run.total_xp = int(c.xp); run.next_level = int(c.next)
 	expedition.pending_chests = int(c.pending); expedition.chests_opened = int(c.opened); expedition.field_credits = int(c.field)
 	expedition.pending_items.assign(c.items)

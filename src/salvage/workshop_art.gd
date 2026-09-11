@@ -724,6 +724,16 @@ func _effect(effect: Dictionary) -> void:
 func _local_resources() -> void:
 	# Fixed logical-pixel size even at wide zoom; no numeric clutter over the actor.
 	var scale_value: float=1.0/maxf(0.35, get_viewport_transform().get_scale().x)
+	if LevelMastery.enabled(model):
+		var at: Vector2=model.player+Vector2(0,29)+Vector2(-35,5)*scale_value
+		var ratio: float=clampf(model.health/model.max_health(),0,1)
+		draw_rect(Rect2(at-Vector2(2,2)*scale_value,Vector2(74,20)*scale_value),Color("091219"))
+		draw_rect(Rect2(at,Vector2(70,9)*scale_value),Color("543d42"))
+		draw_rect(Rect2(at,Vector2(70*ratio,9)*scale_value),CORAL if ratio<0.3 else TEAL)
+		for i in range(1,4): draw_line(at+Vector2(i*17.5,0)*scale_value,at+Vector2(i*17.5,9)*scale_value,INK,scale_value)
+		draw_rect(Rect2(at+Vector2(0,12)*scale_value,Vector2(70,4)*scale_value),Color("30404a"))
+		draw_rect(Rect2(at+Vector2(0,12)*scale_value,Vector2(70*clampf(model.kit.energy/model.kit.energy_max(),0,1),4)*scale_value),Color("82bfe6"))
+		return
 	var origin: Vector2=model.player+Vector2(0,28)+Vector2(-23,5)*scale_value
 	draw_rect(Rect2(origin-Vector2.ONE*scale_value,Vector2(48,11)*scale_value),Color("0c1720bf"))
 	draw_rect(Rect2(origin,Vector2(46,4)*scale_value),Color("30404aaf"))

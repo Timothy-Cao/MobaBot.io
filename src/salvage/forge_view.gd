@@ -9,8 +9,12 @@ static func draw(game) -> void:
 		var crate: Button=ui._button("Supply crate · 150 Salvage",Rect2(625,85,267,30),game.buy_supply_crate,false)
 		crate.add_theme_font_size_override("font_size",13)
 		crate.disabled=collection.blocked or collection.credits<150
-		crate.tooltip_text="One equipment item. Tier odds: 1: 80%, 2: 17%, 3: 2.8%, 4: 0.2%, 5: 0%. Each slot equally likely. Forge 3 identical pieces for the next tier."
+		crate.tooltip_text="One equipment item. Tier odds: 1: 94%, 2: 5.5%, 3: 0.48%, 4: 0.02%, 5: 0%. Each slot equally likely. Forge 3 identical pieces for the next tier."
 	if ReviewRules.enabled(game.model) and game.model.state=="camp" and game.gear_return=="camp": ReviewView.tabs(game)
+	var craft: Button=ui._button("Auto craft",Rect2(48,280,145,30),func(): game.bulk_gear("craft"),false)
+	craft.disabled=collection.blocked; craft.tooltip_text="Combine all eligible three-copy upgrades through every tier."
+	var fit: Button=ui._button("Auto equip",Rect2(208,280,145,30),func(): game.bulk_gear("equip"),false)
+	fit.disabled=collection.blocked; fit.tooltip_text="Equip the highest owned tier in every slot."
 	for i in range(8):
 		var slot: String=ForgeEquipment.SLOTS[i]
 		var id: String=collection.equipped[slot]
