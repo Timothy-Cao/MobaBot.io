@@ -13,6 +13,8 @@
 
 ## Enemy pressure
 
+Visual follow-up: Barrage (owner calls it Missile Frenzy) uses the same Q rocket hull, fins and exhaust at 75% visual scale. This replaces the initial bolt-like mini-projectile drawing; damage, collision and cadence are unchanged.
+
 - Hatchery: four pursuing runners per eight seconds, valid nearby spawn points only; 16 living children per hatchery plus global population limits.
 - Uplink: 280-radius aura heals other enemies at 2% maximum HP/second capped at 12 HP/second. Grants 30% movement speed, linearly decaying over three seconds outside. Multiple auras refresh rather than stack; no self-healing. Includes bosses. Movement remains wall-respecting.
 - These specialists enter after Level 1's first round and remain in later Levels; their native silhouettes are also selectable in Practice.

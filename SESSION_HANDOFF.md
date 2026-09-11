@@ -4,6 +4,8 @@ Updated 11 September 2026. Stable entry point; human feedback and technical evid
 
 ## Next action: owner review of 0.26 arsenal and support enemies
 
+11 September visual follow-up: Missile Frenzy/Barrage now uses the original Q rocket hull, fins and exhaust at 75% size instead of the small bolt-like substitute. Gameplay values unchanged.
+
 Latest override: [ARSENAL_SUPPORT_26](docs/design/ARSENAL_SUPPORT_26.md). New runs/primary Practice use `arsenal26`; older checkpoints preserve their rules. E has fixed reach/damage, reduced recharge with rank, no shield, four charges at rank ten, boundary rebounds and one queued E. Buffered spin commits with +15% damage and a strict 0.1-second arrival window. Slot 4 is eight-second Missile Barrage: unlimited Q shots every 0.3 seconds, five energy each, 60-second activation cooldown. Hatchery spawns runners; Uplink heals/speeds nearby enemies; boss laser sweeps 360 degrees. Healing Reserve, Anchor and boss HP unchanged.
 
 Build tag `vanguard-26-arsenal-support`. Record actual commit/log baseline before human review and freeze the build while the owner plays. No human game was restarted. QA_18 records automated verification; do not equate bot results with human balance. Earlier Head start interpretation and Practice-only Conductor limitations still apply.

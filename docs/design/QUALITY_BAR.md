@@ -1,5 +1,9 @@
 # MobaBot.io quality bar
 
+## Missile Frenzy rocket identity · 11 September 2026
+
+Owner clarified that Frenzy should still look like rockets, just a little smaller. Reused the exact normal Q rocket drawing at 75% scale, including the hull/fins and scaled exhaust. Removed the bolt-like alternate drawing. No gameplay retuning or new asset family. Normal/reduced combat captures inspected; human style approval remains pending.
+
 ## Arsenal, E buffers and support pressure · 11 September 2026 · 0.26
 
 Owner requested a four-pursuer/eight-second spawner, an enemy healing/speed aura with decaying speed outside, and a full-circle boss laser. Energy-totem replacement evolved from twenty rockets/ten seconds to unlimited paced rockets/eight seconds, then explicitly five energy per rocket. Latest version supersedes earlier ammo/free-shot proposals. Owner also requested committed +15% E/hammer spins with strict buffering, fixed E damage/reach with recharge progression, removal of every E shield, boundary rebounds, four charges at rank ten and buffering the next E.

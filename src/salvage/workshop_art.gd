@@ -161,15 +161,11 @@ func _draw() -> void:
 			draw_circle(bullet.pos, 6, CORAL)
 			draw_circle(bullet.pos, 2, CREAM)
 		elif bullet.kind == "rocket":
-			if bullet.get("mini_rocket",false):
-				_line(bullet.pos-direction*19,bullet.pos,Color(TEAL,0.6),3)
-				_line(bullet.pos-direction*7,bullet.pos+direction*5,GOLD,4)
-				draw_circle(bullet.pos+direction*5,2,CREAM)
-				continue
 			var m: int = bullet.get("milestone", 0)
-			_line(bullet.pos - direction * (65 + m * 18), bullet.pos, Color(TEAL, 0.3), 18 + m * 4)
-			_line(bullet.pos - direction * 45, bullet.pos, GOLD, 7 + m * 2)
-			draw_set_transform(bullet.pos, direction.angle(), Vector2.ONE * (1 + m * 0.18))
+			var rocket_scale: float=0.75 if bullet.get("mini_rocket",false) else 1.0
+			_line(bullet.pos - direction * (65 + m * 18) * rocket_scale, bullet.pos, Color(TEAL, 0.3), (18 + m * 4) * rocket_scale)
+			_line(bullet.pos - direction * 45 * rocket_scale, bullet.pos, GOLD, (7 + m * 2) * rocket_scale)
+			draw_set_transform(bullet.pos, direction.angle(), Vector2.ONE * (1 + m * 0.18) * rocket_scale)
 			var hull := PackedVector2Array([Vector2(15, 0), Vector2(3, -7), Vector2(-15, -7), Vector2(-20, -13), Vector2(-19, 13), Vector2(-15, 7), Vector2(3, 7)])
 			draw_colored_polygon(hull, PALE)
 			hull.append(hull[0])
