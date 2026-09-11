@@ -1,11 +1,12 @@
 # MobaBot.io documentation
 
-The current playable version is **0.18 Vanguard**, with two-minute survival rounds. Root SESSION_HANDOFF.md routes current work; QA_18 and its latest pressure/audio addenda supersede the 0.17 shared-pool build. Older iteration documents are history/regression context, not instructions to implement every proposal.
+The current playable version is **0.20 Chapter Operations**, with three-round runs. Root SESSION_HANDOFF.md routes current work; [Operations](design/OPERATIONS_20.md), the latest QA_18 entries and [balance benchmarks](design/BALANCE_BENCHMARKS_21.md) describe the implementation and current measurement targets. Older iteration documents are history/regression context, not instructions to implement every proposal.
 
 ## Start here
 
 - [Project README](../README.md) — setup, controls, game scope, progression, saves and verification commands.
 - [Current session handoff](../SESSION_HANDOFF.md) — first read: actual build, next action, verification and risks.
+- [Gameplay vision](design/GAMEPLAY_VISION_18.md) — current owner north star for full-kit decisions, contextual power, progression, variance and Vanguard module reconsideration.
 - [Playtest protocol](design/PLAYTEST_PROTOCOL.md) — frozen-build testing, read-only logs, targeted questions and reusable review notes.
 - [0.18 QA](design/QA_18.md) and [pressure/audio audit](design/PRESSURE_AUDIO_18.md) — current implementation evidence and limits.
 - [0.17 QA](design/QA_17.md) and [archived brief](design/NEXT_SESSION_BRIEF_17.md) — compatibility behavior and earlier planning context.
