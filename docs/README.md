@@ -11,6 +11,7 @@ The current playable version is **0.18 Vanguard**, with two-minute survival roun
 - [0.18 QA](design/QA_18.md) and [pressure/audio audit](design/PRESSURE_AUDIO_18.md) — current implementation evidence and limits.
 - [0.17 QA](design/QA_17.md) and [archived brief](design/NEXT_SESSION_BRIEF_17.md) — compatibility behavior and earlier planning context.
 - [Quality bar](design/QUALITY_BAR.md) — editable acceptance contract, dated owner feedback and human-review gates.
+- [AI-assisted production feasibility](design/AI_ASSISTED_PRODUCTION_FEASIBILITY_18.md) — current cost/feasibility study for Codex, Godot, Blender and a focused Meshy asset sprint, including 2D/2.5D/3D decision gates.
 - [Ability review](review/abilities.html) — interactive catalog for the 49 current ability icons.
 
 The shortest safe instruction for another session is: **“Read SESSION_HANDOFF.md and follow the playtest protocol. Inspect Git status; don't change the build while I test.”**
