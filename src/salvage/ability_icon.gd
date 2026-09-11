@@ -46,7 +46,7 @@ func _draw_gear_tier() -> void:
 	for i in range(tier): draw_rect(Rect2(32-tier*3+i*6,57,4,3),tint)
 
 func _draw() -> void:
-	if (ability.begins_with("vanguard_") or ability.begins_with("mastery_")) and not base_only and PaintedIcons.enabled:
+	if (ability.begins_with("vanguard_") or ability.begins_with("mastery_") or ability.begins_with("conductor_")) and not base_only and PaintedIcons.enabled:
 		if pixel_material==null:
 			pixel_material=ShaderMaterial.new()
 			pixel_material.shader=preload("res://src/salvage/pixel_icon.gdshader")

@@ -370,7 +370,10 @@ func target_point(run, slot: String, cursor: Vector2) -> Vector2:
 func preview_ready(run, slot: String, cursor: Vector2) -> bool:
 	if emp_left>0 and slot in ReviewRules.MODULES+["d","f"]: return false
 	if Vanguard.enabled(run):
-		if run.vanguard.drive_blocks(run) or slot not in Vanguard.KEYS or not unlocked(slot) or run.vanguard.slam_left>0: return false
+		if slot not in Vanguard.KEYS or not unlocked(slot): return false
+		if SupportModules.enabled(run) and run.vanguard.slam_left>0 and slot=="q": return charges.q>0 and not run.vanguard.slam_fueled
+		if run.vanguard.drive_blocks(run) and not (SupportModules.enabled(run) and slot=="f"): return false
+		if run.vanguard.slam_left>0 and not (SupportModules.enabled(run) and slot=="f"): return false
 		if slot=="p1": return true
 		if charges[slot]<=0 or (energy<ability_cost(loadout[slot]) and not run.vanguard.powered(run)): return false
 		var target:=target_point(run,slot,cursor)

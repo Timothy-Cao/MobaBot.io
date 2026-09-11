@@ -52,6 +52,20 @@ static func barrier(c, wall: Dictionary) -> void:
 		c.draw_line(wall.a,wall.b,Color("32434a"),width*2-4,true)
 		c.draw_circle(wall.a,width-2,Color("32434a")); c.draw_circle(wall.b,width-2,Color("32434a"))
 		c.draw_line(wall.a-Vector2(0,width*0.55),wall.b-Vector2(0,width*0.55),Color("50626a"),7,true)
+		var along: Vector2=(Vector2(wall.b)-Vector2(wall.a)).normalized()
+		var normal:=along.orthogonal()
+		var length: float=Vector2(wall.a).distance_to(wall.b)
+		# Panel seams and recessed vents stay inside the capsule collision silhouette.
+		for i in range(1,maxi(2,int(length/65))):
+			var center: Vector2=Vector2(wall.a).lerp(wall.b,float(i)/maxi(2,int(length/65)))
+			c.draw_line(center-normal*(width-12),center+normal*(width-12),Color("24363e"),3,true)
+			for j in range(3):
+				var p:=center+along*(j*7-7)
+				c.draw_line(p-normal*9,p+normal*9,Color("203139"),3,true)
+		for end in [Vector2(wall.a),Vector2(wall.b)]:
+			c.draw_arc(end,width*0.72,0,TAU,24,Color("41545b"),3,true)
+			c.draw_circle(end,6,Color("24363e"))
+			c.draw_line(end-normal*width*0.65-along*10,end-normal*width*0.65+along*10,Color("928467"),4,true)
 		return
 	var a: Vector2=wall.a
 	var b: Vector2=wall.b

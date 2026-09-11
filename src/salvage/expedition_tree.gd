@@ -65,7 +65,6 @@ func buy(run, id: String) -> bool:
 	if run.state not in ["running", "upgrade", "stage_reward", "chest", "camp"] or not can_buy(id, run.level): return false
 	ranks[id] = rank_of(id) + 1; spent += 1
 	run.exp.sync_stats(run)
-	if modern and id=="charge": run.kit.charges.q=mini(3,run.kit.charges.q+1)
 	return true
 
 func refund(run) -> bool:

@@ -33,7 +33,7 @@ static func draw(ui,run) -> void:
 		button.modulate=Color.WHITE if run.mastery.can_buy(id,run.level) else Color(0.65,0.65,0.65)
 		var left: float=54 if run.mastery.modern else 5
 		if run.mastery.modern:
-			MasteryBadge.attach(ui,button,["mastery_utility","mastery_looting","mastery_pet"][node.branch],MasteryBadge.STATS[node.stat],Rect2(8,6,36,36))
+			MasteryBadge.attach(ui,button,["mastery_utility","mastery_looting","mastery_pet"][node.branch],"charge" if node.stat=="starting_ability" else MasteryBadge.STATS[node.stat],Rect2(8,6,36,36))
 		ui._label(button,node.name,Rect2(left,3,width-left-5,21),12 if run.mastery.modern else 13,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
 		ui._label(button,"%d / %d"%[run.mastery.rank_of(id),node.max],Rect2(left,25,width-left-5,18),12,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
 		button.tooltip_text=(LevelMastery.text(id) if run.mastery.modern else ExpeditionTree.text(id,true,true))+("\nRequires "+tree[node.parent].name if node.parent!="" else "")

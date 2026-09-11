@@ -135,6 +135,9 @@ func _draw() -> void:
 		if loot_view.has_point(pickup.pos): _scrap(pickup)
 	for supply in model.supply_drops:
 		var p: Vector2 = supply.pos
+		if supply.kind in ["energy","repair"]:
+			SupplyArt.draw(self,p,supply.kind)
+			continue
 		var color: Color = {"energy": TEAL, "repair": Color("ed9285"), "coins": GOLD, "speed": Color("b7ddee"), "reset": Color("bfa6dd")}.get(supply.kind, TEAL)
 		draw_circle(p, 11, INK)
 		draw_circle(p, 8, color)
@@ -465,6 +468,10 @@ func _tool(point: Vector2, rotation_angle: float, saw: bool, scale_value: float 
 func _player(presentation_scale: float = 1.0) -> void:
 	var p := model.player + frame_offset
 	var bank := clampf(model.velocity.x / 205.0, -1, 1) * 0.10 + impact_bank()
+	if Vanguard.enabled(model):
+		for effect in model.vanguard.impacts:
+			if effect.kind=="hammer" and float(effect.get("angle",0))>=PI:
+				bank+=(1-float(effect.life)/effect.duration)*TAU; break
 	var bob := sin(visual_time * 5) * 2
 	draw_set_transform(p + Vector2(0, 16) * presentation_scale, 0, Vector2(1.0, 0.35) * presentation_scale)
 	draw_circle(Vector2.ZERO, 23, Color(INK, 0.8))
@@ -475,6 +482,7 @@ func _player(presentation_scale: float = 1.0) -> void:
 		_box(Rect2(x - 4, 0, 8, 15), TEAL, 3)
 		_line(Vector2(x, 17), Vector2(x, 20 + absf(sin(visual_time * 17)) * 4), Color(PALE, 0.65), 4)
 	var body := CREAM
+	if Conductor.enabled(model): body=Color("b3b0d0")
 	if model.invincible > 0 and not reduced_effects and sin(visual_time * 28) > 0:
 		body = Color("ffc3a0")
 	_box(Rect2(-20, -20, 40, 38), INK, 11, INK, 3)

@@ -2,7 +2,13 @@
 
 Updated 10 September 2026. Stable entry point; human feedback and technical evidence stay in their dated review documents.
 
-## Next action: owner review of 0.23 support and reusable mastery art
+## Next action: owner review of 0.24 combos, compact upgrades and Conductor experiment
+
+Latest owner-authorized slice: [COMBOS_ART_24](docs/design/COMBOS_ART_24.md). Current support-rule runs gain E→360 hammer buffering, Q-charge fuel for E, and Flash cancellation/arrival effects during D/E/combos. Hammer damage rules are unchanged. Upgrade cards are smaller overlays with rounded changes, ten rank cells and colored 5/10 milestones. Head start replaces the extra-Q capstone: camp banking unlocks rank-one E at future-run start, with transactional persistence. This is the explicitly stated working interpretation, not a received answer to the optional clarification.
+
+World art now includes obstacle machinery panels and distinct energy/repair pickups. Home → Practice → Build → Conductor experiment is playable QWER exploration; it is not available in campaign. Reset/rank presets retain selection. It reuses the hammer/mobility/support foundation; dedicated baton, full balancing and final class animations remain unfinished. Grapple remains a future class. No user game was restarted. See latest QA_18 for automated evidence; freeze the build at the next owner playtest.
+
+## Previous milestone: 0.23 support and reusable mastery art
 
 11 September follow-up supersedes the paused-module wording below: the owner chose an ordinary-enemy aggro Anchor and an energy version of Reserve, then authorized implementation and art polish. New runs/primary Practice use `support23`; old checkpoints retain their modules. Healing Reserve is unchanged. See [SUPPORT_ART_23](docs/design/SUPPORT_ART_23.md). Five generated source icons, shared pixelation and twelve native top-right badges now illustrate every modern mastery node without thirteen separate paintings. Build tag `vanguard-23-support-art`; record actual commit and logs before the next human test. No user game was restarted.
 

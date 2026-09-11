@@ -1,4 +1,8 @@
-# Current 0.23 override
+# Current 0.24 override
+
+See [Combos and art](docs/design/COMBOS_ART_24.md): buffered E/hammer spins, Q-fueled E, Flash during movement, compact paused upgrade cards, corrected Head start capstone and native world-art improvements. Try the second-class prototype at **Practice → Build → Conductor experiment**. Vanguard remains the campaign class.
+
+## Previous 0.23 override
 
 New runs and primary Practice now have an ordinary-enemy aggro **Anchor** and an **Energy reserve** totem. Healing Reserve is unchanged; old checkpoints preserve earlier modules. Mastery combines three reusable painted emblems with twelve native effect badges, using the established pixelation. See [Support and art](docs/design/SUPPORT_ART_23.md). The [Conductor class concept](docs/design/SECOND_CLASS_24.md) is design only; Vanguard remains the playable class.
 

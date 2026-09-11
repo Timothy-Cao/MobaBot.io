@@ -1,5 +1,11 @@
 # MobaBot.io quality bar
 
+## Owner-directed combinations and second-class experiment · 11 September 2026 · 0.24
+
+Owner prioritized broader art and the second class, corrected Utility's capstone to an extra starting ability, and requested smaller three-card overlays with concise rounded changes, ten rank markers and highlighted fifth/tenth milestones. They asked to preserve hammer strength while making E/left-click a buffered 360 swing, consuming Q stacks to extend E, and allowing Flash during D/E/combinations to end travel and trigger effects immediately. Implemented this slice as described in COMBOS_ART_24. Capstone's future-run E unlock is a stated working interpretation, not an explicit response to the optional question.
+
+Art expands native obstacle panels/vents and distinct energy/repair pickups; Conductor gains relay/beam effects and shared pixelated icons. Conductor is now selectable in Practice, with QWER experimentation and inherited hammer/mobility/support. It is not a finished campaign class. Technical tests and actual-size visual inspection do not raise the human fun score. Request owner review of timing/coverage and route clarity before claiming the second identity works well.
+
 ## Support choice and reusable art · 11 September 2026 · 0.23
 
 Owner selected a medium-health aggro anchor for regular enemies, with bosses immune, and a second Reserve totem supplying energy. Preserve the current healing Reserve. They requested reusable generated mastery art, consistent pixelation and a further quality pass, then suggested broad base emblems plus small top-right effect badges to avoid generating each node separately. Implemented that composition with three mastery bases and twelve native symbols, plus two support images. Actual-size node names, ranks and locked hover descriptions remain visible. No new human feel score: technical rendering and tests establish function, not preference.

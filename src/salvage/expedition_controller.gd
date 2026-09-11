@@ -84,6 +84,9 @@ func launch_expedition(resume: bool=false) -> void:
 		if collection is ForgeEquipment:
 			OperationRules.enable(model,chapter_choice); LevelMastery.enable(model)
 			model.kit.loadout.support23=true
+			if collection.starting_ability:
+				model.kit.rank_up("e"); model.upgrades.skill_e=model.kit.ranks.e
+				if "e" not in model.kit.discovered: model.kit.discovered.append("e")
 		collection.apply_to(model)
 		model.health=model.max_health(); model.kit.energy=model.kit.energy_max()
 		banked_camp=-1
@@ -283,6 +286,8 @@ func _input(event: InputEvent) -> void:
 			for slot in Vanguard.KEYS:
 				if event.keycode!=Vanguard.KEYS[slot]: continue
 				if event.ctrl_pressed: Vanguard.spend(model,slot)
+				elif SupportModules.enabled(model) and model.vanguard.slam_left>0 and slot in ["q","f"]:
+					pending_cast_slot=""; model.vanguard.cast(model,slot,get_global_mouse_position())
 				elif _confirm_cast(slot) and not model.vanguard.drive_blocks(model) and model.kit.unlocked(slot): pending_attack=false; pending_cast_slot=slot
 				elif event.shift_pressed and slot in ["q","w","e","f","x1","x2","x3"] and not model.vanguard.drive_blocks(model): pending_attack=false; pending_cast_slot=slot
 				else:
@@ -587,8 +592,10 @@ func begin_practice_placement() -> void:
 	ui._button("Cancel placement",Rect2(26,25,180,34),func(): practice_placing=false; open_practice(),false)
 
 func practice_reset() -> void:
+	var conductor_mode: bool=model.vanguard.conductor_active
 	practice_clear(); model.player=Vector2(480,300); PracticeSandbox.terrain(model)
 	Vanguard.setup(model,practice_rank); ReviewRules.enable(model); LevelMastery.enable(model); model.kit.loadout.support23=true; PracticeSandbox.terrain(model)
+	model.vanguard.conductor_active=conductor_mode
 	model.damage_dealt.clear(); model.time=0; camera_offset=Vector2.ZERO
 	free_center=model.player; _update_camera(); PracticeSandbox.draw(self)
 

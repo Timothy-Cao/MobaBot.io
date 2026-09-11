@@ -23,7 +23,7 @@ func execute() -> void:
 	check(not run.mastery.buy(run,"charge"),"Cannot skip Utility prerequisites")
 	for id in ["field","reach","economy","insulation","charge"]:
 		while run.mastery.can_buy(id,run.level): check(run.mastery.buy(run,id),"Utility purchase "+id)
-	check(run.kit.extra_q_charge and run.kit.charges.q==3,"Capstone adds stored Q charge")
+	check(not run.kit.extra_q_charge and run.mastery.value("starting_ability")==1,"Capstone unlocks a starting ability instead of a Q charge")
 	check(run.kit.ability_cost("rocket")<8 and run.kit.energy_regen()>8,"Utility energy efficiency and regeneration work")
 	check(is_equal_approx(UpgradePreview.stats(run,"f",1).Energy,run.kit.ability_cost("blink")),"Flash card includes mastery energy efficiency")
 	check(is_equal_approx(UpgradePreview.stats(run,"d",1)["Energy / sec"],ReviewRules.drive_cost(run)),"Drive card includes mastery energy efficiency")
@@ -31,7 +31,7 @@ func execute() -> void:
 	run.state="camp"; run.exp.clear_clock=-2
 	var collection:=ForgeEquipment.new(); check(collection.bank_camp(run,false),"Modern tree checkpoint banks")
 	check(ForgeEquipment.valid_checkpoint(collection.checkpoint),"Modern tree validates")
-	var resumed:=fresh(); check(collection.resume_into(resumed) and resumed.mastery.modern and resumed.kit.extra_q_charge,"Modern tree resumes effects")
+	var resumed:=fresh(); check(collection.resume_into(resumed) and resumed.mastery.modern and collection.starting_ability,"Modern tree banks starting ability")
 	var bad: Dictionary=collection.checkpoint.duplicate(true); bad.spent+=1
 	check(not ForgeEquipment.valid_checkpoint(bad),"Reject forged mastery point count")
 	check(fresh().mastery.spent==0,"New level resets mastery")

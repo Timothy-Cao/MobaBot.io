@@ -43,24 +43,39 @@ static func build(ui, run) -> void:
 		ui._label(ui.overlay,"Change equipment between rounds",Rect2(48,461,760,25),14,ui.MUTED)
 
 static func upgrades(ui, run) -> void:
-	ui.clear_overlay(); ui.hud.visible=false; ui._dim()
-	ui._panel(Rect2(24,24,912,492),ui.PANEL)
-	ui._label(ui.overlay,"Choose an upgrade",Rect2(48,42,650,42),28,ui.CREAM,true)
-	ui._label(ui.overlay,"Level %d · %d pick%s remaining · Combat paused"%[run.level,run.kit.loadout.rewards18.size(),"" if run.kit.loadout.rewards18.size()==1 else "s"],Rect2(48,93,850,26),16,ui.GOLD)
+	ui.clear_overlay(); ui.hud.visible=true
+	var dim:=ColorRect.new(); dim.color=Color(0.035,0.07,0.10,0.38)
+	ui.overlay.add_child(dim); dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	ui._label(ui.overlay,"Choose an upgrade",Rect2(132,100,696,35),25,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
+	ui._label(ui.overlay,"Paused · %d picks left"%run.kit.loadout.rewards18.size(),Rect2(132,135,696,24),14,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
 	for i in range(run.offers.size()):
 		var slot: String=run.offers[i]
 		var rank_value:=Vanguard.rank_of(run,slot)
 		var name: String=slot.capitalize() if slot in ["gun","hammer"] else MobaKit.ABILITIES[Vanguard.TOOLS[slot]].name
-		var card: Button=ui._button("",Rect2(48+i*292,145,276,302),func(): ui.upgrade_selected.emit(i),false)
+		var card: Button=ui._button("",Rect2(132+i*236,173,224,244),func(): ui.upgrade_selected.emit(i),false)
 		card.set_meta("review_choice",slot)
-		ui._ability_icon(card,VanguardHud.icon(slot,run),Rect2(99,24,78,78))
-		ui._label(card,name,Rect2(12,121,252,38),21,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
-		ui._label(card,"Learn" if rank_value==0 else "Rank %d → %d"%[rank_value,rank_value+1],Rect2(12,167,252,28),18,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
-		var hint: Label=ui._label(card,upgrade_hint(run,slot),Rect2(14,201,248,95),12,ui.MUTED)
-		hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		var next:=rank_value+1
+		var accent: Color=Color("c4a1e8") if next==10 else ui.GOLD
+		if next in [5,10]:
+			var frame: Control=ui._surface(card,Rect2(0,0,224,244),Color.TRANSPARENT,2,accent,2)
+			frame.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		ui._ability_icon(card,VanguardHud.icon(slot,run),Rect2(88,12,48,48))
+		ui._label(card,name,Rect2(8,65,208,26),17,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
+		ui._label(card,"Level %d / 10"%next,Rect2(8,94,208,20),13,accent,true,HORIZONTAL_ALIGNMENT_CENTER)
+		for step in range(1,11):
+			var edge: Color=Color("c4a1e8") if step==10 else ui.GOLD if step==5 else ui.EDGE
+			var cell: Control=ui._surface(card,Rect2(17+(step-1)*19,119,16,9),ui.TEAL if step<=rank_value else accent if step==next else ui.INK,0,edge,1)
+			cell.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		var changes:=UpgradePreview.text(run,slot,false).split("\n")
+		for row in range(changes.size()):
+			ui._label(card,changes[row],Rect2(15,138+row*17,194,17),12,ui.CREAM)
+		var bonus:=UpgradePreview.milestone(slot,mini(10,rank_value+run.kit.rank_bonus),mini(10,next+run.kit.rank_bonus))
+		if next in [5,10] or not bonus.is_empty():
+			var label: Label=ui._label(card,bonus if not bonus.is_empty() else "Milestone · stronger stats",Rect2(15,211,194,30),12,accent,true)
+			label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		card.tooltip_text=VanguardHud.detail(run,slot)
 		if i==0: card.grab_focus()
-	ui._label(ui.overlay,"1 / 2 / 3 to choose · Modules are purchased between rounds",Rect2(48,470,860,22),13,ui.MUTED)
+	ui._label(ui.overlay,"1 / 2 / 3 · Special levels: 5 and 10",Rect2(132,430,696,22),13,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
 
 static func tabs(game) -> void:
 	var names: Array=["Round clear","Build","Mastery","Equipment"]

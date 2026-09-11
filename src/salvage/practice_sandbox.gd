@@ -50,9 +50,9 @@ static func draw(game) -> void:
 	var ui=game.ui
 	ui.clear_overlay(); ui.hud.visible=true
 	ui.update_hud(game.model)
-	var panel=ui._surface(ui.overlay,Rect2(12,12,310,406),Color("14242cf5"),0,ui.EDGE)
+	var panel=ui._surface(ui.overlay,Rect2(12,12,310,442),Color("14242cf5"),0,ui.EDGE)
 	panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	ui._label(ui.overlay,"Practice",Rect2(26,23,200,30),22,ui.CREAM,true)
+	ui._label(ui.overlay,"Conductor · Test" if Conductor.enabled(game.model) else "Practice",Rect2(26,23,245,30),20,ui.CREAM,true)
 	ui._button("×",Rect2(276,20,32,29),game.close_practice,false)
 	ui._button("Resume",Rect2(26,67,178,31),game.close_practice)
 	ui._button("Reset",Rect2(213,67,94,31),game.practice_reset,false)
@@ -65,12 +65,18 @@ static func draw(game) -> void:
 		ui._tab(page,Rect2(22+i*96,128,94,31),func(): game.practice_page=page; draw(game),game.practice_page==page)
 	match game.practice_page:
 		"Build":
+			ui._button("Conductor experiment" if not game.model.vanguard.conductor_active else "Return to Vanguard",Rect2(26,413,278,34),func():
+				game.model.vanguard.conductor_active=not game.model.vanguard.conductor_active
+				game.model.vanguard.conductor=Conductor.new(); game.model.vanguard.clear()
+				game.ui.bar_signature=""; draw(game),false)
 			ui._label(ui.overlay,"All abilities",Rect2(26,181,180,23),16,ui.CREAM)
 			for i in range(3):
 				var rank_value: int=[1,5,10][i]
 				ui._button(str(rank_value),Rect2(26+i*95,218,88,35),func():
 					game.practice_rank=rank_value
+					var conductor_mode: bool=game.model.vanguard.conductor_active
 					Vanguard.setup(game.model,rank_value)
+					game.model.vanguard.conductor_active=conductor_mode
 					ReviewRules.enable(game.model); LevelMastery.enable(game.model); game.model.kit.loadout.support23=true
 					draw(game),game.practice_rank==rank_value)
 			for i in range(Vanguard.KEYS.size()):

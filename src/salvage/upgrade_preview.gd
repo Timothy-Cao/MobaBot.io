@@ -32,16 +32,16 @@ static func stats(run, slot: String, earned: int) -> Dictionary:
 
 static func milestone(slot: String, before: int, after: int) -> String:
 	if before<5 and after>=5:
-		return {"gun":"Fire while driving: off → on","hammer":"Sweep: 90° → 120°","e":"Impact stun: 0 → 0.6s","r":"Impact shield: 0 → 1.5s"}.get(slot,"")
+		return {"gun":"Fire while driving","hammer":"Wider sweep","e":"NEW · 0.6s stun","r":"NEW · impact shield","f":"NEW · extra charge"}.get(slot,"")
 	if before<10 and after>=10:
 		return {"gun":"Every fifth shot: 1× → 2×","hammer":"Moving swings: off → on","e":"Impact shield: 0 → 1s","r":"Follow-up damage: 0 → 25%","d":"Cast while driving: off → on","f":"Landing blast: off → on"}.get(slot,"")
 	return ""
 
 static func number(value: float) -> String:
-	var rounded:=snappedf(value,0.01)
+	var rounded:=snappedf(value,0.1 if absf(value)<10 else 1.0)
 	return str(roundi(rounded)) if is_equal_approx(rounded,roundf(rounded)) else str(rounded)
 
-static func text(run, slot: String) -> String:
+static func text(run, slot: String, include_bonus: bool=true) -> String:
 	var earned:=Vanguard.rank_of(run,slot)
 	var before:=stats(run,slot,maxi(1,earned))
 	var after:=stats(run,slot,mini(10,earned+1))
@@ -50,6 +50,6 @@ static func text(run, slot: String) -> String:
 		if earned==0: lines.append("%s  %s"%[key,number(after[key])])
 		elif not is_equal_approx(before[key],after[key]): lines.append("%s  %s → %s"%[key,number(before[key]),number(after[key])])
 	var extra:=milestone(slot,mini(10,earned+run.kit.rank_bonus),mini(10,earned+1+run.kit.rank_bonus))
-	if not extra.is_empty(): lines.append(extra)
+	if include_bonus and not extra.is_empty(): lines.append(extra)
 	if lines.is_empty(): lines.append("Earned rank  %d → %d"%[earned,earned+1]); lines.append("Equipment already grants rank 10")
 	return "\n".join(lines)

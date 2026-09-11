@@ -12,6 +12,7 @@ var credits := 150
 var chapter_cleared := 0
 var recovery_used: Array=[]
 var recovery_target := 0
+var starting_ability := false
 var unlocked_ascension := 0
 var inventory: Dictionary = {}
 var equipped: Dictionary = {}
@@ -49,7 +50,7 @@ static func roll_item(random: RandomNumberGenerator, ascension: int) -> String:
 	return SETS[tier]+"_"+SLOTS[random.randi_range(0,7)]
 
 func snapshot() -> Dictionary:
-	return {"version": 3, "credits": credits, "chapter_cleared":chapter_cleared,"recovery_used":recovery_used.duplicate(),"recovery_target":recovery_target,"crate_rng":str(rng.state), "ascension": unlocked_ascension, "inventory": inventory.duplicate(true), "equipped": equipped.duplicate(), "checkpoint": checkpoint.duplicate(true), "migration": migration.duplicate(true), "loadouts": loadouts.duplicate(true)}
+	return {"version": 3, "starting_ability":starting_ability, "credits": credits, "chapter_cleared":chapter_cleared,"recovery_used":recovery_used.duplicate(),"recovery_target":recovery_target,"crate_rng":str(rng.state), "ascension": unlocked_ascension, "inventory": inventory.duplicate(true), "equipped": equipped.duplicate(), "checkpoint": checkpoint.duplicate(true), "migration": migration.duplicate(true), "loadouts": loadouts.duplicate(true)}
 
 func unlocked_chapter() -> int: return mini(OperationRules.CHAPTERS,chapter_cleared+1)
 
@@ -95,6 +96,7 @@ func buy_crate(persist: bool=true) -> String:
 
 func valid(data: Variant) -> bool:
 	if not data is Dictionary or data.get("version") != 3: return false
+	if not data.get("starting_ability",false) is bool: return false
 	if not integer(data.get("chapter_cleared",0),0,OperationRules.CHAPTERS): return false
 	if not integer(data.get("recovery_target",0),0,7) or not data.get("recovery_used",[]) is Array: return false
 	var used: Array=[]
@@ -204,6 +206,7 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 	return ExpeditionGear.valid_checkpoint(old)
 
 func restore(data: Dictionary) -> void:
+	starting_ability=data.get("starting_ability",false)
 	credits = int(data.credits); unlocked_ascension = int(data.ascension)
 	chapter_cleared=int(data.get("chapter_cleared",0))
 	recovery_used=data.get("recovery_used",[]).duplicate(); recovery_target=int(data.get("recovery_target",0))
@@ -329,6 +332,7 @@ func bank_camp(run, persist: bool = true) -> bool:
 	run.exp.ensure_shop(run)
 	var before := snapshot()
 	credits = mini(10000000, credits + int(run.exp.carry_credits * (1 + run.exp.ascension * 0.1)))
+	if LevelMastery.enabled(run) and run.mastery.rank_of("charge")>0 and not run.exp.practice: starting_ability=true
 	if LevelMastery.enabled(run): credits=mini(10000000,credits+roundi(run.exp.carry_credits*run.mastery.value("loot_bonus")))
 	if LevelMastery.enabled(run) and run.exp.final_round() and run.exp.clear_clock==-2 and recovery_target==run.exp.operation_chapter:
 		credits=mini(10000000,credits+45); recovery_target=0

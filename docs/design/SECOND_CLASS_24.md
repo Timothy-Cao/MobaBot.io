@@ -1,5 +1,7 @@
 # Second-class design: Conductor
 
+0.24 follow-up: a playable Practice-only QWER prototype now exists; see COMBOS_ART_24 for exact implemented behavior and limitations. The proposal below remains design history. Baton, full class balance and campaign availability are not implemented.
+
 11 September 2026. Design proposal, not a playable class. The owner authorized independent exploration after the Vanguard support/art pass. Preserve Vanguard's current kit and campaign. **A future grapple class is explicitly requested**; reserve that identity for a later wall-attachment, reel, swing and release experiment.
 
 ## Identity and decisions

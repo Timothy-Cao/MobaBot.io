@@ -9,10 +9,12 @@ static func slot_rect(slot: String) -> Rect2:
 	return Rect2(SLOT_X[slot],470 if core else 476,width,width)
 
 static func icon(slot: String, run=null) -> String:
+	if Conductor.enabled(run) and slot in ["q","w","e","r"]: return "conductor_"+slot
 	if SupportModules.enabled(run) and slot in ["x1","x3"]: return "vanguard_anchor" if slot=="x1" else "vanguard_energy"
 	return "vanguard_"+slot
 
 static func detail(run, slot: String) -> String:
+	if Conductor.enabled(run) and slot in ["q","w","e","r"]: return Conductor.detail(slot)
 	if SupportModules.enabled(run) and slot in ["x1","x3"]: return SupportModules.detail(slot)
 	if ReviewRules.enabled(run) and ReviewRules.detail(run,slot)!="": return ReviewRules.detail(run,slot)
 	if slot=="hammer": return "Hammer · Rank %d\n%.0f head damage · %.0f reach\n5: wider sweep. 10: swing while moving."%[Vanguard.hammer_rank(run),run.attacks.damage(run),run.attacks.attack_range(run)]

@@ -30,7 +30,7 @@ static func annotate(record: Dictionary, run, automated: bool) -> void:
 	if ReviewRules.enabled(run): record.progression_samples=run.exp.progression_samples.duplicate(true)
 	if OperationRules.enabled(run): record.build="vanguard-20-chapter-operations"; record.chapter=run.exp.operation_chapter; record.operation_rounds=run.exp.route().size()
 	if LevelMastery.enabled(run): record.build="vanguard-22-level-progression"
-	if SupportModules.enabled(run): record.build="vanguard-23-support-art"
+	if SupportModules.enabled(run): record.build="vanguard-24-combos-art"
 	record.practice=run.exp!=null and run.exp.practice
 	record.automated=automated
 	if Vanguard.enabled(run):

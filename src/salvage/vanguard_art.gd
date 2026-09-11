@@ -4,6 +4,7 @@ const Motion=preload("res://src/salvage/vanguard_motion.gd")
 ## Teal/steel bodies, brass impacts, mint support. Geometry reads from simulation.
 static func draw(c, run) -> void:
 	var v: Vanguard=run.vanguard
+	if Conductor.enabled(run): v.conductor.draw(c)
 	if LevelMastery.enabled(run) and run.mastery.value("pet_damage")>0:
 		var p: Vector2=run.kit.pet_position
 		c.draw_circle(p,9,c.INK); c.draw_circle(p,6,c.TEAL if v.emp_left<=0 else c.PALE)

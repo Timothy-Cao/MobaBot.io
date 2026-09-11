@@ -5,7 +5,7 @@ static var TREE: Dictionary=make_tree()
 static func make_tree() -> Dictionary:
 	var result: Dictionary={"field":{"name":"Field sense","stat":"magnet","value":10.0,"max":1,"parent":"","branch":0,"index":-1}}
 	var branches: Array=[
-		[["reach","Extended reach","range",8.0,3],["economy","Efficient circuits","efficiency",0.04,3],["insulation","Insulation","emp_resist",0.1,3],["charge","Spare chamber","extra_charge",1.0,1]],
+		[["reach","Extended reach","range",8.0,3],["economy","Efficient circuits","efficiency",0.04,3],["insulation","Insulation","emp_resist",0.1,3],["charge","Head start","starting_ability",1.0,1]],
 		[["learner","Scavenger training","xp",0.03,3],["salvager","Salvage sorting","loot_bonus",0.04,3],["supplies","Resource recovery","supplies",1.0,3],["windfall","Lucky chest","double_chest",0.01,1]],
 		[["companion","Little helper","pet_damage",2.0,3],["collector","Pickup helper","pet_magnet",12.0,3],["repair","Repair helper","pet_repair",0.15,3],["disruptor","Disruptor pulse","pet_stun",0.25,1]]]
 	for branch in range(3):
@@ -21,6 +21,7 @@ static func enable(run) -> void:
 	run.exp.ascension=0; run.exp.sync_stats(run)
 
 static func text(id: String) -> String:
+	if id=="charge": return "Unlock E at the start of future runs. Bank at a round clear to keep this unlock. Mastery points still reset each run."
 	return {"field":"+10 pickup radius.","reach":"+8 hammer reach per rank.","economy":"Ability energy cost and drive upkeep -4%, energy regeneration +0.2/sec per rank. No cooldown bonus.","insulation":"EMP duration -10% per rank. Does not grant immunity.","charge":"Q stores one extra charge. Recharge speed is unchanged.","learner":"+3% pickup XP per rank. Survival XP is unchanged.","salvager":"+4% field coins and banked Salvage per rank. More crates over time; crate odds are unchanged.","supplies":"Unlock rare energy and repair drops from monsters: 1% per rank. Each supplies 12 + 4 per rank energy or 2 + 1 per rank HP.","windfall":"1% chance for a recovered chest to give double field credits.","companion":"Untargetable helper deals 2 damage per rank every 1.5 seconds within 240 range. Suppressed by EMP.","collector":"+12 pickup radius per rank through the helper.","repair":"Helper repairs 0.15 HP/sec per rank while you have avoided damage for 3 seconds.","disruptor":"Helper briefly stuns one ordinary enemy for 0.25 seconds every 6 seconds. Bosses are immune."}.get(id,"")
 
 static func tick(run, delta: float) -> void:

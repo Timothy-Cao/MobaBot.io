@@ -65,6 +65,11 @@ var hammer_cooldown := 0.0
 var slam_left := 0.0
 var slam_direction := Vector2.RIGHT
 var slam_bounced := false
+var buffered_hammer := false
+var slam_fueled := false
+var spin_swing := false
+var conductor_active := false
+var conductor:=Conductor.new()
 const SLAM_SPEED := 950.0
 const REBOUND_SPEED := 1425.0
 var touch_guard := 0.0
@@ -204,6 +209,7 @@ func clear() -> void:
 	helper_clock=0; helper_stun=0; helper_safe=0; helper_health=0
 	emp_left=0; combo_left=0; combo_swing=false
 	ghost=false; pending.clear(); hammer=-1; slam_left=0; slam_bounced=false; touch_guard=0; shield=0
+	buffered_hammer=false; slam_fueled=false; spin_swing=false
 	constructs.clear(); impacts.clear(); ghosts.clear()
 	hammer_cooldown=0; touch_grace=0; ghost_clock=0
 
@@ -227,9 +233,16 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 		if not pending.is_empty() or slam_left>0: return false
 		ghost=true; hammer=-1; run.attacks.stop(run)
 		run.emit_event("v_drive",run.player); return true
-	if drive_blocks(run): kit.last_failure="Release D"; return false
+	if SupportModules.enabled(run) and slam_left>0 and slot=="q":
+		if slam_fueled or kit.charges.q<=0: return false
+		var fuel: int=kit.charges.q
+		kit.charges.q=0; slam_fueled=true
+		if kit.recharge.q<=0: kit.recharge.q=kit.cooldown("q")
+		slam_left+=float(fuel)*110.0/(REBOUND_SPEED if slam_bounced else SLAM_SPEED)
+		poof(run.player,kit.effective_rank("q")); return true
+	if drive_blocks(run) and not (SupportModules.enabled(run) and slot=="f"): kit.last_failure="Release D"; return false
 	if slot=="p1": kit.orbit_far=not kit.orbit_far; kit.toggles[0]=true; run.emit_event("mode_switch",run.player); return true
-	if slam_left>0 or (not pending.is_empty() and slot!="f"): return false
+	if (slam_left>0 and not (SupportModules.enabled(run) and slot=="f")) or (not pending.is_empty() and slot!="f"): return false
 	if kit.charges[slot]<=0: run.emit_event("cast_unready",run.player); return false
 	var id: String=kit.loadout[slot]
 	var cost: float=kit.ability_cost(id)
@@ -243,9 +256,19 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	kit.charges[slot]-=1
 	if kit.recharge[slot]<=0: kit.recharge[slot]=kit.cooldown(slot)
 	kit.cast_counts[id]=int(kit.cast_counts.get(id,0))+1
+	if Conductor.enabled(run) and slot in ["q","w","e","r"]:
+		conductor.cast(run,slot,target); return true
 	if slot=="f":
 		poof(run.player,kit.effective_rank(slot)); poof(target,kit.effective_rank(slot))
 		run.player=target; run.stop_movement()
+		if SupportModules.enabled(run):
+			ghost=false; kit.sprint=0; kit.dash_left=0
+			if slam_left>0:
+				slam_left=0
+				blast(run,target,95*kit.area_scale("e"),32*kit.damage_scale("e"),"body_slam",0.6 if kit.effective_rank("e")>=5 else 0,240)
+				if kit.effective_rank("e")>=10: shield=1.0
+				finish_slam(run,true)
+			elif spin_swing and hammer>=0: hit_hammer(run)
 		if kit.effective_rank("f")>=10:
 			blast(run,target,110,30*kit.damage_scale("f"),"phase_hop",0,100)
 			impacts.back().rank=10
@@ -253,6 +276,7 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 		return true
 	if slot=="e":
 		slam_bounced=false
+		slam_fueled=false; buffered_hammer=false; spin_swing=false
 		slam_direction=(cursor-run.player).normalized(); slam_left=slam_range(kit.effective_rank("e"))/SLAM_SPEED
 		touch_guard=0.4; hammer=-1; run.attacks.stop(run)
 		if kit.effective_rank(slot)>=10: shield=0.45
@@ -272,8 +296,11 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	return true
 
 func swing(run, cursor: Vector2) -> bool:
+	if SupportModules.enabled(run) and run.state=="running" and slam_left>0:
+		buffered_hammer=true; hammer_direction=(cursor-run.player).normalized(); return true
 	if run.state!="running" or drive_blocks(run) or slam_left>0 or hammer_cooldown>0 or hammer>=0 or not pending.is_empty(): return false
 	combo_swing=ReviewRules.enabled(run) and combo_left>0
+	spin_swing=SupportModules.enabled(run) and combo_swing
 	combo_left=0
 	hammer=0.12 if combo_swing else 0.20; hammer_direction=(cursor-run.player).normalized()
 	if hammer_direction==Vector2.ZERO: hammer_direction=Vector2.RIGHT
@@ -281,6 +308,24 @@ func swing(run, cursor: Vector2) -> bool:
 	if hammer_roots(run): run.stop_movement()
 	run.aim=hammer_direction
 	return true
+
+func finish_slam(run, immediate: bool=false) -> void:
+	if ReviewRules.enabled(run): combo_left=1.2
+	if buffered_hammer:
+		var started:=swing(run,run.player+hammer_direction)
+		buffered_hammer=not started
+		if started and immediate: hit_hammer(run)
+
+func hit_hammer(run) -> void:
+	var reach: float=run.attacks.attack_range(run)
+	for enemy in run.enemies:
+		var offset: Vector2=enemy.pos-run.player
+		if run.attacks.valid(enemy) and offset.length()<=reach+enemy.radius and (spin_swing or absf(hammer_direction.angle_to(offset))<=hammer_angle(run)):
+			var head: bool=offset.length()>=reach*0.512
+			run.hit_enemy(enemy,(38 if head else 9)*power(hammer_rank(run))*(1+run.kit.attack_damage_bonus)*(ReviewRules.hammer_multiplier(run,enemy) if ReviewRules.enabled(run) else 1.0),"hammer",offset.normalized()*190 if head and not enemy.has("role") else Vector2.ZERO)
+			if head and not enemy.has("role"): enemy.stun=0.25
+	impacts.append({"kind":"hammer","pos":run.player,"direction":hammer_direction,"life":0.30,"duration":0.30,"radius":reach,"angle":PI if spin_swing else hammer_angle(run),"rank":hammer_rank(run)})
+	run.emit_event("v_hammer",run.player); hammer=-1; spin_swing=false
 
 func poof(point: Vector2, rank_value: int=1) -> void:
 	impacts.append({"kind":"poof","pos":point,"life":0.3,"duration":0.3,"radius":30.0,"rank":rank_value})
@@ -306,6 +351,7 @@ func release(run) -> void:
 	pending.clear()
 
 func tick(run, delta: float) -> void:
+	if Conductor.enabled(run): conductor.tick(run,delta)
 	if ReviewRules.enabled(run): ReviewRules.tick(run,delta)
 	orbit_angle=fposmod(orbit_angle+delta*(lerpf(3.0,10.2,float(clampi(rank_of(run,"p1"),1,10)-1)/9.0) if ReviewRules.enabled(run) else 10.2),TAU)
 	if run.kit.passive_active("orbit"):
@@ -331,18 +377,13 @@ func tick(run, delta: float) -> void:
 		hammer-=delta
 		if hammer_roots(run): run.stop_movement()
 		if hammer<=0:
-			var reach: float=run.attacks.attack_range(run)
-			for enemy in run.enemies:
-				var offset: Vector2=enemy.pos-run.player
-				if run.attacks.valid(enemy) and offset.length()<=reach+enemy.radius and absf(hammer_direction.angle_to(offset))<=hammer_angle(run):
-					var head: bool=offset.length()>=reach*0.512
-					run.hit_enemy(enemy,(38 if head else 9)*power(hammer_rank(run))*(1+run.kit.attack_damage_bonus)*(ReviewRules.hammer_multiplier(run,enemy) if ReviewRules.enabled(run) else 1.0),"hammer",offset.normalized()*190 if head and not enemy.has("role") else Vector2.ZERO)
-					if head and not enemy.has("role"): enemy.stun=0.25
-			impacts.append({"kind":"hammer","pos":run.player,"direction":hammer_direction,"life":0.30,"duration":0.30,"radius":reach,"angle":hammer_angle(run),"rank":hammer_rank(run)})
-			run.emit_event("v_hammer",run.player); hammer=-1
+			hit_hammer(run)
+	if buffered_hammer and slam_left<=0:
+		if combo_left<=0: buffered_hammer=false
+		elif hammer<0 and hammer_cooldown<=0: finish_slam(run)
 	if slam_left>0:
 		step_slam(run,delta)
-		if slam_left<=0 and ReviewRules.enabled(run): combo_left=1.2
+		if slam_left<=0: finish_slam(run)
 		run.stop_movement()
 	for unit in constructs.duplicate():
 		if emp_left>0:
