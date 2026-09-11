@@ -4,6 +4,8 @@ Updated 10 September 2026. Stable entry point: update this file instead of inven
 
 11 September owner note: Vanguard is now considered in a good place and should be preserved as the benchmark. The next gameplay-design change is to refine another class, but today's work is feedback/research text only. Do not mix that class pass with the optional 3D production experiment documented in [AI-assisted production feasibility](docs/design/AI_ASSISTED_PRODUCTION_FEASIBILITY_18.md).
 
+The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRODUCTION_18.md) records how to create perceived animation quality with a small motion budget. It is a future bakeoff plan, not permission to alter the synchronized build.
+
 ## Next action: human playtest, not another rewrite
 
 The owner wants to play while the next session learns the game, then compare logs with their impressions. Follow [PLAYTEST_PROTOCOL](docs/design/PLAYTEST_PROTOCOL.md). Freeze code/assets during the test. Do not restart the game, pull over the tested checkout, reset saves or tune numbers mid-run. No outstanding blocker prevents testing.
