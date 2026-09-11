@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-11",
+  "generator": "Built-in image_gen",
+  "authorship": "AI-generated original game illustrations using the project's existing generated artwork as style reference.",
+  "reference": "assets/vanguard_icons/vanguard_x2.png",
+  "processing": "Source PNGs copied unchanged. Godot lossless texture import, 128px maximum with mipmaps. Existing pixel_icon.gdshader: 32x32 sampling, saturation 0.85, brightness 0.97. Opaque backgrounds deliberately retained.",
+  "assets": [
+    {
+      "id": "mastery_utility",
+      "path": "assets/mastery_icons/mastery_utility.png",
+      "generated_file": "exec-d525f93f-85b7-4cb0-b89b-d12661518f7e.png",
+      "sha256": "A5C179795B7DEC2A7CE5616EE629AE630E2BE2876647DBC442DB587EB856EB07",
+      "prompt": "Use case: stylized-concept. Create ONE square reusable game UI icon, no text, no letters, no border. Subject: a stout steel adjustable wrench gripping a small cyan energy cell, clear diagonal silhouette, utility engineering. Medium-detail hand-painted gouache/cel-painted salvage machinery; matte petrol-teal enamel, brushed steel working edges, restrained ochre-brass joints, cream upper-left rim light. Three broad value groups, opaque dark navy background #14242c with very restrained painterly shading. Large simple readable subject occupies 75% of frame, generous safe margin. Must remain identifiable at 32x32 after pixelation; no tiny texture, no bloom haze, no photorealism. Match the palette and materials of the supplied reference, not its subject. This is the Utility emblem for a modular mastery icon family."
+    },
+    {
+      "id": "mastery_looting",
+      "path": "assets/mastery_icons/mastery_looting.png",
+      "generated_file": "exec-6ebb8faa-ba93-43d2-976b-4dcbfef8a372.png",
+      "sha256": "1BBD2C31309D372D73E861CB844810C6C433A8DF11DA4866F43B9E3F6C020493",
+      "prompt": "Create ONE square reusable game UI emblem: a compact open salvage chest holding three chunky brass scrap ingots, clear silhouette. No text, letters or border. Match reference's hand-painted salvage machinery materials, matte petrol teal, steel edges, restrained ochre brass and cream upper-left light; opaque dark navy #14242c background. Broad value planes, simplify for readability at 32 pixels after runtime pixelation. Subject centered at 75 percent frame with safe margins. This Looting emblem must look like recovered industrial salvage, not fantasy treasure. No coin shower, tiny details, bloom haze or photorealism."
+    },
+    {
+      "id": "mastery_pet",
+      "path": "assets/mastery_icons/mastery_pet.png",
+      "generated_file": "exec-60c80021-5c29-40fc-81fa-63af8d7fcac5.png",
+      "sha256": "B56928515FD08210A4425C86AEBB69B5A03D783B7BDA02E43F5B5CE19582054B",
+      "prompt": "Create ONE square reusable game UI emblem: a small friendly hovering salvage robot companion, compact rounded teal chassis, two cream rectangular eye slits in a dark faceplate, two tiny steel grabber arms and one restrained cyan thruster beneath. No text, letters, border or scenery. Match reference's hand-painted gouache salvage machinery materials: matte petrol teal, steel, a few ochre brass joints, cream upper-left light, opaque dark navy #14242c background. Three broad value groups and simple silhouette occupying 70 percent of image; generous safe margins, recognizable after 32x32 pixelation. It is a helper drone, not a humanoid hero, animal or weapon. No bloom haze or photorealism."
+    },
+    {
+      "id": "vanguard_anchor",
+      "path": "assets/vanguard_icons/vanguard_anchor.png",
+      "generated_file": "exec-6dee4fa6-067c-4e33-bf07-8cfb43e5c43e.png",
+      "sha256": "8474E440C6550DD1ECF112C2E51F79625F1CD62050363364A380B10FFC206148",
+      "prompt": "ONE square game ability icon: a planted squat aggro beacon, medium armored teal chassis on three broad steel feet, raised brass U-shaped signal mast with a small warm cream light. NO gun barrel, no robot face, no weapon, no lettering. Opaque dark navy background. Match reference's painted teal salvage machinery, steel edge planes, ochre brass, cream upper-left lighting, three bold value groups. Simple strong silhouette for 32-pixel runtime treatment. Centered at 70% frame with generous margins. This is a durable stationary decoy that attracts monsters, not an attacking turret. Restrained circular signal arcs, no bloom haze."
+    },
+    {
+      "id": "vanguard_energy",
+      "path": "assets/vanguard_icons/vanguard_energy.png",
+      "generated_file": "exec-eaba6059-af48-4cd1-91c8-391f4efa4a04.png",
+      "sha256": "9082758212CF75A540E4690139BB635C786940E338E46DDE4324A2EC92A2FCBE",
+      "prompt": "ONE square game ability icon: blue ENERGY STORAGE TOTEM, a stout cylindrical glass reservoir filled with one jagged icy-cyan lightning filament, armored matte petrol-teal housing, steel supports and restrained brass collars. Must match the supplied green healing reservoir's art family but clearly read as blue electricity, not healing: no green glow, no cross. Opaque dark navy background, no lettering or frame. Broad hand-painted gouache planes, cream upper-left edge light, large simple 75 percent frame silhouette with safe margins. Intended for 32-pixel runtime pixelation. Small inward energy arcs, no explosion or bloom fog."
+    }
+  ]
+}

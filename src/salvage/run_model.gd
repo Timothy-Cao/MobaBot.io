@@ -611,6 +611,7 @@ func _enemy_step(delta: float) -> void:
 			enemy.stun = maxf(0, enemy.stun - delta)
 			continue
 		if enemy.has("gunner_kind"):
+			if SupportModules.attract(self,enemy,delta): continue
 			RangedThreats.step(self, enemy, delta)
 			continue
 		if demo_mode and enemy.has("role"):
@@ -618,7 +619,9 @@ func _enemy_step(delta: float) -> void:
 			if state != "running": break
 			continue
 		if ReviewRules.enabled(self) and enemy.kind==3:
+			if SupportModules.attract(self,enemy,delta): continue
 			ReviewEnemies.tank(self,enemy,delta); continue
+		if SupportModules.attract(self,enemy,delta): continue
 		var tracked_player: Vector2 = kit.extra.decoy_position if kit != null and kit.extra.decoy_left > 0 else player
 		var lure: Dictionary={}
 		if Vanguard.enabled(self) and vanguard.emp_left<=0 and drawn<4:

@@ -94,6 +94,7 @@ static func setup(run, rank_value: int = 0) -> void:
 	run.kit.loadout.erase("unified_mastery")
 	run.kit.loadout.erase("operation20"); run.kit.loadout.erase("operation_xp")
 	run.kit.loadout.erase("level22")
+	run.kit.loadout.erase("support23")
 	if run.mastery is ExpeditionTree: run.mastery.modern=false
 	if run.exp!=null: run.exp.operation_chapter=0
 	if run.mastery is ExpeditionTree: run.mastery.unified=false
@@ -207,6 +208,7 @@ func clear() -> void:
 	hammer_cooldown=0; touch_grace=0; ghost_clock=0
 
 func powered(run) -> bool:
+	if SupportModules.enabled(run): return false
 	if emp_left>0: return false
 	for unit in constructs:
 		if unit.id=="recovery_totem" and run.player.distance_to(unit.pos)<=unit.radius: return true
@@ -258,8 +260,10 @@ func cast(run, slot: String, cursor: Vector2) -> bool:
 	if slot in ["x1","x2","x3"]:
 		constructs=constructs.filter(func(u): return u.id!=id)
 		var lifetime: float=(5.0+kit.milestone(slot)*2.0) if slot=="x3" else 35.0
+		if SupportModules.enabled(run): lifetime=35.0
 		constructs.append({"id":id,"pos":target,"life":lifetime,"duration":lifetime,"clock":0.3,"shots":0,"bank":0.0,"radius":125.0+kit.milestone(slot)*20,"hp":135.0*power(kit.effective_rank(slot)),"max_hp":135.0*power(kit.effective_rank(slot)),"slot":slot,"pulse":2.0,"hurt_clock":0.0})
 		constructs.back().rank=kit.effective_rank(slot)
+		if SupportModules.enabled(run) and slot=="x1": constructs.back().radius=340.0
 		poof(target,kit.effective_rank(slot)); return true
 	# 80ms anticipation: F can move the unreleased origin; world aim stays fixed.
 	pending={"slot":slot,"target":cursor,"left":0.08}
@@ -350,14 +354,17 @@ func tick(run, delta: float) -> void:
 			var hull_fraction: float=unit.hp/unit.max_hp
 			unit.max_hp=135.0*power(current_rank); unit.hp=unit.max_hp*hull_fraction
 			unit.radius=125.0+run.kit.milestone(unit.slot)*20
-			if unit.id=="recovery_totem":
+			if SupportModules.enabled(run) and unit.slot=="x1": unit.radius=340.0
+			if unit.id=="recovery_totem" and not SupportModules.enabled(run):
 				var duration: float=5.0+run.kit.milestone(unit.slot)*2.0
 				unit.life+=duration-unit.duration; unit.duration=duration
 			unit.rank=current_rank
 		unit.life-=delta; unit.clock-=delta; unit.pulse-=delta; unit.hurt_clock=maxf(0,unit.hurt_clock-delta)
 		var inside: bool=run.player.distance_to(unit.pos)<=unit.radius
 		var rank_value: int=run.kit.effective_rank(unit.slot)
-		if unit.id=="guard_bot":
+		if unit.id=="guard_bot" and SupportModules.enabled(run):
+			pass
+		elif unit.id=="guard_bot":
 			if unit.clock<=0:
 				var enemy: Dictionary=run.nearest_enemy(unit.pos)
 				var reach: float=520 if gun_special(run,unit.shots) else TURRET_RANGE
@@ -377,6 +384,10 @@ func tick(run, delta: float) -> void:
 				var energy: float=minf(amount,run.kit.energy_max()-run.kit.energy); run.kit.energy+=energy; amount-=energy
 				if amount>0 and unit.pulse<=0: unit.pulse=1; blast(run,unit.pos,unit.radius,13*power(rank_value),"reserve",0,80)
 		elif unit.id=="recovery_totem":
+			if SupportModules.enabled(run):
+				SupportModules.energy(run,unit,delta)
+				if unit.life<=0: constructs.erase(unit)
+				continue
 			run.kit.charges[unit.slot]=0; run.kit.recharge[unit.slot]=run.kit.cooldown(unit.slot)
 			if inside:
 				for slot in KEYS:

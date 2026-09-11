@@ -2,7 +2,13 @@
 
 Updated 10 September 2026. Stable entry point; human feedback and technical evidence stay in their dated review documents.
 
-## Next action: owner review of 0.22 Level progression
+## Next action: owner review of 0.23 support and reusable mastery art
+
+11 September follow-up supersedes the paused-module wording below: the owner chose an ordinary-enemy aggro Anchor and an energy version of Reserve, then authorized implementation and art polish. New runs/primary Practice use `support23`; old checkpoints retain their modules. Healing Reserve is unchanged. See [SUPPORT_ART_23](docs/design/SUPPORT_ART_23.md). Five generated source icons, shared pixelation and twelve native top-right badges now illustrate every modern mastery node without thirteen separate paintings. Build tag `vanguard-23-support-art`; record actual commit and logs before the next human test. No user game was restarted.
+
+Second-class exploration is documented in [SECOND_CLASS_24](docs/design/SECOND_CLASS_24.md): Conductor, using temporary relays and mobile electrical routes. Design only; next implementation is an isolated Practice prototype. The owner's future grapple-class request is recorded separately. Current Vanguard remains the campaign class. Technical verification is in the latest QA_18 section; follow PLAYTEST_PROTOCOL and freeze code/assets when the owner begins review.
+
+## Previous milestone: 0.22 Level progression
 
 Latest implemented override: [LEVEL_PROGRESSION_22](docs/design/LEVEL_PROGRESSION_22.md). Owner says combat is fun and E/Reserve have strong purposes; authorized progression/menu/equipment/mastery work, explicitly deferred energy/turret replacements and the stationary form. New runs use `level22`, no Ascension selection, Level 1–8 labels, persistent camp continuation, stronger/rarer higher-tier armor, bulk crafting/equipping, a bounded one-time frontier recovery assist, and Utility/Looting/Pet run mastery. W recharge +15%, larger local health bar, clearer Reserve charge display. No broad boss or core-combat retune. The module alternatives are brainstorms only. Earlier sections below describe historical 0.20 rules where this override differs. Build tag: `vanguard-22-level-progression`; record actual Git commit at next playtest.
 

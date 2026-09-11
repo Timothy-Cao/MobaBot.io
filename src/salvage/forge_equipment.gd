@@ -150,6 +150,7 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 			if c.loadout.get("level22",false) and c.tree[id]>0 and parent!="" and c.tree.get(parent,0)<tree[parent].max: return false
 		if spent!=c.spent: return false
 	if c.loadout.has("level22") and (c.loadout.level22!=true or not c.loadout.get("operation20",0)>0): return false
+	if c.loadout.has("support23") and (c.loadout.support23!=true or not c.loadout.get("level22",false)): return false
 	if c.loadout.has("vanguard"):
 		if not integer(c.loadout.get("hammer_rank",1),1,10): return false
 		if not c.get("bindings") is Dictionary: return false

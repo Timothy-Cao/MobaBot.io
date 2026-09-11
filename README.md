@@ -1,4 +1,8 @@
-# Current 0.22 override
+# Current 0.23 override
+
+New runs and primary Practice now have an ordinary-enemy aggro **Anchor** and an **Energy reserve** totem. Healing Reserve is unchanged; old checkpoints preserve earlier modules. Mastery combines three reusable painted emblems with twelve native effect badges, using the established pixelation. See [Support and art](docs/design/SUPPORT_ART_23.md). The [Conductor class concept](docs/design/SECOND_CLASS_24.md) is design only; Vanguard remains the playable class.
+
+## Previous 0.22 override
 
 New games use eight numbered Levels of three rounds, with no Ascension selection. See [Level progression](docs/design/LEVEL_PROGRESSION_22.md) for the Utility/Looting/Pet mastery tree, equipment changes, bulk actions and bounded recovery assist. Existing saves remain compatible. The energy/turret module rework is on hold; the existing combat remains playable.
 

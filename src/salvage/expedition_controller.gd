@@ -83,6 +83,7 @@ func launch_expedition(resume: bool=false) -> void:
 		ReviewRules.enable(model)
 		if collection is ForgeEquipment:
 			OperationRules.enable(model,chapter_choice); LevelMastery.enable(model)
+			model.kit.loadout.support23=true
 		collection.apply_to(model)
 		model.health=model.max_health(); model.kit.energy=model.kit.energy_max()
 		banked_camp=-1
@@ -563,7 +564,7 @@ func launch_practice(legacy: bool=false) -> void:
 	expedition.start(model,"ranged",0)
 	BotKeyboard.enable(model); expedition.enable_revision(model)
 	expedition.practice=true
-	if not legacy: Vanguard.setup(model,1); ReviewRules.enable(model); PracticeSandbox.terrain(model)
+	if not legacy: Vanguard.setup(model,1); ReviewRules.enable(model); LevelMastery.enable(model); model.kit.loadout.support23=true; PracticeSandbox.terrain(model)
 	PracticeSandbox.terrain(model)
 	model.health=model.max_health(); model.kit.energy=model.kit.energy_max()
 	model.events.clear(); ui.notice_time=0
@@ -587,7 +588,7 @@ func begin_practice_placement() -> void:
 
 func practice_reset() -> void:
 	practice_clear(); model.player=Vector2(480,300); PracticeSandbox.terrain(model)
-	Vanguard.setup(model,practice_rank); ReviewRules.enable(model); PracticeSandbox.terrain(model)
+	Vanguard.setup(model,practice_rank); ReviewRules.enable(model); LevelMastery.enable(model); model.kit.loadout.support23=true; PracticeSandbox.terrain(model)
 	model.damage_dealt.clear(); model.time=0; camera_offset=Vector2.ZERO
 	free_center=model.player; _update_camera(); PracticeSandbox.draw(self)
 

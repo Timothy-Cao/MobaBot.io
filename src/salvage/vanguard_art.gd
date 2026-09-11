@@ -75,6 +75,12 @@ static func draw(c, run) -> void:
 			var spoke:=Vector2.from_angle(run.time*(0.7+grade*0.3)+i*TAU/(grade+1))
 			c.draw_line(p+spoke*18,p+spoke*23,c.GOLD,3,true)
 		if unit.id=="guard_bot":
+			if SupportModules.enabled(run):
+				c.draw_polyline(PackedVector2Array([p+Vector2(-12,-17),p+Vector2(-12,5),p+Vector2(12,5),p+Vector2(12,-17)]),c.GOLD,4,true)
+				c.draw_circle(p,5,c.CREAM)
+				c.draw_rect(Rect2(p+Vector2(-23,29),Vector2(46,5)),c.INK)
+				c.draw_rect(Rect2(p+Vector2(-23,29),Vector2(46*maxf(0,unit.hp/unit.max_hp),5)),c.TEAL)
+				continue
 			var barrel: Vector2=unit.get("aim",Vector2.RIGHT)
 			var cadence: float=0.8*Vanguard.GUN_INTERVAL[Vanguard.gun_rank(run)]/0.24
 			c.draw_line(p,p+barrel*(24-5*clampf(unit.clock/cadence,0,1)),c.PALE,9,true)
@@ -87,7 +93,7 @@ static func draw(c, run) -> void:
 				c.draw_circle(p+barrel*25,4,c.GOLD)
 			c.draw_rect(Rect2(p+Vector2(-20,27),Vector2(40,4)),c.INK)
 			c.draw_rect(Rect2(p+Vector2(-20,27),Vector2(40*clampf(unit.hp/unit.max_hp,0,1),4)),tint)
-		elif unit.id=="reserve_totem":
+		elif unit.id=="reserve_totem" or (SupportModules.enabled(run) and unit.id=="recovery_totem"):
 			if LevelMastery.enabled(run):
 				var inside: bool=run.player.distance_to(p)<=unit.radius
 				var fill: float=clampf(unit.bank/(86*Vanguard.power(run.kit.effective_rank(unit.slot))),0,1)
@@ -98,8 +104,11 @@ static func draw(c, run) -> void:
 					c.draw_line(p+Vector2(-4,17),p+Vector2(0,12),c.TEAL,2,true)
 				elif unit.bank<=0.1:
 					c.draw_line(p+Vector2(-7,23),p+Vector2(7,23),c.PALE,3,true)
-			c.draw_line(p-Vector2(0,6),p+Vector2(0,6),c.CREAM,4,true)
-			c.draw_line(p-Vector2(6,0),p+Vector2(6,0),c.CREAM,4,true)
+			if unit.id=="recovery_totem":
+				c.draw_polyline(PackedVector2Array([p+Vector2(4,-8),p+Vector2(-4,1),p+Vector2(3,1),p+Vector2(-3,8)]),c.CREAM,3,true)
+			else:
+				c.draw_line(p-Vector2(0,6),p+Vector2(0,6),c.CREAM,4,true)
+				c.draw_line(p-Vector2(6,0),p+Vector2(6,0),c.CREAM,4,true)
 			c.draw_arc(p,21,-PI/2,-PI/2+TAU*minf(1,unit.bank/(86*Vanguard.power(run.kit.effective_rank(unit.slot)))),32,tint,3,true)
 			if unit.bank>0 and run.player.distance_to(p)<=unit.radius:
 				var phase: float=fposmod(run.time*2,1)

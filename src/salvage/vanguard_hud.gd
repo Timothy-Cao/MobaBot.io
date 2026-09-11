@@ -8,13 +8,15 @@ static func slot_rect(slot: String) -> Rect2:
 	var width: float=54 if core else 48
 	return Rect2(SLOT_X[slot],470 if core else 476,width,width)
 
-static func icon(slot: String) -> String:
+static func icon(slot: String, run=null) -> String:
+	if SupportModules.enabled(run) and slot in ["x1","x3"]: return "vanguard_anchor" if slot=="x1" else "vanguard_energy"
 	return "vanguard_"+slot
 
 static func detail(run, slot: String) -> String:
+	if SupportModules.enabled(run) and slot in ["x1","x3"]: return SupportModules.detail(slot)
 	if ReviewRules.enabled(run) and ReviewRules.detail(run,slot)!="": return ReviewRules.detail(run,slot)
 	if slot=="hammer": return "Hammer · Rank %d\n%.0f head damage · %.0f reach\n5: wider sweep. 10: swing while moving."%[Vanguard.hammer_rank(run),run.attacks.damage(run),run.attacks.attack_range(run)]
-	if slot=="gun": return "Machine gun · Rank %d\n%.2f damage · %.2f shots/sec\n5: fires during E / Ghost drive.\n10: every fifth shot deals 2× damage, reaches 450 and hits up to four targets.\nAlso upgrades Bulwark's gun. `: toggle; S never disables it."%[Vanguard.gun_rank(run),run.attacks.auto_damage(run),1/run.attacks.auto_interval(run)]
+	if slot=="gun": return "Machine gun · Rank %d\n%.2f damage · %.2f shots/sec\n5: fires during E / Ghost drive.\n10: every fifth shot deals 2× damage, reaches 450 and hits up to four targets.\n"%[Vanguard.gun_rank(run),run.attacks.auto_damage(run),1/run.attacks.auto_interval(run)]+("" if SupportModules.enabled(run) else "Also upgrades Bulwark's gun. ")+"`: toggle; S never disables it."
 	if slot=="p1": return "Orbit tools\n1: close / far. Always fast. 2 energy/sec.\nPermanent blades. Rank increases damage and blade count."
 	if slot=="x1": return "Bulwark\nGun follows MG rank. Ranks increase hull/pulse.\n5: faster, wider pulses. 10: pulses stun.\n%.1fs recharge · 20 energy"%run.kit.cooldown(slot)
 	if slot=="x2": return "Reserve\nBank repair outside; return for hull, energy, then damage.\n5: larger reserves and coverage. 10: also banks while inside."
@@ -53,7 +55,7 @@ static func draw(ui, run) -> void:
 			tile.set_meta("vanguard_slot",slot)
 			tile.mouse_filter=Control.MOUSE_FILTER_STOP; tile.tooltip_text=detail(run,slot)
 			if rank_of_gate(run,slot): tile.tooltip_text+="\nRank 6+: bring every tool to rank 5 first."
-			ui._ability_icon(tile,icon(slot),Rect2(2,2,width-4,width-4))
+			ui._ability_icon(tile,icon(slot,run),Rect2(2,2,width-4,width-4))
 			var shade:=ColorRect.new(); shade.size=Vector2.ONE*width; shade.color=Color("14242cbb"); shade.mouse_filter=Control.MOUSE_FILTER_IGNORE; tile.add_child(shade)
 			ui.ability_shades[slot]=shade
 			if slot in ["p1","x1","x2","x3"]:

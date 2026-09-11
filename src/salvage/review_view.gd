@@ -10,7 +10,7 @@ static func overview(ui, run) -> void:
 		var slot: String=slots[i]
 		var at:=Vector2(48+(i%4)*98,128+(i/4)*98)
 		var tile=ui._surface(ui.overlay,Rect2(at,Vector2(84,80)),ui.PANEL,1)
-		ui._ability_icon(tile,VanguardHud.icon(slot),Rect2(17,5,50,50))
+		ui._ability_icon(tile,VanguardHud.icon(slot,run),Rect2(17,5,50,50))
 		ui._label(tile,"MG" if slot=="gun" else "LMB" if slot=="hammer" else OS.get_keycode_string(Vanguard.KEYS[slot]),Rect2(3,0,38,19),11,ui.CREAM,true)
 		ui._label(tile,"Rank %d"%Vanguard.rank_of(run,slot) if Vanguard.rank_of(run,slot)>0 else "Shop" if slot in ReviewRules.MODULES else "Unlearned",Rect2(2,57,80,22),12,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
 		tile.mouse_filter=Control.MOUSE_FILTER_STOP; tile.tooltip_text=VanguardHud.detail(run,slot)
@@ -53,7 +53,7 @@ static func upgrades(ui, run) -> void:
 		var name: String=slot.capitalize() if slot in ["gun","hammer"] else MobaKit.ABILITIES[Vanguard.TOOLS[slot]].name
 		var card: Button=ui._button("",Rect2(48+i*292,145,276,302),func(): ui.upgrade_selected.emit(i),false)
 		card.set_meta("review_choice",slot)
-		ui._ability_icon(card,VanguardHud.icon(slot),Rect2(99,24,78,78))
+		ui._ability_icon(card,VanguardHud.icon(slot,run),Rect2(99,24,78,78))
 		ui._label(card,name,Rect2(12,121,252,38),21,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
 		ui._label(card,"Learn" if rank_value==0 else "Rank %d → %d"%[rank_value,rank_value+1],Rect2(12,167,252,28),18,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
 		var hint: Label=ui._label(card,upgrade_hint(run,slot),Rect2(14,201,248,95),12,ui.MUTED)
@@ -92,8 +92,9 @@ static func camp(game) -> void:
 		var card: Button=ui._button("",Rect2(48+i*218,310,208,78),func(): game.buy_review_module(slot),false)
 		card.set_meta("module_purchase",slot)
 		card.disabled=rank_value>=10 or exp.field_credits<price or game.collection.blocked
-		ui._ability_icon(card,VanguardHud.icon(slot),Rect2(8,13,46,46))
+		ui._ability_icon(card,VanguardHud.icon(slot,run),Rect2(8,13,46,46))
 		var title: String="Orbit" if slot=="p1" else MobaKit.ABILITIES[Vanguard.TOOLS[slot]].name
+		if SupportModules.enabled(run) and slot in ["x1","x3"]: title=SupportModules.title(slot)
 		ui._label(card,title,Rect2(62,7,140,26),15,ui.CREAM,true)
 		ui._label(card,"Max rank" if rank_value>=10 else "%s · %d"%["Buy" if rank_value==0 else "Rank %d"%(rank_value+1),price],Rect2(62,38,140,25),14,ui.GOLD)
 		card.tooltip_text=VanguardHud.detail(run,slot)+"\nRun-only purchase. Resets next level."

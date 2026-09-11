@@ -1,5 +1,7 @@
 # MobaBot.io development
 
+0.23 override: SUPPORT_ART_23 supersedes the module hold below. New runs/primary Practice use `support23` Anchor and Energy reserve; health Reserve unchanged, old checkpoints preserved. Include support_art_test.gd. Mastery uses three generated base emblems with native reusable badges; preserve manifest/source masters and shared pixelation. SECOND_CLASS_24 is design only, with a future grapple class noted; Vanguard remains the playable campaign class.
+
 0.22 current override: read docs/design/LEVEL_PROGRESSION_22.md. New levels use run-only Utility/Looting/Pet mastery and no Ascension selection. Preserve old checkpoints. Energy/turret module replacements are explicitly on hold; current core combat/Reserve has positive owner feedback. Include level_progression_test.gd in verification. Earlier 0.18/0.20 contracts below are historical where overridden.
 
 Session entry point: read SESSION_HANDOFF.md first for the current build, next action and unresolved risks. For human testing follow docs/design/PLAYTEST_PROTOCOL.md; freeze code/assets while the owner plays. Update the stable handoff after each verified milestone and before switching sessions. Keep dated feedback in QUALITY_BAR and technical evidence in QA_18 or its explicit successor; never infer full chat continuity.

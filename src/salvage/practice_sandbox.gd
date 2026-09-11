@@ -71,11 +71,12 @@ static func draw(game) -> void:
 				ui._button(str(rank_value),Rect2(26+i*95,218,88,35),func():
 					game.practice_rank=rank_value
 					Vanguard.setup(game.model,rank_value)
+					ReviewRules.enable(game.model); LevelMastery.enable(game.model); game.model.kit.loadout.support23=true
 					draw(game),game.practice_rank==rank_value)
 			for i in range(Vanguard.KEYS.size()):
 				var slot: String=Vanguard.KEYS.keys()[i]
 				var point:=Vector2(28+(i%5)*55,280+(i/5)*57)
-				ui._ability_icon(ui.overlay,VanguardHud.icon(slot),Rect2(point,Vector2(40,40)))
+				ui._ability_icon(ui.overlay,VanguardHud.icon(slot,game.model),Rect2(point,Vector2(40,40)))
 				ui._label(ui.overlay,OS.get_keycode_string(Vanguard.KEYS[slot]),Rect2(point,Vector2(20,16)),10,ui.GOLD,true)
 		"Player":
 			for i in range(5):

@@ -1,5 +1,11 @@
 # MobaBot.io quality bar
 
+## Support choice and reusable art · 11 September 2026 · 0.23
+
+Owner selected a medium-health aggro anchor for regular enemies, with bosses immune, and a second Reserve totem supplying energy. Preserve the current healing Reserve. They requested reusable generated mastery art, consistent pixelation and a further quality pass, then suggested broad base emblems plus small top-right effect badges to avoid generating each node separately. Implemented that composition with three mastery bases and twelve native symbols, plus two support images. Actual-size node names, ranks and locked hover descriptions remain visible. No new human feel score: technical rendering and tests establish function, not preference.
+
+Review priorities: whether Anchor groups enemies without trivializing ranged threats; whether returning to Energy reserve feels useful without enabling uninterrupted spam; whether base-plus-badge icons reduce mastery scanning effort. The future grapple request and a distinct Conductor class proposal are documented; neither is advertised as playable. Existing positive Vanguard feedback remains the reason to keep broader core combat stable.
+
 ## Owner approval and focused progression · 10 September 2026 · 0.22
 
 Owner reports direct games are fun across several rounds; current abilities have strong purposes, especially E for dodge/attack/bounce/reposition/escape, and the healing module is very good. Energy charge/turret feel lame, but owner is no longer convinced by stationary siege and explicitly asks to hold those reworks and brainstorm alternatives. Latest authorization covers the accumulated level/menu/gear/mastery changes; do not treat it as approval for the paused module replacements.
