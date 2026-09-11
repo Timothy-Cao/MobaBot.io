@@ -25,12 +25,13 @@ static func risk(point: Vector2, threats: Array) -> float:
 
 static func step(run, e: Dictionary, delta: float) -> void:
 	e.phase="orbit"
-	e.clock-=delta; e.dodge_clock=float(e.get("dodge_clock",0))-delta
+	# Keep each drone's 100ms reaction cadence, distributed across six frames.
+	e.clock-=delta; e.dodge_clock=float(e.get("dodge_clock",float(int(e.id)%6)/60.0))-delta
 	var away: Vector2=Vector2(e.pos)-run.player
 	var orbit:=away.normalized().orthogonal()*(1 if int(e.id)%2 else -1)
 	var preferred: Vector2=(orbit*0.75+away.normalized()*clampf((310-away.length())/80,-1,1)).normalized()
 	if e.dodge_clock<=0:
-		e.dodge_clock=0.10
+		e.dodge_clock=maxf(0,e.dodge_clock+0.10)
 		var threats:=zones(run,e)
 		var danger:=risk(e.pos,threats)>0
 		var speed:=720.0 if danger else 420.0
@@ -39,7 +40,7 @@ static func step(run, e: Dictionary, delta: float) -> void:
 		# Short horizon and finite speed make overlapping tells/cornering real counters.
 		for i in range(17):
 			var direction:=preferred if i==16 else Vector2.from_angle(i*TAU/16)
-			var candidate:=ReviewEnemies.destination(run,e.pos,direction,speed*0.16,e.radius)
+			var candidate:=destination(run,e.pos,direction,speed*0.16,e.radius)
 			var score:=risk(candidate,threats)+absf(candidate.distance_to(run.player)-310)*0.3+(1-direction.dot(preferred))*8
 			if candidate.distance_to(run.player)<run.attacks.attack_range(run)+30: score+=180
 			if candidate.distance_to(e.pos)<speed*0.08: score+=150
@@ -54,6 +55,18 @@ static func step(run, e: Dictionary, delta: float) -> void:
 		var heading: Vector2=(run.player-Vector2(e.pos)).normalized()
 		run._add_projectile(e.pos,heading*340,1,"hostile",0,1.8)
 		run.emit_event("enemy_shot",e.pos)
+
+static func destination(run, start: Vector2, direction: Vector2, distance: float, radius: float) -> Vector2:
+	var target:=start+direction.limit_length()*distance
+	# The usual clear route needs one capsule check per wall, not 17–29
+	# repeated four-unit sweeps. Keep the original resolution near obstacles.
+	if run.ARENA.grow(-radius).has_point(target):
+		var blocked:=false
+		for wall in run.kit.extra.walls:
+			if run.kit.extra.path_blocked(start,target,wall,radius+6.01):
+				blocked=true; break
+		if not blocked: return target
+	return ReviewEnemies.destination(run,start,direction,distance,radius)
 
 static func draw(art, e: Dictionary) -> void:
 	var p: Vector2=e.pos+art.frame_offset

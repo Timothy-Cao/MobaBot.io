@@ -4,6 +4,8 @@ Updated 11 September 2026. Stable entry point; human feedback and technical evid
 
 ## Next action: owner review of 0.26 arsenal and support enemies
 
+11 September performance follow-up: owner reported lag after spawning 25 Mosquitoes, then requested fewer/tougher ones. Candidate dodge paths now use conservative capsule clearance checks with the original swept fallback near walls; 100ms planning is staggered across frames. Current `arsenal26` Mosquito HP is doubled (20 base), normal spawning caps them at four alive (shared ranged cap can be lower); explicit Practice stress spawns bypass the cap. See QA_18 for reproducible before/after CPU evidence and caveats.
+
 11 September visual follow-up: Missile Frenzy/Barrage now uses the original Q rocket hull, fins and exhaust at 75% size instead of the small bolt-like substitute. Gameplay values unchanged.
 
 Latest override: [ARSENAL_SUPPORT_26](docs/design/ARSENAL_SUPPORT_26.md). New runs/primary Practice use `arsenal26`; older checkpoints preserve their rules. E has fixed reach/damage, reduced recharge with rank, no shield, four charges at rank ten, boundary rebounds and one queued E. Buffered spin commits with +15% damage and a strict 0.1-second arrival window. Slot 4 is eight-second Missile Barrage: unlimited Q shots every 0.3 seconds, five energy each, 60-second activation cooldown. Hatchery spawns runners; Uplink heals/speeds nearby enemies; boss laser sweeps 360 degrees. Healing Reserve, Anchor and boss HP unchanged.

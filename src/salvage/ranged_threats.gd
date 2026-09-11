@@ -4,6 +4,7 @@ const NAMES := {"lancer":"Arc lancer", "volley":"Burst battery", "bomber":"Bomb 
 
 static func spawn(run, type: String, point: Vector2 = Vector2.INF, bypass_cap: bool = false) -> Dictionary:
 	if not NAMES.has(type) or run.enemies.size()>=run.MAX_ENEMIES: return {}
+	if type=="mosquito" and not bypass_cap and run.enemies.filter(func(e): return not e.dead and e.get("gunner_kind","")=="mosquito").size()>=4: return {}
 	var cap:=mini(5,3+int(run.exp.route_index)/7) if Vanguard.enabled(run) else 3
 	if not bypass_cap and run.enemies.filter(func(e): return not e.dead and e.has("gunner_kind")).size()>=cap: return {}
 	if type=="mender" and not bypass_cap and run.enemies.any(func(e): return not e.dead and e.get("gunner_kind","")=="mender"): return {}
@@ -19,6 +20,7 @@ static func spawn(run, type: String, point: Vector2 = Vector2.INF, bypass_cap: b
 	if ReviewRules.enabled(run) and type=="emp": enemy.hp=120.0; enemy.max_hp=120.0
 	if type=="mosquito":
 		enemy.radius=12.0; enemy.hp=10.0*(1+0.22*(run.exp.stage_number()-1))*(1+0.15*run.exp.route_index); enemy.max_hp=enemy.hp
+		if ArsenalBurst.enabled(run): enemy.hp*=2; enemy.max_hp=enemy.hp
 	if type in ["hatchery","uplink"]: enemy.hp=120; enemy.max_hp=120; enemy.clock=8.0
 	return enemy
 

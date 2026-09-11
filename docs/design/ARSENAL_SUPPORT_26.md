@@ -13,6 +13,8 @@
 
 ## Enemy pressure
 
+11 September Mosquito follow-up: double HP on these rules (20 base, same scaling) and at most four alive through normal spawning, additionally subject to the shared ranged cap. Explicit Practice spawning bypasses population limits for stress tests. Dodge planning retains 17 directions/100ms, staggered across frames; clear candidate paths skip repeated four-unit collision sweeps, falling back to the original solver near obstacles/arena edges.
+
 Visual follow-up: Barrage (owner calls it Missile Frenzy) uses the same Q rocket hull, fins and exhaust at 75% visual scale. This replaces the initial bolt-like mini-projectile drawing; damage, collision and cadence are unchanged.
 
 - Hatchery: four pursuing runners per eight seconds, valid nearby spawn points only; 16 living children per hatchery plus global population limits.

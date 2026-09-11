@@ -1,5 +1,9 @@
 # MobaBot.io quality bar
 
+## Mosquito performance and density · 11 September 2026
+
+Owner reported severe lag with 25 manually spawned Mosquitoes and requested optimization, then proposed tankier enemies with only a few active. Implemented a conservative clear-path shortcut for candidate planning and staggered 100ms updates, keeping 17 candidate directions and physical avoidance. New-rule HP doubles to 20 base with existing scaling, with at most four in normal spawning; existing shared ranged limits may be lower. Practice manual spawns remain available for stress review. Wall-path parity, isolated W avoidance and gun hits remain verified. This is not a new human performance or balance verdict.
+
 ## Missile Frenzy rocket identity · 11 September 2026
 
 Owner clarified that Frenzy should still look like rockets, just a little smaller. Reused the exact normal Q rocket drawing at 75% scale, including the hull/fins and scaled exhaust. Removed the bolt-like alternate drawing. No gameplay retuning or new asset family. Normal/reduced combat captures inspected; human style approval remains pending.

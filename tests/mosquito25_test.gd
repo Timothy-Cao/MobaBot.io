@@ -39,6 +39,29 @@ func execute() -> void:
 	MobaKit.area(run,bug.pos,100,100,"strike",0); check(bug.dead,"Point-blank damage still hits; no immunity")
 	check(not Mosquito.wave(1,0,3) and Mosquito.wave(1,1,3),"Introduced after first round")
 	check(Mosquito.wave(3,0,2) and not Mosquito.wave(2,0,2),"Level three has more mosquito waves")
+	run=fresh(); PracticeSandbox.terrain(run)
+	var parity:=true
+	for i in range(500):
+		var origin:=run.player+Vector2.from_angle(i*2.39996)*(40+i%390)
+		if not Vanguard.valid_point(run,origin,12): continue
+		var heading:=Vector2.from_angle(i*0.718)
+		var reference:=ReviewEnemies.destination(run,origin,heading,115.2,12)
+		if Mosquito.destination(run,origin,heading,115.2,12).distance_to(reference)>0.01: parity=false
+	check(parity,"Fast candidate paths match swept collision near practice walls")
+	var boundary:=Vector2(run.ARENA.end.x-20,300)
+	check(Mosquito.destination(run,boundary,Vector2.RIGHT,115.2,12).is_equal_approx(ReviewEnemies.destination(run,boundary,Vector2.RIGHT,115.2,12)),"Arena edge keeps original swept resolution")
+	run=fresh(); run.kit.loadout.arsenal26=true
+	for i in range(4): RangedThreats.spawn(run,"mosquito",run.player+Vector2(200,i*30),true)
+	check(run.enemies[0].hp==20,"Current mosquito has double base HP")
+	check(RangedThreats.spawn(run,"mosquito").is_empty(),"Normal spawning cannot exceed four living mosquitoes")
+	check(not RangedThreats.spawn(run,"mosquito",run.player+Vector2(250,0),true).is_empty(),"Explicit practice stress spawns bypass population cap")
+	run=fresh()
+	for i in range(25): RangedThreats.spawn(run,"mosquito",run.player+Vector2.from_angle(i*TAU/25)*140,true)
+	var planned:=0
+	for foe in run.enemies:
+		Mosquito.step(run,foe,1.0/60)
+		if foe.has("dodge_dir"): planned+=1
+	check(planned>0 and planned<12,"Initial dodge planning is spread across frames")
 	run=fresh(); run.boss_spawned=true; run.boss_defeated=false
 	run.stage_time=run.exp.round_seconds()+60
 	check(ReviewRules.boss_deadline(run)==60 and ReviewRules.enrage_multiplier(run)==1,"Enrage starts without a damage jump")
