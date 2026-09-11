@@ -135,7 +135,7 @@ func incoming(run, hull_units: float) -> float:
 	if Vanguard.enabled(run) and not practice:
 		value*=(0.55*(1+0.1*(operation_chapter-1))*(1+0.15*route_index) if operation_chapter>0 else stage_damage(stage_number())*round_damage())
 		if encounter_spawned and route()[route_index][1] in ["boss","final"]: value*=1.25
-		if ReviewRules.enabled(run): value*=1.0+minf(9.0,ReviewRules.boss_overtime(run)/10.0)
+		if ReviewRules.enabled(run): value*=ReviewRules.enrage_multiplier(run)
 	if run.kit.extra.roll_left > 0: value *= 0.65
 	if run.kit.extra.flywheel >= 1: value *= 0.85
 	return value
@@ -249,7 +249,9 @@ func spawns(run, delta: float) -> void:
 				roster=["breacher","volley","lancer","scatter"] if route_index==0 else ["breacher","mender","scatter","lancer","volley","bomber"]
 				if ReviewRules.enabled(run): roster=ReviewRules.specialist_roster(route_index)
 				if operation_chapter>0: roster=OperationRules.roster(run)
-			RangedThreats.spawn(run,roster[(threat_index+route_index-1)%roster.size()])
+			var selected: String=roster[(threat_index+route_index-1)%roster.size()]
+			if SupportModules.enabled(run) and Mosquito.wave(operation_chapter,route_index,threat_index): selected="mosquito"
+			RangedThreats.spawn(run,selected)
 	run.spawn_clock -= delta
 	if run.spawn_clock <= 0:
 		run.spawn_clock = maxf(0.45, 1.5 - stage_number * 0.11)

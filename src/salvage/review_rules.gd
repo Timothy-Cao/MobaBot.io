@@ -10,7 +10,11 @@ static func boss_overtime(run) -> float:
 	return maxf(0,run.stage_time-run.exp.round_seconds()-boss_deadline(run))
 
 static func boss_deadline(run) -> float:
+	if SupportModules.enabled(run): return 60.0
 	return OperationRules.ENRAGE_SECONDS if OperationRules.enabled(run) else BOSS_ENRAGE_SECONDS
+
+static func enrage_multiplier(run) -> float:
+	return 1.0+minf(4.0,boss_overtime(run)/120.0) if SupportModules.enabled(run) else 1.0+minf(9.0,boss_overtime(run)/10.0)
 
 static func specialist_roster(round_index: int) -> Array:
 	# Teach pursuit and aimed shots first; add support/area denial next, EMP in Stage 2.
@@ -133,6 +137,7 @@ static func scale_role(run, enemy: Dictionary) -> void:
 	if run.exp.practice or enemy.get("review_scaled",false): return
 	enemy.review_scaled=true
 	if enemy.has("exp_boss"): return
+	if enemy.get("gunner_kind","")=="mosquito": return
 	var budget:=reference_w(run.exp.route_index)
 	if OperationRules.enabled(run): budget=91.2*Vanguard.power(OperationRules.reference_rank(run.exp.route_index))*OperationRules.chapter_health(run.exp.operation_chapter)
 	var factor: float=1.0+run.exp.ascension*0.06

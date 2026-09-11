@@ -774,6 +774,10 @@ func _projectile_step(delta: float) -> void:
 		grid[cell].append(enemy)
 	for bullet in projectiles:
 		if bullet.life <= 0: continue
+		if bullet.has("tracking_target") and bullet.hits.is_empty():
+			for enemy in enemies:
+				if enemy.id==bullet.tracking_target and attacks.valid(enemy):
+					bullet.vel=(Vector2(enemy.pos)-Vector2(bullet.pos)).normalized()*2600; break
 		if bullet.kind == "homing":
 			var target := nearest_enemy(bullet.pos, bullet.hits)
 			if not target.is_empty():

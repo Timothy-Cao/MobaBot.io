@@ -14,6 +14,7 @@ static func icon(slot: String, run=null) -> String:
 	return "vanguard_"+slot
 
 static func detail(run, slot: String) -> String:
+	if SupportModules.enabled(run) and slot=="gun": return "Machine gun\nPrioritizes Mosquitoes with fast tracking shots. Fires while moving.\n5: +25%% range. 10: each shot can hit 3 enemies.\n%.0f range · %.1f damage · %.1f shots/sec\n`: toggle; S never disables it."%[run.attacks.auto_range(run),run.attacks.auto_damage(run),1/run.attacks.auto_interval(run)]
 	if Conductor.enabled(run) and slot in ["q","w","e","r"]: return Conductor.detail(slot)
 	if SupportModules.enabled(run) and slot in ["x1","x3"]: return SupportModules.detail(slot)
 	if ReviewRules.enabled(run) and ReviewRules.detail(run,slot)!="": return ReviewRules.detail(run,slot)
@@ -95,7 +96,7 @@ static func draw(ui, run) -> void:
 			if active.active: ui.ability_shades[slot].visible=false; ui.ability_labels[slot].text=""
 		if slot=="d": ui.ability_labels[slot].text="ON" if run.vanguard.ghost else ""
 		if slot=="gun":
-			ui.ability_labels[slot].text="OFF" if not run.vanguard.gun_on else "PAUSE" if Vanguard.gun_paused(run) else "%d/5"%(run.vanguard.gun_shots%5+1) if Vanguard.gun_rank(run)>=10 else ""
+			ui.ability_labels[slot].text="OFF" if not run.vanguard.gun_on else "PAUSE" if Vanguard.gun_paused(run) else "" if SupportModules.enabled(run) else "%d/5"%(run.vanguard.gun_shots%5+1) if Vanguard.gun_rank(run)>=10 else ""
 			ui.ability_shades[slot].visible=not run.vanguard.gun_on
 		if run.vanguard.emp_left>0 and slot in ReviewRules.MODULES+["d","f"]:
 			ui.ability_shades[slot].visible=true; ui.ability_labels[slot].text="EMP"

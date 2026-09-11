@@ -32,6 +32,7 @@ func damage(run) -> float:
 	return (7.0 if run.exp != null and run.exp.class_id == "melee" else 2.0) * SalvageProgression.multiplier(run.rank_of("power")) * (1 + run.kit.attack_damage_bonus) * (1.75 if run.kit.extra.empowered else 1.0)
 
 func auto_range(run) -> float:
+	if SupportModules.enabled(run): return 340.0*(1.25 if Vanguard.gun_rank(run)>=5 else 1.0)
 	if Vanguard.enabled(run): return 265
 	return 470.0 if run.kit.gun_sniper else 265.0
 
@@ -179,13 +180,18 @@ func _fire_auto(run) -> void:
 	if Vanguard.enabled(run) and Vanguard.gun_paused(run): return
 	var enemy := closest(run, run.player)
 	var reach: float=450 if Vanguard.enabled(run) and Vanguard.gun_special(run,run.vanguard.gun_shots) else auto_range(run)
+	if SupportModules.enabled(run):
+		for candidate in run.enemies:
+			if valid(candidate) and candidate.get("gunner_kind","")=="mosquito" and run.player.distance_to(candidate.pos)<=reach:
+				if enemy.get("gunner_kind","")!="mosquito" or run.player.distance_squared_to(candidate.pos)<run.player.distance_squared_to(enemy.pos): enemy=candidate
 	if enemy.is_empty() or run.player.distance_to(enemy.pos) > reach + enemy.radius: return
 	var direction: Vector2 = (Vector2(enemy.pos) - run.player).normalized()
 	if direction == Vector2.ZERO: direction = Vector2.RIGHT
 	if run.kit.laser_left <= 0 and windup < 0: run.aim = direction
 	if Vanguard.enabled(run):
-		if not Vanguard.gun_special(run,run.vanguard.gun_shots): direction=direction.rotated(deg_to_rad([-2.5,0.0,2.5,-1.0,1.0][run.vanguard.gun_shots%5]))
+		if not SupportModules.enabled(run) and not Vanguard.gun_special(run,run.vanguard.gun_shots): direction=direction.rotated(deg_to_rad([-2.5,0.0,2.5,-1.0,1.0][run.vanguard.gun_shots%5]))
 		if Vanguard.gun_bullet(run,run.player,direction,auto_damage(run),reach,run.vanguard.gun_shots,"bolt",run.bolt_pierces()):
+			if SupportModules.enabled(run) and enemy.get("gunner_kind","")=="mosquito": run.projectiles.back().tracking_target=enemy.id
 			run.vanguard.gun_shots+=1; auto_shots+=1; auto_cooldown=auto_interval(run)
 			run.emit_event("auto_shot",run.player)
 		return

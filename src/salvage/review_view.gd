@@ -69,7 +69,7 @@ static func upgrades(ui, run) -> void:
 		var changes:=UpgradePreview.text(run,slot,false).split("\n")
 		for row in range(changes.size()):
 			ui._label(card,changes[row],Rect2(15,138+row*17,194,17),12,ui.CREAM)
-		var bonus:=UpgradePreview.milestone(slot,mini(10,rank_value+run.kit.rank_bonus),mini(10,next+run.kit.rank_bonus))
+		var bonus:=UpgradePreview.milestone(slot,mini(10,rank_value+run.kit.rank_bonus),mini(10,next+run.kit.rank_bonus),SupportModules.enabled(run))
 		if next in [5,10] or not bonus.is_empty():
 			var label: Label=ui._label(card,bonus if not bonus.is_empty() else "Milestone · stronger stats",Rect2(15,211,194,30),12,accent,true)
 			label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART

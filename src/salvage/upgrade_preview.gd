@@ -9,6 +9,7 @@ static func stats(run, slot: String, earned: int) -> Dictionary:
 	var area:=1.0+SalvageProgression.milestone(rank_value)*0.25
 	var data: Dictionary={}
 	if slot=="gun":
+		if SupportModules.enabled(run): return {"Damage":1.2*Vanguard.GUN_POWER[rank_value]*attack,"Shots / sec":SalvageProgression.multiplier(run.rank_of("rapid"))*(1+run.kit.attack_speed_bonus)/Vanguard.GUN_INTERVAL[rank_value],"Range":340.0*(1.25 if rank_value>=5 else 1.0)}
 		return {"Damage":1.2*Vanguard.GUN_POWER[rank_value]*attack,"Shots / sec":SalvageProgression.multiplier(run.rank_of("rapid"))*(1+run.kit.attack_speed_bonus)/Vanguard.GUN_INTERVAL[rank_value]}
 	if slot=="hammer":
 		return {"Head damage":38*power*attack*0.9,"Reach":125*area+run.kit.attack_range_bonus,"Swing / sec":(1+run.kit.attack_speed_bonus)/(1.05-0.05*int(rank_value/5))}
@@ -30,7 +31,11 @@ static func stats(run, slot: String, earned: int) -> Dictionary:
 	data["Recharge sec"]=kit.cooldown(slot)
 	return data
 
-static func milestone(slot: String, before: int, after: int) -> String:
+static func milestone(slot: String, before: int, after: int, current_gun: bool=false) -> String:
+	if slot=="gun" and current_gun:
+		if before<5 and after>=5: return "NEW · +25% range"
+		if before<10 and after>=10: return "NEW · hits 3 enemies"
+		return ""
 	if before<5 and after>=5:
 		return {"gun":"Fire while driving","hammer":"Wider sweep","e":"NEW · 0.6s stun","r":"NEW · impact shield","f":"NEW · extra charge"}.get(slot,"")
 	if before<10 and after>=10:
@@ -49,7 +54,7 @@ static func text(run, slot: String, include_bonus: bool=true) -> String:
 	for key in after:
 		if earned==0: lines.append("%s  %s"%[key,number(after[key])])
 		elif not is_equal_approx(before[key],after[key]): lines.append("%s  %s → %s"%[key,number(before[key]),number(after[key])])
-	var extra:=milestone(slot,mini(10,earned+run.kit.rank_bonus),mini(10,earned+1+run.kit.rank_bonus))
+	var extra:=milestone(slot,mini(10,earned+run.kit.rank_bonus),mini(10,earned+1+run.kit.rank_bonus),SupportModules.enabled(run))
 	if include_bonus and not extra.is_empty(): lines.append(extra)
 	if lines.is_empty(): lines.append("Earned rank  %d → %d"%[earned,earned+1]); lines.append("Equipment already grants rank 10")
 	return "\n".join(lines)

@@ -1,5 +1,11 @@
 # MobaBot.io quality bar
 
+## Mosquito counterplay and gentle enrage · 11 September 2026 · 0.25
+
+Owner requested a mosquito-like ranged enemy that avoids hammer range and quickly dodges individual Q/W/E/R attacks, but can be caught point blank, through positioning or with overlapping abilities. They want the machine gun to be the reliable counter, prioritize this enemy, gain 25% range at five and pierce three total enemies at ten. They approved starting boss enrage as early as one minute with a slow ramp to calibrate through their testing. Implemented scope and exact starting values are in MOSQUITO_ENRAGE_25.
+
+Next human questions: is dodging amusing rather than exhausting, does gun investment make a clear difference in Levels 3/6, and does the gradual ramp add tension without an abrupt wall? No new fun score is inferred from isolated dodge tests, visual inspection or artificial-health completion. Mosquitoes have no damage immunity and all wall/arena collision remains physical.
+
 ## Owner-directed combinations and second-class experiment · 11 September 2026 · 0.24
 
 Owner prioritized broader art and the second class, corrected Utility's capstone to an extra starting ability, and requested smaller three-card overlays with concise rounded changes, ten rank markers and highlighted fifth/tenth milestones. They asked to preserve hammer strength while making E/left-click a buffered 360 swing, consuming Q stacks to extend E, and allowing Flash during D/E/combinations to end travel and trigger effects immediately. Implemented this slice as described in COMBOS_ART_24. Capstone's future-run E unlock is a stated working interpretation, not an explicit response to the optional question.

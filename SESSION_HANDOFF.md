@@ -2,7 +2,13 @@
 
 Updated 10 September 2026. Stable entry point; human feedback and technical evidence stay in their dated review documents.
 
-## Next action: owner review of 0.24 combos, compact upgrades and Conductor experiment
+## Next action: owner review of 0.25 Mosquito and gradual enrage
+
+Latest owner-authorized override: [MOSQUITO_ENRAGE_25](docs/design/MOSQUITO_ENRAGE_25.md). Current support-rule runs gain the physically dodging Mosquito, introduced after Level 1 round one and more frequent in Levels 3/6. Gun prioritizes it, uses fast tracking shots, has 340 base range, +25% range at rank five and three total targets per rank-ten shot. Old fifth-shot burst/counter is removed; gun fires during movement at every rank. Owner explicitly supplied the rank-ten piercing choice and clarified that overlapping/point-blank skill shots must remain viable.
+
+Enrage now begins after one boss minute and ramps gradually; no boss HP change. Damage +0.5× per minute, additional rings delayed another 30 seconds, gradual recovery shortening. Older rule families retain their prior contracts. Practice offers Mosquito. Build tag `vanguard-25-mosquito-enrage`. Record actual commit/log baseline and freeze source/assets during the owner's next test. No human game was restarted. Latest QA_18 contains verification and human-review caveats.
+
+## Previous milestone: 0.24 combos, compact upgrades and Conductor experiment
 
 Latest owner-authorized slice: [COMBOS_ART_24](docs/design/COMBOS_ART_24.md). Current support-rule runs gain E→360 hammer buffering, Q-charge fuel for E, and Flash cancellation/arrival effects during D/E/combos. Hammer damage rules are unchanged. Upgrade cards are smaller overlays with rounded changes, ten rank cells and colored 5/10 milestones. Head start replaces the extra-Q capstone: camp banking unlocks rank-one E at future-run start, with transactional persistence. This is the explicitly stated working interpretation, not a received answer to the optional clarification.
 

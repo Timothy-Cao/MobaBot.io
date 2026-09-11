@@ -9,6 +9,7 @@ static func build(chapter: int, round_index: int, tier: int, focus: String="bala
 	run.enable_moba(MobaKit.demo_preset()); run.enable_demo(); run.attacks.enabled=true
 	BotExpedition.new().start(run,"ranged",0); run.exp.enable_revision(run)
 	Vanguard.setup(run); ReviewRules.enable(run); OperationRules.enable(run,chapter); LevelMastery.enable(run)
+	run.kit.loadout.support23=true
 	run.exp.route_index=round_index
 	# Same earned budget in every comparison; ideal selection ignores card luck.
 	run.total_xp=(LEVELS[round_index]-1)*20; Vanguard.progression(run)
@@ -43,7 +44,7 @@ static func measure(run) -> Dictionary:
 	var energy:=0.0
 	for slot in ["q","w","e","r"]: energy+=run.kit.ability_cost(run.kit.loadout[slot])/run.kit.cooldown(slot)
 	var spells: float=q["Direct + blast"]/q["Recharge sec"]+w["Center damage"]/w["Recharge sec"]+e["Impact damage"]/e["Recharge sec"]+r["Impact damage"]*(1.25 if run.kit.effective_rank("r")>=10 else 1)/r["Recharge sec"]
-	var autos: float=h["Head damage"]*h["Swing / sec"]+g.Damage*g["Shots / sec"]*(1.2 if Vanguard.gun_rank(run)>=10 else 1.0)
+	var autos: float=h["Head damage"]*h["Swing / sec"]+g.Damage*g["Shots / sec"]
 	# A 60-second resource envelope, not an executable perfect rotation. Charged
 	# opening burst, animation timing, modules, pets and mastery proc hits excluded.
 	var energy_factor:=minf(1.0,(run.kit.energy_regen()+run.kit.energy_max()/IDEAL_SECONDS)/energy)

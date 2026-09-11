@@ -12,15 +12,18 @@ static func gun_rank(run) -> int:
 	return mini(10,rank_of(run,"gun")+run.kit.rank_bonus)
 
 static func gun_special(run, fired: int) -> bool:
+	if SupportModules.enabled(run): return false
 	return gun_rank(run)>=10 and (fired+1)%5==0
 
 static func gun_paused(run) -> bool:
+	if SupportModules.enabled(run): return false
 	return gun_rank(run)<5 and (run.vanguard.ghost or run.vanguard.slam_left>0 or run.kit.dash_left>0)
 
 static func gun_bullet(run, origin: Vector2, direction: Vector2, damage: float, reach: float, fired: int, kind: String, pierce: int=0) -> bool:
 	if run.projectiles.size()>=run.MAX_PROJECTILES: return false
 	var special:=gun_special(run,fired)
 	var speed: float=950 if special else 700
+	if SupportModules.enabled(run): speed=2600; pierce=2 if gun_rank(run)>=10 else 0
 	run._add_projectile(origin+direction*20,direction*speed,damage*(2 if special else 1),kind,maxi(pierce,3) if special else pierce)
 	var bullet: Dictionary=run.projectiles.back()
 	bullet.life=(reach-20)/speed; bullet.basic_attack=true

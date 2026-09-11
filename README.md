@@ -1,4 +1,8 @@
-# Current 0.24 override
+# Current 0.25 override
+
+See [Mosquito and enrage](docs/design/MOSQUITO_ENRAGE_25.md): fragile evasive ranged enemies, machine-gun priority and range/piercing milestones, and a gradual boss enrage starting at one minute. Mosquito is also available in Practice. These changes are ready for balance review, not a claim of calibrated difficulty.
+
+## Previous 0.24 override
 
 See [Combos and art](docs/design/COMBOS_ART_24.md): buffered E/hammer spins, Q-fueled E, Flash during movement, compact paused upgrade cards, corrected Head start capstone and native world-art improvements. Try the second-class prototype at **Practice → Build → Conductor experiment**. Vanguard remains the campaign class.
 

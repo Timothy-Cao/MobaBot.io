@@ -1,5 +1,7 @@
 # MobaBot.io development
 
+0.25 override: MOSQUITO_ENRAGE_25 supersedes current support-rule gun/enrage contracts. Physically dodging Mosquito enters after the first round, more often Levels 3/6. Gun prioritizes it; range 340→425 at rank five, every rank-ten shot hits at most three enemies, no old fifth-shot multiplier. Mobile fire at all ranks. Boss enrage begins at 60 seconds and damage rises +0.5× per minute. Include mosquito25_test.gd; preserve earlier rule-family compatibility and no automated player rewards.
+
 0.24 override: read COMBOS_ART_24. Current support-rule runs gain E/Q/hammer/Flash combinations and compact upgrade overlays. Head start capstone banks an extra starting E ability for future runs, not a Q charge. Conductor is a Practice-only QWER prototype; campaign remains Vanguard. Include combo24_test.gd. Preserve capstone profile validation/rollback and no Practice rewards. Existing bitmap masters/pixelation retained; world art additions are native geometry.
 
 0.23 override: SUPPORT_ART_23 supersedes the module hold below. New runs/primary Practice use `support23` Anchor and Energy reserve; health Reserve unchanged, old checkpoints preserved. Include support_art_test.gd. Mastery uses three generated base emblems with native reusable badges; preserve manifest/source masters and shared pixelation. SECOND_CLASS_24 is design only, with a future grapple class noted; Vanguard remains the playable campaign class.

@@ -58,11 +58,11 @@ static func boss(run, e: Dictionary, delta: float) -> void:
 		e.summon_clock=9.0; e.shot_clock=0.0; e.attack="fan"; e.pursuit=0.0
 	var overtime:=ReviewRules.boss_overtime(run) if e.has("exp_boss") else 0.0
 	e.overload=overtime>0
-	e.enraged=e.hp<e.max_hp*0.5 or e.overload
+	e.enraged=e.hp<e.max_hp*0.5 or (overtime>60 if SupportModules.enabled(run) else e.overload)
 	if e.overload:
-		e.overload_clock=float(e.get("overload_clock",0))-delta
+		e.overload_clock=float(e.get("overload_clock",30 if SupportModules.enabled(run) else 0))-delta
 		if e.overload_clock<=0:
-			e.overload_clock=maxf(0.55,2.0-overtime/60.0)
+			e.overload_clock=maxf(2.0,6.0-overtime/45.0) if SupportModules.enabled(run) else maxf(0.55,2.0-overtime/60.0)
 			# Rotating gaps remain physical exits; the deadline never directly sets a loss.
 			for i in range(20):
 				if i%10<2: continue
@@ -127,5 +127,7 @@ static func boss(run, e: Dictionary, delta: float) -> void:
 				if e.burst==0:
 					e.burst=1
 					if offset.length()<155 and absf(Vector2(e.dir).angle_to(offset))<PI*0.6: run.hurt_player(e.pos,"Boss melee sweep",3)
-		if e.clock<=0: e.phase="recover"; e.clock=0.45 if e.overload else 0.85 if e.enraged else 1.15
+		if e.clock<=0:
+			e.phase="recover"
+			e.clock=lerpf(0.85 if e.enraged else 1.15,0.6,clampf(overtime/180.0,0,1)) if SupportModules.enabled(run) else 0.45 if e.overload else 0.85 if e.enraged else 1.15
 	elif e.phase=="recover" and e.clock<=0: e.phase="approach"; e.clock=0.7
