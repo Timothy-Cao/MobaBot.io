@@ -91,6 +91,15 @@ func execute() -> void:
 			check(is_equal_approx(Vector2(target.pos).distance_to(machine.target),45),"Cooling vent slows displacement")
 		run.exp.practice=true; machine.cooldown=0; machine.armed=false; run.factory_works.step(run,1)
 		check(not machine.armed,"Practice never activates campaign machinery")
+	var dense:=spawn_sample(1,0,0,90,true)
+	var previous:=spawn_sample(1,0,0,90,false)
+	check(dense.total>previous.total*1.7 and dense.total<previous.total*2.0,"Opening gets substantially more basic bodies")
+	check(dense.special==0,"Extra opening bodies remain ordinary blobs")
+	for context in [[1,0,120],[1,1,0],[2,0,0],[3,0,0]]:
+		var current:=spawn_sample(context[0],context[1],context[2],20,true)
+		var baseline_sample:=spawn_sample(context[0],context[1],context[2],20,false)
+		check(current.total==baseline_sample.total,"Later time, rounds and Levels keep spawn counts")
+	print("OPENING SPAWNS / 90s: previous=%d current=%d"%[previous.total,dense.total])
 	if "--render" in OS.get_cmdline_user_args(): await captures35()
 	print("DISCOVERY 35: %d checks, %d failures"%[checks,failures]); quit(1 if failures else 0)
 func captures35() -> void:
@@ -125,3 +134,17 @@ func connected(walls: Array) -> void:
 			var next: Vector2i=cell+d
 			if cells.has(next) and not cells[next]: cells[next]=true; queue.append(next)
 	check(queue.size()==cells.size(),"Every sampled walkable route connects")
+
+func spawn_sample(chapter: int, round_index: int, start: float, seconds: float, current: bool) -> Dictionary:
+	var run:=modern(chapter); run.exp.route_index=round_index; run.exp.enter(run)
+	if not current: run.kit.loadout.discovery35=false
+	run.exp.last_wave=int(start/50); run.exp.threat_wave=int(start/30)
+	var result: Dictionary={"total":0,"special":0}
+	for frame in range(int(seconds*30)):
+		run.stage_time=start+frame/30.0
+		run.exp.spawns(run,1.0/30)
+		for enemy in run.enemies:
+			result.total+=1
+			if enemy.kind!=0 or enemy.get("runner",false) or enemy.get("elite",false) or enemy.has("gunner_kind"): result.special+=1
+		run.enemies.clear()
+	return result

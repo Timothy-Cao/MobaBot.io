@@ -8,6 +8,12 @@ The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRO
 
 Owner clarification: preserve the current cartoony presentation as a complete, fun version. The future high-fidelity/high-graphics work is a separate presentation of the same core game for controlled player A/B testing, not a replacement or incremental conversion of the current style.
 
+## Latest follow-up: more opening blobs
+
+12 September owner says Level 1's first round is too easy to AFK through with the machine gun; other sections feel reasonable. Current discovery35 Level 1, round 1 now spawns 3 basic blobs per regular pack for the first 15 seconds, then 4 until 90 seconds (previously 2). The existing 50-second surge is unchanged; no extra elite/runner/specialist bodies are introduced by this adjustment. Normal spawn counts resume at 90 seconds. Levels 2/3, later rounds and enemy stats retain their settings. Extra kills yield ordinary XP.
+
+Actual spawn sampling over the first 90 seconds: 257 versus 138 bodies, all ordinary blobs in the new opening. Focused Discovery35 checks: 117 pass, including unchanged later/other-Level counts. Current normal-health idle/active/basic bots lose at 17.7/137.3/56.5 seconds; they do not model the owner's equipment or establish human balance. No player game restarted. Source change only; the downloadable ZIP remains 0.36.0-test.1. All 44 regression suites passed, plus both historical refined behavior probes. Source is verified and pushed; no new Windows release for this adjustment.
+
 ## Latest follow-up: direct Practice exit
 
 12 September owner requested no Leave/Stay confirmation in Practice. The shared leave handler now returns directly to Home for both current and Legacy Practice, including Settings -> Main menu. Campaign confirmation remains. Isolated UI callback verification passed with no persistence. This source change postdates the published 0.36.0-test.1 ZIP; no player game restarted. All 44 regression suites passed. Source is committed/pushed; the Windows ZIP remains 0.36.0-test.1 until the next release.

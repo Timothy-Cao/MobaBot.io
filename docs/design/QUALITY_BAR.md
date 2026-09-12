@@ -348,3 +348,8 @@ Owner requested a full-heal level-up card at 30% HP or below and occasional map 
 ## 12 September - Practice exit friction
 
 Owner requested that Practice not ask Leave/Stay. Settings -> Main menu now leaves immediately in both current and Legacy Practice, matching the existing Pause behavior. Campaign retains its leave confirmation. No additional copy or gameplay change.
+
+
+## 12 September - Opening blob pressure
+
+Owner now finds Level 1's first-round basic enemies too easy to AFK with the gun; other sections are acceptable. Increased only regular basic-blob packs during its first 90 seconds, from two to three initially and four after 15 seconds. Preserve enemy stats and specialist introductions. Human test should verify that this encourages movement/AOE without restoring the overwhelming opening previously rejected. Better equipment may still overpower this opening; no adaptive scaling against player gear was added.

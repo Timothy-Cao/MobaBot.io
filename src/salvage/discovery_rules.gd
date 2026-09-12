@@ -54,6 +54,10 @@ static func spend(run, id: String) -> bool:
 static func opening(run) -> bool:
 	return enabled(run) and run.exp.route_index==0 and run.stage_time<90
 
+static func opening_pack_size(run, count: int) -> int:
+	if not opening(run) or run.exp.operation_chapter!=1: return count
+	return count+(1 if run.stage_time<15 else 2)
+
 var chest_rng:=RandomNumberGenerator.new()
 var due: float=-1
 func killed(run, enemy: Dictionary) -> void:
