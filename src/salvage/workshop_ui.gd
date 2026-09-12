@@ -477,7 +477,7 @@ func update_hud(model: SalvageRun) -> void:
 	if objective_label == null:
 		objective_label = _label(hud, "", Rect2(250, 62, 660, 22), 12, GOLD, true, HORIZONTAL_ALIGNMENT_RIGHT)
 	objective_label.text = ""
-	if model.demo_mode:
+	if model.demo_mode and model.exp==null:
 		var goal: String = DemoCampaign.info(model).goal
 		if model.stage == 2: goal += " / %d of 2" % model.demo_minis_killed
 		objective_label.text = "%d / 2 wardens" % model.demo_minis_killed if model.stage == 2 else ""

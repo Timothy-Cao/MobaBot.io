@@ -1,4 +1,4 @@
-MobaBot.io - Windows playtest 0.26
+MobaBot.io - Windows playtest 0.31
 
 1. Extract the ENTIRE ZIP to a permanent folder, such as Games\MobaBot.
 2. Double-click MobaBot.exe. No Godot installation is needed.

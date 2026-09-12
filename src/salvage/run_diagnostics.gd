@@ -25,6 +25,7 @@ static func sample_progression(run) -> void:
 	exp.sample_time=run.time; exp.sample_damage=run.damage_dealt.duplicate()
 static func annotate(record: Dictionary, run, automated: bool) -> void:
 	record.log_schema=2
+	record.release_version=str(ProjectSettings.get_setting("application/config/version","development"))
 	record.build=BUILD if Vanguard.enabled(run) else "slice-16-keyboard-forge" if run.exp!=null else "slice-13-mobabot"
 	if ReviewRules.enabled(run): record.build=REVIEW_BUILD
 	if ReviewRules.enabled(run): record.progression_samples=run.exp.progression_samples.duplicate(true)
@@ -33,6 +34,7 @@ static func annotate(record: Dictionary, run, automated: bool) -> void:
 	if SupportModules.enabled(run): record.build="vanguard-25-mosquito-enrage"
 	if ArsenalBurst.enabled(run): record.build="vanguard-26-arsenal-support"
 	if DemoPacing.enabled(run): record.build="vanguard-27-three-level-demo"
+	if FactoryMaps.enabled(run): record.build="vanguard-31-factory-levels"
 	record.practice=run.exp!=null and run.exp.practice
 	record.automated=automated
 	if Vanguard.enabled(run):
