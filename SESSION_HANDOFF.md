@@ -8,7 +8,11 @@ The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRO
 
 Owner clarification: preserve the current cartoony presentation as a complete, fun version. The future high-fidelity/high-graphics work is a separate presentation of the same core game for controlled player A/B testing, not a replacement or incremental conversion of the current style.
 
-## Next action: owner review of distinct factory levels
+## Next action: official human playtest of published 0.31
+
+12 September release: all implementation pushed to origin/main. Published non-draft Windows pre-release [v0.31.0-test.1](https://github.com/Timothy-Cao/MobaBot.io/releases/tag/v0.31.0-test.1), build source ee8db1575bffeffc0b724772222ee882e7d1f476. ZIP and checksum verified uploaded; GitHub digest matches local SHA256. Follow-up commits contain test/documentation corrections only. Full 42-suite regression, focused release diagnostics/HUD checks, exported pack/current-map smoke and actual EXE rendered startup passed. Menu now displays 0.31.0-test.1. See [RELEASE_REVIEW_31](docs/design/RELEASE_REVIEW_31.md) for remaining weaknesses: Level3 crowd performance, human route behavior, pacing/durability and older-save expectations.
+
+Start a new Level1 run to test factory layouts; Continue preserves its historical rules. Before human play capture fresh commit/log baseline and freeze source/assets. Most recent pre-release local result-log baseline: 167381 bytes, last write 12 September 2026 01:37:05 local; no assumption that a later result belongs to this test. No existing player game restarted. Repository private; testers need access or the shared ZIP. Download MobaBot-Windows-0.31.0-test.1.zip, extract everything and run MobaBot.exe.
 
 12 September map follow-up: new runs now use factory31 layouts: Loading yard/open bays, Assembly hall/interrupted production lanes, Cooling plant/inner court and outer loop. Three subtle round variants, themed native machinery/markings, selector route hints and minimap terrain. Existing checkpoints and Practice keep old maps. No extra damage hazards or stat retune. All 42 suites and all three artificial-health routes pass; human route/readability/pressure calibration pending, especially Level 3 peak175 crowd. See [FACTORY_LEVELS_31](docs/design/FACTORY_LEVELS_31.md). Local source only; GitHub download unchanged; no player game restarted.
 
