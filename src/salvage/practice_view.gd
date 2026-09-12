@@ -4,6 +4,10 @@ extends RefCounted
 static func select(ui, items: Array, selected: int, rect: Rect2, callback: Callable) -> OptionButton:
 	var control:=OptionButton.new(); control.position=rect.position; control.size=rect.size
 	control.add_theme_font_size_override("font_size",17)
+	for state in ["normal","hover","pressed","disabled","focus"]:
+		var style:=FoundryButtonStyle.make(false,state); style.content_margin_right=24
+		control.add_theme_stylebox_override(state,style)
+	control.add_theme_color_override("font_color",ui.CREAM)
 	for text_value in items: control.add_item(str(text_value))
 	control.select(maxi(0,selected)); control.item_selected.connect(callback)
 	ui.overlay.add_child(control); return control

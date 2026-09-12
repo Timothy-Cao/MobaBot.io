@@ -34,8 +34,8 @@ static func draw(ui,run) -> void:
 		var owned: bool=run.mastery.rank_of(id)>0
 		var face: Color=Color("29474c") if owned else Color("273d42") if available else Color("172c34")
 		var edge: Color=ui.GOLD if available else ui.TEAL if owned else Color("485c61")
-		var casing: StyleBoxFlat=ui._style(face,2,edge,1)
-		casing.border_width_left=4 if available or owned else 1
+		var casing:=FoundryButtonStyle.make(false,"normal")
+		casing.face=face; casing.edge=edge; casing.accent=edge
 		button.add_theme_stylebox_override("normal",casing)
 		var left: float=54 if run.mastery.modern else 5
 		if run.mastery.modern:

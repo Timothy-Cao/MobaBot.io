@@ -97,8 +97,8 @@ static func camp(game) -> void:
 		overview(ui,run); return
 	if game.review_tab=="Mastery":
 		ExpeditionView.mastery(ui,run); return
-	ui._label(ui.overlay,exp.label(),Rect2(48,95,590,30),19,ui.TEAL,true)
-	ui._label(ui.overlay,"%d field credits"%exp.field_credits,Rect2(480,95,235,30),18,ui.GOLD,true,HORIZONTAL_ALIGNMENT_RIGHT)
+	ui._label(ui.overlay,exp.label(),Rect2(48,95,360,30),17,ui.TEAL,true)
+	ui._label(ui.overlay,"%d field credits"%exp.field_credits,Rect2(452,95,263,30),16,ui.GOLD,true,HORIZONTAL_ALIGNMENT_RIGHT)
 	ui._label(ui.overlay,"Recovered · %d chests"%exp.reward_receipt.chests,Rect2(48,133,760,24),14,ui.MUTED)
 	var receipt:=LootReceipt.new(); receipt.name="RoundReceipt"; receipt.position=Vector2(48,165); receipt.size=Vector2(856,128)
 	ui.overlay.add_child(receipt); receipt.build(ui,exp.reward_receipt,false,true)

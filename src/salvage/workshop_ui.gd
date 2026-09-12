@@ -229,24 +229,25 @@ func _button(text: String, rect: Rect2, action: Callable, primary: bool = true) 
 	button.add_theme_font_size_override("font_size", 16)
 	for state_name in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
 		button.add_theme_color_override(state_name, INK if primary else CREAM)
-	for state in ["normal","hover","pressed","disabled"]:
-		var face: Color=GOLD if primary else Color("243d46")
-		if state=="hover": face=Color("ffda8d") if primary else Color("365760")
-		elif state=="pressed": face=Color("c79543") if primary else Color("192e36")
-		elif state=="disabled": face=Color("1b2b32")
-		var metal:=_style(face,1,Color("89724e") if primary else Color("536b70"),1)
-		metal.border_width_bottom=1 if state=="pressed" else 3
-		metal.shadow_color=Color("071218aa"); metal.shadow_size=1
-		metal.shadow_offset=Vector2(0,1 if state=="pressed" else 3)
-		button.add_theme_stylebox_override(state,metal)
+	for state in ["normal","hover","pressed","disabled","focus"]:
+		button.add_theme_stylebox_override(state,FoundryButtonStyle.make(primary,state))
 	button.add_theme_color_override("font_disabled_color",Color("829390"))
-	button.add_theme_stylebox_override("focus", _style(Color(0, 0, 0, 0), 6, TEAL, 2))
 	button.mouse_entered.connect(func() -> void: ui_interaction.emit("ui_focus"))
 	button.pressed.connect(func() -> void: ui_interaction.emit("ui_confirm"))
 	button.pressed.connect(action)
 	overlay.add_child(button)
 	return button
 
+func _switch(active: bool, rect: Rect2, action: Callable) -> Button:
+	var button:=_button("On" if active else "Off",rect,action,false)
+	button.alignment=HORIZONTAL_ALIGNMENT_RIGHT
+	for state in ["normal","hover","pressed","disabled"]:
+		var style:=FoundryButtonStyle.make(false,state)
+		style.content_margin_right=12; style.content_margin_left=52
+		button.add_theme_stylebox_override(state,style)
+	var lever:=preload("res://src/salvage/foundry_switch.gd").new()
+	lever.active=active; lever.size=rect.size; button.add_child(lever)
+	return button
 func _icon(parent: Node, id: String, rect: Rect2, dim: bool = false) -> Control:
 	var extent := minf(rect.size.x, rect.size.y)
 	var box := Rect2(rect.position + (rect.size - Vector2.ONE * extent) * 0.5, Vector2.ONE * extent)
@@ -257,10 +258,9 @@ func _icon(parent: Node, id: String, rect: Rect2, dim: bool = false) -> Control:
 
 func _tab(text: String, rect: Rect2, action: Callable, selected: bool = false) -> Button:
 	var button := _button(text, rect, action, false)
-	var normal := _style(Color("534a35") if selected else Color("1a3039"), 2, GOLD if selected else Color("4d656b"), 1)
-	normal.border_width_bottom = 3 if selected else 1
-	button.add_theme_stylebox_override("normal", normal)
-	button.add_theme_color_override("font_color", GOLD if selected else MUTED)
+	for state in ["normal","hover","pressed","disabled","focus"]:
+		button.add_theme_stylebox_override(state,FoundryButtonStyle.make(false,state,true,selected))
+	button.add_theme_color_override("font_color", GOLD if selected else CREAM)
 	return button
 
 func _pips(parent: Node, point: Vector2, rank_value: int, maximum: int, next_rank: bool = false) -> void:

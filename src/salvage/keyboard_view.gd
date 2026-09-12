@@ -182,16 +182,18 @@ static func settings(ui) -> void:
 			["Fullscreen","On" if game.fullscreen_setting else "Off",game.toggle_fullscreen]]
 		for i in range(rows.size()):
 			ui._label(ui.overlay,rows[i][0],Rect2(165,330+i*42,350,28),18,ui.CREAM)
-			ui._button(rows[i][1],Rect2(675,326+i*42,110,32),rows[i][2],false)
+			ui._switch(rows[i][1]=="On",Rect2(675,326+i*42,110,32),rows[i][2])
 	if ui.settings_in_run: ui._button("Main menu",Rect2(725,468,186,33),func() -> void: ui.host.confirm_leave(),false)
 
 static func slider(ui, id: String, rect: Rect2, low: float, high: float, step_value: float, current: float, action: Callable, format_value: String) -> HSlider:
 	var control:=HSlider.new()
 	control.name=id; control.position=rect.position; control.size=rect.size-Vector2(66,0)
+	for texture_name in ["grabber","grabber_highlight","grabber_disabled"]:
+		control.add_theme_icon_override(texture_name,preload("res://assets/ui/fader.svg"))
 	control.min_value=low; control.max_value=high; control.step=step_value; control.value=current
-	for entry in [["slider",ui.EDGE],["grabber_area",ui.TEAL],["grabber_area_highlight",ui.GOLD]]:
+	for entry in [["slider",Color("0d222c")],["grabber_area",Color("72897e")],["grabber_area_highlight",Color("b6a472")]]:
 		var track: StyleBoxFlat=ui._style(entry[1],2,entry[1],0)
-		track.content_margin_top=2; track.content_margin_bottom=2
+		track.content_margin_top=3; track.content_margin_bottom=3; track.border_color=Color("405b62"); track.set_border_width_all(1)
 		control.add_theme_stylebox_override(entry[0],track)
 	ui.overlay.add_child(control)
 	var amount: Label=ui._label(ui.overlay,format_value%current,Rect2(rect.position+Vector2(rect.size.x-60,2),Vector2(60,28)),14,ui.MUTED,false,HORIZONTAL_ALIGNMENT_RIGHT)

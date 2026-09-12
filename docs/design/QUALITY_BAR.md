@@ -323,3 +323,7 @@ Owner authorized pushing all work and publishing an updated Windows build. Relea
 ## 12 September 2026 — owner rejects explanatory menu clutter
 
 Owner explicitly rejected route hints, “3 stages / 5 minutes,” “Save between rounds,” and similar unsolicited explanation. Implemented removal from level selection, build/camp/mastery footers and redundant upgrade milestone instructions. Names, actions, currency/point values where useful, upgrade numbers, actual key bindings and hover details remain. Pause → Main menu now uses the existing leave confirmation; Stay keeps the paused run. No mid-combat save capability is implied or introduced. The copy policy is recorded in ART_STYLE_SCHEMA for future work. No fun rating change.
+
+## 12 September 2026 — settings and camp button pass
+
+Owner asked for thematic, beautiful buttons throughout settings and between-round screens. Implemented one shared foundry control material, brass primary actions, steel secondary controls, selected-tab rails, mechanical settings switches and brass fader handles. Mastery and Practice selection controls share the treatment. Round heading/credit spacing tightened without new copy. No gameplay changes. Human visual approval remains pending; no quality rating inferred from passing tests.

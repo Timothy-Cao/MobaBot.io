@@ -186,3 +186,9 @@ Native thick terrain uses exact capsule footings, low contact shadows and inset 
 ## Player-facing copy — owner correction, 12 September 2026
 
 Trust the player to discover routes and mechanics. Menus use names, actions and necessary values. Do not add explanatory taglines, route advice, timing summaries, reset/persistence reminders, “hover to learn” footers, or captions that repeat what the screen already shows. Keep controls and meaningful upgrade numbers visible; put optional mechanics in hover details. Explain consequences at the relevant action (leaving, replacing a save, spending currency), and keep transaction failures visible. Empty space does not need explanatory copy. These are ongoing editorial requirements, not just edits to the level selector.
+
+## Shared foundry controls — 12 September 2026
+
+All shared buttons now use native cut-corner metal StyleBoxes: steel secondary actions, muted brass primary actions, recessed lower edges, thin upper highlights and small stamped details. Selected tabs use a brass rail; keyboard focus uses inset teal corner brackets, independent of selection. Hover lightens the face, press lowers it, disabled controls retain legible muted labels. No continuous button animation or texture generation.
+
+Settings use mechanical On/Off switches with position plus text, and brass fader handles on recessed tracks. The fader is a hand-authored native SVG (assets/ui/fader.svg), not generated raster art. Existing equipment/skill/mastery masters and their pixelation remain untouched. Mastery casing retains available/owned colors in the shared cut-corner shape. Keep decorative details outside text/icon areas and preserve real Button/Slider focus, hit regions, tooltips and actions. Do not add explanatory copy to fill space.
