@@ -10,6 +10,9 @@ Owner clarification: preserve the current cartoony presentation as a complete, f
 
 ## Next action: new-run playtest of Discovery 35
 
+Latest download: [0.35.0-test.2](https://github.com/Timothy-Cao/MobaBot.io/releases/tag/v0.35.0-test.2), source `25af5ac269abcbe2bc9a52608b2a349534a1518a`. This includes the final removal of the obsolete zero-chest round-clear label. Published non-draft; ZIP 102,706,330 bytes, SHA256 `0b2d9f48e33dc27578bbeeeaadd33b86818e2fb1bcc5d9de3b3c7ecb1f70a5c6`. Refreshed exported-pack rendered smoke, 4,294-label UI audit and 111 focused checks pass. Native EXE is byte-identical to the startup-verified test.1 executable; updated gameplay/UI content lives in the verified PCK. Everything is pushed. Earlier test.1 remains historical.
+
+
 12 September latest owner follow-up is implemented as `discovery35`: faster/basic opening, cheaper first four level-ups, one pick through player level5/two thereafter, rare immediate-level chests, five-rank XP and pickup-range cards, 200-credit fallback, corrected XP bar and no-op equipment copy. New illustrated three-panel level selector and three interactive map families (crane/press/cooling vent). Existing saves keep historical rules; start a new Level1. See [DISCOVERY_FACTORIES_35](docs/design/DISCOVERY_FACTORIES_35.md).
 
 All 43 regression suites pass; final focused test has 111 checks, including malformed thresholds and reachable controls. Actual-size selector/maps and normal/reduced cards inspected. Level1/3 artificial-health routes completed in1000.9/1098.1 simulation seconds, with final-boss fights about65/104 seconds. Normal-health active/basic bots lose around146/133 seconds. These observations do not establish human balance. No player game restarted or profile modified by tests.
