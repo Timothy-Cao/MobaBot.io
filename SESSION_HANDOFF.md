@@ -10,6 +10,8 @@ Owner clarification: preserve the current cartoony presentation as a complete, f
 
 ## Next action: owner review of 0.26; research actions on hold
 
+11 September release preparation: owner authorized a downloadable Windows build and GitHub pre-release. `export_presets.cfg` and `scripts/export_windows.ps1` package the EXE/PCK, instructions and optional desktop-shortcut helper. See WINDOWS_RELEASE_26. Repository is private, so testers need repository access or a directly shared ZIP. No research actions or gameplay changes were included. Release startup render and pack smoke passed; publication status must be checked on GitHub.
+
 11 September performance follow-up: owner reported lag after spawning 25 Mosquitoes, then requested fewer/tougher ones. Candidate dodge paths now use conservative capsule clearance checks with the original swept fallback near walls; 100ms planning is staggered across frames. Current `arsenal26` Mosquito HP is doubled (20 base), normal spawning caps them at four alive (shared ranged cap can be lower); explicit Practice stress spawns bypass the cap. See QA_18 for reproducible before/after CPU evidence and caveats.
 
 11 September visual follow-up: Missile Frenzy/Barrage now uses the original Q rocket hull, fins and exhaust at 75% size instead of the small bolt-like substitute. Gameplay values unchanged.

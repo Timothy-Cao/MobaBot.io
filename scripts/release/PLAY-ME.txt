@@ -1,0 +1,19 @@
+MobaBot.io - Windows playtest 0.26
+
+1. Extract the ENTIRE ZIP to a permanent folder, such as Games\MobaBot.
+2. Double-click MobaBot.exe. No Godot installation is needed.
+3. Optional: double-click Create Desktop Shortcut.vbs.
+   If Windows does not support the helper, right-click MobaBot.exe and
+   choose Show more options > Send to > Desktop (create shortcut).
+
+Keep MobaBot.exe and MobaBot.pck together. Do not run from inside the ZIP.
+The build is unsigned; Windows may display an unknown-publisher warning.
+Only run the copy downloaded from the project's GitHub release page.
+
+Start with Practice, or Play > Level 1. Controls are shown in Settings.
+Progress and settings are stored separately from the extracted folder.
+For an update, close the game and extract the new version; recreate the
+desktop shortcut if you change the folder. There is no automatic updater.
+
+Feedback: send the release version, what happened, and a screenshot if useful.
+This is a testing build, not a finished or fully balanced release.
