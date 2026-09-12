@@ -137,7 +137,7 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 		if not c.loadout.get("review19",false) or not c.loadout.get("unified_mastery",false) or not integer(c.loadout.operation20,1,OperationRules.CHAPTERS): return false
 		if not integer(c.get("route"),0,2) or not c.loadout.get("operation_xp") is Array or c.loadout.operation_xp.size()!=3: return false
 		for i in range(3):
-			if not integer(c.loadout.operation_xp[i],0,OperationRules.SURVIVAL_XP[i]): return false
+			if not integer(c.loadout.operation_xp[i],0,OperationRules.survival_budget(i,c.loadout.get("demo27",false)==true)): return false
 	if c.loadout.has("unified_mastery"):
 		if c.loadout.unified_mastery!=true or not c.loadout.get("review19",false): return false
 		if not integer(c.get("level"),1,2147483647): return false

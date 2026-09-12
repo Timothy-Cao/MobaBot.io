@@ -140,7 +140,7 @@ func incoming(run, hull_units: float) -> float:
 		if ReviewRules.enabled(run): value*=ReviewRules.enrage_multiplier(run)
 	if run.kit.extra.roll_left > 0: value *= 0.65
 	if run.kit.extra.flywheel >= 1: value *= 0.85
-	return value
+	return value*DemoPacing.enemy_rate(run)
 
 static func stage_health(number: int) -> float:
 	var depth:=clampi(number,1,8)-1
@@ -167,6 +167,7 @@ func scale_enemy(run, enemy: Dictionary) -> void:
 	else: factor*=1.2 if ascension>=2 else 1.0
 	enemy.hp*=factor; enemy.max_hp*=factor
 	if ReviewRules.enabled(run): ReviewRules.scale_role(run,enemy)
+	enemy.hp*=DemoPacing.enemy_rate(run); enemy.max_hp=enemy.hp
 
 func enemy_speed(run=null) -> float:
 	if operation_chapter>0: return 1.0+minf(0.18,(operation_chapter-1)*0.015+route_index*0.025)+ascension*0.02

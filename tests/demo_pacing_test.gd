@@ -18,9 +18,9 @@ func execute() -> void:
 	for stage in range(3):
 		run.exp.route_index=stage; run.stage_time=150; OperationRules.pace(run)
 		check(run.exp.round_seconds()==300,"Each stage lasts five minutes")
-		check(run.kit.loadout.operation_xp[stage]==OperationRules.SURVIVAL_XP[stage]/2,"Half budget at half duration")
+		check(run.kit.loadout.operation_xp[stage]==roundi(OperationRules.SURVIVAL_XP[stage]*1.1)/2,"Half budget at half duration")
 		run.stage_time=300; OperationRules.pace(run)
-	check(run.total_xp==180,"Survival XP total unchanged")
+	check(run.total_xp==198,"Survival XP total increased ten percent")
 	for id in DemoPacing.INTRO:
 		run=fresh(); var seconds: int=DemoPacing.INTRO[id]
 		run.exp.route_index=seconds/300; run.stage_time=seconds%300

@@ -293,3 +293,8 @@ Owner wants ranged enemies to be more threatening: earlier/longer lasers, sustai
 ## 12 September 2026 - encounter variety and retired disruption
 
 Owner finds EMP unfun and Uplink unnecessary when many enemies die in one hit; both removed from current roster. Owner wants tanks to keep up near swarm speed, minibosses with readable weaknesses, and a more aggressive final boss. Implemented Drift rammer and alternating spin/shockwave Bulwark, with a visible shield/recovery window. Read ENCOUNTER_PRESSURE_28 for values. No human fun/quality score changed. Next playtest should check recognition of the inner safe zone, charge turning fairness, shield feedback and overall Level 3 pressure.
+
+
+## 12 September 2026 - owner requests slight easing
+
+Owner likes the latest changes but reports the game is a bit too hard, suggesting a little faster leveling and/or slightly weaker Level 1 enemies. Implemented +10% demo XP and -10% Level 1 HP/incoming damage, preserving encounter identities. This records favorable directional feedback, not a new numeric quality rating or evidence that balance is now solved.

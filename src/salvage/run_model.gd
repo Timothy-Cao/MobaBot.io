@@ -1016,7 +1016,7 @@ func collect_pickup(pickup: Dictionary) -> void:
 	if value <= 0:
 		return
 	pickup.value = 0 # Claim before triggering damage/reward events.
-	xp_fraction += value * DemoPacing.reward_rate(self) * (1.0 + (float(exp.stats.get("xp", 0)) if exp != null else mastery.rank_of("learning") * 0.1)) / (OperationRules.pickup_divisor(exp.operation_chapter) if OperationRules.enabled(self) else 9.0 if ReviewRules.enabled(self) else 3.0 if Vanguard.enabled(self) else 1.0)
+	xp_fraction += value * DemoPacing.reward_rate(self) * DemoPacing.xp_rate(self) * (1.0 + (float(exp.stats.get("xp", 0)) if exp != null else mastery.rank_of("learning") * 0.1)) / (OperationRules.pickup_divisor(exp.operation_chapter) if OperationRules.enabled(self) else 9.0 if ReviewRules.enabled(self) else 3.0 if Vanguard.enabled(self) else 1.0)
 	var gained := floori(xp_fraction + 0.000001)
 	total_xp += gained
 	xp_fraction = maxf(0, xp_fraction - gained)

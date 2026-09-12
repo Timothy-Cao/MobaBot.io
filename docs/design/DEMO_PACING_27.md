@@ -56,3 +56,12 @@ Current arsenal enemies receive soft circular separation using 64-unit spatial b
 
 
 Latest encounter override: [ENCOUNTER_PRESSURE_28](ENCOUNTER_PRESSURE_28.md) removes Uplink/EMP, adds roaming minibosses at 3:00 each stage, adjusts tank movement/recovery and increases Level 3 final-boss aggression.
+
+
+## 12 September easing follow-up (latest balance)
+
+Owner likes the new encounters but finds the result a little too hard. Apply a modest +10% XP multiplier to demo pickup XP and survival XP across Levels 1-3. Five-minute survival budgets are now 44/66/88 (198 total), preserving three picks per level and rank/level caps. Pickup XP rates are 33%/38.5%/44% of the historical short-round pickup values. Credit/chest reward rates do not change.
+
+Level 1 alone gets 10% less enemy HP, applied once after role health floors, and 10% less incoming damage after existing mitigation/scaling. This includes its guardians, roaming minibosses and main boss (base Operation boss HP 5400 instead of 6000). Level 2/3 health and damage stay unchanged. Practice and historical non-demo checkpoints retain prior balance. The new checkpoint validator accepts exactly the larger demo survival budgets and preserves the older limits for historical rules.
+
+Attack patterns, wave schedule, movement, shields, enrage and five-minute timers remain as before. Automated evidence validates numerical scope and route reliability; human difficulty remains to calibrate.

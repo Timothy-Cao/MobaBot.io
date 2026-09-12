@@ -29,16 +29,19 @@ static func difficulty_text(value: int) -> String:
 	return text+"\nClear Chapter 8 to unlock the next Ascension."
 static func reference_rank(round_index: int) -> int: return [2,5,8][clampi(round_index,0,2)]
 
+static func survival_budget(index: int, demo: bool=false) -> int:
+	return roundi(SURVIVAL_XP[index]*(DemoPacing.XP_RATE if demo else 1.0))
+
 static func pace(run) -> void:
 	if not enabled(run) or run.exp.clear_clock>=0: return
 	var index: int=run.exp.route_index
-	var expected:=floori(SURVIVAL_XP[index]*clampf(run.stage_time/run.exp.round_seconds(),0,1))
+	var expected:=floori(survival_budget(index,DemoPacing.enabled(run))*clampf(run.stage_time/run.exp.round_seconds(),0,1))
 	var granted: int=run.kit.loadout.operation_xp[index]
 	if expected>granted:
 		run.total_xp+=expected-granted; run.kit.loadout.operation_xp[index]=expected
 
 static func boss_hp(run) -> float:
-	return 6000.0*chapter_health(run.exp.operation_chapter)*(1.0+0.12*run.exp.ascension)
+	return 6000.0*DemoPacing.enemy_rate(run)*chapter_health(run.exp.operation_chapter)*(1.0+0.12*run.exp.ascension)
 
 static func roster(run) -> Array:
 	var result:=ReviewRules.specialist_roster(run.exp.route_index)
