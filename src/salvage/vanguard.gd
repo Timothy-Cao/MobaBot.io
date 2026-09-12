@@ -111,6 +111,7 @@ static func setup(run, rank_value: int = 0) -> void:
 	run.kit.loadout.erase("support23")
 	run.kit.loadout.erase("arsenal26")
 	run.kit.loadout.erase("demo27"); run.kit.loadout.erase("factory31")
+	for id in ["intent39","intent_choices","intent_focus"]: run.kit.loadout.erase(id)
 	run.kit.loadout.erase("discovery35"); run.kit.loadout.erase("field_ranks")
 	if run.mastery is ExpeditionTree: run.mastery.modern=false
 	if run.exp!=null: run.exp.operation_chapter=0; run.exp.demo_pace=false
@@ -350,12 +351,18 @@ func finish_slam(run, immediate: bool=false) -> void:
 func hit_hammer(run) -> void:
 	var reach: float=run.attacks.attack_range(run)
 	var spin_bonus: float=1.15 if spin_swing and ArsenalBurst.enabled(run) else 1.0
+	var hit_count:=0
 	for enemy in run.enemies:
 		var offset: Vector2=enemy.pos-run.player
 		if run.attacks.valid(enemy) and offset.length()<=reach+enemy.radius and (spin_swing or absf(hammer_direction.angle_to(offset))<=hammer_angle(run)):
+			hit_count+=1
 			var head: bool=offset.length()>=reach*0.512
 			run.hit_enemy(enemy,(38 if head else 9)*power(hammer_rank(run))*(1+run.kit.attack_damage_bonus)*(ReviewRules.hammer_multiplier(run,enemy) if ReviewRules.enabled(run) else 1.0)*spin_bonus,"hammer",offset.normalized()*190 if head and not enemy.has("role") else Vector2.ZERO)
-			if head and not enemy.has("role"): enemy.stun=0.25
+			if head and not enemy.has("role"): enemy.stun=maxf(float(enemy.get("stun",0)),0.25)
+	if spin_swing and IntentRules.enabled(run):
+		run.intent_combos.spins+=1
+		run.intent_combos.spins_hit+=1 if hit_count>0 else 0
+		run.intent_combos.targets_hit+=hit_count
 	impacts.append({"kind":"hammer","pos":run.player,"direction":hammer_direction,"life":0.30,"duration":0.30,"radius":reach,"angle":PI if spin_swing else hammer_angle(run),"rank":hammer_rank(run)})
 	run.emit_event("v_hammer",run.player); hammer=-1; spin_swing=false
 

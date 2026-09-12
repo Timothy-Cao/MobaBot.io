@@ -46,10 +46,12 @@ static func offer(run) -> void:
 		run.exp.field_credits+=20*run.kit.loadout.rewards18.size()
 		run.kit.loadout.rewards18.clear(); run.offers.clear(); run.state="running"; return
 	if run.state=="upgrade" and not run.offers.is_empty(): return
+	var eligible:=pool.duplicate()
 	run.offers.clear()
 	while run.offers.size()<3 and not pool.is_empty():
 		var index: int=run.offer_rng.randi_range(0,pool.size()-1)
 		run.offers.append(pool[index]); pool.remove_at(index)
+	IntentRules.protect_offers(run,eligible)
 	if DiscoveryRules.enabled(run):
 		while run.offers.size()<3: run.offers.append("field_credit")
 		if RecoveryAid.low(run): run.offers[2]="full_heal"
@@ -61,6 +63,7 @@ static func choose(run, index: int) -> bool:
 	if id in DiscoveryRules.BONUS or id in ["field_credit","full_heal"]:
 		if not DiscoveryRules.spend(run,id): return false
 	elif not Vanguard.spend(run,id): return false
+	IntentRules.chosen(run,id)
 	run.offers.clear(); run.state="running"; offer(run)
 	return true
 

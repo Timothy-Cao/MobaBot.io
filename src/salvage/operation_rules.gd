@@ -36,6 +36,7 @@ static func pace(run) -> void:
 	if not enabled(run) or run.exp.clear_clock>=0: return
 	var index: int=run.exp.route_index
 	var expected:=floori(survival_budget(index,DemoPacing.enabled(run))*clampf(run.stage_time/run.exp.round_seconds(),0,1))
+	if IntentRules.enabled(run): expected=IntentRules.survival_expected(run,survival_budget(index,true))
 	var granted: int=run.kit.loadout.operation_xp[index]
 	if expected>granted:
 		run.xp_fraction+=(expected-granted)*DiscoveryRules.xp_rate(run)

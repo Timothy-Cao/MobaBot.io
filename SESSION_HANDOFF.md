@@ -2,6 +2,16 @@
 
 Updated 12 September 2026. Stable entry point; human feedback and technical evidence stay in their dated review documents.
 
+## Latest: intentional gameplay iteration 39
+
+12 September owner authorized 30–60 minutes of research-led implementation from `96e3628`, preserving MOBA controls and mechanical challenge. See [INTENT_PACING_39](docs/design/INTENT_PACING_39.md). New campaign runs opt into `intent39`: earlier delivery of the same first-round survival XP budget, E/W offers on choices two/three, alternate offers supporting the last selected offensive tool, ten-second directional approach groups, and brief reductions in arrivals between surges. Continue retains its stored pacing. Hammer follow-ups no longer shorten an existing W stun; spin motion and stun/vulnerability cues are clearer, with batched status rendering. No ability damage/range/cooldown or boss-HP change.
+
+**Owner clarification during the pass:** maxing skills before the final boss is acceptable; late XP costs therefore remain unchanged. A trial slowdown was discarded. Completed-round Salvage/gear remain banked after a boss loss; field credits are run-only and boss arrival itself has no separate reward. Do not reintroduce a late slowdown simply to avoid capped abilities.
+
+All 45 regression suites passed, including 3,061 intent39 assertions; final skill-visual checks and normal/reduced captures passed after status batching. Both historical refined probes completed. Three fixed-seed normal-health comparisons with starter equipment reached the first upgrade at 12.5s and learned E at 33.3–37.5s, versus 21.3–21.5s and 46.5–61.4s before. These are limited control policies, not human acceptance. Level 3 artificial-health full route completes at 1,010.6s; all core tools max before final boss. Extreme 180-enemy rendered cadence remains a known weakness despite batching the new cues. QA_18 contains evidence and limits.
+
+Local player log remained 184,685 bytes, last write 12 September 11:51:51 local. No player restart or automated permanent rewards. New diagnostics capture actual offered/chosen cards and spin contacts, plus sampled health/energy/crowd size; observations restart on Continue. Source is ready for a **new-run** human test of opening flow, group attacks/escape routes and final-boss execution. Downloadable Windows release remains 0.36.0-test.1; this iteration does not replace its ZIP. Earlier research-only/await-direction statements below are superseded by this explicit authorization and verified pass.
+
 11 September owner note: Vanguard is now considered in a good place and should be preserved as the benchmark. The next gameplay-design change is to refine another class, but today's work is feedback/research text only. Do not mix that class pass with the optional 3D production experiment documented in [AI-assisted production feasibility](docs/design/AI_ASSISTED_PRODUCTION_FEASIBILITY_18.md).
 
 The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRODUCTION_18.md) records how to create perceived animation quality with a small motion budget. It is a future bakeoff plan, not permission to alter the synchronized build.

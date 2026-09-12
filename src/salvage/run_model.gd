@@ -78,6 +78,8 @@ var last_damage := ""
 var last_damage_time := -99.0
 var last_damage_direction := Vector2.ZERO
 var damage_history: Array[Dictionary] = []
+var intent_decisions: Array[Dictionary] = []
+var intent_combos: Dictionary = {"spins":0,"spins_hit":0,"targets_hit":0}
 var damage_dealt := {"bolt": 0.0, "orbit": 0.0, "shard": 0.0, "pulse": 0.0}
 var upgrade_history: Array[Dictionary] = []
 var spawn_rng := RandomNumberGenerator.new()
@@ -555,6 +557,7 @@ func _offscreen_point(side: int = -1) -> Vector2:
 func _spawn_pack(count: int, pressure: bool = false) -> void:
 	if DiscoveryRules.opening(self): pressure=false
 	var side := spawn_rng.randi_range(0, 3)
+	if IntentRules.enabled(self): side=IntentRules.pack_side(self)
 	for i in range(count):
 		if enemies.size() >= MAX_ENEMIES: break
 		var kind := 0
@@ -566,7 +569,7 @@ func _spawn_pack(count: int, pressure: bool = false) -> void:
 			if kind==1 and DemoPacing.elapsed(self)<90: kind=0
 			if kind==3 and DemoPacing.elapsed(self)<150: kind=0
 		if DiscoveryRules.opening(self): kind=0
-		spawn_enemy(_offscreen_point(side if pressure else -1), kind)
+		spawn_enemy(_offscreen_point(side if pressure or IntentRules.enabled(self) else -1), kind)
 		var enemy: Dictionary = enemies.back()
 		enemy["elite"] = pressure
 		enemy["runner"] = pressure and kind == 0

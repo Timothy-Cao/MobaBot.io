@@ -151,6 +151,7 @@ static func integer(value: Variant, low: int, high: int) -> bool:
 static func valid_checkpoint(c: Dictionary) -> bool:
 	if c.has("receipt") and not RewardLedger.valid(c.receipt): return false
 	if not c.get("loadout") is Dictionary: return false
+	if not IntentRules.valid(c.loadout): return false
 	if not c.loadout.get("flexible",false): return ExpeditionGear.valid_checkpoint(c)
 	if c.get("class","")!="shared" and not BotExpedition.CLASSES.has(c.get("class","")): return false
 	if not BotKeyboard.valid_config(c.loadout): return false

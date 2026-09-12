@@ -22,6 +22,13 @@ static func sample_progression(run) -> void:
 		if enemy.has("exp_boss") and not enemy.dead: boss_hp=enemy.hp
 	exp.progression_samples.append({"route":exp.route_index,"round_seconds":snappedf(run.stage_time,0.1),"interval_seconds":snappedf(elapsed,0.1),"credited_damage_per_second":snappedf(damage/elapsed,0.01),"damage_by_source":sources,"level":run.level,"xp":run.total_xp,"ranks":ranks,"mastery_spent":run.mastery.spent,"field_credits":exp.field_credits,"boss_hp":snappedf(boss_hp,0.1)})
 	if exp.progression_samples.size()>96: exp.progression_samples.pop_front()
+	if IntentRules.enabled(run):
+		var sample: Dictionary=exp.progression_samples.back()
+		sample.health_percent=snappedf(100*run.health/run.max_health(),0.1)
+		sample.energy=snappedf(run.kit.energy,0.1)
+		sample.enemies=run.enemies.size()
+		sample.spins=run.intent_combos.spins
+		sample.spins_hit=run.intent_combos.spins_hit
 	exp.sample_time=run.time; exp.sample_damage=run.damage_dealt.duplicate()
 static func annotate(record: Dictionary, run, automated: bool) -> void:
 	record.log_schema=2
@@ -38,6 +45,10 @@ static func annotate(record: Dictionary, run, automated: bool) -> void:
 	if DiscoveryRules.enabled(run):
 		record.build="vanguard-35-discovery-factories"
 		record.field_ranks=run.kit.loadout.field_ranks.duplicate()
+	if IntentRules.enabled(run):
+		record.build="vanguard-39-intent-pacing"
+		record.progression_decisions=run.intent_decisions.duplicate(true)
+		record.combo_attempts=run.intent_combos.duplicate()
 	record.practice=run.exp!=null and run.exp.practice
 	record.automated=automated
 	if Vanguard.enabled(run):

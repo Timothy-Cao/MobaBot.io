@@ -271,9 +271,10 @@ func spawns(run, delta: float) -> void:
 	if run.spawn_clock <= 0:
 		run.spawn_clock = maxf(0.45, 1.5 - stage_number * 0.11)
 		if Vanguard.enabled(run): run.spawn_clock/=1.0+0.012*route_index+0.15*clampf(run.stage_time/round_seconds(),0,1)
+		run.spawn_clock*=IntentRules.spawn_delay(run)
 		var before: int = run.enemies.size()
 		var pack_size: int=2 + stage_number / 2 + (1 if kind == "loot" else 0)
-		run._spawn_pack(DiscoveryRules.opening_pack_size(run,pack_size), int(run.stage_time) % 15 > 11)
+		run._spawn_pack(DiscoveryRules.opening_pack_size(run,pack_size), IntentRules.pressure_pack(run) if IntentRules.enabled(run) else int(run.stage_time) % 15 > 11)
 		for i in range(before, run.enemies.size()):
 			var enemy: Dictionary = run.enemies[i]
 			if not Vanguard.enabled(run): enemy.hp *= (1 + (stage_number - 1) * 0.22) * (1.2 if ascension >= 2 else 1)

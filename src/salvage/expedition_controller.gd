@@ -84,7 +84,7 @@ func launch_expedition(resume: bool=false) -> void:
 		if collection is ForgeEquipment:
 			OperationRules.enable(model,chapter_choice); LevelMastery.enable(model)
 			model.kit.loadout.support23=true; model.kit.loadout.arsenal26=true
-			DemoPacing.enable(model); FactoryMaps.enable(model); DiscoveryRules.enable(model)
+			DemoPacing.enable(model); FactoryMaps.enable(model); DiscoveryRules.enable(model); IntentRules.enable(model)
 			if collection.starting_ability:
 				model.kit.rank_up("e"); model.upgrades.skill_e=model.kit.ranks.e
 				if "e" not in model.kit.discovered: model.kit.discovered.append("e")

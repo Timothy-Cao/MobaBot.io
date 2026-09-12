@@ -1,5 +1,13 @@
 # MobaBot.io quality bar
 
+## Intentional gameplay iteration · 12 September 2026
+
+Owner authorized a 30–60 minute research-led gameplay pass, preserving MOBA controls and mechanical difficulty. Implemented earlier opening XP delivery, reliable voluntary E/W offers, periodic support for the chosen attack, directional groups and brief recovery in arrivals. Improved spin motion and status readability, batched status rendering, and corrected hammer shortening W's stun. See INTENT_PACING_39 for exact rules and rejected trials.
+
+Owner subsequently clarified that a completed build before the final boss is fine because there is still permanent progress after a boss loss. Removed the trial of rising late XP costs. Existing banked round rewards remain; field credits are run-only and boss arrival has no separate reward. No economic changes or new progression systems.
+
+Normal-health fixed-seed controls show earlier decisions/E and continued need for movement. These are starter-gear bots, not human acceptance. Full routes with artificial health establish reliability only. Native normal/reduced cues reviewed at actual size; initial expensive status drawing was replaced with batched geometry. Extreme crowd rendering remains a weakness. No fun or quality score increased. Human priorities: first-two-minute agency, satisfying group attacks/escape routes, and meaningful boss execution with a finished build.
+
 ## Foundry menu controls · 12 September 2026
 
 Owner relayed that buttons, especially the main menu, look like generic mobile/AI design and requested a more thematic, playful, deliberate treatment. Implemented bespoke brass/steel plates with cut corners, inset control symbols, slotted fasteners, lower edge depth, clearer hover/keyboard focus and mechanical press states. Play is the primary launch plate; Equipment/Practice use secondary plates; Settings/Quit use compact switches. Added the short “SCRAP. UPGRADE. REPEAT.” tagline. Shared non-home buttons get restrained steel edge depth and explicit disabled states. Labels/navigation remain functional native controls, no interaction timing changes. Existing foundry/robot artwork retained; no generated images or new asset dependencies. Normal/reduced and keyboard-focus captures inspected at 1600×900; human preference is pending, not a new quality rating.
