@@ -10,6 +10,8 @@ Owner clarification: preserve the current cartoony presentation as a complete, f
 
 ## Next action: owner review of 0.26; research actions on hold
 
+Published Windows pre-release: [v0.26.0-test.1](https://github.com/Timothy-Cao/MobaBot.io/releases/tag/v0.26.0-test.1), source `4c8d7d4`. ZIP + checksum uploaded and release verified non-draft/pre-release. Local shareable ZIP: `exports/MobaBot-Windows-0.26.0-test.1.zip` (102,236,320 bytes). Extracted ZIP's EXE startup exits 0 and its PCK smoke passes. Private-repository downloads require access; owner can send ZIP directly. No automatic updater/installer. Main-menu footer is still historical 0.18.
+
 11 September release preparation: owner authorized a downloadable Windows build and GitHub pre-release. `export_presets.cfg` and `scripts/export_windows.ps1` package the EXE/PCK, instructions and optional desktop-shortcut helper. See WINDOWS_RELEASE_26. Repository is private, so testers need repository access or a directly shared ZIP. No research actions or gameplay changes were included. Release startup render and pack smoke passed; publication status must be checked on GitHub.
 
 11 September performance follow-up: owner reported lag after spawning 25 Mosquitoes, then requested fewer/tougher ones. Candidate dodge paths now use conservative capsule clearance checks with the original swept fallback near walls; 100ms planning is staggered across frames. Current `arsenal26` Mosquito HP is doubled (20 base), normal spawning caps them at four alive (shared ranged cap can be lower); explicit Practice stress spawns bypass the cap. See QA_18 for reproducible before/after CPU evidence and caveats.
