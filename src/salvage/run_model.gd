@@ -600,7 +600,9 @@ func _staged_spawns(delta: float) -> void:
 func _enemy_step(delta: float) -> void:
 	var before: Dictionary=SupportEnemies.prepare(self,delta) if ArsenalBurst.enabled(self) else {}
 	_enemy_step_base(delta)
-	if ArsenalBurst.enabled(self): SupportEnemies.movement(self,before)
+	if ArsenalBurst.enabled(self):
+		SupportEnemies.movement(self,before)
+		SwarmSpacing.step(self,delta)
 
 func _enemy_step_base(delta: float) -> void:
 	if exp!=null and exp.practice and vanguard.freeze_ai: return

@@ -3,7 +3,7 @@ extends RefCounted
 const LEVELS:=3
 const ROUND_SECONDS:=300.0
 # First eligibility measured in survival seconds across a three-round Level.
-const INTRO:={"breacher":90,"volley":150,"lancer":210,"scatter":270,"mosquito":330,"mender":390,"bomber":450,"hatchery":510,"uplink":570,"emp":720}
+const INTRO:={"breacher":90,"lancer":120,"volley":150,"scatter":270,"mosquito":330,"mender":390,"bomber":450,"hatchery":510,"uplink":570,"emp":720}
 static func enabled(run) -> bool: return run.exp!=null and run.exp.demo_pace and not run.exp.practice
 static func enable(run) -> void:
 	run.exp.demo_pace=true; run.kit.loadout.demo27=true

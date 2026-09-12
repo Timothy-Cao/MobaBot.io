@@ -283,3 +283,8 @@ The earlier positive Stage 1 feedback remains about the previous tested build. D
 ## 12 September 2026 - longer three-level demo feedback
 
 Owner wants three Levels with three five-minute stages each, slower upgrade progression, gradual introductions, and a durable Hatchery that spawns fast chasers. Owner explicitly reports existing Level 3 is already very hard. Implemented as the opt-in demo27 rules described in DEMO_PACING_27; preserve historical saves. Automated completion does not establish human difficulty or improve any fun/quality rating. Next review should focus on first-minute pressure, five-minute repetition and final-boss readiness.
+
+
+## 12 September 2026 - ranged enemies and swarm readability
+
+Owner wants ranged enemies to be more threatening: earlier/longer lasers, sustained aerial bombers, and crowds occupying individual space like a swarm. Implemented lance timing/reach, sequential retargeted bomber barrages and wall-constrained soft separation. A rendered 45-enemy fixture shows distinct bodies. This is visual/mechanical verification, not a new human fun score. Review moving crowds in tight terrain and later-stage bombing before further difficulty changes.

@@ -10,6 +10,8 @@ Owner clarification: preserve the current cartoony presentation as a complete, f
 
 ## Next action: owner review of three-level demo pacing
 
+12 September ranged/swarm follow-up: lance introduction is now 2:00 in Level 1 stage 1; current arsenal lance range 940, engagement 720, warning 0.7s. Bomb carriers drop sequentially at current movement, 5-8 bombs with individual 1.05s warnings and later-stage shorter recovery. Current arsenal crowds use wall-safe soft body spacing; frozen Practice and committed attack tells stay steady. See DEMO_PACING_27 and latest QA_18. Boss attacks/HP and player abilities unchanged; no human game restarted.
+
 12 September 0.27 override: owner confirmed three selectable Levels, three stages each, five-minute survival per stage, with slower progression and gradual enemy introductions. See [DEMO_PACING_27](docs/design/DEMO_PACING_27.md) for roster/timings, save compatibility and verification. New runs use `demo27`; old checkpoints retain their pacing and stored higher-level progress. Hatcheries now have 360 base HP and produce fast chasers. Existing enemy scaling and boss HP remain unchanged; owner says Level 3 is already very hard. Human calibration remains pending. No player game was restarted. All 37 regression suites pass; rendered level selector inspected; artificial-health Level 1/3 full routes complete. See QA_18 for normal-health limitations. Local source update only; GitHub test.2 predates this and the foundry menu.
 
 ## Previous 0.26 handoff

@@ -26,7 +26,7 @@ static func spawn(run, type: String, point: Vector2 = Vector2.INF, bypass_cap: b
 	return enemy
 
 static func beam_end(run, point: Vector2, direction: Vector2) -> Vector2:
-	var end:=point+direction*740
+	var end:=point+direction*(940 if ArsenalBurst.enabled(run) else 740)
 	if run.kit.loadout.get("rules17",false): return end
 	for wall in run.kit.extra.walls:
 		if wall.has("width"):
@@ -56,11 +56,11 @@ static func step(run, e: Dictionary, delta: float) -> void:
 			e.pos=run.kit.extra.solid_point(e.pos,Vector2(e.pos)-offset.normalized()*60*delta,e.radius)
 		# Only start an attack while visible to the player-centered play area.
 		var visible_area := Rect2(run.follow_origin(), run.view_size)
-		if e.clock<=0 and offset.length()<560 and visible_area.grow(-25).has_point(e.pos):
-			e.phase="aim"; e.clock=0.8 if e.gunner_kind=="lancer" else 0.65
+		if e.clock<=0 and offset.length()<(720 if ArsenalBurst.enabled(run) and e.gunner_kind=="lancer" else 560) and visible_area.grow(-25).has_point(e.pos):
+			e.phase="aim"; e.clock=(0.7 if ArsenalBurst.enabled(run) else 0.8) if e.gunner_kind=="lancer" else 0.65
 			run.emit_event("enemy_windup",e.pos)
 			e.dir=(offset+run.velocity.limit_length(240)*0.4).normalized() if ReviewRules.enabled(run) and e.gunner_kind=="lancer" else offset.normalized(); e.beam_end=beam_end(run,e.pos,e.dir)
-			if e.gunner_kind=="bomber":
+			if e.gunner_kind=="bomber" and not ArsenalBurst.enabled(run):
 				var predicted: Vector2=run.player+run.velocity.limit_length(160)*0.3
 				for i in range(5 if ReviewRules.enabled(run) else 3):
 					var target: Vector2=predicted+Vector2.from_angle(i*TAU/3+e.id)*100
@@ -74,7 +74,17 @@ static func step(run, e: Dictionary, delta: float) -> void:
 					run.hurt_player(e.pos,"Arc lance",2,"ground")
 				e.phase="beam"; e.clock=0.22
 			elif e.gunner_kind=="volley": e.phase="burst"; e.burst=0; e.clock=0
+			elif e.gunner_kind=="bomber" and ArsenalBurst.enabled(run):
+				e.phase="bombard"; e.burst=0; e.clock=0
+				e.bomb_count=mini(8,5+run.exp.route_index+int(minf(run.stage_time,299)/150))
 			else: e.phase="recover"; e.clock=3.4
+	elif e.phase=="bombard":
+		if e.clock<=0:
+			var target: Vector2=run.player+run.velocity.limit_length(185)*0.35+offset.normalized().orthogonal()*sin(e.burst*2.1)*70
+			run.hazards.append({"pos":target,"radius":66.0,"time":1.05,"duration":1.05,"owner":e.id,"spent":false})
+			e.burst+=1; e.clock+=0.45
+			if e.burst>=e.bomb_count:
+				e.phase="recover"; e.clock=maxf(2.4,3.0-run.exp.route_index*0.3)
 	elif e.phase=="burst":
 		if e.clock<=0:
 			var heading: Vector2=Vector2(e.dir).rotated(deg_to_rad(-12+e.burst*6))

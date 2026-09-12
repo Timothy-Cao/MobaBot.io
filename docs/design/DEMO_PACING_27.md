@@ -23,7 +23,7 @@ Times below are earliest eligibility in Level 1, not a guaranteed on-screen enco
 | Breacher | Wedge charge | Stage 1, 1:30 |
 | Tank | Durable melee pressure | Stage 1, 2:30 |
 | Burst battery | Projectile fan burst | Stage 1, 2:30 |
-| Arc lancer | Predictive beam | Stage 1, 3:30 |
+| Arc lancer | Predictive beam | Stage 1, 2:00 |
 | Scattergun | Close spread fire | Stage 1, 4:30 |
 | Mosquito | Evasive ranged harassment; gun priority | Stage 2, 0:30 |
 | Mender | Heals nearby enemies | Stage 2, 1:30 |
@@ -44,3 +44,12 @@ Main boss titles are Gatekeeper (Level 1), Stamp press (Level 2), Coolant keeper
 `demo_pacing_test.gd` covers timing, survival/pickup budgets, introductions, base-enemy gating, checkpoint preservation/validation, and destructible Hatchery fast children. The level UI test now checks three choices. Current `expedition_behavior_probe.gd -- --vanguard` uses demo pacing for Levels 1–3; `--legacy-pace` retains prior Operations timing and `--chapter=8` remains a compatibility probe.
 
 Full-route artificial-health probes finished Level 1 in 1088.4 seconds and Level 3 in 1172.4 seconds, including fights and collection. Final-boss arrival was at player level 18 and 19 respectively. These are deterministic automated policies, not human balance evidence. Normal-health Level 3 policies died in the first stage; no claim that the hardest level is now easy or calibrated.
+
+
+## 12 September follow-up - ranged pressure and swarm spacing
+
+Owner requested earlier/farther lasers, bombers that shoot more over time, and individual enemy space rather than stacked sprites. Arc lancer now first becomes eligible at Level 1 stage 1, 2:00 (previously 3:30). Under current arsenal rules, lance reach is 940 instead of 740, visible engagement distance 720 instead of 560, and warning 0.7 instead of 0.8 seconds. Rendering and collision share the same endpoint. Boss lasers are unchanged.
+
+Current bomb carriers issue individual bombs every 0.45 seconds, each with a fresh 1.05-second ground warning aimed around current player movement. Barrage count is capped at eight: 5 + stage index + one after 150 seconds within the stage. Recovery is 3.0/2.7/2.4 seconds by stage. Thus late stages add sustained pressure, not an unbounded damage or projectile ramp. Earlier rule families keep their attacks.
+
+Current arsenal enemies receive soft circular separation using 64-unit spatial buckets, cached movement weights and bounded displacement. Larger bodies yield less. Bosses, dummies and committed windups/charges do not get shoved; neighbors yield around them. Walls and arena bounds constrain every correction. Practice freeze stops spacing. This reduces ordinary crowd overlap rather than promising hard collision during every charge or dense spawn. No player-body collision or friendly-projectile blocking was added.
