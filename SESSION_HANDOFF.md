@@ -10,7 +10,7 @@ Owner clarification: preserve the current cartoony presentation as a complete, f
 
 ## Next action: owner review of 0.26; research actions on hold
 
-11 September UI follow-up: upgrade cards now show their ability key beside the icon, including Q and LMB, with separate 1/2/3 choice instructions. Intended for Windows playtest 2; no balance changes.
+11 September UI follow-up: upgrade cards show their ability key beside the icon, including Q and LMB, with separate 1/2/3 choice instructions. Published in [Windows Playtest 2](https://github.com/Timothy-Cao/MobaBot.io/releases/tag/v0.26.0-test.2), source `045adb7`; ZIP and checksum verified uploaded, non-draft pre-release. All 36 suites and exported-pack smoke pass. No balance changes. Playtest 1 remains available unchanged.
 
 Published Windows pre-release: [v0.26.0-test.1](https://github.com/Timothy-Cao/MobaBot.io/releases/tag/v0.26.0-test.1), source `4c8d7d4`. ZIP + checksum uploaded and release verified non-draft/pre-release. Local shareable ZIP: `exports/MobaBot-Windows-0.26.0-test.1.zip` (102,236,320 bytes). Extracted ZIP's EXE startup exits 0 and its PCK smoke passes. Private-repository downloads require access; owner can send ZIP directly. No automatic updater/installer. Main-menu footer is still historical 0.18.
 
