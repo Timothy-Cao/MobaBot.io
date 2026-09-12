@@ -135,6 +135,8 @@ func _draw() -> void:
 		if loot_view.has_point(pickup.pos): _scrap(pickup)
 	for supply in model.supply_drops:
 		var p: Vector2 = supply.pos
+		if supply.kind in ["health_pack","vacuum"]:
+			FieldPickups.draw(self,p,supply.kind); continue
 		if supply.kind in ["energy","repair"]:
 			SupplyArt.draw(self,p,supply.kind)
 			continue

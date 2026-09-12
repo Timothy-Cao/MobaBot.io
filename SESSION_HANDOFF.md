@@ -8,7 +8,9 @@ The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRO
 
 Owner clarification: preserve the current cartoony presentation as a complete, fun version. The future high-fidelity/high-graphics work is a separate presentation of the same core game for controlled player A/B testing, not a replacement or incremental conversion of the current style.
 
-## Next action: owner review of encounter pressure
+## Next action: owner review of field pickups and visual audit
+
+12 September latest: use plain Levels in player-facing language. Added independently randomized 45-75s health-pack and magnet deadlines, fulfilled by the next campaign kill. Health restores 25% max HP; magnet claims ground XP/supplies/credits/chests without recursion or duplicates. New native icons inspected normal/reduced; existing sounds reused. All 41 suites and current full-level reliability probe pass. [VISUAL_AUDIT_29](docs/design/VISUAL_AUDIT_29.md) ranks terrain depth/identity, miniboss silhouette/animation and shared foundry menu design as next art priorities. Broad art changes are proposals only. No player game restarted or GitHub release uploaded.
 
 12 September latest easing: owner likes encounter changes but finds them slightly too hard. Demo XP +10% (survival 44/66/88); Level 1 enemy HP and incoming damage -10%, including minibosses and boss. Levels 2/3 enemy stats, timers and patterns unchanged. Updated demo checkpoint XP validation; historical limits and Practice balance preserved. All 40 suites passed before the final validator adjustment; focused 43 easing checks plus Operations/Forge regressions passed after it. Level 1 artificial-health route completes. See DEMO_PACING_27 and latest QA_18. No game restarted; GitHub download unchanged.
 

@@ -7,6 +7,7 @@ const ROUND_SECONDS:=300.0
 const INTRO:={"breacher":90,"lancer":120,"volley":150,"scatter":270,"mosquito":330,"mender":390,"bomber":450,"hatchery":510}
 static func enabled(run) -> bool: return run.exp!=null and run.exp.demo_pace and not run.exp.practice
 static func enable(run) -> void:
+	run.field_pickups=FieldPickups.new()
 	run.exp.demo_pace=true; run.kit.loadout.demo27=true
 static func xp_rate(run) -> float: return XP_RATE if enabled(run) else 1.0
 static func enemy_rate(run) -> float: return 0.9 if enabled(run) and run.exp.operation_chapter==1 else 1.0

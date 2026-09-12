@@ -298,3 +298,8 @@ Owner finds EMP unfun and Uplink unnecessary when many enemies die in one hit; b
 ## 12 September 2026 - owner requests slight easing
 
 Owner likes the latest changes but reports the game is a bit too hard, suggesting a little faster leveling and/or slightly weaker Level 1 enemies. Implemented +10% demo XP and -10% Level 1 HP/incoming damage, preserving encounter identities. This records favorable directional feedback, not a new numeric quality rating or evidence that balance is now solved.
+
+
+## 12 September 2026 - field pickups and visual audit
+
+Owner wants plain Levels wording, enemies dropping 25%-max-health packs and map-wide magnets roughly once per minute on independent random schedules, followed by an art/design audit. Pickups implemented; fresh menu, mastery, equipment, camp and combat captures inspected. VISUAL_AUDIT_29 recommends factory terrain identity/depth, clearer miniboss silhouettes/state animation, and extending the Home foundry language into secondary menus. These are visual/design judgments, not a human quality rating or authorization to replace the current cartoony presentation.

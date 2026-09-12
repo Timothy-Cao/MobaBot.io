@@ -31,6 +31,7 @@ var health := 5.0
 var exp: RefCounted
 var vanguard := Vanguard.new()
 var practice_meter := PracticeMeter.new()
+var field_pickups:=FieldPickups.new()
 var mastery := BotMastery.new()
 var attacks := BotAttackOrders.new()
 var xp_fraction := 0.0
@@ -873,6 +874,7 @@ func hit_enemy(enemy: Dictionary, damage: float, source: String, knock: Vector2 
 		if exp!=null and exp.practice:
 			emit_event("kill",enemy.pos,{"enemy_kind":enemy.kind})
 			return
+		field_pickups.killed(self,enemy.pos)
 		if LevelMastery.enabled(self):
 			var recovery: float=mastery.value("supplies")
 			if recovery>0 and loot_rng.randf()<0.01*recovery:
@@ -1120,7 +1122,8 @@ func special_drop_chance(old_baseline: float) -> float:
 
 func _drop_supply(point: Vector2, kind: String, value: int) -> void:
 	# Separate bounded pool: supply rewards cannot consume XP or be converted to it.
-	if supply_drops.filter(func(s: Dictionary) -> bool: return s.kind == kind).size() >= 20:
+	if supply_drops.filter(func(s: Dictionary) -> bool: return s.kind == kind and s.value>0).size() >= 20:
+		if kind in ["health_pack","vacuum"]: return
 		for existing in supply_drops:
 			if existing.kind == kind:
 				existing.value += value
@@ -1130,14 +1133,18 @@ func _drop_supply(point: Vector2, kind: String, value: int) -> void:
 
 func _collect_supply(supply: Dictionary) -> void:
 	if supply.value <= 0: return
+	var amount: int=supply.value
+	supply.value=0 # Claim before a magnet can collect other supplies.
 	match supply.kind:
-		"energy": kit.energy = minf(kit.energy_max(), kit.energy + supply.value)
+		"health_pack": health=minf(max_health(),health+max_health()*amount/100.0)
+		"vacuum": FieldPickups.sweep(self)
+		"energy": kit.energy = minf(kit.energy_max(), kit.energy + amount)
 		"repair":
-			if LevelMastery.enabled(self): health=minf(max_health(),health+supply.value)
-			else: heal(supply.value)
+			if LevelMastery.enabled(self): health=minf(max_health(),health+amount)
+			else: heal(amount)
 		"coins":
-			if OperationRules.enabled(self): exp.field_credits+=roundi(supply.value*(1+mastery.value("loot_bonus"))*DemoPacing.reward_rate(self))
-			else: coins += supply.value
+			if OperationRules.enabled(self): exp.field_credits+=roundi(amount*(1+mastery.value("loot_bonus"))*DemoPacing.reward_rate(self))
+			else: coins += amount
 		"speed": kit.boost_speed = 6.0
 		"reset":
 			for slot in (kit.active_slots() if kit.flexible() else ["q", "w", "e"]):

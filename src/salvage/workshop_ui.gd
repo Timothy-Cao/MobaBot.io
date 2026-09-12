@@ -579,7 +579,7 @@ func show_result(model: SalvageRun, saved: bool = false) -> void:
 	notice_time = 0
 	_dim()
 	_panel(Rect2(188, 126, 584, 353))
-	_label(overlay, ("Level complete" if OperationRules.enabled(model) else "Expedition complete" if model.exp != null else ("Demo complete" if model.demo_mode else "Shift complete")) if model.state == "won" else "Destroyed", Rect2(222, 151, 516, 52), 33, CREAM, true)
+	_label(overlay, ("Level complete" if OperationRules.enabled(model) else "Expedition complete" if model.exp != null else ("Run complete" if model.demo_mode else "Shift complete")) if model.state == "won" else "Destroyed", Rect2(222, 151, 516, 52), 33, CREAM, true)
 	_label(overlay, "%d\nKills" % model.kills, Rect2(230, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
 	_label(overlay, "%d\nRounds" % (model.exp.route_index+(1 if model.state=="won" else 0)) if model.exp != null else "%d\nCredits" % model.coins, Rect2(405, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
 	_label(overlay, "%ds\nSurvived" % int(model.time), Rect2(580, 235, 150, 64), 24, GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)

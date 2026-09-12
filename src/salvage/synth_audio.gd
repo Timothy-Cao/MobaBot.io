@@ -89,7 +89,7 @@ func cue_for(event: Dictionary) -> String:
 	if kind=="hurt":
 		var ratio: float=event.get("health_fraction",1.0)
 		return "hurt_critical" if ratio<0.25 else "hurt_low" if ratio<0.5 else "hurt"
-	if kind=="supply": return {"repair":"repair_pickup","energy":"energy_pickup","coins":"credit_pickup","speed":"boost_pickup","reset":"boost_pickup"}.get(event.get("supply",""),"supply")
+	if kind=="supply": return {"health_pack":"repair_pickup","vacuum":"boost_pickup","repair":"repair_pickup","energy":"energy_pickup","coins":"credit_pickup","speed":"boost_pickup","reset":"boost_pickup"}.get(event.get("supply",""),"supply")
 	if kind=="pickup" and event.get("value",0)>=8: return "pickup_big"
 	if kind=="cast" and event.get("ability","") in ["guard_bot","reserve_totem","medic_sentry","recovery_totem"]: return "deploy"
 	if kind=="miniboss_down": return "boss_down"

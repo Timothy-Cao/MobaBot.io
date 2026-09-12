@@ -574,8 +574,8 @@ func _drain_events() -> void:
 			var title: String = MobaKit.PASSIVES[model.kit.loadout.passives[int(slot.substr(1)) - 1]].name if slot.begins_with("p") else MobaKit.ABILITIES[model.kit.loadout[slot]].name
 			ui.announce("%s  [%s]" % [title, OS.get_keycode_string(model.kit.bindings[slot])], 1)
 		elif event.kind == "supply":
-			if event.supply in ["coins", "speed", "reset"]:
-				ui.announce({"coins": "Credits collected", "speed": "Overclock / 6 seconds", "reset": "Active skills refreshed" if model.kit.flexible() else "Q W E refreshed"}[event.supply])
+			if event.supply in ["coins", "speed", "reset", "health_pack", "vacuum"]:
+				ui.announce({"health_pack":"Hull restored", "vacuum":"Ground loot collected", "coins": "Credits collected", "speed": "Overclock / 6 seconds", "reset": "Active skills refreshed" if model.kit.flexible() else "Q W E refreshed"}[event.supply])
 	model.events.clear()
 
 func _choose(index: int) -> void:
