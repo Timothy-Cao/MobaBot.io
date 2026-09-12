@@ -8,6 +8,12 @@ The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRO
 
 Owner clarification: preserve the current cartoony presentation as a complete, fun version. The future high-fidelity/high-graphics work is a separate presentation of the same core game for controlled player A/B testing, not a replacement or incremental conversion of the current style.
 
+## Latest follow-up: bullet-heaven research
+
+12 September owner requested applicable lessons from Vampire Survivors, Survivor.io, Deep Rock and similar games, preserving MobaBot's greater mechanical emphasis. [BULLET_HEAVEN_LESSONS_38](docs/design/BULLET_HEAVEN_LESSONS_38.md) compares developer sources and current code at `c1905f0`. Research only: no gameplay, assets, saves or release changes. Prioritize (1) first-90-second learning and reliable access to a chosen combo, (2) alternating pressure/payoff and useful factory routes, (3) whole-run upgrade/gear calibration. Proposed timing and fairness targets are hypotheses, not industry averages or implemented rules.
+
+Key findings: ten-option uniform offers can omit a particular tool across the first four healthy opening offers with 24.01% probability; current level2–40 awards total74 choices against75 remaining core ranks plus10 bonus ranks; card decisions may add substantial wall time. Permanent armor should buy resilience while mechanical execution still matters. Avoid matching every enemy exactly to player growth, adding progression layers before measuring current ones, or copying mobile grind. Gameplay recommendations await owner direction. Source research and review notes are the only edits for this milestone; latest download remains0.36.0-test.1.
+
 ## Latest follow-up: visual polish review
 
 12 September owner authorized design critique and iteration within the current cartoony style. Reviewed menus, camp, upgrade cards and all three factory worlds from entry commit `5d77581`. Implemented quieter distinct floor materials, a magnetic crane/segmented press/turbine with inset pedals and cables, a larger module shop with framed keys/rank tracks/gray unavailable states, aligned upgrade cards, a distinct gold XP chip and singular point/copy wording. Six receipt entries fit without scrolling. Combat, machinery effects and solid collision are unchanged. See [VISUAL_POLISH_37](docs/design/VISUAL_POLISH_37.md) for the two passes and remaining critique.
