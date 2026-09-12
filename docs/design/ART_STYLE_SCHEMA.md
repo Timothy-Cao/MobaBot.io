@@ -1,5 +1,9 @@
 # MobaBot.io — art style schema 2.0
 
+## 12 September · Foundry controls
+
+Home navigation is a reusable native metal-plate family (`menu_plate.gd`): cut corners, ink undersides, brass primary / teal steel secondary faces, recessed original geometric glyphs, small slotted fasteners, bright focus seams and depressed pressed state. Keep text in real Button controls for clarity and keyboard navigation. No looping button animation, neon bloom or bitmap text. Shared UI buttons use a restrained version of the steel lip/shadow; don't add full decorative plates to dense equipment grids. Preserve the existing foundry key art and cartoony robot. Normal/reduced appearance remains legible; the redesign does not constitute owner approval of the visual direction.
+
 ## v0.18 Vanguard override
 
 10 September enemy/feedback extension: native steel side rails and a dark faceplate unite three specialist bodies. Breacher has an ochre wedge/plow, Mender a mint repair mast, Scattergun a violet three-barrel silhouette. No new bitmap family. Windup/active/recovery phases drive motion and truthful directional tells; repair links identify actual healed allies. Below-half hit feedback uses restrained amber corner marks; critical hull uses stronger coral marks, not a screen-filling tint. Reduced effects keeps marks/tells and removes edge glow. New SFX are deterministic short synthesized mechanical/chime motifs, not external recordings; see PRESSURE_AUDIO_18 audit.

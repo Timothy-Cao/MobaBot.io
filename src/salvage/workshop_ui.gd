@@ -229,9 +229,17 @@ func _button(text: String, rect: Rect2, action: Callable, primary: bool = true) 
 	button.add_theme_font_size_override("font_size", 16)
 	for state_name in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
 		button.add_theme_color_override(state_name, INK if primary else CREAM)
-	button.add_theme_stylebox_override("normal", _style(GOLD if primary else PANEL, 6))
-	button.add_theme_stylebox_override("hover", _style(Color("ffda8d") if primary else Color("2a4650"), 6, TEAL, 2))
-	button.add_theme_stylebox_override("pressed", _style(TEAL if primary else Color("36545c"), 6))
+	for state in ["normal","hover","pressed","disabled"]:
+		var face: Color=GOLD if primary else Color("243d46")
+		if state=="hover": face=Color("ffda8d") if primary else Color("365760")
+		elif state=="pressed": face=Color("c79543") if primary else Color("192e36")
+		elif state=="disabled": face=Color("1b2b32")
+		var metal:=_style(face,1,Color("89724e") if primary else Color("536b70"),1)
+		metal.border_width_bottom=1 if state=="pressed" else 3
+		metal.shadow_color=Color("071218aa"); metal.shadow_size=1
+		metal.shadow_offset=Vector2(0,1 if state=="pressed" else 3)
+		button.add_theme_stylebox_override(state,metal)
+	button.add_theme_color_override("font_disabled_color",Color("829390"))
 	button.add_theme_stylebox_override("focus", _style(Color(0, 0, 0, 0), 6, TEAL, 2))
 	button.mouse_entered.connect(func() -> void: ui_interaction.emit("ui_focus"))
 	button.pressed.connect(func() -> void: ui_interaction.emit("ui_confirm"))

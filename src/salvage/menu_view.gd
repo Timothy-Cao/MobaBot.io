@@ -34,30 +34,28 @@ static func draw(ui: CanvasLayer) -> void:
 	ui._label(ui.overlay, "MOBA", Rect2(53, 65, 270, 45), 35, ui.TEAL, true)
 	ui._label(ui.overlay, "BOT", Rect2(48, 94, 271, 86), 76, ui.CREAM, true)
 	ui._label(ui.overlay, ".io", Rect2(188, 125, 95, 49), 37, ui.GOLD, true)
-	var play := _nav(ui, "Play", Rect2(54, 229, 267, 44), func() -> void: ui.start_requested.emit("salvage"), true)
-	if not ui.expedition_ui: _nav(ui, "Loadout", Rect2(54, 281, 267, 36), func() -> void: ui.loadout_requested.emit())
-	_nav(ui, "Equipment", Rect2(54, 281 if ui.expedition_ui else 322, 267, 36), func() -> void: ui.gear_requested.emit())
-	if ui.expedition_ui: _nav(ui,"Practice",Rect2(54,326,267,36),func(): ui.host.launch_practice())
-	_nav(ui, "Settings", Rect2(54, 383 if ui.expedition_ui else 377, 122, 30), func() -> void: ui.settings_requested.emit())
-	_nav(ui, "Quit", Rect2(188, 383 if ui.expedition_ui else 377, 132, 30), func() -> void: ui.quit_requested.emit())
+	ui._label(ui.overlay,"SCRAP. UPGRADE. REPEAT.",Rect2(55,187,340,22),13,ui.GOLD,true)
+	var play := _nav(ui, "Play", Rect2(54, 231, 324, 64), func() -> void: ui.start_requested.emit("salvage"), true)
+	if not ui.expedition_ui: _nav(ui, "Loadout", Rect2(54, 307, 324, 52), func() -> void: ui.loadout_requested.emit())
+	_nav(ui, "Equipment", Rect2(54, 307 if ui.expedition_ui else 370, 324, 52), func() -> void: ui.gear_requested.emit())
+	if ui.expedition_ui: _nav(ui,"Practice",Rect2(54,370,324,52),func(): ui.host.launch_practice())
+	_nav(ui, "Settings", Rect2(54, 440, 157, 38), func() -> void: ui.settings_requested.emit())
+	_nav(ui, "Quit", Rect2(221, 440, 157, 38), func() -> void: ui.quit_requested.emit())
 	ui._label(ui.overlay, "0.18" if ui.expedition_ui else "0.13", Rect2(55, 492, 249, 20), 11, ui.MUTED, true)
 	play.grab_focus()
 
 static func _nav(ui, text: String, rect: Rect2, action: Callable, primary: bool = false) -> Button:
 	var button: Button = ui._button(text, rect, action, primary)
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	button.add_theme_font_size_override("font_size", 22 if primary else 18)
-	var normal: StyleBoxFlat = ui._style(ui.GOLD if primary else Color("101f2748"), 0, ui.GOLD if primary else Color("718b8750"), 0)
-	normal.content_margin_left = 18
-	normal.border_width_bottom = 1
-	button.add_theme_stylebox_override("normal", normal)
-	var hover: StyleBoxFlat = normal.duplicate()
-	hover.bg_color = Color("ffe0a0") if primary else Color("29484cec")
-	hover.border_width_left = 3
-	hover.border_color = ui.GOLD
-	button.add_theme_stylebox_override("hover", hover)
-	var press: StyleBoxFlat = hover.duplicate()
-	press.bg_color = ui.TEAL if primary else Color("335459")
-	button.add_theme_stylebox_override("pressed", press)
+	button.add_theme_font_size_override("font_size", 26 if primary else 16 if rect.size.y<42 else 21)
+	for state in ["normal","hover","pressed","focus"]:
+		var style:=StyleBoxEmpty.new()
+		style.content_margin_left=48 if rect.size.y<42 else 67
+		style.content_margin_right=12 if rect.size.y<42 else 45
+		style.content_margin_bottom=2 if state=="pressed" else 5
+		button.add_theme_stylebox_override(state,style)
+	var plate:=preload("res://src/salvage/menu_plate.gd").new()
+	plate.primary=primary; plate.symbol=text; plate.size=rect.size
+	button.add_child(plate)
 	button.tooltip_text = {"Play": "Start Stage 1.", "Practice":"Test skills and spawn enemies. No saved progression.", "Loadout": "Abilities, passives and key bindings.", "Equipment": "Equip and forge." if ui.expedition_ui else "Fit, reroll and star equipment.", "Mastery": "Preview the run-only mastery tree.", "Settings": "Audio, effects, camera and controls.", "Quit": "Close MobaBot.io."}[text]
 	return button

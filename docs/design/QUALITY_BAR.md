@@ -1,5 +1,9 @@
 # MobaBot.io quality bar
 
+## Foundry menu controls · 12 September 2026
+
+Owner relayed that buttons, especially the main menu, look like generic mobile/AI design and requested a more thematic, playful, deliberate treatment. Implemented bespoke brass/steel plates with cut corners, inset control symbols, slotted fasteners, lower edge depth, clearer hover/keyboard focus and mechanical press states. Play is the primary launch plate; Equipment/Practice use secondary plates; Settings/Quit use compact switches. Added the short “SCRAP. UPGRADE. REPEAT.” tagline. Shared non-home buttons get restrained steel edge depth and explicit disabled states. Labels/navigation remain functional native controls, no interaction timing changes. Existing foundry/robot artwork retained; no generated images or new asset dependencies. Normal/reduced and keyboard-focus captures inspected at 1600×900; human preference is pending, not a new quality rating.
+
 ## Upgrade card control association · 11 September 2026
 
 Owner requested the ability key on choice cards so players associate upgrades with controls. Added a prominent key badge beside each icon (Q/W/E/R/D/F, LMB for hammer, backtick for the independent gun), while the footer explicitly labels 1/2/3 as choosing controls. Existing layout, effects and gameplay values retained. Rendered card inspection confirms readable badge spacing.

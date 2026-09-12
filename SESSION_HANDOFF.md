@@ -1,6 +1,6 @@
 # Current session handoff
 
-Updated 11 September 2026. Stable entry point; human feedback and technical evidence stay in their dated review documents.
+Updated 12 September 2026. Stable entry point; human feedback and technical evidence stay in their dated review documents.
 
 11 September owner note: Vanguard is now considered in a good place and should be preserved as the benchmark. The next gameplay-design change is to refine another class, but today's work is feedback/research text only. Do not mix that class pass with the optional 3D production experiment documented in [AI-assisted production feasibility](docs/design/AI_ASSISTED_PRODUCTION_FEASIBILITY_18.md).
 
@@ -9,6 +9,8 @@ The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRO
 Owner clarification: preserve the current cartoony presentation as a complete, fun version. The future high-fidelity/high-graphics work is a separate presentation of the same core game for controlled player A/B testing, not a replacement or incremental conversion of the current style.
 
 ## Next action: owner review of 0.26; research actions on hold
+
+12 September menu-design follow-up: owner rejected the generic/mobile-looking buttons. Home now uses native cut-corner foundry plates, brass Play, steel Equipment/Practice, compact Settings/Quit switches and inset symbols. Shared buttons have clearer edge depth/pressed/disabled states. No gameplay changes. `tests/menu_style_capture.gd` produces ignored normal/reduced/focus/equipment previews without saving. Current GitHub test.2 predates this visual update; review the local menu direction before the next distribution build. Full details and human-feedback distinction are in QUALITY_BAR/QA_18.
 
 11 September UI follow-up: upgrade cards show their ability key beside the icon, including Q and LMB, with separate 1/2/3 choice instructions. Published in [Windows Playtest 2](https://github.com/Timothy-Cao/MobaBot.io/releases/tag/v0.26.0-test.2), source `045adb7`; ZIP and checksum verified uploaded, non-draft pre-release. All 36 suites and exported-pack smoke pass. No balance changes. Playtest 1 remains available unchanged.
 
