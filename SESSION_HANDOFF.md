@@ -2,7 +2,13 @@
 
 Updated 11 September 2026. Stable entry point; human feedback and technical evidence stay in their dated review documents.
 
-## Next action: owner review of 0.26 arsenal and support enemies
+11 September owner note: Vanguard is now considered in a good place and should be preserved as the benchmark. The next gameplay-design change is to refine another class, but today's work is feedback/research text only. Do not mix that class pass with the optional 3D production experiment documented in [AI-assisted production feasibility](docs/design/AI_ASSISTED_PRODUCTION_FEASIBILITY_18.md).
+
+The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRODUCTION_18.md) records how to create perceived animation quality with a small motion budget. It is a future bakeoff plan, not permission to alter the synchronized build.
+
+Owner clarification: preserve the current cartoony presentation as a complete, fun version. The future high-fidelity/high-graphics work is a separate presentation of the same core game for controlled player A/B testing, not a replacement or incremental conversion of the current style.
+
+## Next action: owner review of 0.26; research actions on hold
 
 11 September performance follow-up: owner reported lag after spawning 25 Mosquitoes, then requested fewer/tougher ones. Candidate dodge paths now use conservative capsule clearance checks with the original swept fallback near walls; 100ms planning is staggered across frames. Current `arsenal26` Mosquito HP is doubled (20 base), normal spawning caps them at four alive (shared ranged cap can be lower); explicit Practice stress spawns bypass the cap. See QA_18 for reproducible before/after CPU evidence and caveats.
 
