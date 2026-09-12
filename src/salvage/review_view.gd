@@ -60,6 +60,10 @@ static func upgrades(ui, run) -> void:
 			var frame: Control=ui._surface(card,Rect2(0,0,224,244),Color.TRANSPARENT,2,accent,2)
 			frame.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		ui._ability_icon(card,VanguardHud.icon(slot,run),Rect2(88,12,48,48))
+		var binding: String="LMB" if slot=="hammer" else "`" if slot=="gun" else OS.get_keycode_string(Vanguard.KEYS[slot])
+		var key_badge: Control=ui._surface(card,Rect2(147,22,62,28),ui.INK,4,ui.TEAL,1)
+		key_badge.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		ui._label(key_badge,binding,Rect2(0,0,62,28),18,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
 		ui._label(card,name,Rect2(8,65,208,26),17,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
 		ui._label(card,"Level %d / 10"%next,Rect2(8,94,208,20),13,accent,true,HORIZONTAL_ALIGNMENT_CENTER)
 		for step in range(1,11):
@@ -75,7 +79,7 @@ static func upgrades(ui, run) -> void:
 			label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		card.tooltip_text=VanguardHud.detail(run,slot)
 		if i==0: card.grab_focus()
-	ui._label(ui.overlay,"1 / 2 / 3 · Special levels: 5 and 10",Rect2(132,430,696,22),13,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
+	ui._label(ui.overlay,"Choose: 1 / 2 / 3 · Special levels: 5 and 10",Rect2(132,430,696,22),13,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
 
 static func tabs(game) -> void:
 	var names: Array=["Round clear","Build","Mastery","Equipment"]

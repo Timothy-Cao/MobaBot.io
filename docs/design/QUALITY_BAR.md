@@ -1,5 +1,9 @@
 # MobaBot.io quality bar
 
+## Upgrade card control association · 11 September 2026
+
+Owner requested the ability key on choice cards so players associate upgrades with controls. Added a prominent key badge beside each icon (Q/W/E/R/D/F, LMB for hammer, backtick for the independent gun), while the footer explicitly labels 1/2/3 as choosing controls. Existing layout, effects and gameplay values retained. Rendered card inspection confirms readable badge spacing.
+
 ## Mosquito performance and density · 11 September 2026
 
 Owner reported severe lag with 25 manually spawned Mosquitoes and requested optimization, then proposed tankier enemies with only a few active. Implemented a conservative clear-path shortcut for candidate planning and staggered 100ms updates, keeping 17 candidate directions and physical avoidance. New-rule HP doubles to 20 base with existing scaling, with at most four in normal spawning; existing shared ranged limits may be lower. Practice manual spawns remain available for stress review. Wall-path parity, isolated W avoidance and gun hits remain verified. This is not a new human performance or balance verdict.
