@@ -60,6 +60,28 @@ func record_failure(run) -> void:
 	if level<=1 or level!=chapter_cleared+1 or level in recovery_used or run.time<90 or run.kills<60: return
 	recovery_used.append(level); recovery_target=level-1
 
+func bulk_unavailable_reason(action: String) -> String:
+	if blocked: return message if not message.is_empty() else "Equipment is unavailable."
+	if action=="craft":
+		var storage_full:=false
+		for slot in SLOTS:
+			for tier in range(4):
+				if inventory[SETS[tier]+"_"+slot].copies<3: continue
+				if inventory[SETS[tier+1]+"_"+slot].copies<999: return ""
+				storage_full=true
+		return "Next-tier storage is full." if storage_full else "No matching set of 3 to craft."
+	if action=="equip":
+		var has_items:=false
+		for slot in SLOTS:
+			for tier in range(4,-1,-1):
+				var id: String=SETS[tier]+"_"+slot
+				if inventory[id].copies<=0: continue
+				has_items=true
+				if equipped[slot]!=id: return ""
+				break
+		return "Best gear already equipped." if has_items else "No equipment to equip."
+	return "Unavailable."
+
 func bulk(action: String, persist: bool=true) -> bool:
 	if blocked or action not in ["craft","equip"]: return false
 	var before:=snapshot(); var changed:=0

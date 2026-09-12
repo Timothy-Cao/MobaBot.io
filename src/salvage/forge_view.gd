@@ -12,9 +12,15 @@ static func draw(game) -> void:
 		crate.tooltip_text="One equipment item. Tier odds: 1: 94%, 2: 5.5%, 3: 0.48%, 4: 0.02%, 5: 0%. Each slot equally likely. Forge 3 identical pieces for the next tier."
 	if ReviewRules.enabled(game.model) and game.model.state=="camp" and game.gear_return=="camp": ReviewView.tabs(game)
 	var craft: Button=ui._button("Auto craft",Rect2(48,280,145,30),func(): game.bulk_gear("craft"),false)
-	craft.disabled=collection.blocked; craft.tooltip_text="Combine all eligible three-copy upgrades through every tier."
+	var craft_reason:=collection.bulk_unavailable_reason("craft")
+	craft.disabled=not craft_reason.is_empty()
+	craft.tooltip_text=craft_reason if craft.disabled else "Craft all matching sets of 3."
+	craft.mouse_default_cursor_shape=Control.CURSOR_ARROW if craft.disabled else Control.CURSOR_POINTING_HAND
 	var fit: Button=ui._button("Auto equip",Rect2(208,280,145,30),func(): game.bulk_gear("equip"),false)
-	fit.disabled=collection.blocked; fit.tooltip_text="Equip the highest owned tier in every slot."
+	var equip_reason:=collection.bulk_unavailable_reason("equip")
+	fit.disabled=not equip_reason.is_empty()
+	fit.tooltip_text=equip_reason if fit.disabled else "Equip your best gear."
+	fit.mouse_default_cursor_shape=Control.CURSOR_ARROW if fit.disabled else Control.CURSOR_POINTING_HAND
 	for i in range(8):
 		var slot: String=ForgeEquipment.SLOTS[i]
 		var id: String=collection.equipped[slot]

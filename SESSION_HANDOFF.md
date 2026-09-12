@@ -8,7 +8,9 @@ The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRO
 
 Owner clarification: preserve the current cartoony presentation as a complete, fun version. The future high-fidelity/high-graphics work is a separate presentation of the same core game for controlled player A/B testing, not a replacement or incremental conversion of the current style.
 
-## Next action: review shared foundry controls, then human playtest
+## Next action: review equipment controls, then human playtest
+
+12 September equipment follow-up: Auto craft/Auto equip now disable when they cannot improve inventory/equipped gear, with gray visuals and delayed hover reasons. Availability respects tier-five limits, destination storage, empty slots and blocked profiles. No transaction or save behavior changed. This also postdates the published 0.31.0-test.1 ZIP.
 
 12 September control-art pass: shared buttons/tabs now use cut-corner beveled steel/brass, including settings, camp, equipment, upgrades and Practice. Mechanical switches/faders replace generic settings controls. Mastery retains owned/available colors with the shared casing. No added explanatory copy or gameplay change. Render fixture tests/foundry_controls_capture.gd checks settings/camp and button states without persistence. This and the prior copy cleanup postdate the published 0.31.0-test.1 ZIP.
 

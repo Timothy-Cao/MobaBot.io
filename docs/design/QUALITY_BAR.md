@@ -327,3 +327,7 @@ Owner explicitly rejected route hints, “3 stages / 5 minutes,” “Save betwe
 ## 12 September 2026 — settings and camp button pass
 
 Owner asked for thematic, beautiful buttons throughout settings and between-round screens. Implemented one shared foundry control material, brass primary actions, steel secondary controls, selected-tab rails, mechanical settings switches and brass fader handles. Mastery and Practice selection controls share the treatment. Round heading/credit spacing tightened without new copy. No gameplay changes. Human visual approval remains pending; no quality rating inferred from passing tests.
+
+## 12 September 2026 — actionable equipment controls
+
+Owner requested Auto craft/Auto equip to look inactive when unnecessary, with delayed hover reasons. Availability now derives read-only from inventory/equipped state: craft requires an eligible three-copy conversion with destination space; equip requires a slot whose best owned item is not equipped. Disabled controls use the existing gray material and arrow cursor, retaining native delayed tooltips. Reasons cover no matching trio, already best equipped, empty inventory, full destination storage and blocked collection. Actual forging/equipping transactions remain unchanged.

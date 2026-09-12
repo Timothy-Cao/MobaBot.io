@@ -37,6 +37,26 @@ func execute() -> void:
 	check(fresh().mastery.spent==0,"New level resets mastery")
 	var old:=collection.snapshot(); old.erase("recovery_used"); old.erase("recovery_target")
 	check(collection.valid(old),"Old v3 profile stays valid")
+	var ready:=ForgeEquipment.new(); var ready_before:=ready.snapshot()
+	check(ready.bulk_unavailable_reason("craft")!="" and ready.bulk_unavailable_reason("equip")!="","Nothing to craft or improve initially")
+	check(ready.snapshot()==ready_before,"Availability checks do not mutate inventory or RNG")
+	ready.inventory.courier_helmet.copies=2
+	check(ready.bulk_unavailable_reason("craft")!="","Two matching items cannot craft")
+	ready.inventory.courier_helmet.copies=3
+	check(ready.bulk_unavailable_reason("craft")=="","Three matching items enable crafting")
+	ready.bulk("craft",false)
+	check(ready.bulk_unavailable_reason("craft")!="" and ready.bulk_unavailable_reason("equip")=="Best gear already equipped.","Crafting refreshes eligibility and automatic replacement counts as equipped")
+	ready.inventory.reclaimer_boots.copies=3
+	check(ready.bulk_unavailable_reason("craft")!="","Highest tier cannot craft")
+	check(ready.bulk_unavailable_reason("equip")=="","Higher owned tier enables equipping")
+	ready.bulk("equip",false)
+	check(ready.bulk_unavailable_reason("equip")!="","Best gear disables equip after use")
+	ready.equipped.boots=""
+	check(ready.bulk_unavailable_reason("equip")=="","Empty slot with owned gear enables equip")
+	ready.blocked=true; ready.message="Could not load equipment."
+	check(ready.bulk_unavailable_reason("equip")==ready.message and ready.bulk_unavailable_reason("craft")==ready.message,"Blocked collection explains both actions")
+	ready=ForgeEquipment.new(); ready.inventory.relay_helmet.copies=3; ready.inventory.reclaimer_helmet.copies=999
+	check(ready.bulk_unavailable_reason("craft")=="Next-tier storage is full.","Craft availability respects destination cap")
 	collection.inventory.courier_helmet.copies=27
 	check(collection.bulk("craft",false) and collection.inventory.relay_helmet.copies==1,"Craft chains through tiers")
 	collection.inventory.reclaimer_boots.copies=1
