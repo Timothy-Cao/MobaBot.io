@@ -32,6 +32,8 @@ var exp: RefCounted
 var vanguard := Vanguard.new()
 var practice_meter := PracticeMeter.new()
 var field_pickups:=FieldPickups.new()
+var discovery_chests:=DiscoveryRules.new()
+var factory_works:=FactoryWorks.new()
 var mastery := BotMastery.new()
 var attacks := BotAttackOrders.new()
 var xp_fraction := 0.0
@@ -357,7 +359,7 @@ func orbit_radius() -> float:
 func magnet_radius() -> float:
 	if exp != null:
 		var reach: float=65+rank_of("magnet")*23+exp.stats.get("magnet",0)
-		return minf(Vanguard.TURRET_RANGE,reach) if Vanguard.enabled(self) else reach
+		return minf(Vanguard.TURRET_RANGE,reach)*(1.0+DiscoveryRules.rank_of(self,"pickup_range")*0.1) if Vanguard.enabled(self) else reach
 	if kit != null and kit.onboarding:
 		return 65.0 + rank_of("magnet") * 23.0 + mastery.rank_of("reach") * 35.0
 	if staged:
@@ -550,6 +552,7 @@ func _offscreen_point(side: int = -1) -> Vector2:
 	return point.clamp(ARENA.position + Vector2.ONE * 25, ARENA.end - Vector2.ONE * 25)
 
 func _spawn_pack(count: int, pressure: bool = false) -> void:
+	if DiscoveryRules.opening(self): pressure=false
 	var side := spawn_rng.randi_range(0, 3)
 	for i in range(count):
 		if enemies.size() >= MAX_ENEMIES: break
@@ -561,6 +564,7 @@ func _spawn_pack(count: int, pressure: bool = false) -> void:
 		if DemoPacing.enabled(self):
 			if kind==1 and DemoPacing.elapsed(self)<90: kind=0
 			if kind==3 and DemoPacing.elapsed(self)<150: kind=0
+		if DiscoveryRules.opening(self): kind=0
 		spawn_enemy(_offscreen_point(side if pressure else -1), kind)
 		var enemy: Dictionary = enemies.back()
 		enemy["elite"] = pressure
@@ -599,11 +603,13 @@ func _staged_spawns(delta: float) -> void:
 		_spawn_pack(1 if recovering else 2 + stage)
 
 func _enemy_step(delta: float) -> void:
+	var slowed: Dictionary=factory_works.before_move(self)
 	var before: Dictionary=SupportEnemies.prepare(self,delta) if ArsenalBurst.enabled(self) else {}
 	_enemy_step_base(delta)
 	if ArsenalBurst.enabled(self):
 		SupportEnemies.movement(self,before)
 		SwarmSpacing.step(self,delta)
+	factory_works.after_move(self,slowed)
 
 func _enemy_step_base(delta: float) -> void:
 	if exp!=null and exp.practice and vanguard.freeze_ai: return
@@ -1018,7 +1024,7 @@ func collect_pickup(pickup: Dictionary) -> void:
 	if value <= 0:
 		return
 	pickup.value = 0 # Claim before triggering damage/reward events.
-	xp_fraction += value * DemoPacing.reward_rate(self) * DemoPacing.xp_rate(self) * (1.0 + (float(exp.stats.get("xp", 0)) if exp != null else mastery.rank_of("learning") * 0.1)) / (OperationRules.pickup_divisor(exp.operation_chapter) if OperationRules.enabled(self) else 9.0 if ReviewRules.enabled(self) else 3.0 if Vanguard.enabled(self) else 1.0)
+	xp_fraction += value * DemoPacing.reward_rate(self) * DemoPacing.xp_rate(self) * DiscoveryRules.xp_rate(self) * (1.0 + (float(exp.stats.get("xp", 0)) if exp != null else mastery.rank_of("learning") * 0.1)) / (OperationRules.pickup_divisor(exp.operation_chapter) if OperationRules.enabled(self) else 9.0 if ReviewRules.enabled(self) else 3.0 if Vanguard.enabled(self) else 1.0)
 	var gained := floori(xp_fraction + 0.000001)
 	total_xp += gained
 	xp_fraction = maxf(0, xp_fraction - gained)

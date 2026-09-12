@@ -32,13 +32,17 @@ static func enable(run) -> void:
 	RunTerrain.build(run)
 
 static func candidates(run) -> Array:
-	return CORE.filter(func(slot): return Vanguard.rank_of(run,slot)<10)
+	var pool: Array=CORE.filter(func(slot): return Vanguard.rank_of(run,slot)<10)
+	if DiscoveryRules.enabled(run):
+		for id in DiscoveryRules.BONUS:
+			if DiscoveryRules.rank_of(run,id)<5: pool.append(id)
+	return pool
 
 static func offer(run) -> void:
-	if run.exp.practice or run.exp.clear_clock>=0 or run.state not in ["running","upgrade"]: return
+	if run.exp.practice or (run.exp.clear_clock>=0 and not DiscoveryRules.enabled(run)) or run.state not in ["running","upgrade"]: return
 	if run.kit.loadout.rewards18.is_empty(): return
 	var pool:=candidates(run)
-	if pool.is_empty():
+	if pool.is_empty() and not DiscoveryRules.enabled(run):
 		run.exp.field_credits+=20*run.kit.loadout.rewards18.size()
 		run.kit.loadout.rewards18.clear(); run.offers.clear(); run.state="running"; return
 	if run.state=="upgrade" and not run.offers.is_empty(): return
@@ -46,11 +50,16 @@ static func offer(run) -> void:
 	while run.offers.size()<3 and not pool.is_empty():
 		var index: int=run.offer_rng.randi_range(0,pool.size()-1)
 		run.offers.append(pool[index]); pool.remove_at(index)
+	if DiscoveryRules.enabled(run):
+		while run.offers.size()<3: run.offers.append("field_credit")
 	run.state="upgrade"; run.vanguard.ghost=false; run.kit.sprint=0; run.stop_movement(); run.attacks.stop(run)
 
 static func choose(run, index: int) -> bool:
 	if run.state!="upgrade" or index<0 or index>=run.offers.size(): return false
-	if not Vanguard.spend(run,run.offers[index]): return false
+	var id: String=run.offers[index]
+	if id in DiscoveryRules.BONUS or id=="field_credit":
+		if not DiscoveryRules.spend(run,id): return false
+	elif not Vanguard.spend(run,id): return false
 	run.offers.clear(); run.state="running"; offer(run)
 	return true
 

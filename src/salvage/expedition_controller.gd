@@ -84,7 +84,7 @@ func launch_expedition(resume: bool=false) -> void:
 		if collection is ForgeEquipment:
 			OperationRules.enable(model,chapter_choice); LevelMastery.enable(model)
 			model.kit.loadout.support23=true; model.kit.loadout.arsenal26=true
-			DemoPacing.enable(model); FactoryMaps.enable(model)
+			DemoPacing.enable(model); FactoryMaps.enable(model); DiscoveryRules.enable(model)
 			if collection.starting_ability:
 				model.kit.rank_up("e"); model.upgrades.skill_e=model.kit.ranks.e
 				if "e" not in model.kit.discovered: model.kit.discovered.append("e")
@@ -95,6 +95,7 @@ func launch_expedition(resume: bool=false) -> void:
 		if persistent_run() and not collection.save(): ui.announce("Save unavailable; run is not protected",2)
 		ui.show_running()
 	free_center=model.player
+	if FactoryMaps.enabled(model): ui.announce(FactoryMaps.NAMES[model.exp.operation_chapter-1])
 	_update_camera(); ui.update_hud(model)
 
 func confirm_new_run() -> void:

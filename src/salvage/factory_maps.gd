@@ -41,7 +41,7 @@ static func layout(level: int, round_index: int) -> Array:
 static func add(result: Array, p: Vector2, axis: Vector2, half: float, width: float, theme: int) -> void:
 	result.append({"uid":-3100-result.size(),"a":p-axis*half,"b":p+axis*half,"width":width,"life":99999.0,"terrain":true,"factory_theme":theme})
 static func build(run) -> void:
-	run.kit.extra.walls.assign(layout(run.exp.operation_chapter,run.exp.route_index))
+	run.kit.extra.walls.assign(FactoryWorks.layout(run.exp.operation_chapter,run.exp.route_index) if DiscoveryRules.enabled(run) else layout(run.exp.operation_chapter,run.exp.route_index))
 static func floor_art(c, run) -> void:
 	var level: int=run.exp.operation_chapter
 	var view:=Rect2(run.camera_origin(),run.view_size).grow(100)

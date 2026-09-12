@@ -15,6 +15,9 @@ static func overview(ui, run) -> void:
 		ui._label(tile,"Rank %d"%Vanguard.rank_of(run,slot) if Vanguard.rank_of(run,slot)>0 else "Shop" if slot in ReviewRules.MODULES else "Unlearned",Rect2(2,57,80,22),12,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
 		tile.mouse_filter=Control.MOUSE_FILTER_STOP; tile.tooltip_text=VanguardHud.detail(run,slot)
 	var rows: Array=[["Hull","%d / %d"%[run.health,run.max_health()]],["Energy","%d / %d"%[run.kit.energy,run.kit.energy_max()]],["Resistance","%.0f"%run.exp.resistance],["Move speed","%.0f"%run.kit.speed()],["Energy / second","%.1f"%(run.kit.energy_regen()-run.kit.drain_rate())],["Field credits",str(run.exp.field_credits)]]
+	if DiscoveryRules.enabled(run):
+		rows.append(["XP bonus","+%.0f%%"%(((1.0+float(run.exp.stats.get("xp",0)))*(1.0+DiscoveryRules.rank_of(run,"xp_gain")*0.1)-1)*100)])
+		rows.append(["Pickup reach","%.0f"%run.magnet_radius()])
 	for i in range(rows.size()):
 		ui._label(ui.overlay,rows[i][0],Rect2(490,126+i*49,270,27),16,ui.MUTED)
 		ui._label(ui.overlay,rows[i][1],Rect2(760,126+i*49,145,27),17,ui.CREAM,true,HORIZONTAL_ALIGNMENT_RIGHT)
@@ -45,9 +48,11 @@ static func upgrades(ui, run) -> void:
 	var dim:=ColorRect.new(); dim.color=Color(0.035,0.07,0.10,0.38)
 	ui.overlay.add_child(dim); dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	ui._label(ui.overlay,"Choose an upgrade",Rect2(132,100,696,35),25,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
-	ui._label(ui.overlay,"%d picks left"%run.kit.loadout.rewards18.size(),Rect2(132,135,696,24),14,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
+	ui._label(ui.overlay,"1 pick left" if run.kit.loadout.rewards18.size()==1 else "%d picks left"%run.kit.loadout.rewards18.size(),Rect2(132,135,696,24),14,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
 	for i in range(run.offers.size()):
 		var slot: String=run.offers[i]
+		if slot in DiscoveryRules.BONUS or slot=="field_credit":
+			FieldUpgradeCard.draw(ui,run,slot,i); continue
 		var rank_value:=Vanguard.rank_of(run,slot)
 		var name: String=slot.capitalize() if slot in ["gun","hammer"] else MobaKit.ABILITIES[Vanguard.TOOLS[slot]].name
 		var card: Button=ui._button("",Rect2(132+i*236,173,224,244),func(): ui.upgrade_selected.emit(i),false)

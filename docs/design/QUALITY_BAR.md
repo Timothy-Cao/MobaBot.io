@@ -331,3 +331,10 @@ Owner asked for thematic, beautiful buttons throughout settings and between-roun
 ## 12 September 2026 — actionable equipment controls
 
 Owner requested Auto craft/Auto equip to look inactive when unnecessary, with delayed hover reasons. Availability now derives read-only from inventory/equipped state: craft requires an eligible three-copy conversion with destination space; equip requires a slot whose best owned item is not equipped. Disabled controls use the existing gray material and arrow cursor, retaining native delayed tooltips. Reasons cover no matching trio, already best equipped, empty inventory, full destination storage and blocked collection. Actual forging/equipping transactions remain unchanged.
+
+
+## 12 September - Opening progression and map follow-up
+
+Owner says early levels are too hard for slow XP; wants basic opening swarms, rare immediate-upgrade chests, XP/pickup-range options, credit fallback, concise equipment status, illustrated level selection and more structured/interactive maps. Pickup range was explicitly selected at +10-50%. Implemented new-run Discovery35 rules and three helpful machinery interactions; new selector art retains original masters and shared restrained pixelation.
+
+Automated checks and isolated captures verify behavior, save compatibility and presentation. No human quality/fun score raised. Actual tests needed: whether the first90 seconds teach comfortably, whether the2:00 specialist transition spikes, whether multiple boss chests interrupt too much, whether machinery reads without prose, and whether Level2/3 upgrades accelerate too far. Selector art is richer than the native combat world; this difference remains visible.

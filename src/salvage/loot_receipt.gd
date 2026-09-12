@@ -22,7 +22,9 @@ func build(ui, receipt: Dictionary, compact: bool=false, grid: bool=false) -> vo
 			label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		return
 	var chest:=RewardMotion.new(); chest.position=Vector2(0,2); chest.size=Vector2(96,100); chest.reduced=ui.reduced; chest.mouse_filter=Control.MOUSE_FILTER_IGNORE; add_child(chest)
-	var scroll:=ScrollContainer.new(); scroll.position=Vector2(108,0); scroll.size=size-Vector2(108,0); scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED; add_child(scroll)
+	chest.visible=receipt.chests>0
+	var inset:=108 if receipt.chests>0 else 0
+	var scroll:=ScrollContainer.new(); scroll.position=Vector2(inset,0); scroll.size=size-Vector2(inset,0); scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED; add_child(scroll)
 	scroll.gui_input.connect(_skip_input)
 	var columns:=3 if grid else 1
 	var list:=GridContainer.new(); list.columns=columns; list.size_flags_horizontal=Control.SIZE_EXPAND_FILL; list.add_theme_constant_override("h_separation",8); list.add_theme_constant_override("v_separation",6); scroll.add_child(list)

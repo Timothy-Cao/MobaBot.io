@@ -19,7 +19,7 @@ foreach ($testName in @(
     'smoke_test', 'salvage_test', 'moba_test', 'iteration04_test', 'iteration05_test',
     'demo_test', 'readability_test', 'motion_qa_test', 'mobabot09_test', 'layout_audit',
     'mobabot10_test', 'mobabot11_test', 'mobabot12_test', 'mobabot13_test',
-    'expedition_test', 'expedition_ui_test', 'skill_visual_test', 'keyboard_forge_test', 'keyboard_ui_test', 'painted_art_test', 'refinement_test', 'vanguard_test', 'practice_meter_test', 'cursor_test', 'interface_polish_test', 'loot_receipt_test', 'pressure_feedback_test', 'run_diagnostics_test', 'review_rules_test', 'operation_test', 'balance_benchmark_test', 'level_progression_test', 'support_art_test', 'combo24_test', 'mosquito25_test', 'arsenal26_test', 'demo_pacing_test', 'swarm_pressure_test', 'miniboss_test', 'demo_easing_test', 'field_pickups_test', 'factory_maps_test'
+    'expedition_test', 'expedition_ui_test', 'skill_visual_test', 'keyboard_forge_test', 'keyboard_ui_test', 'painted_art_test', 'refinement_test', 'vanguard_test', 'practice_meter_test', 'cursor_test', 'interface_polish_test', 'loot_receipt_test', 'pressure_feedback_test', 'run_diagnostics_test', 'review_rules_test', 'operation_test', 'balance_benchmark_test', 'level_progression_test', 'support_art_test', 'combo24_test', 'mosquito25_test', 'arsenal26_test', 'demo_pacing_test', 'swarm_pressure_test', 'miniboss_test', 'demo_easing_test', 'field_pickups_test', 'factory_maps_test', 'discovery35_test'
 )) {
     Invoke-GodotCheck -EngineArguments @('--script', "res://tests/$testName.gd")
 }

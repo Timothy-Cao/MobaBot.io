@@ -38,7 +38,10 @@ static func pace(run) -> void:
 	var expected:=floori(survival_budget(index,DemoPacing.enabled(run))*clampf(run.stage_time/run.exp.round_seconds(),0,1))
 	var granted: int=run.kit.loadout.operation_xp[index]
 	if expected>granted:
-		run.total_xp+=expected-granted; run.kit.loadout.operation_xp[index]=expected
+		run.xp_fraction+=(expected-granted)*DiscoveryRules.xp_rate(run)
+		var gain:=floori(run.xp_fraction+0.000001)
+		run.total_xp+=gain; run.xp_fraction=maxf(0,run.xp_fraction-gain)
+		run.kit.loadout.operation_xp[index]=expected
 
 static func boss_hp(run) -> float:
 	return 6000.0*DemoPacing.enemy_rate(run)*chapter_health(run.exp.operation_chapter)*(1.0+0.12*run.exp.ascension)

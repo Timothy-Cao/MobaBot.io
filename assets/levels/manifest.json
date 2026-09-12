@@ -1,0 +1,36 @@
+{
+  "tool": "builtin image_gen",
+  "processing": "Lanczos to 256x384; saturation x0.85, brightness x0.97; nearest display",
+  "images": [
+    {
+      "name": "yard",
+      "generation": "exec-69bcb5a8-342a-48d6-a4d5-d36e086ed2db.png",
+      "source_sha256": "0799b56d5922ab2b296457d3911bb5888d557f3d8ae9c416f55d9c66df6ecca9",
+      "display_size": [
+        256,
+        384
+      ],
+      "alpha": "opaque"
+    },
+    {
+      "name": "assembly",
+      "generation": "exec-f1c68080-a97f-4bf4-9e31-c2041797d224.png",
+      "source_sha256": "3108dae4039735410b4d4a58b0c341e52d1abfb8c0be355b58406296c787d535",
+      "display_size": [
+        256,
+        384
+      ],
+      "alpha": "opaque"
+    },
+    {
+      "name": "cooling",
+      "generation": "exec-826762f7-8fd1-4edf-a7e8-81fd72b1b8f9.png",
+      "source_sha256": "fc19bc9f53e44720fbcb3071e8811ac3fb6d53f2df21aaf67e83a78f146108f3",
+      "display_size": [
+        256,
+        384
+      ],
+      "alpha": "opaque"
+    }
+  ]
+}

@@ -16,6 +16,7 @@ static func reward_rate(run) -> float:
 static func elapsed(run) -> float:
 	return (run.exp.operation_chapter-1)*900.0+run.exp.route_index*300.0+run.stage_time
 static func specialist(run, wave: int) -> String:
+	if DiscoveryRules.enabled(run) and run.exp.route_index==0 and run.stage_time<120: return ""
 	var available: Array[String]=[]
 	for id in INTRO:
 		if elapsed(run)>=INTRO[id]:

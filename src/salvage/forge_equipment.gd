@@ -83,7 +83,7 @@ func bulk_unavailable_reason(action: String) -> String:
 	return "Unavailable."
 
 func bulk(action: String, persist: bool=true) -> bool:
-	if blocked or action not in ["craft","equip"]: return false
+	if not bulk_unavailable_reason(action).is_empty(): return false
 	var before:=snapshot(); var changed:=0
 	for slot in SLOTS:
 		if action=="craft":
@@ -100,7 +100,7 @@ func bulk(action: String, persist: bool=true) -> bool:
 					if equipped[slot]!=id: equipped[slot]=id; changed+=1
 					break
 	if persist and not save(): restore(before); message="Save failed. Nothing changed."; return false
-	message=("Crafted %d upgrades" if action=="craft" else "Updated %d equipment slots")%changed
+	message="Crafting complete." if action=="craft" else "Equipment updated."
 	return true
 
 func buy_crate(persist: bool=true) -> String:
@@ -175,6 +175,15 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 		if spent!=c.spent: return false
 	if c.loadout.has("level22") and (c.loadout.level22!=true or not c.loadout.get("operation20",0)>0): return false
 	if c.loadout.has("support23") and (c.loadout.support23!=true or not c.loadout.get("level22",false)): return false
+	if c.loadout.has("discovery35"):
+		if typeof(c.loadout.discovery35)!=TYPE_BOOL or c.loadout.discovery35!=true: return false
+		if typeof(c.loadout.get("factory31"))!=TYPE_BOOL or c.loadout.factory31!=true: return false
+		if not c.loadout.get("field_ranks") is Dictionary or c.loadout.field_ranks.size()!=2: return false
+		for id in DiscoveryRules.BONUS:
+			if not integer(c.loadout.field_ranks.get(id),0,5): return false
+		if not integer(c.get("level"),1,DiscoveryRules.CAP): return false
+		if not integer(c.get("next"),1,2147483647) or c.next!=DiscoveryRules.threshold(int(c.level)): return false
+	if c.loadout.has("field_ranks") and c.loadout.get("discovery35",false)!=true: return false
 	if c.loadout.has("factory31") and (typeof(c.loadout.factory31)!=TYPE_BOOL or c.loadout.factory31!=true or c.loadout.get("demo27",false)!=true): return false
 	if c.loadout.has("demo27") and (c.loadout.demo27!=true or not c.loadout.get("arsenal26",false) or not integer(c.loadout.get("operation20",0),1,DemoPacing.LEVELS)): return false
 	if c.loadout.has("arsenal26") and (c.loadout.arsenal26!=true or not c.loadout.get("support23",false)): return false

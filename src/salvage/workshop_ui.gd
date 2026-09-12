@@ -464,6 +464,8 @@ func update_hud(model: SalvageRun) -> void:
 	health_bar.mouse_filter = Control.MOUSE_FILTER_STOP
 	health_bar.tooltip_text = "%d / %d hull" % [model.health, model.max_health()]
 	var previous := 0 if model.level == 1 else model.next_level - ((12 + model.level * 8) if model.staged else (8 + model.level * 4))
+	if OperationRules.enabled(model): previous=model.next_level-OperationRules.XP_PER_LEVEL
+	if DiscoveryRules.enabled(model): previous=DiscoveryRules.threshold(model.level-1)
 	xp_bar.value = clampf(float(model.total_xp - previous) / maxf(1, model.next_level - previous), 0, 1)
 	load_label.text = "%d / %d tools" % [model.orbit.size(), model.capacity()] if model.mode == "salvage" else "Bolt gun only"
 	if model.kit != null:

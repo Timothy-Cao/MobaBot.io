@@ -23,6 +23,7 @@ func simulate(class_id: String, policy: String, difficulty: int=0) -> Dictionary
 		OperationRules.enable(run,chapter)
 		LevelMastery.enable(run); run.kit.loadout.support23=true; run.kit.loadout.arsenal26=true
 		if chapter<=DemoPacing.LEVELS and "--legacy-pace" not in OS.get_cmdline_user_args(): DemoPacing.enable(run); FactoryMaps.enable(run)
+		if "--discovery" in OS.get_cmdline_user_args(): DiscoveryRules.enable(run)
 	ForgeEquipment.new().apply_to(run)
 	# Reliability only: a normal-HP refill can still die to several hits in one
 	# frame. Inflate maximum health too, preserving all AI/damage/collision paths.

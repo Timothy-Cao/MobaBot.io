@@ -212,6 +212,7 @@ func enter(run) -> void:
 	run.player = [Vector2(480,300), Vector2(1150,-480), Vector2(-700,950)][route_index % 3]
 	if FactoryMaps.enabled(run): run.player=FactoryMaps.CENTER
 	run.kit.pet_position = run.player
+	run.factory_works=FactoryWorks.new()
 	run.stop_movement(); run.attacks.stop(run)
 	run.caches.clear()
 	for i in range(3):
@@ -291,6 +292,7 @@ func spawns(run, delta: float) -> void:
 
 func enemy_killed(run, enemy: Dictionary) -> void:
 	if practice: return
+	if DiscoveryRules.enabled(run): run.discovery_chests.killed(run,enemy); return
 	if enemy.has("role") or enemy.has("miniboss") or (enemy.get("elite", false) and run.loot_rng.randf() < 0.2*DemoPacing.reward_rate(run)):
 		loot_chests.append({"pos": enemy.pos, "life": 30.0})
 		if loot_chests.size() > 8: pending_chests += 1; loot_chests.pop_front()
@@ -300,6 +302,7 @@ func level_up(run) -> void:
 
 func finish_step(run, delta: float) -> void:
 	if run.state != "running": return
+	run.factory_works.step(run,delta)
 	OperationRules.pace(run)
 	if ReviewRules.enabled(run) and not practice: RunDiagnostics.sample_progression(run)
 	if practice:
@@ -312,6 +315,7 @@ func finish_step(run, delta: float) -> void:
 		return
 	if Vanguard.enabled(run): Vanguard.progression(run)
 	if ReviewRules.enabled(run): ReviewRules.offer(run)
+	if DiscoveryRules.enabled(run) and run.state!="running": return
 	courier_clock = maxf(0, courier_clock - delta)
 	dynamo_clock = maxf(0, dynamo_clock - delta)
 	bastion_clock = maxf(0, bastion_clock - delta)
@@ -326,15 +330,22 @@ func finish_step(run, delta: float) -> void:
 	run.health = minf(max_health(run), run.health + (stats.get("health_regen", 0) + (0.35 if class_id == "melee" else 0.12)) * delta * (0.8 if ascension >= 3 else 1))
 	for chest in loot_chests:
 		chest.life -= delta
-		if run.player.distance_to(chest.pos) < 52 or chest.life <= 0: pending_chests += 1; chest.life = -1
+		if run.player.distance_to(chest.pos) < (run.magnet_radius() if DiscoveryRules.enabled(run) else 52) or chest.life <= 0: pending_chests += 1; chest.life = -1
 	loot_chests = loot_chests.filter(func(c: Dictionary) -> bool: return c.life > 0)
+	if DiscoveryRules.enabled(run):
+		Vanguard.progression(run); ReviewRules.offer(run)
+		if run.state!="running": return
 	var kind: String = route()[route_index][1]
 	var ready: bool = run.boss_defeated if kind in ["boss", "final"] else run.stage_time >= round_seconds() and run.enemies.filter(func(e: Dictionary) -> bool: return e.has("role") and not e.dead).is_empty()
 	if ready:
 		if clear_clock < 0:
 			clear_clock = 12.0 if revised else 1.4
+			if DiscoveryRules.enabled(run):
+				FieldPickups.sweep(run)
+				Vanguard.progression(run); ReviewRules.offer(run)
 			if revised:
 				run.enemies.clear(); run.projectiles.clear(); run.hazards.clear()
+		if DiscoveryRules.enabled(run) and run.state!="running": return
 		clear_clock -= delta
 		if clear_clock <= 0:
 			cleared += 1
@@ -349,7 +360,7 @@ func finish_step(run, delta: float) -> void:
 			field_credits += field_reward
 			if Vanguard.enabled(run): reward_receipt.credits+=field_reward
 			run.coins = 0
-			pending_chests += (3 if kind == "loot" else 1) + loot_chests.size(); loot_chests.clear(); clear_clock = -2
+			pending_chests += (0 if DiscoveryRules.enabled(run) else 3 if kind == "loot" else 1) + loot_chests.size(); loot_chests.clear(); clear_clock = -2
 			if kind == "loot":
 				pending_items.append(ForgeEquipment.roll_item(run.loot_rng,ascension) if run.kit.flexible() else ExpeditionGear.roll_item(run.loot_rng,ascension))
 				if Vanguard.enabled(run): reward_receipt.items[pending_items.back()]=int(reward_receipt.items.get(pending_items.back(),0))+1

@@ -18,12 +18,13 @@ func verify() -> void:
 	if DisplayServer.get_name()!="headless":
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png(OS.get_executable_path().get_base_dir()+"/../export-smoke.png")
-	assert(ProjectSettings.get_setting("application/config/version")=="0.31.0-test.1","Release version mismatch")
+	assert(ProjectSettings.get_setting("application/config/version")=="0.35.0-test.1","Release version mismatch")
 	game.collection=ForgeEquipment.new(); game.launch_expedition(); game.auto_play=true
-	assert(FactoryMaps.enabled(game.model),"Export must launch current factory maps")
+	assert(DiscoveryRules.enabled(game.model),"Export must launch current progression")
+	for id in ["yard","assembly","cooling"]: assert(load("res://assets/levels/"+id+".png") is Texture2D,"Missing level illustration")
 	for level in range(1,4):
 		game.model.exp.operation_chapter=level; game.model.exp.enter(game.model)
-		assert(game.model.kit.extra.walls.size()==FactoryMaps.layout(level,game.model.exp.route_index).size(),"Missing factory geometry")
+		assert(game.model.kit.extra.walls.size()==FactoryWorks.layout(level,game.model.exp.route_index).size(),"Missing factory geometry")
 		game.art.queue_redraw(); await process_frame
 	game.queue_free(); await process_frame
 	print("EXPORTED BUILD SMOKE PASS: Practice, HUD, icons, projectile")

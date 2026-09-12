@@ -321,6 +321,7 @@ func _world_floor() -> void:
 	draw_rect(SalvageRun.ARENA.grow(22), INK, false, 18)
 	if FactoryMaps.enabled(model):
 		FactoryMaps.floor_art(self,model)
+		model.factory_works.draw(self,model)
 	elif model.demo_mode:
 		var center: Vector2 = DemoCampaign.info(model).start
 		var paint := Color("657266")

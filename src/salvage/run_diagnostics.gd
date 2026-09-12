@@ -35,6 +35,9 @@ static func annotate(record: Dictionary, run, automated: bool) -> void:
 	if ArsenalBurst.enabled(run): record.build="vanguard-26-arsenal-support"
 	if DemoPacing.enabled(run): record.build="vanguard-27-three-level-demo"
 	if FactoryMaps.enabled(run): record.build="vanguard-31-factory-levels"
+	if DiscoveryRules.enabled(run):
+		record.build="vanguard-35-discovery-factories"
+		record.field_ranks=run.kit.loadout.field_ranks.duplicate()
 	record.practice=run.exp!=null and run.exp.practice
 	record.automated=automated
 	if Vanguard.enabled(run):

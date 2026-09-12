@@ -111,6 +111,7 @@ static func setup(run, rank_value: int = 0) -> void:
 	run.kit.loadout.erase("support23")
 	run.kit.loadout.erase("arsenal26")
 	run.kit.loadout.erase("demo27"); run.kit.loadout.erase("factory31")
+	run.kit.loadout.erase("discovery35"); run.kit.loadout.erase("field_ranks")
 	if run.mastery is ExpeditionTree: run.mastery.modern=false
 	if run.exp!=null: run.exp.operation_chapter=0; run.exp.demo_pace=false
 	if run.mastery is ExpeditionTree: run.mastery.unified=false
@@ -161,6 +162,7 @@ static func candidates(run, kind: String) -> Array:
 static func reward_kind(run) -> String:
 	var queue: Array = run.kit.loadout.get("rewards18",[])
 	if queue.is_empty(): return ""
+	if DiscoveryRules.enabled(run): return "upgrade"
 	return "upgrade" if not candidates(run,"upgrade").is_empty() else ""
 
 static func earn(run) -> void:
@@ -189,6 +191,7 @@ static func spend(run, slot: String) -> bool:
 	return true
 
 static func progression(run) -> void:
+	if DiscoveryRules.enabled(run): DiscoveryRules.progress(run); return
 	while run.total_xp >= run.next_level and (not OperationRules.enabled(run) or run.level<26):
 		run.level += 1
 		run.next_level += OperationRules.XP_PER_LEVEL if OperationRules.enabled(run) else ceili((12+run.level*8)*BotExpedition.xp_factor(run.level))

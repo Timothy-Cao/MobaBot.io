@@ -8,6 +8,14 @@ The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRO
 
 Owner clarification: preserve the current cartoony presentation as a complete, fun version. The future high-fidelity/high-graphics work is a separate presentation of the same core game for controlled player A/B testing, not a replacement or incremental conversion of the current style.
 
+## Next action: new-run playtest of Discovery 35
+
+12 September latest owner follow-up is implemented as `discovery35`: faster/basic opening, cheaper first four level-ups, one pick through player level5/two thereafter, rare immediate-level chests, five-rank XP and pickup-range cards, 200-credit fallback, corrected XP bar and no-op equipment copy. New illustrated three-panel level selector and three interactive map families (crane/press/cooling vent). Existing saves keep historical rules; start a new Level1. See [DISCOVERY_FACTORIES_35](docs/design/DISCOVERY_FACTORIES_35.md).
+
+All 43 regression suites pass; final focused test has 111 checks, including malformed thresholds and reachable controls. Actual-size selector/maps and normal/reduced cards inspected. Level1/3 artificial-health routes completed in1000.9/1098.1 simulation seconds, with final-boss fights about65/104 seconds. Normal-health active/basic bots lose around146/133 seconds. These observations do not establish human balance. No player game restarted or profile modified by tests.
+
+Version 0.35.0-test.1 prepared; Windows export/publication still pending at this entry. Last published ZIP remains 0.31.0-test.1 until release verification below is updated. Before human play capture a fresh commit/log baseline and freeze source/assets. Owner should review early cadence, first specialist transition, chest pause frequency, machinery discoverability and late-run growth. Combat environment art is still native/simple; do not present the richer selector paintings as a complete world-art replacement.
+
 ## Next action: review equipment controls, then human playtest
 
 12 September equipment follow-up: Auto craft/Auto equip now disable when they cannot improve inventory/equipped gear, with gray visuals and delayed hover reasons. Availability respects tier-five limits, destination storage, empty slots and blocked profiles. No transaction or save behavior changed. This also postdates the published 0.31.0-test.1 ZIP.
