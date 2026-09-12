@@ -557,6 +557,8 @@ func _exit_tree() -> void:
 	AudioServer.set_bus_mute(0,false); AudioServer.set_bus_volume_db(0,0)
 
 func confirm_leave() -> void:
+	if model!=null and model.exp!=null and model.exp.practice:
+		show_home(); return
 	var dialog:=ConfirmationDialog.new(); dialog.title="Leave run?"
 	dialog.dialog_text="This round will be lost." if not collection.checkpoint.is_empty() else "This run has no save yet."
 	dialog.ok_button_text="Leave"; dialog.cancel_button_text="Stay"

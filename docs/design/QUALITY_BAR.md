@@ -343,3 +343,8 @@ Automated checks and isolated captures verify behavior, save compatibility and p
 ## 12 September - Low-health recovery
 
 Owner requested a full-heal level-up card at 30% HP or below and occasional map health packs with directional edge icons. Current campaign implements the heal as an alternative costing one pick, plus delayed, bounded distant recovery packs. Health icons use the native green cross/pack silhouette, with steady arrows and no prose. Markers remain visible at normal/reduced effects and disappear behind menus. Verify human tradeoffs: whether choosing recovery feels worthwhile, whether six seconds is enough opportunity, and whether traveling for a pack is useful without becoming guaranteed survival. No human quality score raised from automated checks.
+
+
+## 12 September - Practice exit friction
+
+Owner requested that Practice not ask Leave/Stay. Settings -> Main menu now leaves immediately in both current and Legacy Practice, matching the existing Pause behavior. Campaign retains its leave confirmation. No additional copy or gameplay change.

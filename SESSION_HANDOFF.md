@@ -8,6 +8,10 @@ The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRO
 
 Owner clarification: preserve the current cartoony presentation as a complete, fun version. The future high-fidelity/high-graphics work is a separate presentation of the same core game for controlled player A/B testing, not a replacement or incremental conversion of the current style.
 
+## Latest follow-up: direct Practice exit
+
+12 September owner requested no Leave/Stay confirmation in Practice. The shared leave handler now returns directly to Home for both current and Legacy Practice, including Settings -> Main menu. Campaign confirmation remains. Isolated UI callback verification passed with no persistence. This source change postdates the published 0.36.0-test.1 ZIP; no player game restarted. All 44 regression suites passed. Source is committed/pushed; the Windows ZIP remains 0.36.0-test.1 until the next release.
+
 ## Latest follow-up: low-health recovery
 
 12 September owner requested a full-heal upgrade option at 30% HP or below, occasional distant recovery packs, and directional health icons. Implemented for current discovery35 campaign runs: one of the three cards is Full heal at <=30% HP, consuming a normal pick. After six seconds continuously low, a 25%-max-HP pack can spawn 650-1000 world units away on clear floor, with 45-65s cooldown, one extra active pack, and 75s lifetime. Independent RNG; no kill required; timers pause with gameplay. Up to three separated edge indicators point to offscreen health packs, remain a fixed screen size at different zooms, and hide in menus. Old pre-discovery checkpoints and Practice retain their rules.
