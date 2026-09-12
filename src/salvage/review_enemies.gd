@@ -44,18 +44,19 @@ static func tank(run, e: Dictionary, delta: float) -> void:
 	var offset: Vector2=run.player-e.pos
 	if not e.has("melee_phase"): e.melee_phase="seek"
 	if e.melee_phase=="seek":
-		move(run,e,(run.kit.extra.route(e.pos,run.player,e.radius)-Vector2(e.pos)).normalized(),130*run.exp.enemy_speed(run),delta)
+		move(run,e,(run.kit.extra.route(e.pos,run.player,e.radius)-Vector2(e.pos)).normalized(),((80+run.stage*10)*1.2*0.9 if ArsenalBurst.enabled(run) else 130)*run.exp.enemy_speed(run),delta)
 		if offset.length()<115 and e.clock<=0:
 			e.melee_phase="aim"; e.clock=0.55; e.dir=offset.normalized(); run.emit_event("enemy_windup",e.pos)
 	elif e.melee_phase=="aim" and e.clock<=0:
 		if offset.length()<125 and absf(Vector2(e.dir).angle_to(offset))<PI*0.45: run.hurt_player(e.pos,"Tank sweep",2)
-		e.melee_phase="recover"; e.clock=1.1
+		e.melee_phase="recover"; e.clock=0.75 if ArsenalBurst.enabled(run) else 1.1
 	elif e.melee_phase=="recover" and e.clock<=0: e.melee_phase="seek"
 
 static func boss(run, e: Dictionary, delta: float) -> void:
 	if not e.get("review_boss",false):
 		e.review_boss=true; e.radius=48.0; e.sequence=0; e.phase="approach"; e.clock=0.7
 		e.summon_clock=9.0; e.shot_clock=0.0; e.attack="fan"; e.pursuit=0.0
+	var aggressive: bool=ArsenalBurst.enabled(run) and (run.exp.practice or (e.has("exp_boss") and run.exp.operation_chapter==3))
 	var overtime:=ReviewRules.boss_overtime(run) if e.has("exp_boss") else 0.0
 	e.overload=overtime>0
 	e.enraged=e.hp<e.max_hp*0.5 or (overtime>60 if SupportModules.enabled(run) else e.overload)
@@ -72,7 +73,7 @@ static func boss(run, e: Dictionary, delta: float) -> void:
 	var offset: Vector2=run.player-e.pos
 	var direction:=offset.normalized()
 	if e.summon_clock<=0:
-		e.summon_clock=8.0 if e.enraged else 12.0
+		e.summon_clock=(7.0 if e.enraged else 9.0) if aggressive else 8.0 if e.enraged else 12.0
 		if run.enemies.size()<90: run._spawn_pack(3,true)
 	# Open arena: a visible, wall-respecting pursuit replaces invisible leashing.
 	if offset.length()>850 and e.phase in ["approach","recover"]:
@@ -85,7 +86,7 @@ static func boss(run, e: Dictionary, delta: float) -> void:
 		move(run,e,(direction*clampf((offset.length()-270)/160,-1,1)+tangent*0.85).normalized(),220 if e.enraged else 185,delta)
 		if e.clock<=0 and offset.length()<700:
 			e.attack=["fan","charge","shells","sweep","ring","melee"][e.sequence%6]; e.sequence+=1
-			e.phase="telegraph"; e.clock=0.55 if e.attack=="charge" else 0.85
+			e.phase="telegraph"; e.clock=(0.45 if aggressive else 0.55) if e.attack=="charge" else 0.85
 			e.dir=(run.player+run.velocity.limit_length(240)*0.3-Vector2(e.pos)).normalized()
 			if e.attack=="sweep": e.dir=direction.rotated(-0.65)
 			e.target=destination(run,e.pos,e.dir,480,e.radius)
@@ -107,13 +108,13 @@ static func boss(run, e: Dictionary, delta: float) -> void:
 					e.shot_clock=0.25
 					if Geometry2D.get_closest_point_to_segment(run.player,e.pos,Vector2(e.pos)+Vector2(e.dir)*740).distance_to(run.player)<23: run.hurt_player(e.pos,"Boss sweep laser",1,"ground")
 			"shells":
-				if e.shot_clock<=0 and e.burst<5:
-					e.shot_clock+=0.5; e.burst+=1
+				if e.shot_clock<=0 and e.burst<(6 if aggressive else 5):
+					e.shot_clock+=0.4 if aggressive else 0.5; e.burst+=1
 					var target: Vector2=run.player+run.velocity.limit_length(160)*0.35+direction.orthogonal()*sin(e.burst*2.4)*65
 					run.hazards.append({"pos":target,"radius":78.0,"time":0.8,"duration":0.8,"owner":e.id,"spent":false})
 			"fan":
-				if e.shot_clock<=0 and e.burst<3:
-					e.shot_clock+=0.3; e.burst+=1
+				if e.shot_clock<=0 and e.burst<(4 if aggressive else 3):
+					e.shot_clock+=0.23 if aggressive else 0.3; e.burst+=1
 					for i in range(9):
 						var aim: Vector2=Vector2(e.dir).rotated((i-4)*0.18+(e.burst%2)*0.07)
 						run._add_projectile(Vector2(e.pos)+aim*e.radius,aim*340,1,"hostile",0,2.5)
@@ -131,4 +132,5 @@ static func boss(run, e: Dictionary, delta: float) -> void:
 		if e.clock<=0:
 			e.phase="recover"
 			e.clock=lerpf(0.85 if e.enraged else 1.15,0.6,clampf(overtime/180.0,0,1)) if SupportModules.enabled(run) else 0.45 if e.overload else 0.85 if e.enraged else 1.15
-	elif e.phase=="recover" and e.clock<=0: e.phase="approach"; e.clock=0.7
+			if aggressive: e.clock*=0.75
+	elif e.phase=="recover" and e.clock<=0: e.phase="approach"; e.clock=0.5 if aggressive else 0.7

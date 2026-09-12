@@ -8,7 +8,9 @@ The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRO
 
 Owner clarification: preserve the current cartoony presentation as a complete, fun version. The future high-fidelity/high-graphics work is a separate presentation of the same core game for controlled player A/B testing, not a replacement or incremental conversion of the current style.
 
-## Next action: owner review of three-level demo pacing
+## Next action: owner review of encounter pressure
+
+12 September latest: [ENCOUNTER_PRESSURE_28](docs/design/ENCOUNTER_PRESSURE_28.md) removes Uplink/EMP from current campaign/Practice selection, sets tanks to 90% of swarm chase speed with shorter melee recovery, and adds two native-art minibosses. Demo stages spawn a roaming encounter at 3:00 (rammer/brawler/rammer) in addition to existing stage-end fights. Level 3 main boss and current Practice boss are more aggressive; HP unchanged. Historical definitions retained for compatibility. No player game restarted; local source only. All 39 suites pass; normal/reduced miniboss renders checked, Level 3 artificial-health route completes. See latest QA_18 for evidence and pending human balance review.
 
 12 September ranged/swarm follow-up: lance introduction is now 2:00 in Level 1 stage 1; current arsenal lance range 940, engagement 720, warning 0.7s. Bomb carriers drop sequentially at current movement, 5-8 bombs with individual 1.05s warnings and later-stage shorter recovery. Current arsenal crowds use wall-safe soft body spacing; frozen Practice and committed attack tells stay steady. See DEMO_PACING_27 and latest QA_18. Boss attacks/HP and player abilities unchanged; no human game restarted.
 

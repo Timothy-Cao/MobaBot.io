@@ -3,7 +3,7 @@ extends RefCounted
 ## Soft body separation, spatially bucketed and bounded by the population cap.
 const CELL:=64.0
 static func weight(e: Dictionary) -> float:
-	if e.get("dummy",false) or e.has("role") or e.phase in ["aim","beam","windup","telegraph","dash"] or e.get("melee_phase","")=="aim": return 0.0
+	if (e.has("miniboss") and e.phase=="attack") or e.get("dummy",false) or e.has("role") or e.phase in ["aim","beam","windup","telegraph","dash"] or e.get("melee_phase","")=="aim": return 0.0
 	return 1.0/maxf(1,float(e.radius)/14.0)
 static func step(run, delta: float) -> void:
 	if delta<=0 or (run.exp.practice and run.vanguard.freeze_ai): return

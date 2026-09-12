@@ -56,6 +56,7 @@ var god_mode := true
 var free_energy := true
 var fast_cooldowns := false
 var threat_wave := 0
+var roaming_mini_spawned:=false
 var progression_samples: Array[Dictionary]=[]
 var sample_time := -1.0
 var sample_damage: Dictionary={}
@@ -203,7 +204,7 @@ func enter(run) -> void:
 	run.stage_clear_wait = -1; run.spawn_clock = 0.8; run.demo_minis_killed = 0
 	encounter_spawned = false; last_wave = -1; clear_clock = -1
 	reward_receipt=RewardLedger.empty()
-	threat_wave = 0
+	threat_wave = 0; roaming_mini_spawned=false
 	run.kit.extra.clear_combat()
 	run.enemies.clear(); run.projectiles.clear(); run.hazards.clear(); run.pickups.clear(); run.supply_drops.clear(); run.orbit.clear()
 	run.kit.salvos.clear(); run.kit.zones.clear(); run.kit.poison_trail.clear(); run.kit.summon.clear(); run.kit.cancel_laser(); run.kit.flame_left = 0; run.kit.dash_left = 0
@@ -242,6 +243,10 @@ func spawns(run, delta: float) -> void:
 			boss.max_hp = boss.hp
 			boss["patterns"] = [["charge","fan"],["shells","charge"],["ring","shells"],["fan","charge","fan"],["ring","fan"],["shells","ring","charge"],["charge","shells","fan"],["ring","shells","charge","fan"]][stage_number - 1]
 		return
+	if DemoPacing.enabled(run) and run.stage_time>=180 and not roaming_mini_spawned:
+		var mini_type: String="drifter" if route_index%2==0 else "bulwark"
+		var roaming: Dictionary=RangedThreats.spawn(run,mini_type,Vector2.INF,true)
+		if not roaming.is_empty(): roaming_mini_spawned=true
 	if revised:
 		var threat_index := int(run.stage_time / (30.0 if DemoPacing.enabled(run) else maxf(15,23-route_index*0.4) if Vanguard.enabled(run) else 26))
 		if threat_index > threat_wave:
@@ -251,11 +256,12 @@ func spawns(run, delta: float) -> void:
 				roster=["breacher","volley","lancer","scatter"] if route_index==0 else ["breacher","mender","scatter","lancer","volley","bomber"]
 				if ReviewRules.enabled(run): roster=ReviewRules.specialist_roster(route_index)
 				if operation_chapter>0: roster=OperationRules.roster(run)
+			if ArsenalBurst.enabled(run): roster=roster.filter(func(id): return id not in ["emp","uplink"])
 			var selected: String=roster[(threat_index+route_index-1)%roster.size()]
 			if SupportModules.enabled(run) and Mosquito.wave(operation_chapter,route_index,threat_index): selected="mosquito"
 			if ArsenalBurst.enabled(run) and (operation_chapter>=2 or route_index>=1):
 				if threat_index%4==1: selected="hatchery"
-				elif threat_index%4==3: selected="uplink"
+				elif threat_index%4==3: selected="scatter"
 			if DemoPacing.enabled(run): selected=DemoPacing.specialist(run,threat_index)
 			if selected!="": RangedThreats.spawn(run,selected)
 	run.spawn_clock -= delta
@@ -283,7 +289,7 @@ func spawns(run, delta: float) -> void:
 
 func enemy_killed(run, enemy: Dictionary) -> void:
 	if practice: return
-	if enemy.has("role") or (enemy.get("elite", false) and run.loot_rng.randf() < 0.2*DemoPacing.reward_rate(run)):
+	if enemy.has("role") or enemy.has("miniboss") or (enemy.get("elite", false) and run.loot_rng.randf() < 0.2*DemoPacing.reward_rate(run)):
 		loot_chests.append({"pos": enemy.pos, "life": 30.0})
 		if loot_chests.size() > 8: pending_chests += 1; loot_chests.pop_front()
 

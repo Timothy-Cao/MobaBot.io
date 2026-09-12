@@ -29,8 +29,8 @@ Times below are earliest eligibility in Level 1, not a guaranteed on-screen enco
 | Mender | Heals nearby enemies | Stage 2, 1:30 |
 | Bomb carrier | Sequential ground blasts | Stage 2, 2:30 |
 | Hatchery | Durable fast-chaser spawner | Stage 2, 3:30 |
-| Uplink | Healing and decaying speed aura | Stage 2, 4:30 |
-| EMP suppressor | Temporarily disables D/F and 1234 | Stage 3, 2:00 |
+| Uplink | Retired from current roster | Compatibility only |
+| EMP suppressor | Retired from current roster | Compatibility only |
 | Rammer guardian | Charging miniboss | Stage 1, 5:00, every Level |
 | Artillery guardian | Ranged miniboss | Stage 2, 5:00, every Level |
 | Main boss | Combined attacks, summons, gradual enrage | Stage 3, 5:00, every Level |
@@ -53,3 +53,6 @@ Owner requested earlier/farther lasers, bombers that shoot more over time, and i
 Current bomb carriers issue individual bombs every 0.45 seconds, each with a fresh 1.05-second ground warning aimed around current player movement. Barrage count is capped at eight: 5 + stage index + one after 150 seconds within the stage. Recovery is 3.0/2.7/2.4 seconds by stage. Thus late stages add sustained pressure, not an unbounded damage or projectile ramp. Earlier rule families keep their attacks.
 
 Current arsenal enemies receive soft circular separation using 64-unit spatial buckets, cached movement weights and bounded displacement. Larger bodies yield less. Bosses, dummies and committed windups/charges do not get shoved; neighbors yield around them. Walls and arena bounds constrain every correction. Practice freeze stops spacing. This reduces ordinary crowd overlap rather than promising hard collision during every charge or dense spawn. No player-body collision or friendly-projectile blocking was added.
+
+
+Latest encounter override: [ENCOUNTER_PRESSURE_28](ENCOUNTER_PRESSURE_28.md) removes Uplink/EMP, adds roaming minibosses at 3:00 each stage, adjusts tank movement/recovery and increases Level 3 final-boss aggression.

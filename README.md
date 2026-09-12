@@ -1,3 +1,7 @@
+# Current encounter update
+
+See [Encounter pressure](docs/design/ENCOUNTER_PRESSURE_28.md): Uplink/EMP retired from current selection, melee tanks paced just behind the swarm, two roaming miniboss types with recovery openings, and more aggressive Level 3 final-boss offense. Both minibosses are available in Practice.
+
 # Current 0.27 demo override
 
 Three selectable Levels, each with three five-minute survival stages plus guardians/boss. Progression is spread across the longer rounds and enemies enter gradually through Level 1. Hatcheries have triple base HP and spawn fast chasers. See [Demo pacing and enemy roster](docs/design/DEMO_PACING_27.md). Start a new level for these timings; historical checkpoints retain their previous pacing.

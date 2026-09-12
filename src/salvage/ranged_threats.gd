@@ -1,6 +1,6 @@
 class_name RangedThreats
 extends RefCounted
-const NAMES := {"lancer":"Arc lancer", "volley":"Burst battery", "bomber":"Bomb carrier", "breacher":"Breacher", "mender":"Mender", "scatter":"Scattergun", "emp":"EMP suppressor", "mosquito":"Mosquito", "hatchery":"Hatchery", "uplink":"Uplink"}
+const NAMES := {"lancer":"Arc lancer", "volley":"Burst battery", "bomber":"Bomb carrier", "breacher":"Breacher", "mender":"Mender", "scatter":"Scattergun", "emp":"EMP suppressor", "mosquito":"Mosquito", "hatchery":"Hatchery", "uplink":"Uplink", "drifter":"Drift rammer", "bulwark":"Bulwark"}
 
 static func spawn(run, type: String, point: Vector2 = Vector2.INF, bypass_cap: bool = false) -> Dictionary:
 	if not NAMES.has(type) or run.enemies.size()>=run.MAX_ENEMIES: return {}
@@ -23,6 +23,7 @@ static func spawn(run, type: String, point: Vector2 = Vector2.INF, bypass_cap: b
 		if ArsenalBurst.enabled(run): enemy.hp*=2; enemy.max_hp=enemy.hp
 	if type in ["hatchery","uplink"]: enemy.hp=120; enemy.max_hp=120; enemy.clock=8.0
 	if type=="hatchery" and ArsenalBurst.enabled(run): enemy.hp=360; enemy.max_hp=360
+	if type in MinibossEncounters.TYPES: MinibossEncounters.setup(enemy,type)
 	return enemy
 
 static func beam_end(run, point: Vector2, direction: Vector2) -> Vector2:
@@ -41,6 +42,7 @@ static func beam_end(run, point: Vector2, direction: Vector2) -> Vector2:
 	return end
 
 static func step(run, e: Dictionary, delta: float) -> void:
+	if e.has("miniboss"): MinibossEncounters.step(run,e,delta); return
 	if e.gunner_kind in ["hatchery","uplink"]: SupportEnemies.step(run,e,delta); return
 	if e.gunner_kind=="mosquito": Mosquito.step(run,e,delta); return
 	if ReviewRules.enabled(run) and e.gunner_kind=="emp": ReviewEnemies.emp(run,e,delta); return
@@ -99,6 +101,7 @@ static func step(run, e: Dictionary, delta: float) -> void:
 	e.pos=Vector2(e.pos).clamp(run.ARENA.position+Vector2.ONE*30,run.ARENA.end-Vector2.ONE*30)
 
 static func draw(art, e: Dictionary) -> void:
+	if e.has("miniboss"): MinibossEncounters.draw(art,e); return
 	if e.gunner_kind in ["hatchery","uplink"]: SupportEnemies.draw(art,e); return
 	if e.gunner_kind=="mosquito": Mosquito.draw(art,e); return
 	if e.gunner_kind in ["breacher","mender","scatter"]: FieldEnemies.draw(art,e); return
@@ -125,6 +128,7 @@ static func draw(art, e: Dictionary) -> void:
 	art.draw_set_transform(Vector2.ZERO)
 
 static func tell(art, e: Dictionary) -> void:
+	if e.has("miniboss"): MinibossEncounters.tell(art,e); return
 	if e.gunner_kind in ["breacher","mender","scatter"]: FieldEnemies.tell(art,e); return
 	if e.gunner_kind=="lancer" and e.phase in ["aim","beam"]:
 		art._line(e.pos,e.beam_end,Color(art.CORAL,0.7 if e.phase=="aim" else 1),2 if e.phase=="aim" else 24)

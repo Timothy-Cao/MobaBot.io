@@ -855,6 +855,7 @@ func _projectile_step(delta: float) -> void:
 func hit_enemy(enemy: Dictionary, damage: float, source: String, knock: Vector2 = Vector2.ZERO) -> void:
 	if enemy.dead:
 		return
+	damage*=MinibossEncounters.damage_factor(enemy)
 	if ReviewRules.enabled(self) and float(enemy.get("vulnerable",0))>0: damage*=1.5
 	if demo_mode and enemy.has("role") and enemy.phase == "recover": damage *= 1.5
 	var dummy: bool=exp!=null and exp.practice and enemy.get("dummy",false)
