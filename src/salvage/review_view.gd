@@ -105,28 +105,43 @@ static func camp(game) -> void:
 	ui._label(ui.overlay,exp.label(),Rect2(48,95,360,30),17,ui.TEAL,true)
 	ui._label(ui.overlay,"%d field credits"%exp.field_credits,Rect2(452,95,263,30),16,ui.GOLD,true,HORIZONTAL_ALIGNMENT_RIGHT)
 	ui._label(ui.overlay,"Recovered" if DiscoveryRules.enabled(run) else "Recovered · %d chests"%exp.reward_receipt.chests,Rect2(48,133,760,24),14,ui.MUTED)
-	var receipt:=LootReceipt.new(); receipt.name="RoundReceipt"; receipt.position=Vector2(48,165); receipt.size=Vector2(856,128)
+	var receipt:=LootReceipt.new(); receipt.name="RoundReceipt"; receipt.position=Vector2(48,165); receipt.size=Vector2(856,108)
 	ui.overlay.add_child(receipt); receipt.build(ui,exp.reward_receipt,false,true)
+	ui._label(ui.overlay,"Modules",Rect2(48,274,400,22),14,ui.MUTED,true)
 	for i in range(4):
 		var slot: String=ReviewRules.MODULES[i]
 		var rank_value:=Vanguard.rank_of(run,slot)
 		var price:=ReviewRules.module_price(run,slot)
-		var card: Button=ui._button("",Rect2(48+i*218,310,208,78),func(): game.buy_review_module(slot),false)
+		var card: Button=ui._button("",Rect2(48+i*218,302,208,151),func(): game.buy_review_module(slot),false)
 		card.set_meta("module_purchase",slot)
 		card.disabled=rank_value>=10 or exp.field_credits<price or game.collection.blocked
-		ui._ability_icon(card,VanguardHud.icon(slot,run),Rect2(8,13,46,46))
+		var module_icon: Control=ui._ability_icon(card,VanguardHud.icon(slot,run),Rect2(13,14,56,56))
+		if card.disabled: module_icon.modulate=Color(0.65,0.7,0.7)
 		var title: String="Orbit" if slot=="p1" else MobaKit.ABILITIES[Vanguard.TOOLS[slot]].name
 		if SupportModules.enabled(run) and slot in ["x1","x3"]: title=SupportModules.title(slot)
 		if ArsenalBurst.enabled(run) and slot=="x3": title="Missile Barrage"
-		ui._label(card,title,Rect2(62,7,140,26),15,ui.CREAM,true)
-		ui._label(card,"Max rank" if rank_value>=10 else "%s · %d"%["Buy" if rank_value==0 else "Rank %d"%(rank_value+1),price],Rect2(62,38,140,25),14,ui.GOLD)
+		var text_color: Color=ui.MUTED if card.disabled else ui.CREAM
+		var accent: Color=ui.MUTED if card.disabled else ui.TEAL if rank_value>0 else ui.GOLD
+		var title_label: Label=ui._label(card,title,Rect2(80,14,118,43),15,text_color,true)
+		title_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		var key=ui._surface(card,Rect2(80,58,24,18),ui.INK,0,ui.EDGE,1)
+		key.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		ui._label(key,OS.get_keycode_string(Vanguard.KEYS[slot]),Rect2(0,0,24,18),11,text_color,true,HORIZONTAL_ALIGNMENT_CENTER)
+		ui._label(card,"%d / 10"%rank_value,Rect2(118,57,75,19),11,ui.MUTED,false,HORIZONTAL_ALIGNMENT_RIGHT)
+		for step in range(10):
+			var pip=ui._surface(card,Rect2(14+step*18,83,14,6),accent if step<rank_value else ui.INK,0,ui.EDGE,1)
+			pip.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		var footer=ui._surface(card,Rect2(9,105,190,37),ui.INK,0)
+		footer.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		ui._label(footer,"Max" if rank_value>=10 else "Buy" if rank_value==0 else "Upgrade",Rect2(9,5,95,26),14,text_color,true)
+		ui._label(footer,"10 / 10" if rank_value>=10 else str(price),Rect2(98,5,82,26),15,accent,true,HORIZONTAL_ALIGNMENT_RIGHT)
 		card.tooltip_text=VanguardHud.detail(run,slot)+"\nRun-only purchase. Resets next level."
 	if exp.is_shop(true):
 		for i in range(exp.shop_stock.size()):
 			var id: String=exp.shop_stock[i]
 			var label: String="Sold" if id=="" else "%s · %d"%[ForgeEquipment.ITEMS[id].name,100+ForgeEquipment.ITEMS[id].tier*100]
-			var card: Button=ui._button(label,Rect2(48+i*292,403,278,35),func(): game.buy_item(i),false)
+			var card: Button=ui._button(label,Rect2(48+i*292,463,278,30),func(): game.buy_item(i),false)
 			card.add_theme_font_size_override("font_size",12)
 			card.disabled=id=="" or game.collection.blocked or exp.field_credits<(100+ForgeEquipment.ITEMS[id].tier*100 if id!="" else 0)
 			card.tooltip_text="Permanent equipment · "+(game.collection.item_text(id) if id!="" else "Sold")
-	if not game.collection.message.is_empty(): ui._label(ui.overlay,game.collection.message,Rect2(48,490,850,22),12,ui.CORAL)
+	if not game.collection.message.is_empty(): ui._label(ui.overlay,game.collection.message,Rect2(48,496,850,18),12,ui.CORAL)

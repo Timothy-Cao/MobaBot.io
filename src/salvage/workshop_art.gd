@@ -294,25 +294,28 @@ func _world_floor() -> void:
 	var view := Rect2(origin - Vector2(100, 100), model.view_size + Vector2(200, 200))
 	var sector: int=model.exp.operation_chapter-1 if FactoryMaps.enabled(model) else clampi(model.stage-1,0,2)
 	var bases: Array=[Color("293e46"),Color("403c3c"),Color("353b49")]
-	draw_rect(view, bases[sector])
-	for x in range(int(floor(view.position.x / 640)), int(ceil(view.end.x / 640))):
-		for y in range(int(floor(view.position.y / 480)), int(ceil(view.end.y / 480))):
-			var p := Vector2(x * 640, y * 480)
-			var color: Color=bases[sector].lightened(0.055 if posmod(x+y,2)==0 else 0.025)
-			draw_rect(Rect2(p + Vector2(4, 4), Vector2(632, 472)), color)
-			# Flush service panels, painted bay markings and floor conduits stay walkable.
-			_box(Rect2(p + Vector2(60, 82), Vector2(92, 46)), Color("243a42"), 3, Color("3b545b"), 1)
-			for vent in range(7):
-				_line(p + Vector2(72 + vent * 11, 91), p + Vector2(72 + vent * 11, 119), Color("415960"), 3)
-			_line(p + Vector2(8, 455), p + Vector2(632, 455), Color("796c49"), 2)
-			_line(p + Vector2(8, 461), p + Vector2(632, 461), Color("796c49"), 1)
-			for stripe in range(6):
-				_line(p + Vector2(400 + stripe * 28, 35), p + Vector2(414 + stripe * 28, 35), Color("657266"), 3)
-			draw_string(stencil_font, p + Vector2(425, 128), "%02d" % (posmod(x * 3 + y, 12) + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 70, Color("3a545d"))
-	for x in range(int(floor(view.position.x / 160)), int(ceil(view.end.x / 160))):
-		_line(Vector2(x * 160, view.position.y), Vector2(x * 160, view.end.y), Color("253b44"), 1)
-	for y in range(int(floor(view.position.y / 120)), int(ceil(view.end.y / 120))):
-		_line(Vector2(view.position.x, y * 120), Vector2(view.end.x, y * 120), Color("253b44"), 1)
+	if FactoryMaps.enabled(model):
+		FactoryFinish.floor_draw(self,view,sector)
+	else:
+		draw_rect(view, bases[sector])
+		for x in range(int(floor(view.position.x / 640)), int(ceil(view.end.x / 640))):
+			for y in range(int(floor(view.position.y / 480)), int(ceil(view.end.y / 480))):
+				var p := Vector2(x * 640, y * 480)
+				var color: Color=bases[sector].lightened(0.055 if posmod(x+y,2)==0 else 0.025)
+				draw_rect(Rect2(p + Vector2(4, 4), Vector2(632, 472)), color)
+				# Flush service panels, painted bay markings and floor conduits stay walkable.
+				_box(Rect2(p + Vector2(60, 82), Vector2(92, 46)), Color("243a42"), 3, Color("3b545b"), 1)
+				for vent in range(7):
+					_line(p + Vector2(72 + vent * 11, 91), p + Vector2(72 + vent * 11, 119), Color("415960"), 3)
+				_line(p + Vector2(8, 455), p + Vector2(632, 455), Color("796c49"), 2)
+				_line(p + Vector2(8, 461), p + Vector2(632, 461), Color("796c49"), 1)
+				for stripe in range(6):
+					_line(p + Vector2(400 + stripe * 28, 35), p + Vector2(414 + stripe * 28, 35), Color("657266"), 3)
+				draw_string(stencil_font, p + Vector2(425, 128), "%02d" % (posmod(x * 3 + y, 12) + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 70, Color("3a545d"))
+		for x in range(int(floor(view.position.x / 160)), int(ceil(view.end.x / 160))):
+			_line(Vector2(x * 160, view.position.y), Vector2(x * 160, view.end.y), Color("253b44"), 1)
+		for y in range(int(floor(view.position.y / 120)), int(ceil(view.end.y / 120))):
+			_line(Vector2(view.position.x, y * 120), Vector2(view.end.x, y * 120), Color("253b44"), 1)
 	var arena := SalvageRun.ARENA
 	# Mask decorative tiles beyond the walkable floor when the edge camera overscans.
 	if view.position.x < arena.position.x: draw_rect(Rect2(view.position, Vector2(arena.position.x - view.position.x, view.size.y)), INK)

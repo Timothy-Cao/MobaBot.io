@@ -29,10 +29,10 @@ func build(ui, receipt: Dictionary, compact: bool=false, grid: bool=false) -> vo
 	var columns:=3 if grid else 1
 	var list:=GridContainer.new(); list.columns=columns; list.size_flags_horizontal=Control.SIZE_EXPAND_FILL; list.add_theme_constant_override("h_separation",8); list.add_theme_constant_override("v_separation",6); scroll.add_child(list)
 	for row in rows:
-		var card:=Control.new(); card.custom_minimum_size=Vector2((size.x-124)/columns-8 if grid else 0,50); list.add_child(card)
+		var card:=Control.new(); card.custom_minimum_size=Vector2((size.x-inset)/columns-8 if grid else 0,50); list.add_child(card)
 		card.gui_input.connect(_skip_input)
 		ui._ability_icon(card,row[0],Rect2(2,3,44,44))
-		var label: Label=ui._label(card,row[1],Rect2(56,2,(size.x-124)/columns-66 if grid else size.x-186,46),12 if grid else 14,ui.CREAM,true)
+		var label: Label=ui._label(card,row[1],Rect2(56,2,(size.x-inset)/columns-66 if grid else size.x-186,46),12 if grid else 14,ui.CREAM,true)
 		label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		reveal_cards.append(card)
 	if rows.is_empty():

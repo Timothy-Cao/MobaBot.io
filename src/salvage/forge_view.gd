@@ -41,7 +41,7 @@ static func draw(game) -> void:
 		var data: Dictionary=ForgeEquipment.ITEMS[selected]; var item: Dictionary=collection.inventory[selected]
 		ui._ability_icon(ui.overlay,data.icon,Rect2(429,130,90,90))
 		ui._label(ui.overlay,data.name,Rect2(538,135,373,40),23,ui.CREAM,true)
-		ui._label(ui.overlay,"Tier %d · %d copies"%[data.tier,item.copies],Rect2(538,180,373,26),15,ForgeEquipment.TIER_COLORS[data.tier-1])
+		ui._label(ui.overlay,"Tier %d · %d %s"%[data.tier,item.copies,"copy" if item.copies==1 else "copies"],Rect2(538,180,373,26),15,ForgeEquipment.TIER_COLORS[data.tier-1])
 		var values:=collection.values(selected)
 		var fitted: String=collection.equipped[data.slot]
 		var old: Dictionary={} if fitted=="" else collection.values(fitted)

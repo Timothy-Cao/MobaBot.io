@@ -84,6 +84,13 @@ func _draw() -> void:
 			line(Vector2(25,14),Vector2(39,14),STEEL,5)
 			line(Vector2(22,34),Vector2(42,34),CREAM,6)
 			line(Vector2(32,24),Vector2(32,44),CREAM,6)
+		"xp_gain":
+			poly([Vector2(15,10),Vector2(45,10),Vector2(51,16),Vector2(51,53),Vector2(15,53)],STEEL)
+			draw_rect(Rect2(19,15,27,32),INK)
+			for i in range(3): draw_rect(Rect2(22+i*8,36-i*7,5,8+i*7),GOLD)
+			line(Vector2(23,25),Vector2(39,17),CREAM,3)
+			line(Vector2(39,17),Vector2(38,24),CREAM,3)
+			for i in range(3): draw_rect(Rect2(21+i*9,52,4,6),GOLD)
 		"reward_point":
 			poly([Vector2(32,7),Vector2(55,32),Vector2(32,57),Vector2(9,32)],TEAL)
 			line(Vector2(22,32),Vector2(42,32),CREAM,5)

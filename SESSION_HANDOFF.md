@@ -8,6 +8,12 @@ The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRO
 
 Owner clarification: preserve the current cartoony presentation as a complete, fun version. The future high-fidelity/high-graphics work is a separate presentation of the same core game for controlled player A/B testing, not a replacement or incremental conversion of the current style.
 
+## Latest follow-up: visual polish review
+
+12 September owner authorized design critique and iteration within the current cartoony style. Reviewed menus, camp, upgrade cards and all three factory worlds from entry commit `5d77581`. Implemented quieter distinct floor materials, a magnetic crane/segmented press/turbine with inset pedals and cables, a larger module shop with framed keys/rank tracks/gray unavailable states, aligned upgrade cards, a distinct gold XP chip and singular point/copy wording. Six receipt entries fit without scrolling. Combat, machinery effects and solid collision are unchanged. See [VISUAL_POLISH_37](docs/design/VISUAL_POLISH_37.md) for the two passes and remaining critique.
+
+All 44 regression suites passed; final normal/reduced renders and state-preservation/affordability fixture passed. Both historical refined behavior probes and current Vanguard discovery probe completed. Tests use isolated state and no permanent rewards. No player game restarted. This is source-only; the downloadable Windows release remains **0.36.0-test.1**. Next visual review should target actor animation/material cohesion, occasional factory landmarks, and mastery node hierarchy. These are review observations, not owner-approved quality scores.
+
 ## Latest follow-up: more opening blobs
 
 12 September owner says Level 1's first round is too easy to AFK through with the machine gun; other sections feel reasonable. Current discovery35 Level 1, round 1 now spawns 3 basic blobs per regular pack for the first 15 seconds, then 4 until 90 seconds (previously 2). The existing 50-second surge is unchanged; no extra elite/runner/specialist bodies are introduced by this adjustment. Normal spawn counts resume at 90 seconds. Levels 2/3, later rounds and enemy stats retain their settings. Extra kills yield ordinary XP.

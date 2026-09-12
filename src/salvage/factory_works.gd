@@ -77,40 +77,4 @@ func draw(art, run) -> void:
 	var view:=Rect2(run.camera_origin(),run.view_size).grow(360)
 	for m in visible:
 		if not view.has_point(m.pad) and not view.has_point(m.target): continue
-		var tint:=Color("ddbd75") if run.exp.operation_chapter!=3 else Color("76c6bd")
-		var lit: Color=tint if m.cooldown<=0 or m.armed else Color("566c70")
-		art.draw_line(m.pad,m.target,Color("10212a"),13)
-		art.draw_line(m.pad,m.target,Color(lit,0.45),3)
-		art.draw_circle(m.pad+Vector2(0,6),46,Color("0d1e26"))
-		art.draw_circle(m.pad,42,Color("344e57"))
-		art.draw_arc(m.pad,36,0,TAU,24,lit,4,true)
-		for side in [-1,1]: ExpeditionArt.chevron(art,m.pad+Vector2(side*17,0),Vector2(-side,0),lit,9)
-		if m.cooldown>0: art.draw_arc(m.pad,43,-PI/2,-PI/2+TAU*(1-m.cooldown/45),32,tint,3,true)
-		var p: Vector2=m.target
-		match run.exp.operation_chapter:
-			1:
-				art.draw_rect(Rect2(p-Vector2(170,110),Vector2(340,220)),Color("537078",0.22),false,5)
-				for x in [-150,150]:
-					art.draw_line(p+Vector2(x,-140),p+Vector2(x,140),Color("324e5a"),14)
-					art.draw_line(p+Vector2(x-3,-140),p+Vector2(x-3,140),Color("6b8387"),3)
-				art.draw_line(p-Vector2(150,90),p+Vector2(150,-90),tint,8)
-				art.draw_line(p-Vector2(0,90),p-Vector2(0,25),tint,4)
-				art.draw_arc(p-Vector2(0,12),13,-PI/2,PI,12,tint,5)
-				if m.active>0: art.draw_arc(p,80+100*(1-m.active),0,TAU,40,Color(tint,m.active),4)
-			2:
-				art.draw_circle(p,210,Color("714e35",0.17))
-				art.draw_arc(p,210,0,TAU,48,Color(tint,0.4),4,true)
-				for i in range(12):
-					var d:=Vector2.from_angle(i*TAU/12)
-					art.draw_line(p+d*188,p+d*204,tint,6)
-				if m.armed or m.active>0:
-					var scale_value: float=1.0-m.windup/0.8 if m.armed else m.active/0.7
-					art.draw_circle(p,210*scale_value,Color(tint,0.14))
-					art.draw_arc(p,210*scale_value,0,TAU,40,tint,5,true)
-			3:
-				for radius in [70,82,94]: art.draw_arc(p,radius,0,TAU,32,Color("507e84"),5)
-				for i in range(-2,3): art.draw_line(p+Vector2(-50,i*18),p+Vector2(50,i*18),Color("6f999b"),6)
-				if m.active>0:
-					art.draw_circle(p,300,Color(tint,0.08))
-					art.draw_arc(p,300,0,TAU,64,Color(tint,0.6),3,true)
-		if m.armed: art.draw_arc(m.pad,48,-PI/2,-PI/2+TAU*(1-m.windup/0.8),32,tint,4,true)
+		FactoryFinish.machine(art,m,run.exp.operation_chapter)

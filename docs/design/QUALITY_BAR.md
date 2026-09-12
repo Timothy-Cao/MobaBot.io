@@ -353,3 +353,10 @@ Owner requested that Practice not ask Leave/Stay. Settings -> Main menu now leav
 ## 12 September - Opening blob pressure
 
 Owner now finds Level 1's first-round basic enemies too easy to AFK with the gun; other sections are acceptable. Increased only regular basic-blob packs during its first 90 seconds, from two to three initially and four after 15 seconds. Preserve enemy stats and specialist introductions. Human test should verify that this encourages movement/AOE without restoring the overwhelming opening previously rejected. Better equipment may still overpower this opening; no adaptive scaling against player gear was added.
+
+
+## 12 September 2026 — owner-authorized visual iteration
+
+Owner asked for critique and refinement against a polished game of this genre/theme, especially weak art/design. Reviewed from `5d77581`: repetitive factory flooring, schematic interactive machinery and sparse camp purchasing were the highest-impact weaknesses. Two presentation passes now provide quieter distinct floor materials, recognizable crane/press/cooling hardware, larger module cards with keys/rank tracks/disabled states, consistent upgrade alignment and an XP chip instead of a medical cross. Six rewards fit without scrolling; no added tutorial prose.
+
+Observed normal/reduced rendered results and 44 passing suites are technical evidence only. No new human fun score or player approval inferred. Remaining ranked art gaps: actor animation/material cohesion, occasional authored level landmarks, mastery node hierarchy. See VISUAL_POLISH_37.md. No gameplay balance changed; no player game restarted; source-only update, Windows ZIP unchanged.
