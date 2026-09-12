@@ -10,7 +10,7 @@ static func point(id: String, tree: Dictionary=ExpeditionTree.UNIFIED) -> Vector
 static func draw(ui,run) -> void:
 	var tree: Dictionary=run.mastery.nodes()
 	var width: float=200 if run.mastery.modern else 156
-	ui._label(ui.overlay,"%d points · Resets next run"%run.mastery.available(run.level),Rect2(48,90,750,23),14,ui.GOLD)
+	ui._label(ui.overlay,"%d points"%run.mastery.available(run.level),Rect2(48,90,750,23),14,ui.GOLD)
 	for id in tree:
 		var node: Dictionary=tree[id]
 		var at:=point(id,tree)

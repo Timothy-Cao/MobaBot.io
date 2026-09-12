@@ -3,7 +3,6 @@ extends RefCounted
 ## Fixed route geometry, independent of player position, camera and loot RNG.
 const CENTER:=Vector2(480,300)
 const NAMES:=["Loading yard","Assembly hall","Cooling plant"]
-const HINTS:=["Open bays · wide escape routes","Production lanes · cross through the gaps","Inner court · four exits to the outer loop"]
 static func enabled(run) -> bool:
 	return DemoPacing.enabled(run) and run.kit.loadout.get("factory31",false)==true
 static func enable(run) -> void:

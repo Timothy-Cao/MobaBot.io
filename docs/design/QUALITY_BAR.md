@@ -319,3 +319,7 @@ All 42 regression suites and all three artificial-health routes pass. Human feel
 ## 12 September 2026 — official playtest readiness
 
 Owner authorized pushing all work and publishing an updated Windows build. Release review corrected stale version/result labels and an obsolete campaign objective. Remaining human-review risks: crowd performance, factory route feel and five-minute pacing/durability. Passing automated runs do not raise quality scores. See RELEASE_REVIEW_31 for scope and old-log limitations.
+
+## 12 September 2026 — owner rejects explanatory menu clutter
+
+Owner explicitly rejected route hints, “3 stages / 5 minutes,” “Save between rounds,” and similar unsolicited explanation. Implemented removal from level selection, build/camp/mastery footers and redundant upgrade milestone instructions. Names, actions, currency/point values where useful, upgrade numbers, actual key bindings and hover details remain. Pause → Main menu now uses the existing leave confirmation; Stay keeps the paused run. No mid-combat save capability is implied or introduced. The copy policy is recorded in ART_STYLE_SCHEMA for future work. No fun rating change.

@@ -559,7 +559,9 @@ func show_pause() -> void:
 	_label(overlay, "Paused", Rect2(289, 133, 382, 42), 30, CREAM, true)
 	var resume := _button("Resume", Rect2(288, 198, 384, 42), func() -> void: resume_requested.emit())
 	_button("Settings", Rect2(288, 251, 384, 38), func() -> void: settings_requested.emit(), false)
-	_button("Main menu", Rect2(288, 304, 384, 38), func() -> void: menu_requested.emit(), false)
+	_button("Main menu", Rect2(288, 304, 384, 38), func() -> void:
+		if expedition_ui and host.model.exp!=null and not host.model.exp.practice: host.confirm_leave()
+		else: menu_requested.emit(), false)
 	resume.grab_focus()
 
 func show_build(model: SalvageRun, reset: bool = true) -> void:

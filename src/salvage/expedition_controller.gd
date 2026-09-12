@@ -557,7 +557,8 @@ func _exit_tree() -> void:
 
 func confirm_leave() -> void:
 	var dialog:=ConfirmationDialog.new(); dialog.title="Leave run?"
-	dialog.dialog_text="Continue returns to the last cleared round."
+	dialog.dialog_text="This round will be lost." if not collection.checkpoint.is_empty() else "This run has no save yet."
+	dialog.ok_button_text="Leave"; dialog.cancel_button_text="Stay"
 	dialog.confirmed.connect(func() -> void: show_home(); dialog.queue_free())
 	dialog.canceled.connect(dialog.queue_free)
 	add_child(dialog); dialog.popup_centered(Vector2i(440,140))

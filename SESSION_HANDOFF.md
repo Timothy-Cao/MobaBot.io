@@ -8,7 +8,9 @@ The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRO
 
 Owner clarification: preserve the current cartoony presentation as a complete, fun version. The future high-fidelity/high-graphics work is a separate presentation of the same core game for controlled player A/B testing, not a replacement or incremental conversion of the current style.
 
-## Next action: official human playtest of published 0.31
+## Next action: review copy cleanup, then human playtest
+
+12 September owner copy correction: keep player-facing menus terse. Removed level route hints, duration/reset/persistence explanations, build/camp hover footers and redundant milestone directions. Level names/actions and useful values remain. Pause → Main menu now confirms departure and Stay preserves the paused run. Existing checkpoint behavior retained; no mid-round save added. ART_STYLE_SCHEMA records the ongoing copy policy. This cleanup postdates the published 0.31.0-test.1 ZIP.
 
 12 September release: all implementation pushed to origin/main. Published non-draft Windows pre-release [v0.31.0-test.1](https://github.com/Timothy-Cao/MobaBot.io/releases/tag/v0.31.0-test.1), build source ee8db1575bffeffc0b724772222ee882e7d1f476. ZIP and checksum verified uploaded; GitHub digest matches local SHA256. Follow-up commits contain test/documentation corrections only. Full 42-suite regression, focused release diagnostics/HUD checks, exported pack/current-map smoke and actual EXE rendered startup passed. Menu now displays 0.31.0-test.1. See [RELEASE_REVIEW_31](docs/design/RELEASE_REVIEW_31.md) for remaining weaknesses: Level3 crowd performance, human route behavior, pacing/durability and older-save expectations.
 

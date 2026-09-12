@@ -27,7 +27,6 @@ static func prepare(game) -> void:
 	start.grab_focus()
 	if not game.collection.checkpoint.is_empty():
 		ui._button("Continue run",Rect2(424,439,234,44),func() -> void: game.launch_expedition(true),false)
-	ui._label(ui.overlay,"8 stages · Save between rounds",Rect2(48,445,354,25),13,ui.MUTED)
 	if not game.collection.message.is_empty(): ui._label(ui.overlay,game.collection.message,Rect2(48,491,856,21),12,ui.CORAL)
 
 static func chest(game) -> void:

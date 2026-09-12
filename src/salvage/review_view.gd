@@ -18,7 +18,6 @@ static func overview(ui, run) -> void:
 	for i in range(rows.size()):
 		ui._label(ui.overlay,rows[i][0],Rect2(490,126+i*49,270,27),16,ui.MUTED)
 		ui._label(ui.overlay,rows[i][1],Rect2(760,126+i*49,145,27),17,ui.CREAM,true,HORIZONTAL_ALIGNMENT_RIGHT)
-	ui._label(ui.overlay,"Hover a tool for mechanics and milestones",Rect2(48,461,760,25),14,ui.MUTED)
 
 static func build(ui, run) -> void:
 	var page: String="Mastery" if ui.build_page=="mastery" else "Equipment" if ui.build_page=="gear" else "Build"
@@ -40,14 +39,13 @@ static func build(ui, run) -> void:
 			var label: Label=ui._label(card,item.name,Rect2(76,12,124,55),15,ui.CREAM,true); label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			ui._label(card,"Tier %d"%item.tier,Rect2(12,83,180,25),15,ui.GOLD)
 			card.mouse_filter=Control.MOUSE_FILTER_STOP; card.tooltip_text=item.stats
-		ui._label(ui.overlay,"Change equipment between rounds",Rect2(48,461,760,25),14,ui.MUTED)
 
 static func upgrades(ui, run) -> void:
 	ui.clear_overlay(); ui.hud.visible=true
 	var dim:=ColorRect.new(); dim.color=Color(0.035,0.07,0.10,0.38)
 	ui.overlay.add_child(dim); dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	ui._label(ui.overlay,"Choose an upgrade",Rect2(132,100,696,35),25,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
-	ui._label(ui.overlay,"Paused · %d picks left"%run.kit.loadout.rewards18.size(),Rect2(132,135,696,24),14,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
+	ui._label(ui.overlay,"%d picks left"%run.kit.loadout.rewards18.size(),Rect2(132,135,696,24),14,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
 	for i in range(run.offers.size()):
 		var slot: String=run.offers[i]
 		var rank_value:=Vanguard.rank_of(run,slot)
@@ -75,11 +73,11 @@ static func upgrades(ui, run) -> void:
 			ui._label(card,changes[row],Rect2(15,138+row*17,194,17),12,ui.CREAM)
 		var bonus:=UpgradePreview.milestone(slot,mini(10,rank_value+run.kit.rank_bonus),mini(10,next+run.kit.rank_bonus),SupportModules.enabled(run),ArsenalBurst.enabled(run))
 		if next in [5,10] or not bonus.is_empty():
-			var label: Label=ui._label(card,bonus if not bonus.is_empty() else "Milestone · stronger stats",Rect2(15,211,194,30),12,accent,true)
+			var label: Label=ui._label(card,bonus if not bonus.is_empty() else "",Rect2(15,211,194,30),12,accent,true)
 			label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		card.tooltip_text=VanguardHud.detail(run,slot)
 		if i==0: card.grab_focus()
-	ui._label(ui.overlay,"Choose: 1 / 2 / 3 · Special levels: 5 and 10",Rect2(132,430,696,22),13,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
+	ui._label(ui.overlay,"1 / 2 / 3",Rect2(132,430,696,22),13,ui.CREAM,true,HORIZONTAL_ALIGNMENT_CENTER)
 
 static func tabs(game) -> void:
 	var names: Array=["Round clear","Build","Mastery","Equipment"]
@@ -126,5 +124,4 @@ static func camp(game) -> void:
 			card.add_theme_font_size_override("font_size",12)
 			card.disabled=id=="" or game.collection.blocked or exp.field_credits<(100+ForgeEquipment.ITEMS[id].tier*100 if id!="" else 0)
 			card.tooltip_text="Permanent equipment · "+(game.collection.item_text(id) if id!="" else "Sold")
-	ui._label(ui.overlay,"%d Salvage banked · Modules reset next level"%game.collection.credits if OperationRules.enabled(run) else "Module purchases last this expedition",Rect2(48,460,610,22),13,ui.MUTED)
 	if not game.collection.message.is_empty(): ui._label(ui.overlay,game.collection.message,Rect2(48,490,850,22),12,ui.CORAL)

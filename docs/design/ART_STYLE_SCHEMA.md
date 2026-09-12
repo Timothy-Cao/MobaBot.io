@@ -182,3 +182,7 @@ Known mismatch: inventory illustrations have richer bevels than the simplified w
 ## Foundry world and camp extension — 12 September 2026
 
 Native thick terrain uses exact capsule footings, low contact shadows and inset conveyor/cooling/press surfaces in steel, muted teal, cream and brass. Read existing wall IDs deterministically; never consume simulation RNG for decoration. Cull against the render camera. Drifter uses a wedge plow; Bulwark uses broad shoulders and a central rotor with visibly open recovery armor. Reduced effects retain state silhouettes while suppressing decorative motion. Camp frames and tabs share cut corners, steel edges and restrained brass accents; labels remain real, readable controls. Existing generated masters and shared pixelation are unchanged. See FOUNDRY_VISUAL_30 for captures and rendering-cost limits.
+
+## Player-facing copy — owner correction, 12 September 2026
+
+Trust the player to discover routes and mechanics. Menus use names, actions and necessary values. Do not add explanatory taglines, route advice, timing summaries, reset/persistence reminders, “hover to learn” footers, or captions that repeat what the screen already shows. Keep controls and meaningful upgrade numbers visible; put optional mechanics in hover details. Explain consequences at the relevant action (leaving, replacing a save, spending currency), and keep transaction failures visible. Empty space does not need explanatory copy. These are ongoing editorial requirements, not just edits to the level selector.
