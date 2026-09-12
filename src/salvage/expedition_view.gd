@@ -3,7 +3,8 @@ extends RefCounted
 
 static func frame(ui, title: String, back: Callable) -> void:
 	ui.clear_overlay(); ui.hud.visible = false; ui._dim()
-	ui._panel(Rect2(24,24,912,492),ui.PANEL)
+	var enclosure:=FoundryFrame.new(); enclosure.position=Vector2(24,24); enclosure.size=Vector2(912,492)
+	ui.overlay.add_child(enclosure)
 	ui._label(ui.overlay,title,Rect2(47,39,600,45),30,ui.CREAM,true)
 	ui._button("Back",Rect2(811,43,102,34),back,false)
 

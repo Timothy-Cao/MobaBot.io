@@ -257,7 +257,7 @@ func _icon(parent: Node, id: String, rect: Rect2, dim: bool = false) -> Control:
 
 func _tab(text: String, rect: Rect2, action: Callable, selected: bool = false) -> Button:
 	var button := _button(text, rect, action, false)
-	var normal := _style(Color.TRANSPARENT, 0, GOLD if selected else EDGE, 0)
+	var normal := _style(Color("534a35") if selected else Color("1a3039"), 2, GOLD if selected else Color("4d656b"), 1)
 	normal.border_width_bottom = 3 if selected else 1
 	button.add_theme_stylebox_override("normal", normal)
 	button.add_theme_color_override("font_color", GOLD if selected else MUTED)

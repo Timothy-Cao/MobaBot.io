@@ -44,3 +44,7 @@ Keep UI text, borders, status badges, health bars and collision-linked tells nat
 - Compare the same 180-enemy scene before/after. Prefer baked shadows and bounded reusable effects; no assumption that a static art preview proves frame-rate quality.
 
 Recommended next milestone: terrain materials/props and the two miniboss silhouettes, followed by the shared camp/menu frame. Keep gameplay fixed while reviewing those visual changes. No new human fun/quality score is assigned by this audit.
+
+## Implemented follow-up — 12 September 2026
+
+Owner approved execution. FOUNDRY_VISUAL_30 implements priorities 1–3 in a bounded slice: three existing capsule machinery treatments, distinct miniboss bodies/recovery animation, shared camp frame/tabs. Priority 4 receives brighter labels and clearer path states; node layout and capstone redesign remain proposed. Floor decals, full equipment/reward/impact redesigns and build-label metadata are not implemented by this follow-up. See QA_18 for automated checks and the measured render-cost caveat; human approval remains pending.

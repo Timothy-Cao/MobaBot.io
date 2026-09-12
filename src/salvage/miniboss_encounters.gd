@@ -47,18 +47,49 @@ static func damage_factor(e: Dictionary) -> float:
 	return 1.35 if e.phase=="recover" else 0.55
 static func draw(art, e: Dictionary) -> void:
 	var p: Vector2=Vector2(e.pos)+art.frame_offset
-	var color: Color=art.GOLD if e.miniboss=="drifter" else Color("8bb7ca")
-	for side in [-1,1]:
-		art._box(Rect2(p+Vector2(side*33-7,-19),Vector2(14,44)),art.INK,2)
-		for y in [-12,0,12]: art.draw_line(p+Vector2(side*33-4,y),p+Vector2(side*33+4,y),art.PALE,3,true)
-	art._box(Rect2(p-Vector2(31,28),Vector2(62,56)),color,5,art.INK,4)
-	art._box(Rect2(p-Vector2(21,10),Vector2(42,20)),art.INK,2)
-	for x in [-12,12]: art.draw_circle(p+Vector2(x,0),5,art.CORAL)
-	if e.miniboss=="bulwark": art.draw_arc(p,42,0,TAU,32,art.GOLD if e.phase=="recover" else Color("8bd4ef"),2 if e.phase=="recover" else 5,true)
+	var open: bool=e.phase=="recover"
+	var moving: bool=e.phase in ["approach","attack"]
+	var motion: float=0 if art.reduced_effects or not moving else fmod(art.model.time*40,10)
+	art.draw_circle(p+Vector2(0,8),37,Color(art.INK,0.45))
+	if e.miniboss=="drifter":
+		var heading: Vector2=Vector2(e.dir) if e.phase!="approach" else (art.model.player-Vector2(e.pos)).normalized()
+		art.draw_set_transform(p,heading.angle()+PI/2)
+		for side in [-1,1]:
+			art._box(Rect2(side*27-8,-24,16,58),art.INK,3)
+			for i in range(5):
+				var y: float=-20+i*10+motion
+				art.draw_line(Vector2(side*27-5,y),Vector2(side*27+5,y),art.PALE,3,true)
+		ExpeditionArt.poly(art,[Vector2(-20,27),Vector2(-22,-17),Vector2(0,-33),Vector2(22,-17),Vector2(20,27)],art.GOLD)
+		# The broad plow is separate from its narrower tracked chassis.
+		ExpeditionArt.poly(art,[Vector2(-30,-18),Vector2(0,-42),Vector2(30,-18),Vector2(21,-12),Vector2(0,-27),Vector2(-21,-12)],Color("d3c5a1"))
+		art._box(Rect2(-14,-9,28,15),art.INK,2)
+		art.draw_line(Vector2(-9,-2),Vector2(9,-2),art.CORAL,3,true)
+		for x in [-10,10]:
+			art.draw_line(Vector2(x,12),Vector2(x,24),Color("745937"),4,true)
+			if open: art.draw_line(Vector2(x,28),Vector2(x,36),Color("b6c3b0"),2,true)
 	else:
-		for x in [-32,32]: art.draw_line(p+Vector2(x,-25),p+Vector2(x,-42),art.CREAM,6,true)
-	art._box(Rect2(p-Vector2(34,51),Vector2(68,5)),art.INK,0)
-	art._box(Rect2(p-Vector2(33,50),Vector2(66*maxf(0,e.hp/e.max_hp),3)),art.CORAL,0,art.CORAL,0)
+		art.draw_set_transform(p)
+		var spread: float=7 if open else 0
+		for side in [-1,1]:
+			var x: float=side*(26+spread)
+			art._box(Rect2(x-10,-27,20,44),Color("526e79"),4,art.INK,3)
+			art.draw_line(Vector2(x-5,-21),Vector2(x+5,-21),art.PALE,3,true)
+			art._box(Rect2(x-8,18,16,13),art.INK,2)
+		art._box(Rect2(-21,-22,42,48),Color("8ba2a5"),5,art.INK,3)
+		art.draw_circle(Vector2(0,6),18,art.INK)
+		var rotor: float=0 if art.reduced_effects else art.model.time*(12 if e.phase=="attack" else 1.5)
+		for i in range(4):
+			var d:=Vector2.from_angle(rotor+i*PI/2)
+			art.draw_line(Vector2(0,6)+d*6,Vector2(0,6)+d*14,art.GOLD if open else Color("668f9a"),5,true)
+		art.draw_circle(Vector2(0,6),5,art.GOLD if open else art.PALE)
+		art._box(Rect2(-15,-20,30,10),art.INK,2)
+		for x in [-8,8]: art.draw_circle(Vector2(x,-15),3,art.CORAL)
+		# Split shield arcs physically open during the damage window.
+		for side in [0,1]:
+			art.draw_arc(Vector2.ZERO,42,side*PI+0.25+(0.30 if open else 0),side*PI+PI-0.25-(0.30 if open else 0),20,art.GOLD if open else Color("8bd4ef"),2 if open else 5,true)
+	art.draw_set_transform(Vector2.ZERO)
+	art._box(Rect2(p-Vector2(34,53),Vector2(68,5)),art.INK,0)
+	art._box(Rect2(p-Vector2(33,52),Vector2(66*maxf(0,e.hp/e.max_hp),3)),art.CORAL,0,art.CORAL,0)
 static func tell(art, e: Dictionary) -> void:
 	if e.phase=="telegraph":
 		if e.attack=="ram": art.draw_line(e.pos,Vector2(e.pos)+Vector2(e.dir)*697,art.CORAL,3,true)

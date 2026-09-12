@@ -17,7 +17,7 @@ static func draw(ui,run) -> void:
 		if node.parent!="":
 			var start:=point(node.parent,tree)+Vector2(width/2,48)
 			var end:=at+Vector2(width/2,0)
-			var line:=Line2D.new(); line.points=PackedVector2Array([start,Vector2(end.x,start.y+12),end]); line.width=2; line.default_color=ui.EDGE
+			var line:=Line2D.new(); line.points=PackedVector2Array([start,Vector2(end.x,start.y+12),end]); line.width=2; line.default_color=ui.TEAL if run.mastery.rank_of(id)>0 else ui.GOLD if run.mastery.can_buy(id,run.level) else ui.EDGE
 			ui.overlay.add_child(line)
 	for i in range(3):
 		ui._surface(ui.overlay,Rect2(102+i*300,183,156,24),ui.PANEL,0)
@@ -30,7 +30,13 @@ static func draw(ui,run) -> void:
 			if run.state=="camp": ReviewView.camp(ui.host)
 			else: ui.show_build(run,false),false)
 		button.set_meta("mastery_node",id)
-		button.modulate=Color.WHITE if run.mastery.can_buy(id,run.level) else Color(0.65,0.65,0.65)
+		var available: bool=run.mastery.can_buy(id,run.level)
+		var owned: bool=run.mastery.rank_of(id)>0
+		var face: Color=Color("29474c") if owned else Color("273d42") if available else Color("172c34")
+		var edge: Color=ui.GOLD if available else ui.TEAL if owned else Color("485c61")
+		var casing: StyleBoxFlat=ui._style(face,2,edge,1)
+		casing.border_width_left=4 if available or owned else 1
+		button.add_theme_stylebox_override("normal",casing)
 		var left: float=54 if run.mastery.modern else 5
 		if run.mastery.modern:
 			MasteryBadge.attach(ui,button,["mastery_utility","mastery_looting","mastery_pet"][node.branch],"charge" if node.stat=="starting_ability" else MasteryBadge.STATS[node.stat],Rect2(8,6,36,36))

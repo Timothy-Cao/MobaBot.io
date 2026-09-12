@@ -303,3 +303,9 @@ Owner likes the latest changes but reports the game is a bit too hard, suggestin
 ## 12 September 2026 - field pickups and visual audit
 
 Owner wants plain Levels wording, enemies dropping 25%-max-health packs and map-wide magnets roughly once per minute on independent random schedules, followed by an art/design audit. Pickups implemented; fresh menu, mastery, equipment, camp and combat captures inspected. VISUAL_AUDIT_29 recommends factory terrain identity/depth, clearer miniboss silhouettes/state animation, and extending the Home foundry language into secondary menus. These are visual/design judgments, not a human quality rating or authorization to replace the current cartoony presentation.
+
+## 12 September 2026 — owner-authorized foundry visual pass
+
+Owner: “Then execute on the best changes you think are good ideas.” Implemented three machinery appearances, two distinct miniboss silhouettes with recovery presentation, shared camp framing/tabs, and readable mastery state styling. The existing cartoon direction and bitmap masters remain intact. No combat or progression change.
+
+Automated regressions and draw-state preservation pass; normal/reduced previews inspected. This does not establish improved fun or raise any human quality rating. Human review should focus on obstacle solidity/readable routes, brawler recovery clarity, camp hierarchy and crowded-fight performance. Synthetic 180-enemy median frame cadence rose approximately 3.8 ms; do not claim performance neutrality. Other VISUAL_AUDIT_29 proposals remain future work.
