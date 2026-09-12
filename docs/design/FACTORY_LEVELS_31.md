@@ -12,7 +12,7 @@ Vampire Survivors stage discussions identify the Library/Tower corridor layouts 
 |---|---|---|
 | 1 — Loading yard | Twelve separated loading/press islands, marked bays, broad central apron | Long kiting sweeps with optional turns around loading islands; generous escape routes |
 | 2 — Assembly hall | Fourteen conveyor/press islands arranged into interrupted parallel lines, directional floor marks | Travel along production lanes, then cut through crossovers or use existing Flash over machinery to change lanes |
-| 3 — Cooling plant | Twelve cooling banks/press islands, central court with four corner exits, outer circulation route and pipe/ring markings | Hold the spacious center or leave through a corner and circle outside; use the banks to separate approaching groups |
+| 3 — Cooling plant | Ten cooling banks/press islands, central court with four corner exits, outer circulation route and pipe/ring markings | Hold the spacious center or leave through a corner and circle outside; use the banks to separate approaching groups |
 
 Each round retains its level identity with reflected/staggered placement or slight rotation. Fixed geometry is independent of player position, camera and RNG. All rounds start in a clear central arrival area. No sealed rooms, compulsory narrow doorways, new hazards, conveyor forces or damage/stat changes. Decorative floor paint is walkable. Existing terrain rules still apply: bodies block, projectiles pass through, E rebounds and Flash crosses terrain.
 

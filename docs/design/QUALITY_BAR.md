@@ -315,3 +315,7 @@ Automated regressions and draw-state preservation pass; normal/reduced previews 
 Owner asked for thematic layout variety beyond stronger enemies and recoloring. Implemented new-run Loading yard (open bays), Assembly hall (interrupted lanes/crossovers), Cooling plant (central court/four corner exits/outer route). Three round variants per identity; reusable native machinery and floor landmarks, selector hints and terrain minimap. No added damage hazards or numerical difficulty increase. Old saves/Practice retain their maps.
 
 All 42 regression suites and all three artificial-health routes pass. Human feel remains untested; no quality/fun rating change. See FACTORY_LEVELS_31 and QA_18. Review actual routes under pressure, especially Level 3, before adding more environmental mechanics.
+
+## 12 September 2026 — official playtest readiness
+
+Owner authorized pushing all work and publishing an updated Windows build. Release review corrected stale version/result labels and an obsolete campaign objective. Remaining human-review risks: crowd performance, factory route feel and five-minute pacing/durability. Passing automated runs do not raise quality scores. See RELEASE_REVIEW_31 for scope and old-log limitations.
