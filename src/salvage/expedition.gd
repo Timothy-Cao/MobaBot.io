@@ -302,6 +302,7 @@ func level_up(run) -> void:
 
 func finish_step(run, delta: float) -> void:
 	if run.state != "running": return
+	run.recovery_aid.step(run,delta)
 	run.factory_works.step(run,delta)
 	OperationRules.pace(run)
 	if ReviewRules.enabled(run) and not practice: RunDiagnostics.sample_progression(run)

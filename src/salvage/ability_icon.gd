@@ -78,6 +78,12 @@ func _draw() -> void:
 				draw_circle(at,15,GOLD)
 				draw_arc(at,11,PI,TAU,18,CREAM,2,true)
 				line(at+Vector2(0,-6),at+Vector2(0,6),INK,4)
+		"health_pack":
+			draw_rect(Rect2(11,17,42,34),INK)
+			draw_rect(Rect2(14,20,36,28),Color("78c995"))
+			line(Vector2(25,14),Vector2(39,14),STEEL,5)
+			line(Vector2(22,34),Vector2(42,34),CREAM,6)
+			line(Vector2(32,24),Vector2(32,44),CREAM,6)
 		"reward_point":
 			poly([Vector2(32,7),Vector2(55,32),Vector2(32,57),Vector2(9,32)],TEAL)
 			line(Vector2(22,32),Vector2(42,32),CREAM,5)

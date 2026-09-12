@@ -8,6 +8,12 @@ The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRO
 
 Owner clarification: preserve the current cartoony presentation as a complete, fun version. The future high-fidelity/high-graphics work is a separate presentation of the same core game for controlled player A/B testing, not a replacement or incremental conversion of the current style.
 
+## Latest follow-up: low-health recovery
+
+12 September owner requested a full-heal upgrade option at 30% HP or below, occasional distant recovery packs, and directional health icons. Implemented for current discovery35 campaign runs: one of the three cards is Full heal at <=30% HP, consuming a normal pick. After six seconds continuously low, a 25%-max-HP pack can spawn 650-1000 world units away on clear floor, with 45-65s cooldown, one extra active pack, and 75s lifetime. Independent RNG; no kill required; timers pause with gameplay. Up to three separated edge indicators point to offscreen health packs, remain a fixed screen size at different zooms, and hide in menus. Old pre-discovery checkpoints and Practice retain their rules.
+
+All 44 suites pass, plus 45 focused recovery checks and normal/reduced renders. Both historical refined probes and current campaign behavior run without errors. No player run restarted or permanent test rewards. Native health icon only; no generated art. Version 0.36.0-test.1 prepared; publication pending until the verification entry below. Latest published download is still 0.35.0-test.2 at this point.
+
 ## Next action: new-run playtest of Discovery 35
 
 Latest download: [0.35.0-test.2](https://github.com/Timothy-Cao/MobaBot.io/releases/tag/v0.35.0-test.2), source `25af5ac269abcbe2bc9a52608b2a349534a1518a`. This includes the final removal of the obsolete zero-chest round-clear label. Published non-draft; ZIP 102,706,330 bytes, SHA256 `0b2d9f48e33dc27578bbeeeaadd33b86818e2fb1bcc5d9de3b3c7ecb1f70a5c6`. Refreshed exported-pack rendered smoke, 4,294-label UI audit and 111 focused checks pass. Native EXE is byte-identical to the startup-verified test.1 executable; updated gameplay/UI content lives in the verified PCK. Everything is pushed. Earlier test.1 remains historical.

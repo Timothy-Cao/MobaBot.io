@@ -51,7 +51,7 @@ static func upgrades(ui, run) -> void:
 	ui._label(ui.overlay,"1 pick left" if run.kit.loadout.rewards18.size()==1 else "%d picks left"%run.kit.loadout.rewards18.size(),Rect2(132,135,696,24),14,ui.GOLD,true,HORIZONTAL_ALIGNMENT_CENTER)
 	for i in range(run.offers.size()):
 		var slot: String=run.offers[i]
-		if slot in DiscoveryRules.BONUS or slot=="field_credit":
+		if slot in DiscoveryRules.BONUS or slot in ["field_credit","full_heal"]:
 			FieldUpgradeCard.draw(ui,run,slot,i); continue
 		var rank_value:=Vanguard.rank_of(run,slot)
 		var name: String=slot.capitalize() if slot in ["gun","hammer"] else MobaKit.ABILITIES[Vanguard.TOOLS[slot]].name

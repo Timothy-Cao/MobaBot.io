@@ -52,12 +52,13 @@ static func offer(run) -> void:
 		run.offers.append(pool[index]); pool.remove_at(index)
 	if DiscoveryRules.enabled(run):
 		while run.offers.size()<3: run.offers.append("field_credit")
+		if RecoveryAid.low(run): run.offers[2]="full_heal"
 	run.state="upgrade"; run.vanguard.ghost=false; run.kit.sprint=0; run.stop_movement(); run.attacks.stop(run)
 
 static func choose(run, index: int) -> bool:
 	if run.state!="upgrade" or index<0 or index>=run.offers.size(): return false
 	var id: String=run.offers[index]
-	if id in DiscoveryRules.BONUS or id=="field_credit":
+	if id in DiscoveryRules.BONUS or id in ["field_credit","full_heal"]:
 		if not DiscoveryRules.spend(run,id): return false
 	elif not Vanguard.spend(run,id): return false
 	run.offers.clear(); run.state="running"; offer(run)

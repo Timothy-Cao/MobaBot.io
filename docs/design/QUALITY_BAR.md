@@ -338,3 +338,8 @@ Owner requested Auto craft/Auto equip to look inactive when unnecessary, with de
 Owner says early levels are too hard for slow XP; wants basic opening swarms, rare immediate-upgrade chests, XP/pickup-range options, credit fallback, concise equipment status, illustrated level selection and more structured/interactive maps. Pickup range was explicitly selected at +10-50%. Implemented new-run Discovery35 rules and three helpful machinery interactions; new selector art retains original masters and shared restrained pixelation.
 
 Automated checks and isolated captures verify behavior, save compatibility and presentation. No human quality/fun score raised. Actual tests needed: whether the first90 seconds teach comfortably, whether the2:00 specialist transition spikes, whether multiple boss chests interrupt too much, whether machinery reads without prose, and whether Level2/3 upgrades accelerate too far. Selector art is richer than the native combat world; this difference remains visible.
+
+
+## 12 September - Low-health recovery
+
+Owner requested a full-heal level-up card at 30% HP or below and occasional map health packs with directional edge icons. Current campaign implements the heal as an alternative costing one pick, plus delayed, bounded distant recovery packs. Health icons use the native green cross/pack silhouette, with steady arrows and no prose. Markers remain visible at normal/reduced effects and disappear behind menus. Verify human tradeoffs: whether choosing recovery feels worthwhile, whether six seconds is enough opportunity, and whether traveling for a pack is useful without becoming guaranteed survival. No human quality score raised from automated checks.

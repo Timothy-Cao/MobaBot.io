@@ -42,7 +42,10 @@ static func levels(run) -> void:
 		run.emit_event("equipped",run.player,{"id":"power"})
 static func spend(run, id: String) -> bool:
 	if not enabled(run) or run.state!="upgrade" or id not in run.offers or run.kit.loadout.rewards18.is_empty(): return false
-	if id=="field_credit": run.exp.field_credits+=200
+	if id=="full_heal":
+		run.health=run.max_health()
+		run.emit_event("supply",run.player,{"supply":"health_pack"})
+	elif id=="field_credit": run.exp.field_credits+=200
 	elif id in BONUS and rank_of(run,id)<5: run.kit.loadout.field_ranks[id]+=1
 	else: return false
 	run.kit.loadout.rewards18.pop_front()

@@ -32,6 +32,7 @@ var exp: RefCounted
 var vanguard := Vanguard.new()
 var practice_meter := PracticeMeter.new()
 var field_pickups:=FieldPickups.new()
+var recovery_aid:=RecoveryAid.new()
 var discovery_chests:=DiscoveryRules.new()
 var factory_works:=FactoryWorks.new()
 var mastery := BotMastery.new()
@@ -1165,6 +1166,7 @@ func _supply_step(delta: float) -> void:
 	if not staged: return
 	for supply in supply_drops:
 		supply.age += delta
+		if supply.age>=float(supply.get("expires",INF)): supply.value=0; continue
 		if supply.age < 0.35: continue
 		if Vector2(supply.pos).distance_to(player) < (48.0 if kit.onboarding else magnet_radius()):
 			supply.pos = Vector2(supply.pos).move_toward(player, delta * 900)

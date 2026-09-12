@@ -18,7 +18,7 @@ func verify() -> void:
 	if DisplayServer.get_name()!="headless":
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png(OS.get_executable_path().get_base_dir()+"/../export-smoke.png")
-	assert(ProjectSettings.get_setting("application/config/version")=="0.35.0-test.2","Release version mismatch")
+	assert(ProjectSettings.get_setting("application/config/version")=="0.36.0-test.1","Release version mismatch")
 	game.collection=ForgeEquipment.new(); game.launch_expedition(); game.auto_play=true
 	assert(DiscoveryRules.enabled(game.model),"Export must launch current progression")
 	for id in ["yard","assembly","cooling"]: assert(load("res://assets/levels/"+id+".png") is Texture2D,"Missing level illustration")
@@ -26,6 +26,11 @@ func verify() -> void:
 		game.model.exp.operation_chapter=level; game.model.exp.enter(game.model)
 		assert(game.model.kit.extra.walls.size()==FactoryWorks.layout(level,game.model.exp.route_index).size(),"Missing factory geometry")
 		game.art.queue_redraw(); await process_frame
+	game.model.health=game.model.max_health()*0.2
+	Vanguard.earn(game.model); ReviewRules.offer(game.model)
+	assert("full_heal" in game.model.offers,"Missing emergency heal card")
+	assert(ReviewRules.choose(game.model,game.model.offers.find("full_heal")),"Heal choice rejected")
+	assert(game.model.health==game.model.max_health(),"Heal did not restore hull")
 	game.queue_free(); await process_frame
 	print("EXPORTED BUILD SMOKE PASS: Practice, HUD, icons, projectile")
 	quit()

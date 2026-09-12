@@ -224,6 +224,8 @@ func _draw() -> void:
 		draw_arc(model.player, 37, angle - 0.55, angle + 0.55, 18, INK, 6, true)
 		draw_arc(model.player, 37, angle - 0.55, angle + 0.55, 18, CORAL, 3, true)
 
+	RecoveryAid.draw(self,model)
+
 func _demo_tells() -> void:
 	for hazard in model.hazards:
 		draw_circle(hazard.pos, hazard.radius, Color(CORAL, 0.1))
