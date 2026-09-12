@@ -32,3 +32,6 @@ Flush control plates, wires, crane rails, press marks and vent grilles use nativ
 Level1 artificial-health full route completed in 1000.9 simulation seconds, peak21 enemies, final boss about64.6s. Guardian arrivals: player levels12/33; final boss40. This bot picks all sorts of upgrades and is not a resource-perfect DPS benchmark. Normal-health active/basic policies reached player level6 and lost at146.3/132.9s; idle lost27.8s atlevel1. These are reliability/relative-pressure observations, not human fun or difficulty acceptance. Human review should check opening choice cadence, first specialist transition, chest pause frequency, control discoverability and whether the late run grows too quickly.
 
 The illustrated selector is substantially richer than the native combat world. More environment art may still be worthwhile after the owner reviews the interaction/layout changes. Do not claim a finished map-art replacement or solved balance.
+
+
+Release: [0.35.0-test.1](https://github.com/Timothy-Cao/MobaBot.io/releases/tag/v0.35.0-test.1), source49be864. All43 suites plus final111 focused checks pass. Level3 artificial-health route completed in1098.1s, peak85 enemies, final boss about104s. The ZIP includes this milestone and the prior button/copy changes. Old checkpoints retain old progression; start a new run for review.
