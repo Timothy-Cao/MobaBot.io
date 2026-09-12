@@ -61,7 +61,7 @@ func start_run(mode: String="salvage") -> void:
 func launch_expedition(resume: bool=false) -> void:
 	if collection.blocked:
 		ui.announce(collection.message,2); return
-	if not resume and collection is ForgeEquipment and (chapter_choice<1 or chapter_choice>collection.unlocked_chapter()):
+	if not resume and collection is ForgeEquipment and (chapter_choice<1 or chapter_choice>mini(DemoPacing.LEVELS,collection.unlocked_chapter())):
 		ui.announce("Clear the preceding level first",2); return
 	camera_offset=Vector2.ZERO; minimap_held=false
 	seed_value=int(collection.checkpoint.get("seed",2407)) if resume else int(Time.get_unix_time_from_system())%2147483647
@@ -84,6 +84,7 @@ func launch_expedition(resume: bool=false) -> void:
 		if collection is ForgeEquipment:
 			OperationRules.enable(model,chapter_choice); LevelMastery.enable(model)
 			model.kit.loadout.support23=true; model.kit.loadout.arsenal26=true
+			DemoPacing.enable(model)
 			if collection.starting_ability:
 				model.kit.rank_up("e"); model.upgrades.skill_e=model.kit.ranks.e
 				if "e" not in model.kit.discovered: model.kit.discovered.append("e")
@@ -209,7 +210,7 @@ func bulk_gear(action: String) -> void:
 	ForgeView.draw(self)
 
 func result_next() -> void:
-	chapter_choice=mini(8,model.exp.operation_chapter+(1 if model.state=="won" else 0))
+	chapter_choice=mini(DemoPacing.LEVELS,model.exp.operation_chapter+(1 if model.state=="won" else 0))
 	screen="prepare"; OperationView.prepare(self)
 
 func _open_build() -> void:

@@ -153,6 +153,7 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 		if spent!=c.spent: return false
 	if c.loadout.has("level22") and (c.loadout.level22!=true or not c.loadout.get("operation20",0)>0): return false
 	if c.loadout.has("support23") and (c.loadout.support23!=true or not c.loadout.get("level22",false)): return false
+	if c.loadout.has("demo27") and (c.loadout.demo27!=true or not c.loadout.get("arsenal26",false) or not integer(c.loadout.get("operation20",0),1,DemoPacing.LEVELS)): return false
 	if c.loadout.has("arsenal26") and (c.loadout.arsenal26!=true or not c.loadout.get("support23",false)): return false
 	if c.loadout.has("vanguard"):
 		if not integer(c.loadout.get("hammer_rank",1),1,10): return false
@@ -356,6 +357,7 @@ func resume_into(run) -> bool:
 	expedition.route_index = int(c.route); expedition.gear_stats = c.stats.duplicate(); expedition.set_counts = c.sets.duplicate()
 	run.kit.loadout = c.loadout.duplicate(true); run.kit.discovered = c.discovered.duplicate()
 	expedition.operation_chapter=int(c.loadout.get("operation20",0))
+	expedition.demo_pace=c.loadout.get("demo27",false)
 	if c.has("bindings"): run.kit.bindings=c.bindings.duplicate()
 	run.kit.ranks = c.ranks.duplicate(); run.kit.tiers = c.tiers.duplicate(); run.upgrades = c.upgrades.duplicate()
 	run._sync_resource_ranks()

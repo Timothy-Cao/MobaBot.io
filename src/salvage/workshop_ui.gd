@@ -586,7 +586,7 @@ func show_result(model: SalvageRun, saved: bool = false) -> void:
 	if model.state == "lost" and not model.last_damage.is_empty():
 		_label(overlay, "Final hit: " + model.last_damage, Rect2(219, 305, 522, 20), 13, CREAM, true, HORIZONTAL_ALIGNMENT_CENTER)
 	var operation: bool=OperationRules.enabled(model) and host!=null
-	var title: String=("Next level · %d"%(model.exp.operation_chapter+1) if model.exp.operation_chapter<8 else "Choose level") if operation and model.state=="won" else "Retry level" if operation else "Play again"
+	var title: String=("Next level · %d"%(model.exp.operation_chapter+1) if model.exp.operation_chapter<(DemoPacing.LEVELS if DemoPacing.enabled(model) else OperationRules.CHAPTERS) else "Choose level") if operation and model.state=="won" else "Retry level" if operation else "Play again"
 	var again := _button(title, Rect2(228, 353, 244, 44), func() -> void:
 		if operation: host.result_next()
 		else: restart_requested.emit())

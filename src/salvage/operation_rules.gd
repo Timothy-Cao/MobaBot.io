@@ -32,7 +32,7 @@ static func reference_rank(round_index: int) -> int: return [2,5,8][clampi(round
 static func pace(run) -> void:
 	if not enabled(run) or run.exp.clear_clock>=0: return
 	var index: int=run.exp.route_index
-	var expected:=floori(SURVIVAL_XP[index]*clampf(run.stage_time/ROUND_SECONDS[index],0,1))
+	var expected:=floori(SURVIVAL_XP[index]*clampf(run.stage_time/run.exp.round_seconds(),0,1))
 	var granted: int=run.kit.loadout.operation_xp[index]
 	if expected>granted:
 		run.total_xp+=expected-granted; run.kit.loadout.operation_xp[index]=expected

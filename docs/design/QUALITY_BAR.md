@@ -278,3 +278,8 @@ Owner requested status and said to keep going. Continued with the explicitly sta
 Implemented: eight replayable numbered Chapters, three-round build resets, separately named Field credits/Salvage, outside-run equipment crates, transactional first-clear unlocks/rewards, and a short-run XP/boss budget. Core leveling now reaches final-boss entry at levels 23 and 24 in the fixed-seed Chapter 1/8 artificial-health probes, with completion levels 25 and 26. This meets a prototype pacing target in those policies; it does not establish a human distribution. Later-Chapter overload remains a specific human-review risk, and ordinary-health bots still die early.
 
 The earlier positive Stage 1 feedback remains about the previous tested build. Do not claim it applies to 0.20 or increase existing ratings from test success. No additional human playtest, audio approval or fun verdict has occurred. Optional potions, permanent mastery, random ability permissions and additional unique enemy/boss assets remain future design choices rather than silently expanding the reward pool.
+
+
+## 12 September 2026 - longer three-level demo feedback
+
+Owner wants three Levels with three five-minute stages each, slower upgrade progression, gradual introductions, and a durable Hatchery that spawns fast chasers. Owner explicitly reports existing Level 3 is already very hard. Implemented as the opt-in demo27 rules described in DEMO_PACING_27; preserve historical saves. Automated completion does not establish human difficulty or improve any fun/quality rating. Next review should focus on first-minute pressure, five-minute repetition and final-boss readiness.

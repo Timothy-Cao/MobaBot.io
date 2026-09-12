@@ -16,6 +16,7 @@ const CLASSES := {
 	"summoner": {"name": "Engineer", "text": "Two major summons. Stronger constructs and extended battery life.", "w": "gravity", "e": "repulsor", "t": "mirror_sentry", "passives": ["bolt", "mounted", "poison", "lightning"]}}
 var route_index := 0
 var operation_chapter := 0
+var demo_pace:=false
 
 func route() -> Array:
 	return [[operation_chapter,"neutral"],[operation_chapter,"neutral"],[operation_chapter,"boss"]] if operation_chapter>0 else ROUTE
@@ -171,6 +172,7 @@ func enemy_speed(run=null) -> float:
 	return 1 + (0.08 if ascension >= 1 else 0) + (0.07 if ascension >= 4 else 0) + (minf(0.18,route_index*0.008) if run!=null and Vanguard.enabled(run) and not practice else 0.0)
 
 func round_seconds() -> float:
+	if demo_pace and operation_chapter>0: return DemoPacing.ROUND_SECONDS
 	if operation_chapter>0: return OperationRules.ROUND_SECONDS[route_index]
 	if revised: return 120.0
 	return 35.0 if ROUTE[route_index][1] in ["boss", "final"] else (40.0 if ROUTE[route_index][1] == "loot" else 50.0)
@@ -241,7 +243,7 @@ func spawns(run, delta: float) -> void:
 			boss["patterns"] = [["charge","fan"],["shells","charge"],["ring","shells"],["fan","charge","fan"],["ring","fan"],["shells","ring","charge"],["charge","shells","fan"],["ring","shells","charge","fan"]][stage_number - 1]
 		return
 	if revised:
-		var threat_index := int(run.stage_time / (maxf(15,23-route_index*0.4) if Vanguard.enabled(run) else 26))
+		var threat_index := int(run.stage_time / (30.0 if DemoPacing.enabled(run) else maxf(15,23-route_index*0.4) if Vanguard.enabled(run) else 26))
 		if threat_index > threat_wave:
 			threat_wave = threat_index
 			var roster: Array=["lancer","volley","bomber"]
@@ -254,7 +256,8 @@ func spawns(run, delta: float) -> void:
 			if ArsenalBurst.enabled(run) and (operation_chapter>=2 or route_index>=1):
 				if threat_index%4==1: selected="hatchery"
 				elif threat_index%4==3: selected="uplink"
-			RangedThreats.spawn(run,selected)
+			if DemoPacing.enabled(run): selected=DemoPacing.specialist(run,threat_index)
+			if selected!="": RangedThreats.spawn(run,selected)
 	run.spawn_clock -= delta
 	if run.spawn_clock <= 0:
 		run.spawn_clock = maxf(0.45, 1.5 - stage_number * 0.11)
@@ -265,7 +268,7 @@ func spawns(run, delta: float) -> void:
 			var enemy: Dictionary = run.enemies[i]
 			if not Vanguard.enabled(run): enemy.hp *= (1 + (stage_number - 1) * 0.22) * (1.2 if ascension >= 2 else 1)
 			enemy.max_hp = enemy.hp
-	var wave := int(run.stage_time / 17)
+	var wave := int(run.stage_time / (50 if DemoPacing.enabled(run) else 17))
 	if wave > last_wave:
 		last_wave = wave
 		if wave > 0:
@@ -280,7 +283,7 @@ func spawns(run, delta: float) -> void:
 
 func enemy_killed(run, enemy: Dictionary) -> void:
 	if practice: return
-	if enemy.has("role") or (enemy.get("elite", false) and run.loot_rng.randf() < 0.2):
+	if enemy.has("role") or (enemy.get("elite", false) and run.loot_rng.randf() < 0.2*DemoPacing.reward_rate(run)):
 		loot_chests.append({"pos": enemy.pos, "life": 30.0})
 		if loot_chests.size() > 8: pending_chests += 1; loot_chests.pop_front()
 

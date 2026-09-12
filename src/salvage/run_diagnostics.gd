@@ -32,6 +32,7 @@ static func annotate(record: Dictionary, run, automated: bool) -> void:
 	if LevelMastery.enabled(run): record.build="vanguard-22-level-progression"
 	if SupportModules.enabled(run): record.build="vanguard-25-mosquito-enrage"
 	if ArsenalBurst.enabled(run): record.build="vanguard-26-arsenal-support"
+	if DemoPacing.enabled(run): record.build="vanguard-27-three-level-demo"
 	record.practice=run.exp!=null and run.exp.practice
 	record.automated=automated
 	if Vanguard.enabled(run):

@@ -110,8 +110,9 @@ static func setup(run, rank_value: int = 0) -> void:
 	run.kit.loadout.erase("level22")
 	run.kit.loadout.erase("support23")
 	run.kit.loadout.erase("arsenal26")
+	run.kit.loadout.erase("demo27")
 	if run.mastery is ExpeditionTree: run.mastery.modern=false
-	if run.exp!=null: run.exp.operation_chapter=0
+	if run.exp!=null: run.exp.operation_chapter=0; run.exp.demo_pace=false
 	if run.mastery is ExpeditionTree: run.mastery.unified=false
 	var kit: MobaKit = run.kit
 	kit.loadout["vanguard"] = true

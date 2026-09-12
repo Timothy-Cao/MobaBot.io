@@ -80,6 +80,7 @@ func ui_checks() -> void:
 	game.persist_settings=false; root.add_child(game); await process_frame
 	game.set_physics_process(false); game.sound.set_muted(true); game.music_player.shutdown(); game.collection=ForgeEquipment.new()
 	game.start_run(); await capture("Levels")
+	check(game.ui.overlay.get_children().filter(func(node): return node.has_meta("chapter")).size()==3,"Demo offers exactly three levels")
 	game.launch_expedition(); check(LevelMastery.enabled(game.model),"Controller starts latest rules")
 	game.model.state="camp"; game.model.exp.clear_clock=-2; game.screen="camp"
 	for tab in ["Round clear","Build","Mastery","Equipment"]:
@@ -88,7 +89,7 @@ func ui_checks() -> void:
 		await capture(tab.replace(" ","-"))
 	game.model.state="won"; game.ui.show_result(game.model,true); await capture("Victory")
 	game.result_next(); check(game.chapter_choice==2,"Victory routes to next level")
-	game.model.exp.operation_chapter=8; game.result_next(); check(game.chapter_choice==8,"Final level never offers nine")
+	game.model.exp.operation_chapter=8; game.result_next(); check(game.chapter_choice==3,"Historical final level returns to demo level selection")
 	game.chapter_choice=1; game.launch_expedition()
 	game.model.kit.rank_up("x2"); game.model.kit.discovered.append("x2")
 	game.model.vanguard.cast(game.model,"x2",game.model.player+Vector2(130,0))

@@ -22,6 +22,7 @@ static func spawn(run, type: String, point: Vector2 = Vector2.INF, bypass_cap: b
 		enemy.radius=12.0; enemy.hp=10.0*(1+0.22*(run.exp.stage_number()-1))*(1+0.15*run.exp.route_index); enemy.max_hp=enemy.hp
 		if ArsenalBurst.enabled(run): enemy.hp*=2; enemy.max_hp=enemy.hp
 	if type in ["hatchery","uplink"]: enemy.hp=120; enemy.max_hp=120; enemy.clock=8.0
+	if type=="hatchery" and ArsenalBurst.enabled(run): enemy.hp=360; enemy.max_hp=360
 	return enemy
 
 static func beam_end(run, point: Vector2, direction: Vector2) -> Vector2:

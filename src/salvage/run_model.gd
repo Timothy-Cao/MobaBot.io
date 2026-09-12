@@ -557,10 +557,14 @@ func _spawn_pack(count: int, pressure: bool = false) -> void:
 			kind = 3 if i % 5 == 4 else (1 if i % 3 == 2 else 0)
 		elif stage_time > 12 and spawn_rng.randf() < 0.18:
 			kind = 1
+		if DemoPacing.enabled(self):
+			if kind==1 and DemoPacing.elapsed(self)<90: kind=0
+			if kind==3 and DemoPacing.elapsed(self)<150: kind=0
 		spawn_enemy(_offscreen_point(side if pressure else -1), kind)
 		var enemy: Dictionary = enemies.back()
 		enemy["elite"] = pressure
 		enemy["runner"] = pressure and kind == 0
+		if DemoPacing.enabled(self) and DemoPacing.elapsed(self)<45: enemy.runner=false
 		enemy.hp *= (1.0 + stage * 0.18) * (1.65 if pressure else 1.0)
 		enemy.max_hp = enemy.hp
 
@@ -1009,7 +1013,7 @@ func collect_pickup(pickup: Dictionary) -> void:
 	if value <= 0:
 		return
 	pickup.value = 0 # Claim before triggering damage/reward events.
-	xp_fraction += value * (1.0 + (float(exp.stats.get("xp", 0)) if exp != null else mastery.rank_of("learning") * 0.1)) / (OperationRules.pickup_divisor(exp.operation_chapter) if OperationRules.enabled(self) else 9.0 if ReviewRules.enabled(self) else 3.0 if Vanguard.enabled(self) else 1.0)
+	xp_fraction += value * DemoPacing.reward_rate(self) * (1.0 + (float(exp.stats.get("xp", 0)) if exp != null else mastery.rank_of("learning") * 0.1)) / (OperationRules.pickup_divisor(exp.operation_chapter) if OperationRules.enabled(self) else 9.0 if ReviewRules.enabled(self) else 3.0 if Vanguard.enabled(self) else 1.0)
 	var gained := floori(xp_fraction + 0.000001)
 	total_xp += gained
 	xp_fraction = maxf(0, xp_fraction - gained)
@@ -1129,7 +1133,7 @@ func _collect_supply(supply: Dictionary) -> void:
 			if LevelMastery.enabled(self): health=minf(max_health(),health+supply.value)
 			else: heal(supply.value)
 		"coins":
-			if OperationRules.enabled(self): exp.field_credits+=roundi(supply.value*(1+mastery.value("loot_bonus")))
+			if OperationRules.enabled(self): exp.field_credits+=roundi(supply.value*(1+mastery.value("loot_bonus"))*DemoPacing.reward_rate(self))
 			else: coins += supply.value
 		"speed": kit.boost_speed = 6.0
 		"reset":

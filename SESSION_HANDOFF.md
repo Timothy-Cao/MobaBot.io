@@ -8,7 +8,11 @@ The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRO
 
 Owner clarification: preserve the current cartoony presentation as a complete, fun version. The future high-fidelity/high-graphics work is a separate presentation of the same core game for controlled player A/B testing, not a replacement or incremental conversion of the current style.
 
-## Next action: owner review of 0.26; research actions on hold
+## Next action: owner review of three-level demo pacing
+
+12 September 0.27 override: owner confirmed three selectable Levels, three stages each, five-minute survival per stage, with slower progression and gradual enemy introductions. See [DEMO_PACING_27](docs/design/DEMO_PACING_27.md) for roster/timings, save compatibility and verification. New runs use `demo27`; old checkpoints retain their pacing and stored higher-level progress. Hatcheries now have 360 base HP and produce fast chasers. Existing enemy scaling and boss HP remain unchanged; owner says Level 3 is already very hard. Human calibration remains pending. No player game was restarted. All 37 regression suites pass; rendered level selector inspected; artificial-health Level 1/3 full routes complete. See QA_18 for normal-health limitations. Local source update only; GitHub test.2 predates this and the foundry menu.
+
+## Previous 0.26 handoff
 
 12 September menu-design follow-up: owner rejected the generic/mobile-looking buttons. Home now uses native cut-corner foundry plates, brass Play, steel Equipment/Practice, compact Settings/Quit switches and inset symbols. Shared buttons have clearer edge depth/pressed/disabled states. No gameplay changes. `tests/menu_style_capture.gd` produces ignored normal/reduced/focus/equipment previews without saving. Current GitHub test.2 predates this visual update; review the local menu direction before the next distribution build. Full details and human-feedback distinction are in QUALITY_BAR/QA_18.
 
