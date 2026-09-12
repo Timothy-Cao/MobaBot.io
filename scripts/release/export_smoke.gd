@@ -18,7 +18,7 @@ func verify() -> void:
 	if DisplayServer.get_name()!="headless":
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png(OS.get_executable_path().get_base_dir()+"/../export-smoke.png")
-	assert(ProjectSettings.get_setting("application/config/version")=="0.35.0-test.1","Release version mismatch")
+	assert(ProjectSettings.get_setting("application/config/version")=="0.35.0-test.2","Release version mismatch")
 	game.collection=ForgeEquipment.new(); game.launch_expedition(); game.auto_play=true
 	assert(DiscoveryRules.enabled(game.model),"Export must launch current progression")
 	for id in ["yard","assembly","cooling"]: assert(load("res://assets/levels/"+id+".png") is Texture2D,"Missing level illustration")
