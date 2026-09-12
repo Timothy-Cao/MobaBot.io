@@ -8,11 +8,12 @@ static func prepare(game) -> void:
 	ui._label(ui.overlay,"3 stages / 5 minutes each + bosses / Build resets each level",Rect2(48,95,850,28),17,ui.GOLD)
 	for i in range(DemoPacing.LEVELS):
 		var chapter: int=i+1
-		var button: Button=ui._button("Level %d"%chapter,Rect2(48+i*292,147,278,80),func():
+		var button: Button=ui._button("Level %d\n%s"%[chapter,FactoryMaps.NAMES[i]],Rect2(48+i*292,147,278,80),func():
 			game.chapter_choice=chapter; prepare(game),game.chapter_choice==chapter)
 		button.add_theme_font_size_override("font_size",15)
 		button.disabled=chapter>game.collection.unlocked_chapter()
 		button.set_meta("chapter",chapter)
+		ui._label(ui.overlay,FactoryMaps.HINTS[i].replace(" · ","\n"),Rect2(58+i*292,243,258,65),15,ui.CREAM)
 		button.tooltip_text="Replay for Salvage" if chapter<=game.collection.chapter_cleared else "Clear to unlock the next level"
 	ui._label(ui.overlay,"%d Salvage · Equipment persists"%game.collection.credits,Rect2(48,397,650,26),16,ui.TEAL)
 	var start: Button=ui._button("Play Level %d"%game.chapter_choice,Rect2(679,439,234,44),game.confirm_new_run)

@@ -2,6 +2,7 @@ class_name RunTerrain
 extends RefCounted
 ## Disconnected cover islands; no enclosed rooms or narrow mandatory chokepoints.
 static func build(run) -> void:
+	if FactoryMaps.enabled(run): FactoryMaps.build(run); return
 	if ReviewRules.enabled(run): ReviewRules.terrain(run); return
 	run.kit.extra.walls.clear()
 	var uid := -1

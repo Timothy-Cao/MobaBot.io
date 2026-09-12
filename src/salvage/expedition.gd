@@ -210,6 +210,7 @@ func enter(run) -> void:
 	run.enemies.clear(); run.projectiles.clear(); run.hazards.clear(); run.pickups.clear(); run.supply_drops.clear(); run.orbit.clear()
 	run.kit.salvos.clear(); run.kit.zones.clear(); run.kit.poison_trail.clear(); run.kit.summon.clear(); run.kit.cancel_laser(); run.kit.flame_left = 0; run.kit.dash_left = 0
 	run.player = [Vector2(480,300), Vector2(1150,-480), Vector2(-700,950)][route_index % 3]
+	if FactoryMaps.enabled(run): run.player=FactoryMaps.CENTER
 	run.kit.pet_position = run.player
 	run.stop_movement(); run.attacks.stop(run)
 	run.caches.clear()

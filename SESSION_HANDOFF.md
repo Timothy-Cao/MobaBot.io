@@ -8,7 +8,9 @@ The follow-up [high-ROI visual production study](docs/design/HIGH_ROI_VISUAL_PRO
 
 Owner clarification: preserve the current cartoony presentation as a complete, fun version. The future high-fidelity/high-graphics work is a separate presentation of the same core game for controlled player A/B testing, not a replacement or incremental conversion of the current style.
 
-## Next action: owner review of foundry visual pass
+## Next action: owner review of distinct factory levels
+
+12 September map follow-up: new runs now use factory31 layouts: Loading yard/open bays, Assembly hall/interrupted production lanes, Cooling plant/inner court and outer loop. Three subtle round variants, themed native machinery/markings, selector route hints and minimap terrain. Existing checkpoints and Practice keep old maps. No extra damage hazards or stat retune. All 42 suites and all three artificial-health routes pass; human route/readability/pressure calibration pending, especially Level 3 peak175 crowd. See [FACTORY_LEVELS_31](docs/design/FACTORY_LEVELS_31.md). Local source only; GitHub download unchanged; no player game restarted.
 
 12 September visual follow-up: implemented three recognizable machinery treatments with unchanged collision, distinct rammer/brawler silhouettes and recovery poses, shared foundry camp framing/tabs, and clearer mastery path states. Native geometry only; existing bitmap masters/pixelation retained. All 41 suites, both historical refined probes and current artificial-health route pass; route gameplay outputs match the previous milestone exactly. Normal/reduced captures inspected. Synthetic 180-enemy render cadence increased from 44.5 to 48.2 ms median; this is not isolated GPU timing, and crowded human play still needs review. See [FOUNDRY_VISUAL_30](docs/design/FOUNDRY_VISUAL_30.md) and latest QA_18. Local source only; no player game restarted or GitHub release replaced.
 

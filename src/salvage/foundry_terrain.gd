@@ -17,7 +17,7 @@ static func draw(c, wall: Dictionary) -> void:
 		c.draw_circle(left+offset,radius,color); c.draw_circle(right+offset,radius,color)
 	c.draw_line(left-Vector2(0,w-7),right-Vector2(0,w-7),Color("819087"),3,true)
 	c.draw_line(left+Vector2(0,w-7),right+Vector2(0,w-7),Color("263c45"),6,true)
-	var type:=absi(int(wall.get("uid",0)))%3
+	var type:=int(wall.get("factory_theme",absi(int(wall.get("uid",0)))%3))
 	if type==0:
 		# Conveyor: inset belt, rollers and two brass drive housings.
 		c.draw_rect(Rect2(-length/2,-w*0.6,length,w*1.2),Color("152a33"))

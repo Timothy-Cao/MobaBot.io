@@ -309,3 +309,9 @@ Owner wants plain Levels wording, enemies dropping 25%-max-health packs and map-
 Owner: “Then execute on the best changes you think are good ideas.” Implemented three machinery appearances, two distinct miniboss silhouettes with recovery presentation, shared camp framing/tabs, and readable mastery state styling. The existing cartoon direction and bitmap masters remain intact. No combat or progression change.
 
 Automated regressions and draw-state preservation pass; normal/reduced previews inspected. This does not establish improved fun or raise any human quality rating. Human review should focus on obstacle solidity/readable routes, brawler recovery clarity, camp hierarchy and crowded-fight performance. Synthetic 180-enemy median frame cadence rose approximately 3.8 ms; do not claim performance neutrality. Other VISUAL_AUDIT_29 proposals remain future work.
+
+## 12 September 2026 — distinct factory levels
+
+Owner asked for thematic layout variety beyond stronger enemies and recoloring. Implemented new-run Loading yard (open bays), Assembly hall (interrupted lanes/crossovers), Cooling plant (central court/four corner exits/outer route). Three round variants per identity; reusable native machinery and floor landmarks, selector hints and terrain minimap. No added damage hazards or numerical difficulty increase. Old saves/Practice retain their maps.
+
+All 42 regression suites and all three artificial-health routes pass. Human feel remains untested; no quality/fun rating change. See FACTORY_LEVELS_31 and QA_18. Review actual routes under pressure, especially Level 3, before adding more environmental mechanics.

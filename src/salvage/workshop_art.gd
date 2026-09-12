@@ -290,7 +290,7 @@ func _floor() -> void:
 func _world_floor() -> void:
 	var origin := model.camera_origin()
 	var view := Rect2(origin - Vector2(100, 100), model.view_size + Vector2(200, 200))
-	var sector: int=clampi(model.stage-1,0,2)
+	var sector: int=model.exp.operation_chapter-1 if FactoryMaps.enabled(model) else clampi(model.stage-1,0,2)
 	var bases: Array=[Color("293e46"),Color("403c3c"),Color("353b49")]
 	draw_rect(view, bases[sector])
 	for x in range(int(floor(view.position.x / 640)), int(ceil(view.end.x / 640))):
@@ -319,7 +319,9 @@ func _world_floor() -> void:
 	if view.end.y > arena.end.y: draw_rect(Rect2(Vector2(view.position.x, arena.end.y), Vector2(view.size.x, view.end.y - arena.end.y)), INK)
 	draw_rect(SalvageRun.ARENA.grow(8), Color("a39261"), false, 10)
 	draw_rect(SalvageRun.ARENA.grow(22), INK, false, 18)
-	if model.demo_mode:
+	if FactoryMaps.enabled(model):
+		FactoryMaps.floor_art(self,model)
+	elif model.demo_mode:
 		var center: Vector2 = DemoCampaign.info(model).start
 		var paint := Color("657266")
 		draw_string(stencil_font, center + Vector2(-240, -160), DemoCampaign.info(model).name.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 38, Color(paint, 0.5))

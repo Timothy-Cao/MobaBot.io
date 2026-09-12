@@ -153,6 +153,7 @@ static func valid_checkpoint(c: Dictionary) -> bool:
 		if spent!=c.spent: return false
 	if c.loadout.has("level22") and (c.loadout.level22!=true or not c.loadout.get("operation20",0)>0): return false
 	if c.loadout.has("support23") and (c.loadout.support23!=true or not c.loadout.get("level22",false)): return false
+	if c.loadout.has("factory31") and (typeof(c.loadout.factory31)!=TYPE_BOOL or c.loadout.factory31!=true or c.loadout.get("demo27",false)!=true): return false
 	if c.loadout.has("demo27") and (c.loadout.demo27!=true or not c.loadout.get("arsenal26",false) or not integer(c.loadout.get("operation20",0),1,DemoPacing.LEVELS)): return false
 	if c.loadout.has("arsenal26") and (c.loadout.arsenal26!=true or not c.loadout.get("support23",false)): return false
 	if c.loadout.has("vanguard"):

@@ -9,6 +9,12 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), Color("526d74"), false, 1)
 	var bounds := Rect2(Vector2(7, 7), size - Vector2(14, 14))
 	var scale_value := bounds.size / SalvageRun.ARENA.size
+	if FactoryMaps.enabled(model):
+		for wall in model.kit.extra.walls:
+			if not wall.get("terrain",false): continue
+			var a: Vector2=bounds.position+(Vector2(wall.a)-SalvageRun.ARENA.position)*scale_value
+			var b: Vector2=bounds.position+(Vector2(wall.b)-SalvageRun.ARENA.position)*scale_value
+			draw_line(a,b,Color("7b8d89"),maxf(2,wall.width*2*minf(scale_value.x,scale_value.y)),true)
 	for cache in model.caches:
 		if not cache.opened:
 			var point: Vector2 = bounds.position + (Vector2(cache.pos) - SalvageRun.ARENA.position) * scale_value
