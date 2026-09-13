@@ -2,6 +2,12 @@
 
 Updated 12 September 2026. Stable entry point; human feedback and technical evidence stay in their dated review documents.
 
+## Latest: portfolio snapshot handoff
+
+12 September owner requested an isolated static copy for the portfolio session, which is concurrently migrating games. Delivered `C:\Users\tctct\Downloads\claude\portfolio\incoming-games\mobabot-web-84bc6c0` beside, not inside, `Timothy-Cao.github.io` and `gabo`. Contains release Web files, exact tracked source ZIP at `84bc6c0314a12d20da875ce007000234cb3caedd`, manifest/checksums, START_HERE/INTEGRATION/TODO/VERIFICATION notes and a standalone integrity checker. All 20 checksummed files verified after copying. No portfolio repository edits, Git operations that write, installs or deployments; no game code or active port-8765 export changes. Integration remains for that session. The MobaBot repository stays the gameplay source of truth; future copies should be versioned, not live-linked.
+
+Release standalone/nested same-origin iframe loads and Practice input passed on a separate plain HTTP server without isolation headers. One unlocated MutationObserver error occurred in the iframe browser instrumentation path; no matching reference exists in delivered code, attribution unproven, recorded for receiving review. Web payload 104,581,238 bytes; source ZIP 253,518,589 bytes. Package notes distinguish the frozen commit from the inherited older on-screen release label. Temporary preview server stopped after verification; existing development server retained.
+
 ## Latest: local Web development target
 
 12 September owner requested browser testing alongside native Godot. Added the Web preset, pinned official template setup, build metadata, loopback server and one-command `scripts/run_web.ps1` workflow. See [LOCAL_WEB_40](docs/design/LOCAL_WEB_40.md). Shared intent39 gameplay is unchanged. Browser-only fixes cover unsupported mouse confinement, fullscreen startup, Reload instead of Quit and bundled HUD symbol fallback; native profiles remain separate and untouched.
