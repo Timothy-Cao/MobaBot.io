@@ -129,6 +129,9 @@ func _quit_cleanly(code: int) -> void:
 	sound.set_muted(true)
 	music_player.shutdown()
 	await get_tree().create_timer(0.2).timeout
+	if OS.has_feature("web"):
+		JavaScriptBridge.eval("window.location.reload();")
+		return
 	get_tree().quit(code)
 
 func show_home() -> void:

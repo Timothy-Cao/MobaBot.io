@@ -40,7 +40,8 @@ func _ready() -> void:
 	ui.expedition_ui = true
 	ui.host=self
 	ui.keyboard_requested.connect(open_keyboard)
-	if persistent_run(): apply_fullscreen()
+	if OS.has_feature("web"): fullscreen_setting=false # Browser fullscreen needs a user gesture.
+	elif persistent_run(): apply_fullscreen()
 	if screen == "home": ui.show_home()
 	select_class(class_choice)
 	get_window().title="MobaBot.io · Levels"
@@ -452,7 +453,7 @@ func _apply_hud_scale() -> void:
 
 func apply_fullscreen() -> void:
 	get_window().mode=Window.MODE_FULLSCREEN if fullscreen_setting else Window.MODE_WINDOWED
-	if not fullscreen_setting: get_window().size=Vector2i(1536,864)
+	if not fullscreen_setting and not OS.has_feature("web"): get_window().size=Vector2i(1536,864)
 
 func toggle_fullscreen() -> void:
 	fullscreen_setting=not fullscreen_setting; apply_fullscreen(); _save_settings(); ui.show_settings()
@@ -473,7 +474,7 @@ func _set_mute(value: bool) -> void:
 
 func _update_pointer_mode() -> void:
 	if DisplayServer.get_name()=="headless": return
-	var confined: bool=screen=="running" and get_window().has_focus()
+	var confined: bool=not OS.has_feature("web") and screen=="running" and get_window().has_focus()
 	var desired: int=Input.MOUSE_MODE_CONFINED if confined else Input.MOUSE_MODE_VISIBLE
 	if Input.mouse_mode!=desired: Input.mouse_mode=desired; pointer_warp=Vector2(-9999,-9999)
 	if screen!="running": minimap_held=false

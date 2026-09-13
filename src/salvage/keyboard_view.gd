@@ -172,7 +172,10 @@ static func settings(ui) -> void:
 		ui._label(ui.overlay,"Camera speed",Rect2(165,174,270,28),18,ui.CREAM)
 		slider(ui,"camera_speed",Rect2(470,169,315,32),40,220,5,game.camera_speed/6.2,func(v): game.camera_speed=v*6.2; game._save_settings(),"%d%%")
 		ui._label(ui.overlay,"Mouse speed",Rect2(165,224,270,28),18,ui.CREAM)
-		slider(ui,"mouse_speed",Rect2(470,219,315,32),0.5,2,0.05,game.mouse_speed,func(v): game.mouse_speed=v; game._save_settings(),"%.2f×")
+		var pointer_slider:=slider(ui,"mouse_speed",Rect2(470,219,315,32),0.5,2,0.05,game.mouse_speed,func(v): game.mouse_speed=v; game._save_settings(),"%.2f×")
+		if OS.has_feature("web"):
+			pointer_slider.editable=false; pointer_slider.modulate=Color(1,1,1,0.4)
+			pointer_slider.tooltip_text="Uses your system pointer speed."
 		ui._label(ui.overlay,"HUD size",Rect2(165,274,270,28),18,ui.CREAM)
 		slider(ui,"hud_scale",Rect2(470,269,315,32),70,100,5,game.hud_scale*100,func(v): game.hud_scale=v/100.0; game._apply_hud_scale(); game._save_settings(),"%d%%")
 		ui._rule(Vector2(165,310),620)

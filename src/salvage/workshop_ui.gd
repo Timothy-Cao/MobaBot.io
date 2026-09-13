@@ -107,6 +107,9 @@ func _ready() -> void:
 	font.font_names = PackedStringArray(["Segoe UI", "Arial"])
 	bold_font.font_names = font.font_names
 	bold_font.font_weight = 700
+	if OS.has_feature("web"):
+		var symbols=preload("res://assets/fonts/NotoSansSymbols2-Regular.ttf")
+		for face in [font,bold_font,heading_font]: face.fallbacks=[symbols]
 	root = Control.new()
 	add_child(root)
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

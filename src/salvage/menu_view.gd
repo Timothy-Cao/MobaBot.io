@@ -58,4 +58,5 @@ static func _nav(ui, text: String, rect: Rect2, action: Callable, primary: bool 
 	plate.primary=primary; plate.symbol=text; plate.size=rect.size
 	button.add_child(plate)
 	button.tooltip_text = {"Play": "Start Stage 1.", "Practice":"Test skills and spawn enemies. No saved progression.", "Loadout": "Abilities, passives and key bindings.", "Equipment": "Equip and forge." if ui.expedition_ui else "Fit, reroll and star equipment.", "Mastery": "Preview the run-only mastery tree.", "Settings": "Audio, effects, camera and controls.", "Quit": "Close MobaBot.io."}[text]
+	if text=="Quit" and OS.has_feature("web"): button.text="Reload"; button.tooltip_text="Reload the game."
 	return button

@@ -1,5 +1,9 @@
 # MobaBot.io quality bar
 
+## Local browser compatibility · 12 September 2026
+
+Owner requested ongoing browser/native development from one project. Local Web export now renders existing menus and Practice, supports MOBA inputs and stores browser settings across refresh. Fixed unsupported cursor confinement and missing symbol glyphs; native gameplay/art direction are unchanged. This is compatibility verification, not an increase in fun or visual ratings. Human review should compare buffered input timing, crowded scenes and sound against native. Full browser campaign persistence and non-Chromium engines remain unverified. See LOCAL_WEB_40.
+
 ## Intentional gameplay iteration · 12 September 2026
 
 Owner authorized a 30–60 minute research-led gameplay pass, preserving MOBA controls and mechanical difficulty. Implemented earlier opening XP delivery, reliable voluntary E/W offers, periodic support for the chosen attack, directional groups and brief recovery in arrivals. Improved spin motion and status readability, batched status rendering, and corrected hammer shortening W's stun. See INTENT_PACING_39 for exact rules and rejected trials.

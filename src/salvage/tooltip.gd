@@ -17,6 +17,7 @@ static func make(text: String) -> Control:
 	var label := Label.new()
 	var font := SystemFont.new()
 	font.font_names = PackedStringArray(["Segoe UI", "Arial"])
+	if OS.has_feature("web"): font.fallbacks=[preload("res://assets/fonts/NotoSansSymbols2-Regular.ttf")]
 	label.add_theme_font_override("font", font)
 	label.add_theme_font_size_override("font_size", 13)
 	label.add_theme_color_override("font_color", Color("eceddf"))

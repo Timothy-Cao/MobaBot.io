@@ -1,3 +1,7 @@
+# Local browser testing
+
+Run `.\scripts\run_web.ps1` to build and open [the local game](http://127.0.0.1:8765/). Native testing stays on `.\scripts\run_game.ps1`; both use the same source. After changes, run `.\scripts\export_web.ps1` and refresh the browser. Browser saves are separate from Windows saves. [Setup, stop command and platform notes](docs/design/LOCAL_WEB_40.md).
+
 # Current encounter update
 
 See [Encounter pressure](docs/design/ENCOUNTER_PRESSURE_28.md): Uplink/EMP retired from current selection, melee tanks paced just behind the swarm, two roaming miniboss types with recovery openings, and more aggressive Level 3 final-boss offense. Both minibosses are available in Practice.

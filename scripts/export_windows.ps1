@@ -15,6 +15,7 @@ $messages | ForEach-Object { Write-Host $_ }
 if ($code -ne 0 -or ($messages | Select-String '(^|\s)(SCRIPT ERROR:|ERROR:)')) { throw 'Export failed' }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'release/PLAY-ME.txt'), (Join-Path $PSScriptRoot 'release/Create Desktop Shortcut.vbs') -Destination $folder
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'release/GODOT-LICENSE.txt'), (Join-Path $PSScriptRoot 'release/GODOT-THIRD-PARTY.txt') -Destination $folder
+Copy-Item -LiteralPath (Join-Path $projectRoot 'assets/fonts/OFL-NotoSansSymbols2.txt') -Destination $folder
 git -C $projectRoot rev-parse HEAD | Set-Content (Join-Path $folder 'BUILD-COMMIT.txt')
 Compress-Archive -LiteralPath $folder -DestinationPath "$folder.zip"
 Get-FileHash -LiteralPath "$folder.zip" -Algorithm SHA256

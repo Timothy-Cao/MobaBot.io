@@ -2,6 +2,12 @@
 
 Updated 12 September 2026. Stable entry point; human feedback and technical evidence stay in their dated review documents.
 
+## Latest: local Web development target
+
+12 September owner requested browser testing alongside native Godot. Added the Web preset, pinned official template setup, build metadata, loopback server and one-command `scripts/run_web.ps1` workflow. See [LOCAL_WEB_40](docs/design/LOCAL_WEB_40.md). Shared intent39 gameplay is unchanged. Browser-only fixes cover unsupported mouse confinement, fullscreen startup, Reload instead of Quit and bundled HUD symbol fallback; native profiles remain separate and untouched.
+
+Debug export and rendered Chromium Home/Settings/Practice passed, including right-click movement, Q/E/LMB input and settings persistence across reload. All 46 native regression suites and isolated HTTP checks pass. These establish compatibility, not full browser campaign/performance acceptance. No automated permanent rewards. Keep port 8765 for stable browser storage; rebuild then refresh between tests. Source milestone only, no public web deployment or new Windows release; Windows download remains 0.36.0-test.1. Next: owner compares browser controls, audio and crowd performance against native.
+
 ## Latest: intentional gameplay iteration 39
 
 12 September owner authorized 30–60 minutes of research-led implementation from `96e3628`, preserving MOBA controls and mechanical challenge. See [INTENT_PACING_39](docs/design/INTENT_PACING_39.md). New campaign runs opt into `intent39`: earlier delivery of the same first-round survival XP budget, E/W offers on choices two/three, alternate offers supporting the last selected offensive tool, ten-second directional approach groups, and brief reductions in arrivals between surges. Continue retains its stored pacing. Hammer follow-ups no longer shorten an existing W stun; spin motion and stun/vulnerability cues are clearer, with batched status rendering. No ability damage/range/cooldown or boss-HP change.
