@@ -94,6 +94,7 @@ static func spawns(run, delta: float) -> void:
 static func enemy_step(run, enemy: Dictionary, delta: float) -> void:
 	if ReviewRules.enabled(run) and (enemy.has("exp_boss") or (run.exp.practice and enemy.role=="foreman")): ReviewEnemies.boss(run,enemy,delta); return
 	var role: String = enemy.role
+	var opening_guardian: bool=enemy.get("opening_guardian42",false)
 	var tracked: Vector2 = run.kit.extra.decoy_position if run.kit.extra.decoy_left > 0 else run.player
 	var direction: Vector2 = (tracked - Vector2(enemy.pos)).normalized()
 	if role == "foreman" and enemy.hp <= enemy.max_hp * 0.5 and not enemy.enraged:
@@ -118,7 +119,7 @@ static func enemy_step(run, enemy: Dictionary, delta: float) -> void:
 			enemy.attack = pattern[enemy.sequence % pattern.size()]
 			enemy.sequence += 1
 			enemy.phase = "telegraph"
-			enemy.clock = 0.65 if enemy.enraged else 0.9
+			enemy.clock = 0.65 if opening_guardian or enemy.enraged else 0.9
 			enemy.dir = direction
 			run.emit_event("boss_windup", enemy.pos)
 			enemy["target"] = (Vector2(enemy.pos) + (run.player + run.velocity * 0.35 - Vector2(enemy.pos)).normalized() * 560).clamp(run.ARENA.position + Vector2.ONE * enemy.radius, run.ARENA.end - Vector2.ONE * enemy.radius)
@@ -147,7 +148,7 @@ static func enemy_step(run, enemy: Dictionary, delta: float) -> void:
 					run._add_projectile(enemy.pos + heading * enemy.radius, heading * 230, 2, "hostile", 0)
 					if not run.projectiles.is_empty(): run.projectiles.back()["slow"] = true
 			enemy.phase = "recover"
-			enemy.clock = 0.65 if enemy.enraged else 1.1
+			enemy.clock = 0.3 if opening_guardian else 0.65 if enemy.enraged else 1.1
 	elif enemy.phase == "charge":
 		var before: Vector2 = enemy.pos
 		enemy.pos = (before + Vector2(enemy.charge_velocity) * minf(delta, maxf(0, enemy.clock + delta))).clamp(run.ARENA.position + Vector2.ONE * enemy.radius, run.ARENA.end - Vector2.ONE * enemy.radius)
@@ -155,10 +156,10 @@ static func enemy_step(run, enemy: Dictionary, delta: float) -> void:
 			run.hurt_player(enemy.pos, CombatReadability.enemy_name(enemy) + " charge", 3)
 		if enemy.clock <= 0:
 			enemy.phase = "recover"
-			enemy.clock = 0.65 if enemy.enraged else 1.1
+			enemy.clock = 0.3 if opening_guardian else 0.65 if enemy.enraged else 1.1
 	elif enemy.phase == "recover" and enemy.clock <= 0:
 		enemy.phase = "approach"
-		enemy.clock = 0.35
+		enemy.clock = 0.1 if opening_guardian else 0.35
 	# Recovery rewards committing damage, not hiding an unavoidable contact hit.
 	if enemy.phase != "recover" and Vector2(enemy.pos).distance_to(run.player) < enemy.radius + 12:
 		run.hurt_player(enemy.pos, CombatReadability.enemy_name(enemy) + " contact", 2)

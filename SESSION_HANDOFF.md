@@ -2,6 +2,8 @@
 
 Updated 13 September 2026. Stable entry point; human feedback and technical evidence stay in their dated review documents.
 
+14 September guardian42: owner likes Level 1 / Stage 1 gameplay and confirmed the required five-minute guardian feels too weak. Implemented 3x final scaled HP and approximately 2x attack cadence for that encounter only in current intent39 runs. Standard fixture 354.586 to 1,063.757 HP; 12 to 23 attack starts/30s. Windup remains 0.65s, recovery 0.3s; charge travel/damage and the surrounding opening remain. Main bosses/roaming minis/other stages/Levels/Practice/older rule families are unchanged. See QUALITY_BAR and opening_guardian_test.gd. Verification/release closeout follows; don't confuse this with the prior optimized cc68f99 build.
+
 ## Latest: browser rendering performance 41
 
 Owner clarified that this session must integrate and publish the improvement itself, not delegate to the portfolio session. Completed: game source `cc68f99198f09d31ba913729a408fabb869081da`, portfolio import `66f0db34d19b5b6d96030ff17fcf67cfba03d4e7`, production `dpl_ATMdAgZMCc5oAs65ZgzSeMoyajSZ` READY at https://www.timcao.com/playground/mobabot. All 13 live web files match the release SHA-256s; MIME/cache, ranges, missing-file 404 and www/apex routing pass. Live Home/Practice/right-click/Q/E/hammer and Playground exit passed with no fresh game console errors. Local nested wrapper preserves settings across reload; narrow-screen notice/exits and fullscreen checked. Previous `dpl_5y1Npd4RJ9K5nKpfrzMs8bcmyYBt` retained for rollback. Portfolio app docs contain release evidence; no other game/site deployment or shared adapter change. Existing localhost:8765 and native game were left untouched. Use the online URL for this optimized build.

@@ -234,6 +234,11 @@ func spawns(run, delta: float) -> void:
 			mini.hp = (100 + stage_number*30) * (1.2 if ascension >= 2 else 1); mini.max_hp = mini.hp
 			if operation_chapter>0:
 				mini.hp=(320.0+route_index*280)*OperationRules.chapter_health(operation_chapter)*(1+ascension*0.12); mini.max_hp=mini.hp
+			if IntentRules.enabled(run) and operation_chapter==1 and route_index==0:
+				# Multiply the final hull after the shared role floor, exactly once.
+				scale_enemy(run,mini)
+				mini.hp*=3.0; mini.max_hp=mini.hp
+				mini["opening_guardian42"]=true; mini.clock=0.5
 		if kind in ["boss", "final"] and not encounter_spawned:
 			encounter_spawned = true; run.boss_spawned = true
 			DemoCampaign.spawn_special(run, "foreman")

@@ -23,6 +23,7 @@ foreach ($testName in @(
     'intent39_test'
     'web_compat_test'
     'web_render_test'
+    'opening_guardian_test'
 )) {
     Invoke-GodotCheck -EngineArguments @('--script', "res://tests/$testName.gd")
 }

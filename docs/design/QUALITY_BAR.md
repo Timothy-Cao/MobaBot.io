@@ -1,5 +1,11 @@
 # MobaBot.io quality bar
 
+## First encounter feedback · 14 September 2026
+
+Owner reports Level 1 / Stage 1 gameplay feels great except the first boss, which feels comparable to ordinary enemies. Confirmed the required Rammer guardian at 300 seconds, not the roaming Drift rammer or main boss. Requested three times the health and abilities twice as often. Preserve the surrounding opening pacing, waves, rewards and player kit. Current online feedback build is assumed cc68f99; actual tested URL/save/equipment are not confirmed.
+
+Implemented only for the current intent39 Level 1 / Stage 1 guardian: multiply hull after shared scaling/role floors, 354.586 to 1,063.757 in the standard fixture. Warning 0.9 to 0.65s, recovery 1.1 to 0.3s, inter-attack wait 0.35 to 0.1s; initial wait 1 to 0.5s. Charge travel/duration, projectile speed/count, damage and rewards remain. Fixed-range scheduler starts 23 versus 12 attacks in 30s; this is cadence verification, not human dodge/kill-time acceptance. Other stages/Levels, roaming minibosses, Practice and historical pre-intent rules retain their behavior. No fun rating inferred; owner should judge the next guardian fight.
+
 ## Browser performance · 13 September 2026
 
 Owner reports browser feels around 30–40 FPS and requests a 60-FPS target without disrupting native. A Web-only atlas reuses repeated blob/pickup art and shadows; mechanical timing, warnings and native renderer remain. Local mixed-combat fixture improved from ~20.2 to ~9.6 ms mean frame time. This supports a human test; it does not establish sustained live-site 60 FPS or improved fun. Actual-size native/cache normal/reduced art reviewed; fixed darkening from premultiplied alpha. No quality score change. Next review: real Chrome through the portfolio wrapper, later encounters, input feel and high zoom.
