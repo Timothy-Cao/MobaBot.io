@@ -1,8 +1,8 @@
 # Current session handoff
 
-Updated 13 September 2026. Stable entry point; human feedback and technical evidence stay in their dated review documents.
+Updated 14 September 2026. Stable entry point; human feedback and technical evidence stay in their dated review documents.
 
-14 September guardian42: owner likes Level 1 / Stage 1 gameplay and confirmed the required five-minute guardian feels too weak. Implemented 3x final scaled HP and approximately 2x attack cadence for that encounter only in current intent39 runs. Standard fixture 354.586 to 1,063.757 HP; 12 to 23 attack starts/30s. Windup remains 0.65s, recovery 0.3s; charge travel/damage and the surrounding opening remain. Main bosses/roaming minis/other stages/Levels/Practice/older rule families are unchanged. See QUALITY_BAR and opening_guardian_test.gd. Verification/release closeout follows; don't confuse this with the prior optimized cc68f99 build.
+14 September guardian42: owner likes Level 1 / Stage 1 gameplay and confirmed the required five-minute guardian feels too weak. Implemented 3x final scaled HP and approximately 2x attack cadence for that encounter only in current intent39 runs. Standard fixture 354.586 to 1,063.757 HP; 12 to 23 attack starts/30s. Windup remains 0.65s, recovery 0.3s; charge travel/damage and the surrounding opening remain. Main bosses/roaming minis/other stages/Levels/Practice/older rule families are unchanged. See QUALITY_BAR and opening_guardian_test.gd. All 48 regression suites and historical/current behavior probes pass. Source a6f08f8; portfolio import 78379935. Production dpl_GhGqi6oJN3deAgeRAA3Syr4tRrP8 is READY at https://www.timcao.com/playground/mobabot. All 13 live file hashes/MIME/cache/ranges/404/www-apex and live Home/Practice/input smoke passed; local settings persisted across snapshot update. Previous Web41 deployment retained for rollback. Existing owner tabs/native game/localhost8765 left running unchanged. Reload the online game between runs for this update; human guardian balance acceptance remains pending.
 
 ## Latest: browser rendering performance 41
 
