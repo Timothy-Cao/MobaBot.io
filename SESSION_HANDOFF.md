@@ -1,6 +1,14 @@
 # Current session handoff
 
-Updated 12 September 2026. Stable entry point; human feedback and technical evidence stay in their dated review documents.
+Updated 13 September 2026. Stable entry point; human feedback and technical evidence stay in their dated review documents.
+
+## Latest: browser rendering performance 41
+
+Owner asked for smoother browser play toward 60 FPS with minimal native impact, following the portfolio integration playbook. Implemented a Web-only, one-time GPU atlas for repeated basic-blob bodies/flash, pickups and shadows. Native retains its procedural drawing path and allocates no atlas; simulation, inputs, enemies, attack tells, saves and UI are unchanged. No global site headers/threading changes. See [WEB_PERFORMANCE_41](docs/design/WEB_PERFORMANCE_41.md).
+
+Matched local Chromium mixed-combat fixture: original 20.21 ms mean / 26.2 ms p95 (~49.5 reported FPS); final alpha-correct build 9.63 / 12.7 ms (~103.8). Simulation ~2.8 ms both; gain is rendering. This is an uncapped local harness with artificial enemy health/Practice god mode, not display refresh, full-campaign acceptance or a universal FPS guarantee. Frozen 40/120-body scenes also improved. Native/cache normal/reduced screenshots and immutability checks passed, including corrected shadow blending. All 47 regression suites pass. Diagnostics are excluded from shipped exports. No player profiles/rewards or active native game changed.
+
+MobaBot gameplay remains authoritative here; portfolio `apps/mobabot` owns its existing Vite wrapper and currently pins source `84bc6c0`. Deliver a new frozen snapshot/filled handoff, preserving wrapper exits, policies, device gate, saved data and cache adapters. Do not publish or auto-sync into the portfolio's concurrently edited repository. Next: receiving-session snapshot import and owner test in normal Chrome at the actual canonical route. Downloadable native release remains 0.36.0-test.1.
 
 ## Latest: portfolio snapshot handoff
 

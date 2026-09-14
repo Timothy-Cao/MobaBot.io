@@ -1,5 +1,9 @@
 # MobaBot.io quality bar
 
+## Browser performance · 13 September 2026
+
+Owner reports browser feels around 30–40 FPS and requests a 60-FPS target without disrupting native. A Web-only atlas reuses repeated blob/pickup art and shadows; mechanical timing, warnings and native renderer remain. Local mixed-combat fixture improved from ~20.2 to ~9.6 ms mean frame time. This supports a human test; it does not establish sustained live-site 60 FPS or improved fun. Actual-size native/cache normal/reduced art reviewed; fixed darkening from premultiplied alpha. No quality score change. Next review: real Chrome through the portfolio wrapper, later encounters, input feel and high zoom.
+
 ## Local browser compatibility · 12 September 2026
 
 Owner requested ongoing browser/native development from one project. Local Web export now renders existing menus and Practice, supports MOBA inputs and stores browser settings across refresh. Fixed unsupported cursor confinement and missing symbol glyphs; native gameplay/art direction are unchanged. This is compatibility verification, not an increase in fun or visual ratings. Human review should compare buffered input timing, crowded scenes and sound against native. Full browser campaign persistence and non-Chromium engines remain unverified. See LOCAL_WEB_40.

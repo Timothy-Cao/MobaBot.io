@@ -29,6 +29,12 @@ var auto_empowered := false
 var placement_points: Array[Vector2] = []
 var placement_valid := false
 var placement_radius := 25.0
+var web_cached_art:=OS.has_feature("web")
+var web_atlas: WebArtAtlas
+
+func _ready() -> void:
+	if web_cached_art:
+		web_atlas=WebArtAtlas.new(); web_atlas.attach(self)
 
 func impact_bank() -> float:
 	return 0.0 if reduced_effects else sin(visual_time * 38) * minf(shake, 5.0) * 0.008
@@ -360,13 +366,18 @@ func _scrap(pickup: Dictionary) -> void:
 		var tail := (p - model.player).normalized()
 		_line(p, p + tail * minf(18, pickup.speed * 0.025), Color(GOLD, 0.32), 3)
 	var bob := sin(visual_time * 4 + float(pickup.id)) * 1.5
-	draw_circle(p + Vector2(0, 4), 5, Color(INK, 0.6))
+	if web_cached_art and web_atlas!=null and web_atlas.ready:
+		draw_set_transform(p+Vector2(0,4)); web_atlas.draw(self,5); draw_set_transform(Vector2.ZERO)
+	else: draw_circle(p + Vector2(0, 4), 5, Color(INK, 0.6))
 	var bundle_scale: float=1.5 if pickup.value>=20 else 1.25 if pickup.value>=5 else 1.0
 	draw_set_transform(p + Vector2(0, bob), 0.3,Vector2.ONE*bundle_scale)
-	_box(Rect2(-4, -5, 8, 10), GOLD, 2, INK, 1)
-	_line(Vector2(-2, -2), Vector2(2, -2), CREAM, 1)
-	if pickup.value > 1:
-		draw_circle(Vector2(3, -4), 2, CREAM)
+	if web_cached_art and web_atlas!=null and web_atlas.ready:
+		web_atlas.draw(self,3 if pickup.value>1 else 2)
+	else:
+		_box(Rect2(-4, -5, 8, 10), GOLD, 2, INK, 1)
+		_line(Vector2(-2, -2), Vector2(2, -2), CREAM, 1)
+		if pickup.value > 1:
+			draw_circle(Vector2(3, -4), 2, CREAM)
 	draw_set_transform(Vector2.ZERO)
 
 func _enemy(enemy: Dictionary) -> void:
@@ -386,17 +397,23 @@ func _enemy(enemy: Dictionary) -> void:
 	if enemy.warmup > 0:
 		body.a = 0.4
 	draw_set_transform(p + Vector2(0, r * 0.6), 0, Vector2(1.0, 0.42))
-	draw_circle(Vector2.ZERO, r + 3, Color(INK, 0.7))
+	if web_cached_art and web_atlas!=null and web_atlas.ready and kind==0:
+		draw_set_transform(p+Vector2(0,r*0.6),0,Vector2(1,0.42)*(r+3)/18)
+		web_atlas.draw(self,4)
+	else: draw_circle(Vector2.ZERO, r + 3, Color(INK, 0.7))
 	draw_set_transform(p + Vector2(0, sin(visual_time * 6 + enemy.id) * 1.4))
 	if kind == 0:
-		_box(Rect2(-18, -4, 36, 13), INK, 5)
-		draw_circle(Vector2.ZERO, 15, INK)
-		draw_circle(Vector2(0, -1), 12, body)
-		draw_arc(Vector2(0, -1), 9, PI * 1.1, PI * 1.8, 12, Color("ffb49a"), 2, true)
-		_box(Rect2(-8, -2, 16, 7), INK, 3, INK, 0)
-		draw_circle(Vector2(-4, 1), 2, CREAM)
-		draw_circle(Vector2(4, 1), 2, CREAM)
-		_line(Vector2(-5, 9), Vector2(5, 9), INK, 2)
+		if web_cached_art and web_atlas!=null and web_atlas.ready and enemy.warmup<=0:
+			web_atlas.draw(self,1 if enemy.flash>0 and not reduced_effects else 0)
+		else:
+			_box(Rect2(-18, -4, 36, 13), INK, 5)
+			draw_circle(Vector2.ZERO, 15, INK)
+			draw_circle(Vector2(0, -1), 12, body)
+			draw_arc(Vector2(0, -1), 9, PI * 1.1, PI * 1.8, 12, Color("ffb49a"), 2, true)
+			_box(Rect2(-8, -2, 16, 7), INK, 3, INK, 0)
+			draw_circle(Vector2(-4, 1), 2, CREAM)
+			draw_circle(Vector2(4, 1), 2, CREAM)
+			_line(Vector2(-5, 9), Vector2(5, 9), INK, 2)
 	elif kind == 1:
 		var rotation_angle: float = Vector2(enemy.dir).angle() + PI / 2 if enemy.phase != "seek" else (model.player - Vector2(enemy.pos)).angle() + PI / 2
 		draw_set_transform(p, rotation_angle)
